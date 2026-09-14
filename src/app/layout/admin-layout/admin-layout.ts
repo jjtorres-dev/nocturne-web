@@ -39,6 +39,8 @@ export class AdminLayout {
     { label: 'Cuentas', icon: 'account_circle', route: '/accounts' },
     { label: 'Ventas', icon: 'point_of_sale', route: '/sales' },
     { label: 'Vencimientos', icon: 'event_busy', route: '/vencimientos' },
+    { label: 'Gastos', icon: 'payments', route: '/expenses' },
+    { label: 'Contabilidad', icon: 'account_balance', route: '/accounting' },
   ];
 
   logout(): void {

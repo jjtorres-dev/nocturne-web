@@ -1,0 +1,112 @@
+.page-header {
+  margin-bottom: 16px;
+
+  h1 {
+    margin: 0;
+    font-size: 1.5rem;
+  }
+}
+
+.filters {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  padding: 48px 0;
+}
+
+.summary-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.summary-card {
+  mat-card-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 16px 0;
+  }
+}
+
+.summary-value {
+  font-size: 1.75rem;
+  font-weight: 600;
+}
+
+.summary-label {
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.gastos .summary-value {
+  color: var(--mat-sys-error);
+}
+
+// Ganancia es el número que más importa: tarjeta destacada, más grande y
+// con color según el signo.
+.ganancia {
+  border: 2px solid var(--mat-sys-primary);
+
+  .summary-value {
+    font-size: 2.25rem;
+    color: var(--mat-sys-primary);
+  }
+
+  &.negativa .summary-value {
+    color: var(--mat-sys-error);
+  }
+}
+
+.tables-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.table-section h2 {
+  font-size: 1.1rem;
+  margin: 0 0 8px;
+}
+
+.breakdown-table {
+  width: 100%;
+}
+
+.timeline-section {
+  margin-top: 8px;
+}
+
+.timeline-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+
+  h2 {
+    font-size: 1.1rem;
+    margin: 0;
+  }
+}
+
+.chart-wrapper {
+  position: relative;
+  height: 320px;
+  width: 100%;
+}
+
+.empty-state {
+  color: var(--mat-sys-on-surface-variant);
+  padding: 16px 0;
+  text-align: center;
+}

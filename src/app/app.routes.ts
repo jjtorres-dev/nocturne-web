@@ -59,6 +59,20 @@ export const routes: Routes = [
             './features/vencimientos/vencimientos-list/vencimientos-list'
           ).then((m) => m.VencimientosList),
       },
+      {
+        path: 'expenses',
+        loadComponent: () =>
+          import('./features/expenses/gastos-list/gastos-list').then(
+            (m) => m.GastosList,
+          ),
+      },
+      {
+        path: 'accounting',
+        loadComponent: () =>
+          import('./features/accounting/accounting').then(
+            (m) => m.Accounting,
+          ),
+      },
       { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
     ],
   },

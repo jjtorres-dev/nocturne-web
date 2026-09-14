@@ -1,0 +1,141 @@
+<div class="page-header">
+  <h1>Contabilidad</h1>
+</div>
+
+<div class="filters">
+  <mat-form-field appearance="outline">
+    <mat-label>Desde</mat-label>
+    <input matInput type="date" [(ngModel)]="desde" />
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Hasta</mat-label>
+    <input matInput type="date" [(ngModel)]="hasta" />
+  </mat-form-field>
+
+  <button mat-flat-button color="primary" (click)="refresh()">Aplicar</button>
+</div>
+
+@if (loading()) {
+  <div class="loading">
+    <mat-spinner diameter="32" />
+  </div>
+}
+
+@if (summary(); as s) {
+  <div class="summary-cards">
+    <mat-card class="summary-card ingresos">
+      <mat-card-content>
+        <span class="summary-value">{{ s.ingresos | soles }}</span>
+        <span class="summary-label">Ingresos</span>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="summary-card inversion">
+      <mat-card-content>
+        <span class="summary-value">{{ s.inversion | soles }}</span>
+        <span class="summary-label">Inversión</span>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="summary-card gastos">
+      <mat-card-content>
+        <span class="summary-value">{{ s.gastos | soles }}</span>
+        <span class="summary-label">Gastos</span>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="summary-card ganancia" [class.negativa]="s.ganancia < 0">
+      <mat-card-content>
+        <span class="summary-value">{{ s.ganancia | soles }}</span>
+        <span class="summary-label">Ganancia</span>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <div class="tables-grid">
+    <div class="table-section">
+      <h2>Por servicio</h2>
+      <table mat-table [dataSource]="byService()" class="breakdown-table">
+        <ng-container matColumnDef="nombre">
+          <th mat-header-cell *matHeaderCellDef>Servicio</th>
+          <td mat-cell *matCellDef="let r">{{ r.nombre }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="inversion">
+          <th mat-header-cell *matHeaderCellDef>Inversión</th>
+          <td mat-cell *matCellDef="let r">{{ r.inversion | soles }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="ingresos">
+          <th mat-header-cell *matHeaderCellDef>Ingresos</th>
+          <td mat-cell *matCellDef="let r">{{ r.ingresos | soles }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="ganancia">
+          <th mat-header-cell *matHeaderCellDef>Ganancia</th>
+          <td mat-cell *matCellDef="let r">{{ r.ganancia | soles }}</td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="byServiceColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: byServiceColumns"></tr>
+      </table>
+      @if (byService().length === 0) {
+        <p class="empty-state">Sin datos en este rango.</p>
+      }
+    </div>
+
+    <div class="table-section">
+      <h2>Por método de pago</h2>
+      <table mat-table [dataSource]="byPaymentMethod()" class="breakdown-table">
+        <ng-container matColumnDef="metodoPago">
+          <th mat-header-cell *matHeaderCellDef>Método</th>
+          <td mat-cell *matCellDef="let r">{{ r.metodoPago }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="ingresos">
+          <th mat-header-cell *matHeaderCellDef>Ingresos</th>
+          <td mat-cell *matCellDef="let r">{{ r.ingresos | soles }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="gastos">
+          <th mat-header-cell *matHeaderCellDef>Gastos</th>
+          <td mat-cell *matCellDef="let r">{{ r.gastos | soles }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="neto">
+          <th mat-header-cell *matHeaderCellDef>Neto</th>
+          <td mat-cell *matCellDef="let r">{{ r.neto | soles }}</td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="byPaymentMethodColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: byPaymentMethodColumns"></tr>
+      </table>
+      @if (byPaymentMethod().length === 0) {
+        <p class="empty-state">Sin datos en este rango.</p>
+      }
+    </div>
+  </div>
+}
+
+<div class="timeline-section">
+  <div class="timeline-header">
+    <h2>Línea de tiempo</h2>
+    <mat-form-field appearance="outline">
+      <mat-label>Agrupar por</mat-label>
+      <mat-select [(ngModel)]="groupBy" (selectionChange)="refresh()">
+        @for (opt of groupByOptions; track opt) {
+          <mat-option [value]="opt">{{ groupByLabels[opt] }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+  </div>
+
+  <div class="chart-wrapper">
+    <canvas #timelineCanvas></canvas>
+  </div>
+
+  @if (!loading() && timeline().length === 0) {
+    <p class="empty-state">Sin datos en este rango.</p>
+  }
+</div>
