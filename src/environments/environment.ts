@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://REPLACE-WITH-RAILWAY-URL.up.railway.app/api',
+  apiUrl: 'https://nocturne-api-production-cb15.up.railway.app/api',
 };
