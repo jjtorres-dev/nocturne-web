@@ -37,6 +37,7 @@ export class AdminLayout {
     { label: 'Servicios', icon: 'subscriptions', route: '/services' },
     { label: 'Contactos', icon: 'contacts', route: '/contacts' },
     { label: 'Cuentas', icon: 'account_circle', route: '/accounts' },
+    { label: 'Ventas', icon: 'point_of_sale', route: '/sales' },
   ];
 
   logout(): void {

@@ -35,6 +35,7 @@ describe('CuentasList', () => {
     id: 'cta-1',
     servicioId: 'srv-1',
     proveedorId: 'prov-1',
+    clienteId: null,
     correo: 'cuenta@correo.com',
     fechaInicio: '2026-01-01',
     fechaFin: '2026-02-01',

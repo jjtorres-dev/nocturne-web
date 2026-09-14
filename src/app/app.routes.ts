@@ -45,6 +45,13 @@ export const routes: Routes = [
             (m) => m.CuentaDetail,
           ),
       },
+      {
+        path: 'sales',
+        loadComponent: () =>
+          import('./features/sales/ventas-list/ventas-list').then(
+            (m) => m.VentasList,
+          ),
+      },
       { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
     ],
   },

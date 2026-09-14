@@ -17,6 +17,7 @@ describe('CuentaDetail', () => {
     id: 'cta-1',
     servicioId: 'srv-1',
     proveedorId: 'prov-1',
+    clienteId: null,
     correo: 'cuenta@correo.com',
     claveServicio: 'clave-servicio-secreta',
     claveCorreo: 'clave-correo-secreta',
