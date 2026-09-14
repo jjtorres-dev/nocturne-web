@@ -71,22 +71,35 @@ en `navItems` de `AdminLayout`.
 En cada push/PR a `main`, `.github/workflows/ci.yml` corre lint, tests
 unitarios y build.
 
-### Vercel (auto-deploy en merge a `main`)
+### Railway (auto-deploy en merge a `main`)
 
-El deploy a Vercel **no se automatiza desde aquí**; se configura una vez
-manualmente:
+El frontend está desplegado en **Railway**, como un servicio aparte dentro
+del mismo proyecto que `nocturne-api` (no se usó Vercel como se había
+planeado originalmente). El deploy no se automatiza desde aquí; el setup
+manual es:
 
-1. Importar este repositorio en [Vercel](https://vercel.com/) como un
-   nuevo proyecto (Framework Preset: Angular).
-2. Build command: `npm run build` — Output directory:
-   `dist/nocturne-web/browser` (Angular 22 con `@angular/build:application`
-   genera el output ahí).
-3. Configurar `main` como la rama de producción (Vercel hace auto-deploy en
-   cada push/merge a esa rama por defecto).
-4. Si en el futuro se necesita una variable de entorno inyectada en build
-   (por ejemplo, para no commitear `environment.ts` con la URL de
-   producción), configurarla como variable de entorno del proyecto en
-   Vercel, nunca hardcodeada en el repo.
+1. En el mismo proyecto de Railway del backend, agregar otro servicio
+   "Deploy from GitHub repo" apuntando a este repositorio (`nocturne-web`).
+2. Build command: `npm run build`. Railway usa **Railpack** para detectar
+   y servir el resultado como sitio estático.
+3. Configurar la variable de entorno del servicio:
 
-No se realizó ningún deploy real a Vercel desde este entorno; este es solo
-el procedimiento a seguir.
+   ```
+   RAILPACK_SPA_OUTPUT_DIR=dist/nocturne-web/browser
+   ```
+
+   Esto es necesario porque Angular (con `@angular/build:application`, el
+   builder de Angular 22) no deja los archivos estáticos en la raíz de
+   `dist/`, sino en `dist/nocturne-web/browser/`. Sin esta variable,
+   Railpack no encuentra el `index.html` y el deploy sirve una app en
+   blanco o da 404 en cualquier ruta que no sea `/`.
+4. Activar auto-deploy en la rama `main` — cada merge que pase CI dispara
+   un nuevo deploy.
+5. La URL de la API de producción está hardcodeada en
+   `src/environments/environment.ts` (`apiUrl`). Si se necesita inyectarla
+   en build time en vez de commitearla, configurarla como variable de
+   entorno del servicio en Railway, nunca hardcodeada en otro lado del
+   repo.
+
+Si se recrea este servicio desde cero, no olvidar volver a setear
+`RAILPACK_SPA_OUTPUT_DIR` — es el paso que más fácil se pasa por alto.
