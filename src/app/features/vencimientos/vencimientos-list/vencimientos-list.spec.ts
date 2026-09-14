@@ -119,6 +119,14 @@ describe('VencimientosList', () => {
     });
   });
 
+  it('formatea el precio en soles (S/), no como decimal crudo', async () => {
+    await setup();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).toContain('S/ 15.00');
+  });
+
   it('toma el estado inicial de los query params (viniendo del Dashboard)', async () => {
     await setup({ estado: 'por_vencer' });
     await fixture.whenStable();

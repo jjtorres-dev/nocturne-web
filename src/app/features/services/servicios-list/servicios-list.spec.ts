@@ -60,6 +60,13 @@ describe('ServiciosList', () => {
     expect(component.servicios()).toEqual([servicio]);
   });
 
+  it('formatea precioBase en soles (S/), no como decimal crudo', async () => {
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).toContain('S/ 10.00');
+  });
+
   it('desactiva un servicio tras confirmar', async () => {
     await fixture.whenStable();
     dialog.open.mockReturnValue({ afterClosed: () => of(true) });

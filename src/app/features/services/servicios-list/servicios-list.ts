@@ -1,5 +1,4 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
-import { DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatTableModule } from '@angular/material/table';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -19,13 +18,14 @@ import {
 } from '../servicio.model';
 import { ServicioFormDialog } from '../servicio-form-dialog/servicio-form-dialog';
 import { ConfirmDialog } from '../../../shared/confirm-dialog/confirm-dialog';
+import { SolesPipe } from '../../../shared/soles.pipe';
 
 type ActivoFilter = 'todos' | 'activos' | 'inactivos';
 
 @Component({
   imports: [
     FormsModule,
-    DecimalPipe,
+    SolesPipe,
     MatTableModule,
     MatFormFieldModule,
     MatSelectModule,

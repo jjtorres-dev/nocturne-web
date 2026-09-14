@@ -1,5 +1,6 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
-import { DatePipe, DecimalPipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
+import { SolesPipe } from '../../../shared/soles.pipe';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -25,7 +26,7 @@ import { PerfilFormDialog } from '../profiles/perfil-form-dialog/perfil-form-dia
 @Component({
   imports: [
     DatePipe,
-    DecimalPipe,
+    SolesPipe,
     RouterLink,
     MatButtonModule,
     MatIconModule,

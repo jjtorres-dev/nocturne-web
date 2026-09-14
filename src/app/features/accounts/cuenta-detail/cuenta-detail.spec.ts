@@ -113,6 +113,14 @@ describe('CuentaDetail', () => {
     expect(component.perfiles()).toEqual([perfilActivo]);
   });
 
+  it('formatea el costo en soles (S/), no como decimal crudo', async () => {
+    await setup();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).toContain('S/ 10.00');
+  });
+
   it('no muestra claveServicio, claveCorreo ni pin en el DOM hasta presionar Mostrar', async () => {
     await setup();
     await fixture.whenStable();

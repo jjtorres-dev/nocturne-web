@@ -13,6 +13,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { VentasApi } from '../../sales/ventas-api';
 import {
+  Moneda,
   VENCIMIENTO_LABELS,
   VencimientoFiltro,
   type Venta,
@@ -25,6 +26,7 @@ import { type Contacto } from '../../contacts/contacto.model';
 import { CuentasApi } from '../../accounts/cuentas-api';
 import { type CuentaListItem } from '../../accounts/cuenta.model';
 import { PerfilesApi } from '../../accounts/profiles/perfiles-api';
+import { SolesPipe } from '../../../shared/soles.pipe';
 
 const ESTADOS_VALIDOS = new Set<string>(Object.values(VencimientoFiltro));
 
@@ -33,6 +35,7 @@ const ESTADOS_VALIDOS = new Set<string>(Object.values(VencimientoFiltro));
     FormsModule,
     DatePipe,
     DecimalPipe,
+    SolesPipe,
     MatTableModule,
     MatFormFieldModule,
     MatInputModule,
@@ -55,6 +58,7 @@ export class VencimientosList implements OnInit {
   private readonly perfilesApi = inject(PerfilesApi);
   private readonly snackBar = inject(MatSnackBar);
 
+  protected readonly Moneda = Moneda;
   protected readonly estados = Object.values(VencimientoFiltro);
   protected readonly estadoLabels = VENCIMIENTO_LABELS;
   protected readonly VencimientoFiltro = VencimientoFiltro;

@@ -155,6 +155,28 @@ describe('VentasList', () => {
     expect(text).toContain('V-00001');
   });
 
+  it('formatea el precio en soles (S/), no como decimal crudo', async () => {
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const text = fixture.nativeElement.textContent;
+    expect(text).toContain('S/ 15.00');
+    expect(text).not.toContain('15.00 PEN');
+  });
+
+  it('muestra el precio original entre paréntesis cuando la moneda no es PEN', async () => {
+    api.list.mockResolvedValue([
+      { ...venta, precio: 20, moneda: Moneda.USD, tasaCambio: 3.8, precioPEN: 76 },
+    ]);
+
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const text = fixture.nativeElement.textContent;
+    expect(text).toContain('S/ 76.00');
+    expect(text).toContain('(20.00 USD)');
+  });
+
   it('renueva una venta y muestra la nueva fecha de fin en el snackbar', async () => {
     await fixture.whenStable();
     dialog.open.mockReturnValue({ afterClosed: () => of(true) });

@@ -75,7 +75,12 @@
 
     <ng-container matColumnDef="precio">
       <th mat-header-cell *matHeaderCellDef>Precio</th>
-      <td mat-cell *matCellDef="let v">{{ v.precio | number: '1.2-2' }} {{ v.moneda }}</td>
+      <td mat-cell *matCellDef="let v">
+        {{ v.precioPEN | soles }}
+        @if (v.moneda !== Moneda.PEN) {
+          <span class="original-amount">({{ v.precio | number: '1.2-2' }} {{ v.moneda }})</span>
+        }
+      </td>
     </ng-container>
 
     <ng-container matColumnDef="activo">

@@ -13,7 +13,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { VentasApi } from '../ventas-api';
-import { type Venta } from '../venta.model';
+import { Moneda, type Venta } from '../venta.model';
 import { ServiciosApi } from '../../services/servicios-api';
 import { type Servicio } from '../../services/servicio.model';
 import { ContactosApi } from '../../contacts/contactos-api';
@@ -24,6 +24,7 @@ import { PerfilesApi } from '../../accounts/profiles/perfiles-api';
 import { VentaCreateDialog } from '../venta-create-dialog/venta-create-dialog';
 import { VentaEditDialog } from '../venta-edit-dialog/venta-edit-dialog';
 import { ConfirmDialog } from '../../../shared/confirm-dialog/confirm-dialog';
+import { SolesPipe } from '../../../shared/soles.pipe';
 
 type ActivoFilter = 'todos' | 'activos' | 'inactivos';
 
@@ -32,6 +33,7 @@ type ActivoFilter = 'todos' | 'activos' | 'inactivos';
     FormsModule,
     DatePipe,
     DecimalPipe,
+    SolesPipe,
     MatTableModule,
     MatFormFieldModule,
     MatSelectModule,
@@ -54,6 +56,7 @@ export class VentasList implements OnInit {
   private readonly dialog = inject(MatDialog);
   private readonly snackBar = inject(MatSnackBar);
 
+  protected readonly Moneda = Moneda;
   protected readonly displayedColumns = [
     'codigoVenta',
     'cliente',
