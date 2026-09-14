@@ -4,6 +4,7 @@ import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import type {
   CreateVentaPayload,
+  SalesSummary,
   UpdateVentaPayload,
   Venta,
   VentaFilters,
@@ -26,7 +27,23 @@ export class VentasApi {
     if (filters.activo !== undefined) {
       params = params.set('activo', String(filters.activo));
     }
+    if (filters.vencimiento) {
+      params = params.set('vencimiento', filters.vencimiento);
+    }
+    if (filters.diasAlerta !== undefined) {
+      params = params.set('diasAlerta', String(filters.diasAlerta));
+    }
     return firstValueFrom(this.http.get<Venta[]>(BASE_URL, { params }));
+  }
+
+  summary(diasAlerta?: number): Promise<SalesSummary> {
+    let params = new HttpParams();
+    if (diasAlerta !== undefined) {
+      params = params.set('diasAlerta', String(diasAlerta));
+    }
+    return firstValueFrom(
+      this.http.get<SalesSummary>(`${BASE_URL}/summary`, { params }),
+    );
   }
 
   findOne(id: string): Promise<Venta> {

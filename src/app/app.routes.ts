@@ -52,6 +52,13 @@ export const routes: Routes = [
             (m) => m.VentasList,
           ),
       },
+      {
+        path: 'vencimientos',
+        loadComponent: () =>
+          import(
+            './features/vencimientos/vencimientos-list/vencimientos-list'
+          ).then((m) => m.VencimientosList),
+      },
       { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
     ],
   },

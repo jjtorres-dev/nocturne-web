@@ -1,0 +1,88 @@
+<div class="page-header">
+  <h1>Vencimientos</h1>
+</div>
+
+<div class="filters">
+  <mat-button-toggle-group
+    [(ngModel)]="estado"
+    (change)="refresh()"
+    aria-label="Estado de vencimiento"
+  >
+    @for (e of estados; track e) {
+      <mat-button-toggle [value]="e">{{ estadoLabels[e] }}</mat-button-toggle>
+    }
+  </mat-button-toggle-group>
+
+  <mat-form-field appearance="outline" class="dias-alerta">
+    <mat-label>Días de alerta</mat-label>
+    <input
+      matInput
+      type="number"
+      min="0"
+      [(ngModel)]="diasAlerta"
+      (change)="refresh()"
+    />
+  </mat-form-field>
+</div>
+
+@if (loading()) {
+  <div class="loading">
+    <mat-spinner diameter="32" />
+  </div>
+} @else {
+  <table mat-table [dataSource]="ventas()" class="vencimientos-table">
+    <ng-container matColumnDef="cliente">
+      <th mat-header-cell *matHeaderCellDef>Cliente</th>
+      <td mat-cell *matCellDef="let v">{{ clienteNombre(v.clienteId) }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="servicio">
+      <th mat-header-cell *matHeaderCellDef>Servicio</th>
+      <td mat-cell *matCellDef="let v">{{ servicioNombre(v.servicioId) }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="cuentaPerfil">
+      <th mat-header-cell *matHeaderCellDef>Cuenta / Perfil</th>
+      <td mat-cell *matCellDef="let v">{{ cuentaPerfilLabel(v) }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="fechaFin">
+      <th mat-header-cell *matHeaderCellDef>Fecha de fin</th>
+      <td mat-cell *matCellDef="let v">{{ v.fechaFin | date: 'dd/MM/yyyy' }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="dias">
+      <th mat-header-cell *matHeaderCellDef>Días</th>
+      <td mat-cell *matCellDef="let v" [class.dias-negativo]="diasDiferencia(v.fechaFin) < 0">
+        {{ diasDiferencia(v.fechaFin) }}
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="precio">
+      <th mat-header-cell *matHeaderCellDef>Precio</th>
+      <td mat-cell *matCellDef="let v">{{ v.precio | number: '1.2-2' }} {{ v.moneda }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="acciones">
+      <th mat-header-cell *matHeaderCellDef></th>
+      <td mat-cell *matCellDef="let v">
+        @if (mostrarWhatsapp()) {
+          <button
+            mat-icon-button
+            matTooltip="Enviar recordatorio por WhatsApp"
+            (click)="abrirWhatsapp(v)"
+          >
+            <mat-icon>chat</mat-icon>
+          </button>
+        }
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+  </table>
+
+  @if (ventas().length === 0) {
+    <p class="empty-state">No hay ventas en este estado.</p>
+  }
+}

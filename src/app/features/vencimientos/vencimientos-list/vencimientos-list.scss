@@ -1,0 +1,40 @@
+.page-header {
+  margin-bottom: 16px;
+
+  h1 {
+    margin: 0;
+    font-size: 1.5rem;
+  }
+}
+
+.filters {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.dias-alerta {
+  width: 140px;
+}
+
+.vencimientos-table {
+  width: 100%;
+}
+
+.dias-negativo {
+  color: var(--mat-sys-error);
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  padding: 48px 0;
+}
+
+.empty-state {
+  color: var(--mat-sys-on-surface-variant);
+  padding: 24px 0;
+  text-align: center;
+}

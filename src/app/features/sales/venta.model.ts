@@ -64,4 +64,24 @@ export interface VentaFilters {
   clienteId?: string;
   servicioId?: string;
   activo?: boolean;
+  vencimiento?: VencimientoFiltro;
+  diasAlerta?: number;
+}
+
+export enum VencimientoFiltro {
+  VENCIDA = 'vencida',
+  POR_VENCER = 'por_vencer',
+  AL_DIA = 'al_dia',
+}
+
+export const VENCIMIENTO_LABELS: Record<VencimientoFiltro, string> = {
+  [VencimientoFiltro.VENCIDA]: 'Vencidas',
+  [VencimientoFiltro.POR_VENCER]: 'Por vencer',
+  [VencimientoFiltro.AL_DIA]: 'Al día',
+};
+
+export interface SalesSummary {
+  vencidas: number;
+  porVencer: number;
+  alDia: number;
 }

@@ -1,0 +1,53 @@
+.page-header {
+  margin-bottom: 16px;
+
+  h1 {
+    margin: 0;
+    font-size: 1.5rem;
+  }
+}
+
+.summary-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.summary-card {
+  cursor: pointer;
+
+  mat-card-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 16px 0;
+  }
+}
+
+.summary-count {
+  font-size: 2.5rem;
+  font-weight: 600;
+}
+
+.summary-label {
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.vencida .summary-count {
+  color: var(--mat-sys-error);
+}
+
+.por-vencer .summary-count {
+  color: #b8860b;
+}
+
+.al-dia .summary-count {
+  color: var(--mat-sys-primary);
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  padding: 48px 0;
+}

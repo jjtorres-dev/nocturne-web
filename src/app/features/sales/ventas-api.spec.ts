@@ -6,7 +6,7 @@ import {
 } from '@angular/common/http/testing';
 import { environment } from '../../../environments/environment';
 import { VentasApi } from './ventas-api';
-import { Moneda } from './venta.model';
+import { Moneda, VencimientoFiltro } from './venta.model';
 
 describe('VentasApi', () => {
   const baseUrl = `${environment.apiUrl}/sales`;
@@ -93,6 +93,41 @@ describe('VentasApi', () => {
     const req = httpMock.expectOne(`${baseUrl}/abc/renew`);
     expect(req.request.method).toBe('POST');
     req.flush({ id: 'abc', fechaFin: '2026-03-01' });
+    await promise;
+  });
+
+  it('lista con filtros de vencimiento y diasAlerta', async () => {
+    const promise = api.list({
+      vencimiento: VencimientoFiltro.POR_VENCER,
+      diasAlerta: 5,
+    });
+    const req = httpMock.expectOne(
+      (r) =>
+        r.url === baseUrl &&
+        r.params.get('vencimiento') === 'por_vencer' &&
+        r.params.get('diasAlerta') === '5',
+    );
+    expect(req.request.method).toBe('GET');
+    req.flush([]);
+    await promise;
+  });
+
+  it('obtiene el resumen con GET /summary', async () => {
+    const promise = api.summary(4);
+    const req = httpMock.expectOne(
+      (r) => r.url === `${baseUrl}/summary` && r.params.get('diasAlerta') === '4',
+    );
+    expect(req.request.method).toBe('GET');
+    req.flush({ vencidas: 1, porVencer: 2, alDia: 3 });
+    await promise;
+  });
+
+  it('summary sin diasAlerta no manda el query param', async () => {
+    const promise = api.summary();
+    const req = httpMock.expectOne(
+      (r) => r.url === `${baseUrl}/summary` && !r.params.has('diasAlerta'),
+    );
+    req.flush({ vencidas: 0, porVencer: 0, alDia: 0 });
     await promise;
   });
 });

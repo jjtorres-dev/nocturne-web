@@ -1,12 +1,50 @@
-<mat-card>
-  <mat-card-header>
-    <mat-card-title>Bienvenido a Nocturne</mat-card-title>
-  </mat-card-header>
-  <mat-card-content>
-    <p>
-      Este es el esqueleto del panel de administración. Las secciones de
-      Servicios, Contactos, Cuentas, Ventas, Vencimientos y Contabilidad se
-      irán agregando en las siguientes fases del roadmap.
-    </p>
-  </mat-card-content>
-</mat-card>
+<div class="page-header">
+  <h1>Dashboard</h1>
+</div>
+
+@if (loading()) {
+  <div class="loading">
+    <mat-spinner diameter="32" />
+  </div>
+} @else if (summary(); as s) {
+  <div class="summary-cards">
+    <mat-card
+      class="summary-card vencida"
+      tabindex="0"
+      role="button"
+      (click)="goToVencimientos(VencimientoFiltro.VENCIDA)"
+      (keyup.enter)="goToVencimientos(VencimientoFiltro.VENCIDA)"
+    >
+      <mat-card-content>
+        <span class="summary-count">{{ s.vencidas }}</span>
+        <span class="summary-label">Vencidas</span>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card
+      class="summary-card por-vencer"
+      tabindex="0"
+      role="button"
+      (click)="goToVencimientos(VencimientoFiltro.POR_VENCER)"
+      (keyup.enter)="goToVencimientos(VencimientoFiltro.POR_VENCER)"
+    >
+      <mat-card-content>
+        <span class="summary-count">{{ s.porVencer }}</span>
+        <span class="summary-label">Por vencer</span>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card
+      class="summary-card al-dia"
+      tabindex="0"
+      role="button"
+      (click)="goToVencimientos(VencimientoFiltro.AL_DIA)"
+      (keyup.enter)="goToVencimientos(VencimientoFiltro.AL_DIA)"
+    >
+      <mat-card-content>
+        <span class="summary-count">{{ s.alDia }}</span>
+        <span class="summary-label">Al día</span>
+      </mat-card-content>
+    </mat-card>
+  </div>
+}
