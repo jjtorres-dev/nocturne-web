@@ -31,6 +31,20 @@ export const routes: Routes = [
             (m) => m.ContactosList,
           ),
       },
+      {
+        path: 'accounts',
+        loadComponent: () =>
+          import('./features/accounts/cuentas-list/cuentas-list').then(
+            (m) => m.CuentasList,
+          ),
+      },
+      {
+        path: 'accounts/:id',
+        loadComponent: () =>
+          import('./features/accounts/cuenta-detail/cuenta-detail').then(
+            (m) => m.CuentaDetail,
+          ),
+      },
       { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
     ],
   },

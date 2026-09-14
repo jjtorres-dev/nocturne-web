@@ -1,0 +1,19 @@
+.form-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 360px;
+  padding-top: 4px;
+}
+
+.error-message {
+  color: var(--mat-sys-error);
+  margin: 0 0 8px;
+  font-size: 0.875rem;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  padding: 24px 0;
+}

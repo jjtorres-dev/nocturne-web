@@ -1,0 +1,164 @@
+@if (loading()) {
+  <div class="loading">
+    <mat-spinner diameter="32" />
+  </div>
+} @else if (cuenta(); as c) {
+  <a routerLink="/accounts" class="back-link">
+    <mat-icon>arrow_back</mat-icon>
+    Volver a cuentas
+  </a>
+
+  <div class="page-header">
+    <h1>{{ servicio()?.nombre ?? 'Cuenta' }}</h1>
+    <div class="header-actions">
+      <button mat-stroked-button (click)="openEdit()">
+        <mat-icon>edit</mat-icon>
+        Editar
+      </button>
+      @if (c.activo) {
+        <button mat-stroked-button color="warn" (click)="confirmDeactivate()">
+          <mat-icon>block</mat-icon>
+          Desactivar
+        </button>
+      } @else {
+        <button mat-stroked-button color="primary" (click)="confirmReactivate()">
+          <mat-icon>restart_alt</mat-icon>
+          Reactivar
+        </button>
+      }
+    </div>
+  </div>
+
+  <section class="details-card">
+    <div class="detail-row">
+      <span class="detail-label">Servicio</span>
+      <span>{{ servicio()?.nombre ?? '—' }}</span>
+    </div>
+    <div class="detail-row">
+      <span class="detail-label">Proveedor</span>
+      <span>{{ proveedor()?.nombre ?? '—' }}</span>
+    </div>
+    <div class="detail-row">
+      <span class="detail-label">Correo</span>
+      <span>{{ c.correo }}</span>
+    </div>
+    <div class="detail-row">
+      <span class="detail-label">Clave del servicio</span>
+      <app-secret-value [value]="c.claveServicio" label="Clave del servicio" />
+    </div>
+    <div class="detail-row">
+      <span class="detail-label">Clave del correo</span>
+      <app-secret-value [value]="c.claveCorreo" label="Clave del correo" />
+    </div>
+    <div class="detail-row">
+      <span class="detail-label">Fecha de inicio</span>
+      <span>{{ c.fechaInicio | date: 'dd/MM/yyyy' }}</span>
+    </div>
+    <div class="detail-row">
+      <span class="detail-label">Fecha de fin</span>
+      <span>{{ c.fechaFin | date: 'dd/MM/yyyy' }}</span>
+    </div>
+    <div class="detail-row">
+      <span class="detail-label">Costo</span>
+      <span>{{ c.costo | number: '1.2-2' }}</span>
+    </div>
+    <div class="detail-row">
+      <span class="detail-label">Método de pago</span>
+      <span>{{ c.metodoPago }}</span>
+    </div>
+    <div class="detail-row">
+      <span class="detail-label">URL</span>
+      <span>{{ c.url ?? '—' }}</span>
+    </div>
+    <div class="detail-row">
+      <span class="detail-label">Renovación automática</span>
+      <span>{{ c.renovacionAutomatica ? 'Sí' : 'No' }}</span>
+    </div>
+    <div class="detail-row">
+      <span class="detail-label">Estado</span>
+      <mat-chip [highlighted]="c.activo" [class.chip-inactive]="!c.activo">
+        {{ c.activo ? 'Activo' : 'Inactivo' }}
+      </mat-chip>
+    </div>
+  </section>
+
+  <section class="profiles-section">
+    <div class="page-header">
+      <h2>Perfiles</h2>
+      <button
+        mat-flat-button
+        color="primary"
+        [disabled]="!canAddPerfil()"
+        [matTooltip]="addPerfilDisabledReason() ?? ''"
+        [matTooltipDisabled]="canAddPerfil()"
+        (click)="openCreatePerfil()"
+      >
+        <mat-icon>add</mat-icon>
+        Agregar perfil
+      </button>
+    </div>
+
+    @if (!canAddPerfil()) {
+      <p class="limit-reached">{{ addPerfilDisabledReason() }}</p>
+    }
+
+    @if (loadingPerfiles()) {
+      <div class="loading">
+        <mat-spinner diameter="32" />
+      </div>
+    } @else {
+      <table mat-table [dataSource]="perfiles()" class="profiles-table">
+        <ng-container matColumnDef="nombre">
+          <th mat-header-cell *matHeaderCellDef>Nombre</th>
+          <td mat-cell *matCellDef="let p">{{ p.nombre }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="pin">
+          <th mat-header-cell *matHeaderCellDef>PIN</th>
+          <td mat-cell *matCellDef="let p">
+            <app-secret-value [value]="p.pin" label="PIN" />
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="cliente">
+          <th mat-header-cell *matHeaderCellDef>Cliente asignado</th>
+          <td mat-cell *matCellDef="let p">—</td>
+        </ng-container>
+
+        <ng-container matColumnDef="activo">
+          <th mat-header-cell *matHeaderCellDef>Estado</th>
+          <td mat-cell *matCellDef="let p">
+            <mat-chip [highlighted]="p.activo" [class.chip-inactive]="!p.activo">
+              {{ p.activo ? 'Activo' : 'Inactivo' }}
+            </mat-chip>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="acciones">
+          <th mat-header-cell *matHeaderCellDef></th>
+          <td mat-cell *matCellDef="let p">
+            <button mat-icon-button matTooltip="Editar" (click)="openEditPerfil(p)">
+              <mat-icon>edit</mat-icon>
+            </button>
+            @if (p.activo) {
+              <button mat-icon-button matTooltip="Desactivar" (click)="confirmDeactivatePerfil(p)">
+                <mat-icon>block</mat-icon>
+              </button>
+            } @else {
+              <button mat-icon-button matTooltip="Reactivar" (click)="confirmReactivatePerfil(p)">
+                <mat-icon>restart_alt</mat-icon>
+              </button>
+            }
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedProfileColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedProfileColumns"></tr>
+      </table>
+
+      @if (perfiles().length === 0) {
+        <p class="empty-state">Esta cuenta todavía no tiene perfiles.</p>
+      }
+    }
+  </section>
+}

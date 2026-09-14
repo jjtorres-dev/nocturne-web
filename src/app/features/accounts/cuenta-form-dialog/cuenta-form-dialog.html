@@ -1,0 +1,149 @@
+<h2 mat-dialog-title>{{ isEdit ? 'Editar cuenta' : 'Nueva cuenta' }}</h2>
+
+<form [formGroup]="form" (ngSubmit)="submit()">
+  <mat-dialog-content class="form-grid">
+    @if (loadingOptions()) {
+      <div class="loading">
+        <mat-spinner diameter="32" />
+      </div>
+    } @else {
+      <mat-form-field appearance="outline">
+        <mat-label>Servicio</mat-label>
+        <mat-select formControlName="servicioId">
+          @for (s of servicios(); track s.id) {
+            <mat-option [value]="s.id">{{ s.nombre }}</mat-option>
+          }
+        </mat-select>
+        @if (form.controls.servicioId.hasError('required')) {
+          <mat-error>El servicio es obligatorio.</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Proveedor</mat-label>
+        <mat-select formControlName="proveedorId">
+          <mat-option value="">Sin proveedor</mat-option>
+          @for (p of proveedores(); track p.id) {
+            <mat-option [value]="p.id">{{ p.nombre }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Correo</mat-label>
+        <input matInput type="email" formControlName="correo" />
+        @if (form.controls.correo.hasError('required')) {
+          <mat-error>El correo es obligatorio.</mat-error>
+        }
+        @if (form.controls.correo.hasError('email')) {
+          <mat-error>Correo inválido.</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Clave del servicio</mat-label>
+        <input
+          matInput
+          [type]="showClaveServicio() ? 'text' : 'password'"
+          formControlName="claveServicio"
+        />
+        <button
+          mat-icon-button
+          matSuffix
+          type="button"
+          (click)="toggleClaveServicio()"
+          [attr.aria-label]="showClaveServicio() ? 'Ocultar clave del servicio' : 'Mostrar clave del servicio'"
+        >
+          <mat-icon>{{ showClaveServicio() ? 'visibility_off' : 'visibility' }}</mat-icon>
+        </button>
+        @if (form.controls.claveServicio.hasError('required')) {
+          <mat-error>La clave del servicio es obligatoria.</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Clave del correo (opcional)</mat-label>
+        <input
+          matInput
+          [type]="showClaveCorreo() ? 'text' : 'password'"
+          formControlName="claveCorreo"
+        />
+        <button
+          mat-icon-button
+          matSuffix
+          type="button"
+          (click)="toggleClaveCorreo()"
+          [attr.aria-label]="showClaveCorreo() ? 'Ocultar clave del correo' : 'Mostrar clave del correo'"
+        >
+          <mat-icon>{{ showClaveCorreo() ? 'visibility_off' : 'visibility' }}</mat-icon>
+        </button>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Fecha de inicio</mat-label>
+        <input matInput type="date" formControlName="fechaInicio" />
+        @if (form.controls.fechaInicio.hasError('required')) {
+          <mat-error>La fecha de inicio es obligatoria.</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Fecha de fin</mat-label>
+        <input matInput type="date" formControlName="fechaFin" />
+        @if (form.controls.fechaFin.hasError('required')) {
+          <mat-error>La fecha de fin es obligatoria.</mat-error>
+        }
+      </mat-form-field>
+
+      @if (form.hasError('fechaFinInvalida') && !form.controls.fechaFin.hasError('required') && !form.controls.fechaInicio.hasError('required')) {
+        <p class="error-message">La fecha de fin debe ser posterior a la fecha de inicio.</p>
+      }
+
+      <mat-form-field appearance="outline">
+        <mat-label>Costo</mat-label>
+        <input matInput type="number" step="0.01" formControlName="costo" />
+        @if (form.controls.costo.hasError('required')) {
+          <mat-error>El costo es obligatorio.</mat-error>
+        }
+        @if (form.controls.costo.hasError('min')) {
+          <mat-error>Debe ser un número positivo.</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Método de pago</mat-label>
+        <input matInput formControlName="metodoPago" />
+        @if (form.controls.metodoPago.hasError('required')) {
+          <mat-error>El método de pago es obligatorio.</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>URL (opcional)</mat-label>
+        <input matInput formControlName="url" />
+      </mat-form-field>
+
+      <mat-checkbox formControlName="renovacionAutomatica">Renovación automática</mat-checkbox>
+
+      @if (errorMessage()) {
+        <p class="error-message">{{ errorMessage() }}</p>
+      }
+    }
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button type="button" (click)="cancel()">Cancelar</button>
+    <button
+      mat-flat-button
+      color="primary"
+      type="submit"
+      [disabled]="form.invalid || saving() || loadingOptions()"
+    >
+      @if (saving()) {
+        <mat-spinner diameter="20" />
+      } @else {
+        Guardar
+      }
+    </button>
+  </mat-dialog-actions>
+</form>
