@@ -1,0 +1,43 @@
+import { Component, inject } from '@angular/core';
+import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatSidenavModule } from '@angular/material/sidenav';
+import { MatListModule } from '@angular/material/list';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { Auth } from '../../core/auth/auth';
+
+interface NavItem {
+  label: string;
+  icon: string;
+  route: string;
+}
+
+@Component({
+  imports: [
+    RouterLink,
+    RouterLinkActive,
+    RouterOutlet,
+    MatToolbarModule,
+    MatSidenavModule,
+    MatListModule,
+    MatIconModule,
+    MatButtonModule,
+  ],
+  selector: 'app-admin-layout',
+  styleUrl: './admin-layout.scss',
+  templateUrl: './admin-layout.html',
+})
+export class AdminLayout {
+  protected readonly auth = inject(Auth);
+
+  // Se irán sumando secciones a medida que avancen las fases del roadmap
+  // (Servicios/Contactos en Fase 1, Cuentas/Perfiles en Fase 2, etc.)
+  protected readonly navItems: NavItem[] = [
+    { label: 'Dashboard', icon: 'dashboard', route: '/dashboard' },
+  ];
+
+  logout(): void {
+    this.auth.logout();
+  }
+}

@@ -1,0 +1,38 @@
+.layout-container {
+  height: 100vh;
+}
+
+.sidenav {
+  width: 240px;
+  display: flex;
+  flex-direction: column;
+}
+
+.brand {
+  padding: 16px;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+.user-name {
+  margin-right: 8px;
+  font-size: 0.875rem;
+}
+
+.content {
+  padding: 24px;
+}
+
+.active-link {
+  --mat-list-active-indicator-color: var(--mat-sys-secondary-container);
+}
