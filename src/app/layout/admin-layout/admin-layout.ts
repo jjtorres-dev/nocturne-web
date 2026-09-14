@@ -32,9 +32,11 @@ export class AdminLayout {
   protected readonly auth = inject(Auth);
 
   // Se irán sumando secciones a medida que avancen las fases del roadmap
-  // (Servicios/Contactos en Fase 1, Cuentas/Perfiles en Fase 2, etc.)
+  // (Cuentas/Perfiles en Fase 2, etc.)
   protected readonly navItems: NavItem[] = [
     { label: 'Dashboard', icon: 'dashboard', route: '/dashboard' },
+    { label: 'Servicios', icon: 'subscriptions', route: '/services' },
+    { label: 'Contactos', icon: 'contacts', route: '/contacts' },
   ];
 
   logout(): void {

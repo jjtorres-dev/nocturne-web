@@ -1,0 +1,64 @@
+<h2 mat-dialog-title>{{ isEdit ? 'Editar servicio' : 'Nuevo servicio' }}</h2>
+
+<form [formGroup]="form" (ngSubmit)="submit()">
+  <mat-dialog-content class="form-grid">
+    <mat-form-field appearance="outline">
+      <mat-label>Nombre</mat-label>
+      <input matInput formControlName="nombre" />
+      @if (form.controls.nombre.hasError('required')) {
+        <mat-error>El nombre es obligatorio.</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Tipo</mat-label>
+      <mat-select formControlName="tipo">
+        @for (type of serviceTypes; track type) {
+          <mat-option [value]="type">{{ typeLabels[type] }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Duración (meses)</mat-label>
+      <input matInput type="number" step="0.1" formControlName="duracionMeses" />
+      @if (form.controls.duracionMeses.hasError('required')) {
+        <mat-error>La duración es obligatoria.</mat-error>
+      }
+      @if (form.controls.duracionMeses.hasError('min')) {
+        <mat-error>Debe ser un número positivo.</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Pantallas máx. (opcional)</mat-label>
+      <input matInput type="number" step="1" formControlName="pantallasMax" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Precio base</mat-label>
+      <input matInput type="number" step="0.01" formControlName="precioBase" />
+      @if (form.controls.precioBase.hasError('required')) {
+        <mat-error>El precio es obligatorio.</mat-error>
+      }
+      @if (form.controls.precioBase.hasError('min')) {
+        <mat-error>Debe ser un número positivo.</mat-error>
+      }
+    </mat-form-field>
+
+    @if (errorMessage()) {
+      <p class="error-message">{{ errorMessage() }}</p>
+    }
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button type="button" (click)="cancel()">Cancelar</button>
+    <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid || saving()">
+      @if (saving()) {
+        <mat-spinner diameter="20" />
+      } @else {
+        Guardar
+      }
+    </button>
+  </mat-dialog-actions>
+</form>

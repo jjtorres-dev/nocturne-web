@@ -17,6 +17,20 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/dashboard/dashboard').then((m) => m.Dashboard),
       },
+      {
+        path: 'services',
+        loadComponent: () =>
+          import('./features/services/servicios-list/servicios-list').then(
+            (m) => m.ServiciosList,
+          ),
+      },
+      {
+        path: 'contacts',
+        loadComponent: () =>
+          import('./features/contacts/contactos-list/contactos-list').then(
+            (m) => m.ContactosList,
+          ),
+      },
       { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
     ],
   },
