@@ -53,6 +53,13 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'combos',
+        loadComponent: () =>
+          import('./features/combos/combos-list/combos-list').then(
+            (m) => m.CombosList,
+          ),
+      },
+      {
         path: 'vencimientos',
         loadComponent: () =>
           import(

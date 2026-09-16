@@ -1,0 +1,17 @@
+.form-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 320px;
+  padding-top: 4px;
+}
+
+.selected-servicios {
+  margin: -4px 0 8px;
+}
+
+.error-message {
+  color: var(--mat-sys-error);
+  margin: 0 0 8px;
+  font-size: 0.875rem;
+}
