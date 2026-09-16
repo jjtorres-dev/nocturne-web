@@ -45,7 +45,7 @@ export class AdminLayout {
     { label: 'Contabilidad', icon: 'account_balance', route: '/accounting' },
   ];
 
-  logout(): void {
-    this.auth.logout();
+  async logout(): Promise<void> {
+    await this.auth.logout();
   }
 }
