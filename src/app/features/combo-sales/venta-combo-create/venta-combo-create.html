@@ -1,0 +1,186 @@
+<a routerLink="/combo-sales" class="back-link">
+  <mat-icon>arrow_back</mat-icon>
+  Volver a Ventas Combo
+</a>
+
+<h1>Nueva venta de combo</h1>
+
+<form [formGroup]="form" (ngSubmit)="submit()">
+  @if (loadingOptions()) {
+    <div class="loading">
+      <mat-spinner diameter="32" />
+    </div>
+  } @else {
+    <section class="form-grid">
+      <mat-form-field appearance="outline">
+        <mat-label>Cliente</mat-label>
+        <mat-select formControlName="clienteId">
+          @for (c of clientes(); track c.id) {
+            <mat-option [value]="c.id">{{ c.nombre }}</mat-option>
+          }
+        </mat-select>
+        @if (form.controls.clienteId.hasError('required')) {
+          <mat-error>El cliente es obligatorio.</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Combo</mat-label>
+        <mat-select
+          formControlName="comboId"
+          (selectionChange)="onComboChange($event.value)"
+        >
+          @for (c of combos(); track c.id) {
+            <mat-option [value]="c.id">{{ c.nombre }}</mat-option>
+          }
+        </mat-select>
+        @if (form.controls.comboId.hasError('required')) {
+          <mat-error>El combo es obligatorio.</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Duración (meses)</mat-label>
+        <input matInput type="number" step="0.1" formControlName="duracionMeses" />
+        @if (form.controls.duracionMeses.hasError('required')) {
+          <mat-error>La duración es obligatoria.</mat-error>
+        }
+        @if (form.controls.duracionMeses.hasError('min')) {
+          <mat-error>Debe ser un número positivo.</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Fecha de inicio</mat-label>
+        <input matInput type="date" formControlName="fechaInicio" />
+        @if (form.controls.fechaInicio.hasError('required')) {
+          <mat-error>La fecha de inicio es obligatoria.</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Fecha de fin</mat-label>
+        <input matInput type="date" formControlName="fechaFin" />
+        @if (form.controls.fechaFin.hasError('required')) {
+          <mat-error>La fecha de fin es obligatoria.</mat-error>
+        }
+      </mat-form-field>
+
+      @if (form.hasError('fechaFinInvalida') && !form.controls.fechaFin.hasError('required') && !form.controls.fechaInicio.hasError('required')) {
+        <p class="error-message">La fecha de fin debe ser posterior a la fecha de inicio.</p>
+      }
+
+      <mat-form-field appearance="outline">
+        <mat-label>Precio</mat-label>
+        <input matInput type="number" step="0.01" formControlName="precio" />
+        @if (form.controls.precio.hasError('required')) {
+          <mat-error>El precio es obligatorio.</mat-error>
+        }
+        @if (form.controls.precio.hasError('min')) {
+          <mat-error>Debe ser un número positivo.</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Moneda</mat-label>
+        <mat-select formControlName="moneda">
+          @for (m of monedas; track m) {
+            <mat-option [value]="m">{{ m }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Tasa de cambio</mat-label>
+        <input matInput type="number" step="0.0001" formControlName="tasaCambio" />
+        @if (form.controls.tasaCambio.hasError('min')) {
+          <mat-error>Debe ser un número positivo.</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Método de pago</mat-label>
+        <input matInput formControlName="metodoPago" />
+        @if (form.controls.metodoPago.hasError('required')) {
+          <mat-error>El método de pago es obligatorio.</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-checkbox formControlName="renovacionAutomatica">Renovación automática</mat-checkbox>
+    </section>
+
+    @if (form.controls.comboId.value) {
+      <section class="asignaciones">
+        <h2>Asignación de cuentas/perfiles</h2>
+
+        @if (asignaciones().length === 0 && loadingAsignaciones()) {
+          <div class="loading">
+            <mat-spinner diameter="32" />
+          </div>
+        }
+
+        @for (section of asignaciones(); track section.servicio.id; let i = $index) {
+          <div class="asignacion-card">
+            <h3>Asignación — {{ section.servicio.nombre }}</h3>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Cuenta</mat-label>
+              <mat-select
+                [value]="section.cuentaId"
+                (selectionChange)="onAsignacionCuentaChange(i, $event.value)"
+              >
+                @for (c of section.cuentas; track c.id) {
+                  <mat-option [value]="c.id">{{ c.correo }}</mat-option>
+                }
+              </mat-select>
+              @if (section.loadingCuentas) {
+                <mat-hint>Cargando cuentas…</mat-hint>
+              } @else if (section.cuentas.length === 0) {
+                <mat-hint>Este servicio no tiene cuentas activas.</mat-hint>
+              }
+            </mat-form-field>
+
+            @if (section.cuentaId && section.requierePerfil) {
+              <mat-form-field appearance="outline">
+                <mat-label>Perfil</mat-label>
+                <mat-select
+                  [value]="section.perfilId"
+                  (selectionChange)="onAsignacionPerfilChange(i, $event.value)"
+                >
+                  @for (p of section.perfiles; track p.id) {
+                    <mat-option [value]="p.id">{{ p.nombre }}</mat-option>
+                  }
+                </mat-select>
+                @if (section.loadingPerfiles) {
+                  <mat-hint>Cargando perfiles…</mat-hint>
+                } @else if (section.perfiles.length === 0) {
+                  <mat-hint>No hay perfiles disponibles en esta cuenta.</mat-hint>
+                }
+              </mat-form-field>
+            }
+          </div>
+        }
+      </section>
+    }
+
+    @if (errorMessage()) {
+      <p class="error-message">{{ errorMessage() }}</p>
+    }
+
+    <div class="actions">
+      <button mat-button type="button" routerLink="/combo-sales">Cancelar</button>
+      <button
+        mat-flat-button
+        color="primary"
+        type="submit"
+        [disabled]="form.invalid || saving() || loadingOptions() || !form.controls.comboId.value"
+      >
+        @if (saving()) {
+          <mat-spinner diameter="20" />
+        } @else {
+          Guardar
+        }
+      </button>
+    </div>
+  }
+</form>

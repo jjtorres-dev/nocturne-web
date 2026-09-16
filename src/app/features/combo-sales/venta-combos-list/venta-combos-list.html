@@ -1,8 +1,8 @@
 <div class="page-header">
-  <h1>Ventas</h1>
+  <h1>Ventas Combo</h1>
   <button mat-flat-button color="primary" (click)="openCreate()">
     <mat-icon>add</mat-icon>
-    Nueva venta
+    Nueva venta de combo
   </button>
 </div>
 
@@ -18,11 +18,11 @@
   </mat-form-field>
 
   <mat-form-field appearance="outline">
-    <mat-label>Servicio</mat-label>
-    <mat-select [(ngModel)]="servicioFilter" (selectionChange)="refresh()">
+    <mat-label>Combo</mat-label>
+    <mat-select [(ngModel)]="comboFilter" (selectionChange)="refresh()">
       <mat-option value="todos">Todos</mat-option>
-      @for (s of servicios(); track s.id) {
-        <mat-option [value]="s.id">{{ s.nombre }}</mat-option>
+      @for (c of combos(); track c.id) {
+        <mat-option [value]="c.id">{{ c.nombre }}</mat-option>
       }
     </mat-select>
   </mat-form-field>
@@ -42,10 +42,12 @@
     <mat-spinner diameter="32" />
   </div>
 } @else {
-  <table mat-table [dataSource]="ventas()" class="sales-table">
+  <table mat-table [dataSource]="ventasCombo()" class="combo-sales-table">
     <ng-container matColumnDef="codigoVenta">
       <th mat-header-cell *matHeaderCellDef>Código</th>
-      <td mat-cell *matCellDef="let v">{{ v.codigoVenta }}</td>
+      <td mat-cell *matCellDef="let v">
+        <a [routerLink]="['/combo-sales', v.id]">{{ v.codigoVenta }}</a>
+      </td>
     </ng-container>
 
     <ng-container matColumnDef="cliente">
@@ -53,14 +55,9 @@
       <td mat-cell *matCellDef="let v">{{ clienteNombre(v.clienteId) }}</td>
     </ng-container>
 
-    <ng-container matColumnDef="servicio">
-      <th mat-header-cell *matHeaderCellDef>Servicio</th>
-      <td mat-cell *matCellDef="let v">{{ servicioNombre(v.servicioId) }}</td>
-    </ng-container>
-
-    <ng-container matColumnDef="cuentaPerfil">
-      <th mat-header-cell *matHeaderCellDef>Cuenta / Perfil</th>
-      <td mat-cell *matCellDef="let v">{{ cuentaPerfilLabel(v) }}</td>
+    <ng-container matColumnDef="combo">
+      <th mat-header-cell *matHeaderCellDef>Combo</th>
+      <td mat-cell *matCellDef="let v">{{ comboNombre(v.comboId) }}</td>
     </ng-container>
 
     <ng-container matColumnDef="fechaInicio">
@@ -95,31 +92,20 @@
     <ng-container matColumnDef="acciones">
       <th mat-header-cell *matHeaderCellDef></th>
       <td mat-cell *matCellDef="let v">
-        @if (v.ventaComboId) {
-          <a
-            class="combo-badge"
-            [routerLink]="['/combo-sales', v.ventaComboId]"
-            matTooltip="Ver la venta de combo"
-          >
-            <mat-icon>link</mat-icon>
-            {{ comboLabel(v) }}
-          </a>
-        } @else {
-          <button mat-icon-button matTooltip="Editar" (click)="openEdit(v)">
-            <mat-icon>edit</mat-icon>
+        <button mat-icon-button matTooltip="Ver detalle" (click)="openDetail(v)">
+          <mat-icon>visibility</mat-icon>
+        </button>
+        @if (v.activo) {
+          <button mat-icon-button matTooltip="Renovar" (click)="confirmRenew(v)">
+            <mat-icon>autorenew</mat-icon>
           </button>
-          @if (v.activo) {
-            <button mat-icon-button matTooltip="Renovar" (click)="confirmRenew(v)">
-              <mat-icon>autorenew</mat-icon>
-            </button>
-            <button mat-icon-button matTooltip="Desactivar" (click)="confirmDeactivate(v)">
-              <mat-icon>block</mat-icon>
-            </button>
-          } @else {
-            <button mat-icon-button matTooltip="Reactivar" (click)="confirmReactivate(v)">
-              <mat-icon>restart_alt</mat-icon>
-            </button>
-          }
+          <button mat-icon-button matTooltip="Desactivar" (click)="confirmDeactivate(v)">
+            <mat-icon>block</mat-icon>
+          </button>
+        } @else {
+          <button mat-icon-button matTooltip="Reactivar" (click)="confirmReactivate(v)">
+            <mat-icon>restart_alt</mat-icon>
+          </button>
         }
       </td>
     </ng-container>
@@ -128,7 +114,7 @@
     <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
   </table>
 
-  @if (ventas().length === 0) {
-    <p class="empty-state">No hay ventas con estos filtros.</p>
+  @if (ventasCombo().length === 0) {
+    <p class="empty-state">No hay ventas de combo con estos filtros.</p>
   }
 }

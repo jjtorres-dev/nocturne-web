@@ -2,6 +2,7 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { MatTableModule } from '@angular/material/table';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
@@ -21,6 +22,7 @@ import { type Contacto } from '../../contacts/contacto.model';
 import { CuentasApi } from '../../accounts/cuentas-api';
 import { type CuentaListItem } from '../../accounts/cuenta.model';
 import { PerfilesApi } from '../../accounts/profiles/perfiles-api';
+import { VentaCombosApi } from '../../combo-sales/venta-combos-api';
 import { VentaCreateDialog } from '../venta-create-dialog/venta-create-dialog';
 import { VentaEditDialog } from '../venta-edit-dialog/venta-edit-dialog';
 import { ConfirmDialog } from '../../../shared/confirm-dialog/confirm-dialog';
@@ -33,6 +35,7 @@ type ActivoFilter = 'todos' | 'activos' | 'inactivos';
     FormsModule,
     DatePipe,
     DecimalPipe,
+    RouterLink,
     SolesPipe,
     MatTableModule,
     MatFormFieldModule,
@@ -53,6 +56,7 @@ export class VentasList implements OnInit {
   private readonly contactosApi = inject(ContactosApi);
   private readonly cuentasApi = inject(CuentasApi);
   private readonly perfilesApi = inject(PerfilesApi);
+  private readonly ventaCombosApi = inject(VentaCombosApi);
   private readonly dialog = inject(MatDialog);
   private readonly snackBar = inject(MatSnackBar);
 
@@ -74,6 +78,7 @@ export class VentasList implements OnInit {
   readonly clientes = signal<Contacto[]>([]);
   readonly cuentas = signal<CuentaListItem[]>([]);
   readonly perfilNombres = signal<Map<string, string>>(new Map());
+  readonly comboCodigos = signal<Map<string, string>>(new Map());
   readonly loading = signal(false);
 
   clienteFilter = 'todos';
@@ -86,14 +91,18 @@ export class VentasList implements OnInit {
   }
 
   private async loadOptions(): Promise<void> {
-    const [servicios, clientes, cuentas] = await Promise.all([
+    const [servicios, clientes, cuentas, ventasCombo] = await Promise.all([
       this.serviciosApi.list(),
       this.contactosApi.list(),
       this.cuentasApi.list(),
+      this.ventaCombosApi.list(),
     ]);
     this.servicios.set(servicios);
     this.clientes.set(clientes);
     this.cuentas.set(cuentas);
+    this.comboCodigos.set(
+      new Map(ventasCombo.map((vc) => [vc.id, vc.codigoVenta])),
+    );
   }
 
   async refresh(): Promise<void> {
@@ -209,6 +218,14 @@ export class VentasList implements OnInit {
 
   protected clienteNombre(clienteId: string): string {
     return this.clientes().find((c) => c.id === clienteId)?.nombre ?? '—';
+  }
+
+  protected comboLabel(venta: Venta): string {
+    if (!venta.ventaComboId) {
+      return '';
+    }
+    const codigo = this.comboCodigos().get(venta.ventaComboId);
+    return codigo ? `Parte de combo ${codigo}` : 'Parte de combo';
   }
 
   protected cuentaPerfilLabel(venta: Venta): string {

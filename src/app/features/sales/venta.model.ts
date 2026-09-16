@@ -30,6 +30,10 @@ export interface Venta {
   metodoPago: string;
   renovacionAutomatica: boolean;
   activo: boolean;
+  // No nulo solo cuando esta venta es "hija" de un combo (ver
+  // /api/combo-sales): en ese caso se gestiona desde Ventas de Combo, no
+  // desde esta pantalla (ver VentasList.esDeCombo).
+  ventaComboId: string | null;
   createdAt: string;
   updatedAt: string;
 }

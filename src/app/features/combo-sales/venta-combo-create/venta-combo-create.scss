@@ -1,0 +1,73 @@
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--mat-sys-primary);
+  text-decoration: none;
+  margin-bottom: 16px;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+}
+
+h1 {
+  margin: 0 0 16px;
+  font-size: 1.5rem;
+}
+
+.form-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-width: 480px;
+}
+
+.asignaciones {
+  margin-top: 24px;
+  max-width: 480px;
+
+  h2 {
+    font-size: 1.1rem;
+    margin: 0 0 8px;
+  }
+}
+
+.asignacion-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px;
+  margin-bottom: 12px;
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: 8px;
+
+  h3 {
+    margin: 0 0 4px;
+    font-size: 0.95rem;
+    color: var(--mat-sys-on-surface-variant);
+  }
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  padding: 24px 0;
+}
+
+.error-message {
+  color: var(--mat-sys-error);
+  margin: 8px 0;
+  font-size: 0.875rem;
+  max-width: 480px;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 16px;
+  max-width: 480px;
+}

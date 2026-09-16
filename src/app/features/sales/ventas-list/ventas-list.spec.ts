@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { HttpErrorResponse } from '@angular/common/http';
+import { provideRouter } from '@angular/router';
 import { of } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -14,6 +15,7 @@ import { CuentasApi } from '../../accounts/cuentas-api';
 import { type CuentaListItem } from '../../accounts/cuenta.model';
 import { PerfilesApi } from '../../accounts/profiles/perfiles-api';
 import { type Perfil } from '../../accounts/profiles/perfil.model';
+import { VentaCombosApi } from '../../combo-sales/venta-combos-api';
 
 describe('VentasList', () => {
   const servicio: Servicio = {
@@ -80,10 +82,16 @@ describe('VentasList', () => {
     metodoPago: 'Yape',
     renovacionAutomatica: false,
     activo: true,
+    ventaComboId: null,
     createdAt: '',
     updatedAt: '',
   };
   const ventaInactiva: Venta = { ...venta, id: 'v-2', activo: false };
+  const ventaDeCombo: Venta = {
+    ...venta,
+    id: 'v-3',
+    ventaComboId: 'vc-1',
+  };
 
   let fixture: ComponentFixture<VentasList>;
   let component: VentasList;
@@ -97,6 +105,7 @@ describe('VentasList', () => {
   let contactosApi: { list: ReturnType<typeof vi.fn> };
   let cuentasApi: { list: ReturnType<typeof vi.fn> };
   let perfilesApi: { list: ReturnType<typeof vi.fn> };
+  let ventaCombosApi: { list: ReturnType<typeof vi.fn> };
   let dialog: { open: ReturnType<typeof vi.fn> };
   let snackBar: { open: ReturnType<typeof vi.fn> };
 
@@ -111,17 +120,22 @@ describe('VentasList', () => {
     contactosApi = { list: vi.fn().mockResolvedValue([cliente]) };
     cuentasApi = { list: vi.fn().mockResolvedValue([cuenta]) };
     perfilesApi = { list: vi.fn().mockResolvedValue([perfil]) };
+    ventaCombosApi = {
+      list: vi.fn().mockResolvedValue([{ id: 'vc-1', codigoVenta: 'C-00001' }]),
+    };
     dialog = { open: vi.fn() };
     snackBar = { open: vi.fn() };
 
     await TestBed.configureTestingModule({
       imports: [VentasList],
       providers: [
+        provideRouter([]),
         { provide: VentasApi, useValue: api },
         { provide: ServiciosApi, useValue: serviciosApi },
         { provide: ContactosApi, useValue: contactosApi },
         { provide: CuentasApi, useValue: cuentasApi },
         { provide: PerfilesApi, useValue: perfilesApi },
+        { provide: VentaCombosApi, useValue: ventaCombosApi },
         { provide: MatDialog, useValue: dialog },
         { provide: MatSnackBar, useValue: snackBar },
       ],
@@ -247,5 +261,37 @@ describe('VentasList', () => {
       expect.anything(),
       expect.objectContaining({ data: { venta } }),
     );
+  });
+
+  it('oculta editar/renovar/desactivar y muestra el badge de combo en filas con ventaComboId', async () => {
+    api.list.mockResolvedValue([venta, ventaDeCombo]);
+
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const rows = fixture.nativeElement.querySelectorAll(
+      'tr.mat-mdc-row',
+    ) as NodeListOf<HTMLElement>;
+    expect(rows.length).toBe(2);
+
+    const filaNormal = rows[0];
+    expect(filaNormal.querySelector('.combo-badge')).toBeNull();
+    expect(filaNormal.querySelectorAll('button[mat-icon-button]').length).toBe(3);
+
+    const filaCombo = rows[1];
+    expect(filaCombo.querySelectorAll('button[mat-icon-button]').length).toBe(0);
+    const badge = filaCombo.querySelector('.combo-badge');
+    expect(badge).not.toBeNull();
+    expect(badge!.textContent).toContain('Parte de combo C-00001');
+  });
+
+  it('el badge de combo enlaza a /combo-sales/:id', async () => {
+    api.list.mockResolvedValue([ventaDeCombo]);
+
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const badge = fixture.nativeElement.querySelector('.combo-badge');
+    expect(badge.getAttribute('href')).toBe('/combo-sales/vc-1');
   });
 });

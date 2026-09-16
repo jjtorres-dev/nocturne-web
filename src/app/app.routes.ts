@@ -60,6 +60,27 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'combo-sales',
+        loadComponent: () =>
+          import(
+            './features/combo-sales/venta-combos-list/venta-combos-list'
+          ).then((m) => m.VentaCombosList),
+      },
+      {
+        path: 'combo-sales/nueva',
+        loadComponent: () =>
+          import(
+            './features/combo-sales/venta-combo-create/venta-combo-create'
+          ).then((m) => m.VentaComboCreate),
+      },
+      {
+        path: 'combo-sales/:id',
+        loadComponent: () =>
+          import(
+            './features/combo-sales/venta-combo-detail/venta-combo-detail'
+          ).then((m) => m.VentaComboDetail),
+      },
+      {
         path: 'vencimientos',
         loadComponent: () =>
           import(

@@ -17,7 +17,7 @@
   margin-bottom: 8px;
 }
 
-.sales-table {
+.combo-sales-table {
   width: 100%;
 }
 
@@ -41,23 +41,4 @@
   color: var(--mat-sys-on-surface-variant);
   font-size: 0.85em;
   margin-left: 4px;
-}
-
-.combo-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 4px 12px;
-  border-radius: 16px;
-  background: var(--mat-sys-secondary-container);
-  color: var(--mat-sys-on-secondary-container);
-  font-size: 0.8125rem;
-  text-decoration: none;
-  cursor: pointer;
-
-  mat-icon {
-    font-size: 16px;
-    width: 16px;
-    height: 16px;
-  }
 }

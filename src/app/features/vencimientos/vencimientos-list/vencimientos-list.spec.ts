@@ -67,6 +67,7 @@ describe('VencimientosList', () => {
     metodoPago: 'Yape',
     renovacionAutomatica: false,
     activo: true,
+    ventaComboId: null,
     createdAt: '',
     updatedAt: '',
   };
