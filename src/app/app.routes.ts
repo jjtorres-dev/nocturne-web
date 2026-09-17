@@ -101,6 +101,13 @@ export const routes: Routes = [
             (m) => m.Accounting,
           ),
       },
+      {
+        path: 'users',
+        loadComponent: () =>
+          import('./features/users/usuarios-list/usuarios-list').then(
+            (m) => m.UsuariosList,
+          ),
+      },
       { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
     ],
   },

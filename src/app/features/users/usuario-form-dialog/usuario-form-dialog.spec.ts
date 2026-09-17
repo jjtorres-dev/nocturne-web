@@ -1,0 +1,150 @@
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { UsuarioFormDialog } from './usuario-form-dialog';
+import { UsuariosApi } from '../usuarios-api';
+import { Auth } from '../../../core/auth/auth';
+import { UserRole, type Usuario } from '../usuario.model';
+
+describe('UsuarioFormDialog', () => {
+  let fixture: ComponentFixture<UsuarioFormDialog>;
+  let component: UsuarioFormDialog;
+  let api: { create: ReturnType<typeof vi.fn>; update: ReturnType<typeof vi.fn> };
+  let dialogRef: { close: ReturnType<typeof vi.fn> };
+  let auth: { currentUser: ReturnType<typeof vi.fn> };
+
+  const otroUsuario: Usuario = {
+    id: 'user-1',
+    email: 'otro@nocturne.dev',
+    name: 'Otro',
+    role: UserRole.REVENDEDOR,
+    isActive: true,
+    createdAt: '',
+    updatedAt: '',
+  };
+
+  async function setup(
+    data: { usuario?: Usuario } = {},
+    loggedInUserId = 'admin-0',
+  ) {
+    api = {
+      create: vi.fn().mockResolvedValue({ id: 'user-new' }),
+      update: vi.fn().mockResolvedValue({ id: 'user-1' }),
+    };
+    dialogRef = { close: vi.fn() };
+    auth = { currentUser: vi.fn().mockReturnValue({ id: loggedInUserId }) };
+
+    await TestBed.configureTestingModule({
+      imports: [UsuarioFormDialog],
+      providers: [
+        { provide: UsuariosApi, useValue: api },
+        { provide: Auth, useValue: auth },
+        { provide: MatDialogRef, useValue: dialogRef },
+        { provide: MAT_DIALOG_DATA, useValue: data },
+      ],
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(UsuarioFormDialog);
+    component = fixture.componentInstance;
+  }
+
+  it('arranca en modo creación, sin isSelf', async () => {
+    await setup();
+    await fixture.whenStable();
+
+    expect(component.isEdit).toBe(false);
+    expect(component.isSelf).toBe(false);
+    expect(component.form.controls.role.enabled).toBe(true);
+  });
+
+  it('crea un usuario con el payload del formulario', async () => {
+    await setup();
+    await fixture.whenStable();
+
+    component.form.patchValue({
+      email: 'nuevo@nocturne.dev',
+      name: 'Nuevo',
+      role: UserRole.REVENDEDOR,
+      password: 'password123',
+    });
+
+    await component.submit();
+
+    expect(api.create).toHaveBeenCalledWith({
+      email: 'nuevo@nocturne.dev',
+      name: 'Nuevo',
+      role: UserRole.REVENDEDOR,
+      password: 'password123',
+    });
+    expect(dialogRef.close).toHaveBeenCalledWith({ id: 'user-new' });
+  });
+
+  it('no envía el formulario si la contraseña es muy corta al crear', async () => {
+    await setup();
+    await fixture.whenStable();
+
+    component.form.patchValue({
+      email: 'nuevo@nocturne.dev',
+      name: 'Nuevo',
+      password: 'corta',
+    });
+    await component.submit();
+
+    expect(api.create).not.toHaveBeenCalled();
+  });
+
+  it('precarga los datos del usuario en modo edición (email deshabilitado)', async () => {
+    await setup({ usuario: otroUsuario });
+    await fixture.whenStable();
+
+    expect(component.isEdit).toBe(true);
+    expect(component.form.controls.name.value).toBe('Otro');
+    expect(component.form.controls.role.value).toBe(UserRole.REVENDEDOR);
+    expect(component.form.controls.email.disabled).toBe(true);
+  });
+
+  it('actualiza un usuario ajeno incluyendo el rol, sin mandar password si viene vacío', async () => {
+    await setup({ usuario: otroUsuario });
+    await fixture.whenStable();
+
+    component.form.patchValue({ name: 'Otro editado', role: UserRole.ADMIN });
+    await component.submit();
+
+    expect(api.update).toHaveBeenCalledWith('user-1', {
+      name: 'Otro editado',
+      role: UserRole.ADMIN,
+    });
+  });
+
+  it('incluye password en el payload solo si se escribe una nueva', async () => {
+    await setup({ usuario: otroUsuario });
+    await fixture.whenStable();
+
+    component.form.patchValue({ name: 'Otro', password: 'nuevaClave123' });
+    await component.submit();
+
+    expect(api.update).toHaveBeenCalledWith(
+      'user-1',
+      expect.objectContaining({ password: 'nuevaClave123' }),
+    );
+  });
+
+  it('editándose a sí mismo: isSelf=true, el select de rol queda deshabilitado y el payload nunca incluye role', async () => {
+    const yoMismo: Usuario = { ...otroUsuario, id: 'admin-0' };
+    await setup({ usuario: yoMismo }, 'admin-0');
+    await fixture.whenStable();
+
+    expect(component.isSelf).toBe(true);
+    expect(component.form.controls.role.disabled).toBe(true);
+
+    component.form.patchValue({ name: 'Yo mismo editado' });
+    await component.submit();
+
+    expect(api.update).toHaveBeenCalledWith('admin-0', {
+      name: 'Yo mismo editado',
+    });
+    expect(api.update).not.toHaveBeenCalledWith(
+      'admin-0',
+      expect.objectContaining({ role: expect.anything() }),
+    );
+  });
+});

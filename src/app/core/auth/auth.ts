@@ -13,11 +13,17 @@ import {
 } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
+// Mismos valores que UserRole en el backend (src/users/user-role.enum.ts).
+export enum UserRole {
+  ADMIN = 'admin',
+  REVENDEDOR = 'revendedor',
+}
+
 export interface AuthenticatedUser {
   id: string;
   email: string;
   name: string;
-  role: string;
+  role: UserRole;
 }
 
 interface LoginResponse {
