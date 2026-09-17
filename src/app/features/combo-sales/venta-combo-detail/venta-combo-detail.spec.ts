@@ -12,8 +12,10 @@ import { type Combo } from '../../combos/combo.model';
 import { ContactosApi } from '../../contacts/contactos-api';
 import { ContactType, type Contacto } from '../../contacts/contacto.model';
 import { ServiceType, type Servicio } from '../../services/servicio.model';
+import { Auth, UserRole } from '../../../core/auth/auth';
 
 describe('VentaComboDetail', () => {
+  const owner = { id: 'admin-0', name: 'Admin', email: 'admin@nocturne.dev' };
   const servicio: Servicio = {
     id: 'srv-1',
     nombre: 'Netflix',
@@ -22,6 +24,7 @@ describe('VentaComboDetail', () => {
     pantallasMax: 4,
     precioBase: 10,
     activo: true,
+    owner,
     createdAt: '',
     updatedAt: '',
   };
@@ -32,6 +35,7 @@ describe('VentaComboDetail', () => {
     servicios: [servicio],
     precioCombo: 25,
     activo: true,
+    owner,
     createdAt: '',
     updatedAt: '',
   };
@@ -41,6 +45,7 @@ describe('VentaComboDetail', () => {
     whatsapp: '+51999999999',
     tipo: ContactType.CLIENTE_FINAL,
     activo: true,
+    owner,
     createdAt: '',
     updatedAt: '',
   };
@@ -59,6 +64,7 @@ describe('VentaComboDetail', () => {
     metodoPago: 'Yape',
     renovacionAutomatica: false,
     activo: true,
+    owner,
     ventas: [
       {
         id: 'v-1',
@@ -88,8 +94,10 @@ describe('VentaComboDetail', () => {
   let combosApi: { list: ReturnType<typeof vi.fn> };
   let contactosApi: { list: ReturnType<typeof vi.fn> };
   let dialog: { open: ReturnType<typeof vi.fn> };
+  let auth: { currentUser: ReturnType<typeof vi.fn> };
 
-  beforeEach(async () => {
+  async function setup(role: UserRole = UserRole.ADMIN) {
+    TestBed.resetTestingModule();
     api = {
       findOne: vi.fn().mockResolvedValue(ventaCombo),
       deactivate: vi.fn().mockResolvedValue({ ...ventaCombo, activo: false }),
@@ -99,6 +107,7 @@ describe('VentaComboDetail', () => {
     combosApi = { list: vi.fn().mockResolvedValue([combo]) };
     contactosApi = { list: vi.fn().mockResolvedValue([cliente]) };
     dialog = { open: vi.fn() };
+    auth = { currentUser: vi.fn().mockReturnValue({ id: 'admin-0', role }) };
 
     await TestBed.configureTestingModule({
       imports: [VentaComboDetail],
@@ -107,6 +116,7 @@ describe('VentaComboDetail', () => {
         { provide: VentaCombosApi, useValue: api },
         { provide: CombosApi, useValue: combosApi },
         { provide: ContactosApi, useValue: contactosApi },
+        { provide: Auth, useValue: auth },
         { provide: MatDialog, useValue: dialog },
         { provide: MatSnackBar, useValue: { open: vi.fn() } },
         {
@@ -120,6 +130,10 @@ describe('VentaComboDetail', () => {
 
     fixture = TestBed.createComponent(VentaComboDetail);
     component = fixture.componentInstance;
+  }
+
+  beforeEach(async () => {
+    await setup();
   });
 
   it('carga la venta de combo, el combo y el cliente al iniciar', async () => {
@@ -175,5 +189,21 @@ describe('VentaComboDetail', () => {
       expect.anything(),
       expect.objectContaining({ data: { ventaCombo } }),
     );
+  });
+
+  it('muestra el dueño en la cabecera para un ADMIN', async () => {
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).toContain('Dueño');
+    expect(fixture.nativeElement.textContent).toContain('Admin');
+  });
+
+  it('no muestra el dueño en la cabecera para un REVENDEDOR', async () => {
+    await setup(UserRole.REVENDEDOR);
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).not.toContain('Dueño');
   });
 });

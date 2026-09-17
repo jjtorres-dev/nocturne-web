@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatTableModule } from '@angular/material/table';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -19,6 +19,7 @@ import {
 import { ServicioFormDialog } from '../servicio-form-dialog/servicio-form-dialog';
 import { ConfirmDialog } from '../../../shared/confirm-dialog/confirm-dialog';
 import { SolesPipe } from '../../../shared/soles.pipe';
+import { Auth, UserRole } from '../../../core/auth/auth';
 
 type ActivoFilter = 'todos' | 'activos' | 'inactivos';
 
@@ -41,20 +42,40 @@ type ActivoFilter = 'todos' | 'activos' | 'inactivos';
 })
 export class ServiciosList implements OnInit {
   private readonly api = inject(ServiciosApi);
+  private readonly auth = inject(Auth);
   private readonly dialog = inject(MatDialog);
   private readonly snackBar = inject(MatSnackBar);
 
   protected readonly serviceTypes = Object.values(ServiceType);
   protected readonly typeLabels = SERVICE_TYPE_LABELS;
-  protected readonly displayedColumns = [
-    'nombre',
-    'tipo',
-    'duracionMeses',
-    'pantallasMax',
-    'precioBase',
-    'activo',
-    'acciones',
-  ];
+  // "Dueño" solo se ve para ADMIN: un REVENDEDOR nunca ve nada ajeno, así
+  // que la columna sería ruido sin sentido para él (mismo criterio que el
+  // link de Usuarios en el sidebar).
+  protected readonly isAdmin = computed(
+    () => this.auth.currentUser()?.role === UserRole.ADMIN,
+  );
+  protected readonly displayedColumns = computed(() =>
+    this.isAdmin()
+      ? [
+          'nombre',
+          'tipo',
+          'duracionMeses',
+          'pantallasMax',
+          'precioBase',
+          'dueno',
+          'activo',
+          'acciones',
+        ]
+      : [
+          'nombre',
+          'tipo',
+          'duracionMeses',
+          'pantallasMax',
+          'precioBase',
+          'activo',
+          'acciones',
+        ],
+  );
 
   readonly servicios = signal<Servicio[]>([]);
   readonly loading = signal(false);

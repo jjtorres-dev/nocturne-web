@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { SolesPipe } from '../../../shared/soles.pipe';
 import { ActivatedRoute, RouterLink } from '@angular/router';
@@ -22,6 +22,7 @@ import { SecretValue } from '../../../shared/secret-value/secret-value';
 import { PerfilesApi } from '../profiles/perfiles-api';
 import { type Perfil } from '../profiles/perfil.model';
 import { PerfilFormDialog } from '../profiles/perfil-form-dialog/perfil-form-dialog';
+import { Auth, UserRole } from '../../../core/auth/auth';
 
 @Component({
   imports: [
@@ -46,9 +47,13 @@ export class CuentaDetail implements OnInit {
   private readonly serviciosApi = inject(ServiciosApi);
   private readonly contactosApi = inject(ContactosApi);
   private readonly perfilesApi = inject(PerfilesApi);
+  private readonly auth = inject(Auth);
   private readonly dialog = inject(MatDialog);
   private readonly snackBar = inject(MatSnackBar);
 
+  protected readonly isAdmin = computed(
+    () => this.auth.currentUser()?.role === UserRole.ADMIN,
+  );
   protected readonly displayedProfileColumns = [
     'nombre',
     'pin',

@@ -16,8 +16,10 @@ import { type CuentaListItem } from '../../accounts/cuenta.model';
 import { PerfilesApi } from '../../accounts/profiles/perfiles-api';
 import { type Perfil } from '../../accounts/profiles/perfil.model';
 import { VentaCombosApi } from '../../combo-sales/venta-combos-api';
+import { Auth, UserRole } from '../../../core/auth/auth';
 
 describe('VentasList', () => {
+  const owner = { id: 'admin-0', name: 'Admin', email: 'admin@nocturne.dev' };
   const servicio: Servicio = {
     id: 'srv-1',
     nombre: 'Netflix',
@@ -26,6 +28,7 @@ describe('VentasList', () => {
     pantallasMax: 2,
     precioBase: 10,
     activo: true,
+    owner,
     createdAt: '',
     updatedAt: '',
   };
@@ -35,6 +38,7 @@ describe('VentasList', () => {
     whatsapp: '+51999999999',
     tipo: ContactType.CLIENTE_FINAL,
     activo: true,
+    owner,
     createdAt: '',
     updatedAt: '',
   };
@@ -52,6 +56,7 @@ describe('VentasList', () => {
     renovacionAutomatica: false,
     activo: true,
     perfilesCount: 1,
+    owner,
     createdAt: '',
     updatedAt: '',
   };
@@ -83,6 +88,7 @@ describe('VentasList', () => {
     renovacionAutomatica: false,
     activo: true,
     ventaComboId: null,
+    owner,
     createdAt: '',
     updatedAt: '',
   };
@@ -108,8 +114,10 @@ describe('VentasList', () => {
   let ventaCombosApi: { list: ReturnType<typeof vi.fn> };
   let dialog: { open: ReturnType<typeof vi.fn> };
   let snackBar: { open: ReturnType<typeof vi.fn> };
+  let auth: { currentUser: ReturnType<typeof vi.fn> };
 
-  beforeEach(async () => {
+  async function setup(role: UserRole = UserRole.ADMIN) {
+    TestBed.resetTestingModule();
     api = {
       list: vi.fn().mockResolvedValue([venta]),
       deactivate: vi.fn().mockResolvedValue({ ...venta, activo: false }),
@@ -125,6 +133,7 @@ describe('VentasList', () => {
     };
     dialog = { open: vi.fn() };
     snackBar = { open: vi.fn() };
+    auth = { currentUser: vi.fn().mockReturnValue({ id: 'admin-0', role }) };
 
     await TestBed.configureTestingModule({
       imports: [VentasList],
@@ -136,6 +145,7 @@ describe('VentasList', () => {
         { provide: CuentasApi, useValue: cuentasApi },
         { provide: PerfilesApi, useValue: perfilesApi },
         { provide: VentaCombosApi, useValue: ventaCombosApi },
+        { provide: Auth, useValue: auth },
         { provide: MatDialog, useValue: dialog },
         { provide: MatSnackBar, useValue: snackBar },
       ],
@@ -143,6 +153,10 @@ describe('VentasList', () => {
 
     fixture = TestBed.createComponent(VentasList);
     component = fixture.componentInstance;
+  }
+
+  beforeEach(async () => {
+    await setup();
   });
 
   it('carga ventas, servicios, clientes y cuentas al iniciar', async () => {
@@ -293,5 +307,21 @@ describe('VentasList', () => {
 
     const badge = fixture.nativeElement.querySelector('.combo-badge');
     expect(badge.getAttribute('href')).toBe('/combo-sales/vc-1');
+  });
+
+  it('muestra la columna Dueño para un ADMIN', async () => {
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.mat-column-dueno')).not.toBeNull();
+    expect(fixture.nativeElement.textContent).toContain('Admin');
+  });
+
+  it('no muestra la columna Dueño para un REVENDEDOR', async () => {
+    await setup(UserRole.REVENDEDOR);
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.mat-column-dueno')).toBeNull();
   });
 });

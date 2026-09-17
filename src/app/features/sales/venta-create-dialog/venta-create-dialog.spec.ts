@@ -14,6 +14,7 @@ import { PerfilesApi } from '../../accounts/profiles/perfiles-api';
 import { type Perfil } from '../../accounts/profiles/perfil.model';
 
 describe('VentaCreateDialog', () => {
+  const owner = { id: 'admin-0', name: 'Admin', email: 'admin@nocturne.dev' };
   const servicioConPerfiles: Servicio = {
     id: 'srv-1',
     nombre: 'Netflix',
@@ -22,6 +23,7 @@ describe('VentaCreateDialog', () => {
     pantallasMax: 2,
     precioBase: 10,
     activo: true,
+    owner,
     createdAt: '',
     updatedAt: '',
   };
@@ -36,6 +38,7 @@ describe('VentaCreateDialog', () => {
     whatsapp: '+51999999999',
     tipo: ContactType.CLIENTE_FINAL,
     activo: true,
+    owner,
     createdAt: '',
     updatedAt: '',
   };
@@ -53,6 +56,7 @@ describe('VentaCreateDialog', () => {
     renovacionAutomatica: false,
     activo: true,
     perfilesCount: 0,
+    owner,
     createdAt: '',
     updatedAt: '',
   };

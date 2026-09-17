@@ -6,8 +6,10 @@ import { CombosList } from './combos-list';
 import { CombosApi } from '../combos-api';
 import { type Combo } from '../combo.model';
 import { ServiceType, type Servicio } from '../../services/servicio.model';
+import { Auth, UserRole } from '../../../core/auth/auth';
 
 describe('CombosList', () => {
+  const owner = { id: 'admin-0', name: 'Admin', email: 'admin@nocturne.dev' };
   const servicioA: Servicio = {
     id: 'srv-1',
     nombre: 'Netflix',
@@ -16,6 +18,7 @@ describe('CombosList', () => {
     pantallasMax: 4,
     precioBase: 10,
     activo: true,
+    owner,
     createdAt: '',
     updatedAt: '',
   };
@@ -27,6 +30,7 @@ describe('CombosList', () => {
     servicios: [servicioA, servicioB],
     precioCombo: 20,
     activo: true,
+    owner,
     createdAt: '',
     updatedAt: '',
   };
@@ -40,19 +44,23 @@ describe('CombosList', () => {
     reactivate: ReturnType<typeof vi.fn>;
   };
   let dialog: { open: ReturnType<typeof vi.fn> };
+  let auth: { currentUser: ReturnType<typeof vi.fn> };
 
-  beforeEach(async () => {
+  async function setup(role: UserRole = UserRole.ADMIN) {
+    TestBed.resetTestingModule();
     api = {
       list: vi.fn().mockResolvedValue([combo]),
       deactivate: vi.fn().mockResolvedValue({ ...combo, activo: false }),
       reactivate: vi.fn().mockResolvedValue({ ...comboInactivo, activo: true }),
     };
     dialog = { open: vi.fn() };
+    auth = { currentUser: vi.fn().mockReturnValue({ id: 'admin-0', role }) };
 
     await TestBed.configureTestingModule({
       imports: [CombosList],
       providers: [
         { provide: CombosApi, useValue: api },
+        { provide: Auth, useValue: auth },
         { provide: MatDialog, useValue: dialog },
         { provide: MatSnackBar, useValue: { open: vi.fn() } },
       ],
@@ -60,6 +68,10 @@ describe('CombosList', () => {
 
     fixture = TestBed.createComponent(CombosList);
     component = fixture.componentInstance;
+  }
+
+  beforeEach(async () => {
+    await setup();
   });
 
   it('carga los combos activos al iniciar', async () => {
@@ -137,5 +149,21 @@ describe('CombosList', () => {
       expect.anything(),
       expect.objectContaining({ data: { combo } }),
     );
+  });
+
+  it('muestra la columna Dueño para un ADMIN', async () => {
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.mat-column-dueno')).not.toBeNull();
+    expect(fixture.nativeElement.textContent).toContain('Admin');
+  });
+
+  it('no muestra la columna Dueño para un REVENDEDOR', async () => {
+    await setup(UserRole.REVENDEDOR);
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.mat-column-dueno')).toBeNull();
   });
 });

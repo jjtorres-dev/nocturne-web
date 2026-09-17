@@ -11,8 +11,10 @@ import { ContactosApi } from '../../contacts/contactos-api';
 import { ContactType, type Contacto } from '../../contacts/contacto.model';
 import { PerfilesApi } from '../profiles/perfiles-api';
 import { type Perfil } from '../profiles/perfil.model';
+import { Auth, UserRole } from '../../../core/auth/auth';
 
 describe('CuentaDetail', () => {
+  const owner = { id: 'admin-0', name: 'Admin', email: 'admin@nocturne.dev' };
   const cuenta: Cuenta = {
     id: 'cta-1',
     servicioId: 'srv-1',
@@ -28,6 +30,7 @@ describe('CuentaDetail', () => {
     url: null,
     renovacionAutomatica: false,
     activo: true,
+    owner,
     createdAt: '',
     updatedAt: '',
   };
@@ -39,6 +42,7 @@ describe('CuentaDetail', () => {
     pantallasMax: 2,
     precioBase: 10,
     activo: true,
+    owner,
     createdAt: '',
     updatedAt: '',
   };
@@ -48,6 +52,7 @@ describe('CuentaDetail', () => {
     whatsapp: '+51999999999',
     tipo: ContactType.PROVEEDOR,
     activo: true,
+    owner,
     createdAt: '',
     updatedAt: '',
   };
@@ -68,8 +73,12 @@ describe('CuentaDetail', () => {
   let serviciosApi: { list: ReturnType<typeof vi.fn> };
   let contactosApi: { list: ReturnType<typeof vi.fn> };
   let perfilesApi: { list: ReturnType<typeof vi.fn> };
+  let auth: { currentUser: ReturnType<typeof vi.fn> };
 
-  async function setup(perfiles: Perfil[] = [perfilActivo]) {
+  async function setup(
+    perfiles: Perfil[] = [perfilActivo],
+    role: UserRole = UserRole.ADMIN,
+  ) {
     api = {
       findOne: vi.fn().mockResolvedValue(cuenta),
       deactivate: vi.fn().mockResolvedValue({ ...cuenta, activo: false }),
@@ -78,6 +87,7 @@ describe('CuentaDetail', () => {
     serviciosApi = { list: vi.fn().mockResolvedValue([servicio]) };
     contactosApi = { list: vi.fn().mockResolvedValue([proveedor]) };
     perfilesApi = { list: vi.fn().mockResolvedValue(perfiles) };
+    auth = { currentUser: vi.fn().mockReturnValue({ id: 'admin-0', role }) };
 
     await TestBed.configureTestingModule({
       imports: [CuentaDetail],
@@ -86,6 +96,7 @@ describe('CuentaDetail', () => {
         { provide: ServiciosApi, useValue: serviciosApi },
         { provide: ContactosApi, useValue: contactosApi },
         { provide: PerfilesApi, useValue: perfilesApi },
+        { provide: Auth, useValue: auth },
         { provide: MatDialog, useValue: { open: vi.fn() } },
         { provide: MatSnackBar, useValue: { open: vi.fn() } },
         {
@@ -173,5 +184,22 @@ describe('CuentaDetail', () => {
     ).find((b) => b.textContent?.includes('Agregar perfil'))!;
 
     expect(addButton.disabled).toBe(false);
+  });
+
+  it('muestra el dueño en la cabecera para un ADMIN', async () => {
+    await setup();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).toContain('Dueño');
+    expect(fixture.nativeElement.textContent).toContain('Admin');
+  });
+
+  it('no muestra el dueño en la cabecera para un REVENDEDOR', async () => {
+    await setup([perfilActivo], UserRole.REVENDEDOR);
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).not.toContain('Dueño');
   });
 });

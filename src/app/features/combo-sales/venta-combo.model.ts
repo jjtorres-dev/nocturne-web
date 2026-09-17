@@ -2,6 +2,7 @@ import type { Moneda } from '../sales/venta.model';
 import type { Servicio } from '../services/servicio.model';
 import type { Cuenta } from '../accounts/cuenta.model';
 import type { Perfil } from '../accounts/profiles/perfil.model';
+import type { Owner } from '../../shared/owner.model';
 
 // Una "venta hija" del combo (fila de la tabla sales con ventaComboId
 // seteado). Solo aparece con las relaciones servicio/cuenta/perfil
@@ -36,6 +37,7 @@ export interface VentaCombo {
   activo: boolean;
   // Solo presente en GET /combo-sales/:id, no en el listado.
   ventas?: VentaComboSaleItem[];
+  owner: Owner;
   createdAt: string;
   updatedAt: string;
 }

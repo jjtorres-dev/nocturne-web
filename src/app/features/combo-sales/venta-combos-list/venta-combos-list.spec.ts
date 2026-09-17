@@ -12,8 +12,10 @@ import { type Combo } from '../../combos/combo.model';
 import { ContactosApi } from '../../contacts/contactos-api';
 import { ContactType, type Contacto } from '../../contacts/contacto.model';
 import { ServiceType, type Servicio } from '../../services/servicio.model';
+import { Auth, UserRole } from '../../../core/auth/auth';
 
 describe('VentaCombosList', () => {
+  const owner = { id: 'admin-0', name: 'Admin', email: 'admin@nocturne.dev' };
   const servicio: Servicio = {
     id: 'srv-1',
     nombre: 'Netflix',
@@ -22,6 +24,7 @@ describe('VentaCombosList', () => {
     pantallasMax: 4,
     precioBase: 10,
     activo: true,
+    owner,
     createdAt: '',
     updatedAt: '',
   };
@@ -32,6 +35,7 @@ describe('VentaCombosList', () => {
     servicios: [servicio],
     precioCombo: 20,
     activo: true,
+    owner,
     createdAt: '',
     updatedAt: '',
   };
@@ -41,6 +45,7 @@ describe('VentaCombosList', () => {
     whatsapp: '+51999999999',
     tipo: ContactType.CLIENTE_FINAL,
     activo: true,
+    owner,
     createdAt: '',
     updatedAt: '',
   };
@@ -59,6 +64,7 @@ describe('VentaCombosList', () => {
     metodoPago: 'Yape',
     renovacionAutomatica: false,
     activo: true,
+    owner,
     createdAt: '',
     updatedAt: '',
   };
@@ -76,8 +82,10 @@ describe('VentaCombosList', () => {
   let contactosApi: { list: ReturnType<typeof vi.fn> };
   let dialog: { open: ReturnType<typeof vi.fn> };
   let router: Router;
+  let auth: { currentUser: ReturnType<typeof vi.fn> };
 
-  beforeEach(async () => {
+  async function setup(role: UserRole = UserRole.ADMIN) {
+    TestBed.resetTestingModule();
     api = {
       list: vi.fn().mockResolvedValue([ventaCombo]),
       deactivate: vi.fn().mockResolvedValue({ ...ventaCombo, activo: false }),
@@ -87,6 +95,7 @@ describe('VentaCombosList', () => {
     combosApi = { list: vi.fn().mockResolvedValue([combo]) };
     contactosApi = { list: vi.fn().mockResolvedValue([cliente]) };
     dialog = { open: vi.fn() };
+    auth = { currentUser: vi.fn().mockReturnValue({ id: 'admin-0', role }) };
 
     await TestBed.configureTestingModule({
       imports: [VentaCombosList],
@@ -95,6 +104,7 @@ describe('VentaCombosList', () => {
         { provide: VentaCombosApi, useValue: api },
         { provide: CombosApi, useValue: combosApi },
         { provide: ContactosApi, useValue: contactosApi },
+        { provide: Auth, useValue: auth },
         { provide: MatDialog, useValue: dialog },
         { provide: MatSnackBar, useValue: { open: vi.fn() } },
       ],
@@ -103,6 +113,10 @@ describe('VentaCombosList', () => {
     fixture = TestBed.createComponent(VentaCombosList);
     component = fixture.componentInstance;
     router = TestBed.inject(Router);
+  }
+
+  beforeEach(async () => {
+    await setup();
   });
 
   it('carga ventas de combo, combos y clientes al iniciar', async () => {
@@ -177,5 +191,21 @@ describe('VentaCombosList', () => {
     await Promise.resolve();
 
     expect(api.reactivate).toHaveBeenCalledWith('vc-2');
+  });
+
+  it('muestra la columna Dueño para un ADMIN', async () => {
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.mat-column-dueno')).not.toBeNull();
+    expect(fixture.nativeElement.textContent).toContain('Admin');
+  });
+
+  it('no muestra la columna Dueño para un REVENDEDOR', async () => {
+    await setup(UserRole.REVENDEDOR);
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.mat-column-dueno')).toBeNull();
   });
 });

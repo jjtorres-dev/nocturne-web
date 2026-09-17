@@ -36,4 +36,8 @@ export interface TimelinePoint {
 export interface AccountingRangeFilters {
   desde?: string;
   hasta?: string;
+  // Solo tiene efecto para ADMIN (ver AccountingService.resolveOwnerId en
+  // nocturne-api): 'all' quita el filtro de dueño, un id de usuario filtra
+  // por ese dueño en vez del propio admin, y ausente = "mi negocio".
+  viewOwnerId?: string;
 }

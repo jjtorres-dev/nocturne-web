@@ -13,6 +13,7 @@ import { type CuentaListItem } from '../../accounts/cuenta.model';
 import { PerfilesApi } from '../../accounts/profiles/perfiles-api';
 
 describe('VencimientosList', () => {
+  const owner = { id: 'admin-0', name: 'Admin', email: 'admin@nocturne.dev' };
   const servicio: Servicio = {
     id: 'srv-1',
     nombre: 'Netflix',
@@ -21,6 +22,7 @@ describe('VencimientosList', () => {
     pantallasMax: null,
     precioBase: 10,
     activo: true,
+    owner,
     createdAt: '',
     updatedAt: '',
   };
@@ -30,6 +32,7 @@ describe('VencimientosList', () => {
     whatsapp: '+51 999-999-999',
     tipo: ContactType.CLIENTE_FINAL,
     activo: true,
+    owner,
     createdAt: '',
     updatedAt: '',
   };
@@ -47,6 +50,7 @@ describe('VencimientosList', () => {
     renovacionAutomatica: false,
     activo: true,
     perfilesCount: 0,
+    owner,
     createdAt: '',
     updatedAt: '',
   };
@@ -68,6 +72,7 @@ describe('VencimientosList', () => {
     renovacionAutomatica: false,
     activo: true,
     ventaComboId: null,
+    owner,
     createdAt: '',
     updatedAt: '',
   };

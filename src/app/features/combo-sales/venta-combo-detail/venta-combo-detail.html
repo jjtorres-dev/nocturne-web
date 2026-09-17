@@ -34,6 +34,12 @@
   </div>
 
   <section class="details-card">
+    @if (isAdmin()) {
+      <div class="detail-row">
+        <span class="detail-label">Dueño</span>
+        <span>{{ vc.owner.name }}</span>
+      </div>
+    }
     <div class="detail-row">
       <span class="detail-label">Cliente</span>
       <span>{{ cliente()?.nombre ?? '—' }}</span>

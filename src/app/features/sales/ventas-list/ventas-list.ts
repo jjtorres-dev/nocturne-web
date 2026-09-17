@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
@@ -27,6 +27,7 @@ import { VentaCreateDialog } from '../venta-create-dialog/venta-create-dialog';
 import { VentaEditDialog } from '../venta-edit-dialog/venta-edit-dialog';
 import { ConfirmDialog } from '../../../shared/confirm-dialog/confirm-dialog';
 import { SolesPipe } from '../../../shared/soles.pipe';
+import { Auth, UserRole } from '../../../core/auth/auth';
 
 type ActivoFilter = 'todos' | 'activos' | 'inactivos';
 
@@ -57,21 +58,40 @@ export class VentasList implements OnInit {
   private readonly cuentasApi = inject(CuentasApi);
   private readonly perfilesApi = inject(PerfilesApi);
   private readonly ventaCombosApi = inject(VentaCombosApi);
+  private readonly auth = inject(Auth);
   private readonly dialog = inject(MatDialog);
   private readonly snackBar = inject(MatSnackBar);
 
   protected readonly Moneda = Moneda;
-  protected readonly displayedColumns = [
-    'codigoVenta',
-    'cliente',
-    'servicio',
-    'cuentaPerfil',
-    'fechaInicio',
-    'fechaFin',
-    'precio',
-    'activo',
-    'acciones',
-  ];
+  protected readonly isAdmin = computed(
+    () => this.auth.currentUser()?.role === UserRole.ADMIN,
+  );
+  protected readonly displayedColumns = computed(() =>
+    this.isAdmin()
+      ? [
+          'codigoVenta',
+          'cliente',
+          'servicio',
+          'cuentaPerfil',
+          'fechaInicio',
+          'fechaFin',
+          'precio',
+          'dueno',
+          'activo',
+          'acciones',
+        ]
+      : [
+          'codigoVenta',
+          'cliente',
+          'servicio',
+          'cuentaPerfil',
+          'fechaInicio',
+          'fechaFin',
+          'precio',
+          'activo',
+          'acciones',
+        ],
+  );
 
   readonly ventas = signal<Venta[]>([]);
   readonly servicios = signal<Servicio[]>([]);

@@ -6,6 +6,7 @@ import { GastosList } from './gastos-list';
 import { GastosApi } from '../gastos-api';
 import { Moneda } from '../../sales/venta.model';
 import type { Gasto } from '../expense.model';
+import { Auth, UserRole } from '../../../core/auth/auth';
 
 describe('GastosList', () => {
   const gasto: Gasto = {
@@ -18,6 +19,7 @@ describe('GastosList', () => {
     metodoPago: 'Yape',
     fecha: '2026-01-05',
     activo: true,
+    owner: { id: 'admin-0', name: 'Admin', email: 'admin@nocturne.dev' },
     createdAt: '',
     updatedAt: '',
   };
@@ -31,19 +33,23 @@ describe('GastosList', () => {
     reactivate: ReturnType<typeof vi.fn>;
   };
   let dialog: { open: ReturnType<typeof vi.fn> };
+  let auth: { currentUser: ReturnType<typeof vi.fn> };
 
-  beforeEach(async () => {
+  async function setup(role: UserRole = UserRole.ADMIN) {
+    TestBed.resetTestingModule();
     api = {
       list: vi.fn().mockResolvedValue([gasto]),
       deactivate: vi.fn().mockResolvedValue({ ...gasto, activo: false }),
       reactivate: vi.fn().mockResolvedValue({ ...gastoInactivo, activo: true }),
     };
     dialog = { open: vi.fn() };
+    auth = { currentUser: vi.fn().mockReturnValue({ id: 'admin-0', role }) };
 
     await TestBed.configureTestingModule({
       imports: [GastosList],
       providers: [
         { provide: GastosApi, useValue: api },
+        { provide: Auth, useValue: auth },
         { provide: MatDialog, useValue: dialog },
         { provide: MatSnackBar, useValue: { open: vi.fn() } },
       ],
@@ -51,6 +57,10 @@ describe('GastosList', () => {
 
     fixture = TestBed.createComponent(GastosList);
     component = fixture.componentInstance;
+  }
+
+  beforeEach(async () => {
+    await setup();
   });
 
   it('carga los gastos activos al iniciar', async () => {
@@ -131,5 +141,21 @@ describe('GastosList', () => {
     ).map((el) => (el as HTMLElement).textContent?.trim());
 
     expect(iconNames).toEqual(['edit', 'block', 'edit', 'restart_alt']);
+  });
+
+  it('muestra la columna Dueño para un ADMIN', async () => {
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.mat-column-dueno')).not.toBeNull();
+    expect(fixture.nativeElement.textContent).toContain('Admin');
+  });
+
+  it('no muestra la columna Dueño para un REVENDEDOR', async () => {
+    await setup(UserRole.REVENDEDOR);
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.mat-column-dueno')).toBeNull();
   });
 });

@@ -77,6 +77,7 @@ describe('GastoFormDialog', () => {
       metodoPago: 'Yape',
       fecha: '2026-01-05',
       activo: true,
+      owner: { id: 'admin-0', name: 'Admin', email: 'admin@nocturne.dev' },
       createdAt: '',
       updatedAt: '',
     };
@@ -99,6 +100,7 @@ describe('GastoFormDialog', () => {
       metodoPago: 'Yape',
       fecha: '2026-01-05',
       activo: true,
+      owner: { id: 'admin-0', name: 'Admin', email: 'admin@nocturne.dev' },
       createdAt: '',
       updatedAt: '',
     };

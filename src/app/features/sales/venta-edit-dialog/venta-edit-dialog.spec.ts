@@ -23,6 +23,7 @@ describe('VentaEditDialog', () => {
     renovacionAutomatica: false,
     activo: true,
     ventaComboId: null,
+    owner: { id: 'admin-0', name: 'Admin', email: 'admin@nocturne.dev' },
     createdAt: '',
     updatedAt: '',
   };

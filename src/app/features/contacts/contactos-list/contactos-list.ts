@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatTableModule } from '@angular/material/table';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -18,6 +18,7 @@ import {
 } from '../contacto.model';
 import { ContactoFormDialog } from '../contacto-form-dialog/contacto-form-dialog';
 import { ConfirmDialog } from '../../../shared/confirm-dialog/confirm-dialog';
+import { Auth, UserRole } from '../../../core/auth/auth';
 
 type ActivoFilter = 'todos' | 'activos' | 'inactivos';
 
@@ -39,18 +40,20 @@ type ActivoFilter = 'todos' | 'activos' | 'inactivos';
 })
 export class ContactosList implements OnInit {
   private readonly api = inject(ContactosApi);
+  private readonly auth = inject(Auth);
   private readonly dialog = inject(MatDialog);
   private readonly snackBar = inject(MatSnackBar);
 
   protected readonly contactTypes = Object.values(ContactType);
   protected readonly typeLabels = CONTACT_TYPE_LABELS;
-  protected readonly displayedColumns = [
-    'nombre',
-    'whatsapp',
-    'tipo',
-    'activo',
-    'acciones',
-  ];
+  protected readonly isAdmin = computed(
+    () => this.auth.currentUser()?.role === UserRole.ADMIN,
+  );
+  protected readonly displayedColumns = computed(() =>
+    this.isAdmin()
+      ? ['nombre', 'whatsapp', 'tipo', 'dueno', 'activo', 'acciones']
+      : ['nombre', 'whatsapp', 'tipo', 'activo', 'acciones'],
+  );
 
   readonly contactos = signal<Contacto[]>([]);
   readonly loading = signal(false);

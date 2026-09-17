@@ -5,10 +5,12 @@ import {
   OnDestroy,
   OnInit,
   ViewChild,
+  computed,
   inject,
   signal,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatTableModule } from '@angular/material/table';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -28,6 +30,16 @@ import {
 } from './accounting.model';
 import { buildTimelineChartData } from './accounting-chart.util';
 import { SolesPipe } from '../../shared/soles.pipe';
+import { Auth, UserRole } from '../../core/auth/auth';
+import { UsuariosApi } from '../users/usuarios-api';
+import type { Usuario } from '../users/usuario.model';
+
+// Sentinel para "sin filtro de dueño" en el backend (ver
+// AccountingService.VIEW_ALL en nocturne-api) — nunca un id real.
+const VIEW_ALL = 'all';
+// Valor solo de UI: "sin viewOwnerId" (el admin ve lo mismo que vería
+// siendo revendedor). No se manda al backend.
+const VIEW_MINE = 'mine';
 
 Chart.register(...registerables);
 
@@ -49,6 +61,10 @@ Chart.register(...registerables);
 })
 export class Accounting implements OnInit, AfterViewInit, OnDestroy {
   private readonly api = inject(AccountingApi);
+  private readonly usuariosApi = inject(UsuariosApi);
+  private readonly auth = inject(Auth);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   private readonly snackBar = inject(MatSnackBar);
 
   @ViewChild('timelineCanvas')
@@ -75,17 +91,57 @@ export class Accounting implements OnInit, AfterViewInit, OnDestroy {
     'neto',
   ];
 
+  // Solo un ADMIN puede "ver como": un REVENDEDOR siempre ve lo suyo, sin
+  // selector (mismo criterio que la columna "Dueño" en el resto de listas).
+  protected readonly isAdmin = computed(
+    () => this.auth.currentUser()?.role === UserRole.ADMIN,
+  );
+  protected readonly VIEW_MINE = VIEW_MINE;
+  protected readonly VIEW_ALL = VIEW_ALL;
+
   readonly summary = signal<AccountingSummary | null>(null);
   readonly byService = signal<ServiceBreakdown[]>([]);
   readonly byPaymentMethod = signal<PaymentMethodBreakdown[]>([]);
   readonly timeline = signal<TimelinePoint[]>([]);
+  readonly usuarios = signal<Usuario[]>([]);
   readonly loading = signal(false);
 
   desde = '';
   hasta = '';
   groupBy: TimelineGroupBy = TimelineGroupBy.DAY;
+  // 'mine' | 'all' | <userId> — persiste en el query param `viewOwnerId`
+  // de la URL para sobrevivir un refresh de la página.
+  viewOwnerId = VIEW_MINE;
 
   ngOnInit(): void {
+    if (this.isAdmin()) {
+      this.viewOwnerId =
+        this.route.snapshot.queryParamMap.get('viewOwnerId') ?? VIEW_MINE;
+      void this.loadUsuarios();
+    }
+    void this.refresh();
+  }
+
+  private async loadUsuarios(): Promise<void> {
+    try {
+      this.usuarios.set(await this.usuariosApi.list());
+    } catch {
+      // Si falla, el selector solo pierde las opciones de usuario
+      // específico ("Mi negocio"/"Todo el negocio" siguen andando) — no
+      // bloquea el resto de la pantalla.
+    }
+  }
+
+  // Actualiza la URL (para que sobreviva un refresh) y refresca los 4
+  // reportes con el filtro nuevo.
+  onViewOwnerChange(): void {
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {
+        viewOwnerId: this.viewOwnerId === VIEW_MINE ? null : this.viewOwnerId,
+      },
+      queryParamsHandling: 'merge',
+    });
     void this.refresh();
   }
 
@@ -106,6 +162,10 @@ export class Accounting implements OnInit, AfterViewInit, OnDestroy {
       const filters = {
         desde: this.desde || undefined,
         hasta: this.hasta || undefined,
+        viewOwnerId:
+          this.isAdmin() && this.viewOwnerId !== VIEW_MINE
+            ? this.viewOwnerId
+            : undefined,
       };
       const [summary, byService, byPaymentMethod, timeline] =
         await Promise.all([

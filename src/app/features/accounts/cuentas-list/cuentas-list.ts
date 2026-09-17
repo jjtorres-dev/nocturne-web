@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -9,6 +9,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { CuentasApi } from '../cuentas-api';
@@ -18,6 +19,7 @@ import { type Servicio } from '../../services/servicio.model';
 import { ContactosApi } from '../../contacts/contactos-api';
 import { ContactType, type Contacto } from '../../contacts/contacto.model';
 import { CuentaFormDialog } from '../cuenta-form-dialog/cuenta-form-dialog';
+import { Auth, UserRole } from '../../../core/auth/auth';
 
 type ActivoFilter = 'todos' | 'activos' | 'inactivos';
 
@@ -32,6 +34,7 @@ type ActivoFilter = 'todos' | 'activos' | 'inactivos';
     MatIconModule,
     MatChipsModule,
     MatProgressSpinnerModule,
+    MatTooltipModule,
   ],
   selector: 'app-cuentas-list',
   styleUrl: './cuentas-list.scss',
@@ -41,19 +44,36 @@ export class CuentasList implements OnInit {
   private readonly api = inject(CuentasApi);
   private readonly serviciosApi = inject(ServiciosApi);
   private readonly contactosApi = inject(ContactosApi);
+  private readonly auth = inject(Auth);
   private readonly dialog = inject(MatDialog);
   private readonly snackBar = inject(MatSnackBar);
   private readonly router = inject(Router);
 
-  protected readonly displayedColumns = [
-    'servicio',
-    'correo',
-    'proveedor',
-    'fechaInicio',
-    'fechaFin',
-    'perfiles',
-    'activo',
-  ];
+  protected readonly isAdmin = computed(
+    () => this.auth.currentUser()?.role === UserRole.ADMIN,
+  );
+  protected readonly displayedColumns = computed(() =>
+    this.isAdmin()
+      ? [
+          'servicio',
+          'correo',
+          'proveedor',
+          'fechaInicio',
+          'fechaFin',
+          'perfiles',
+          'dueno',
+          'activo',
+        ]
+      : [
+          'servicio',
+          'correo',
+          'proveedor',
+          'fechaInicio',
+          'fechaFin',
+          'perfiles',
+          'activo',
+        ],
+  );
 
   readonly cuentas = signal<CuentaListItem[]>([]);
   readonly servicios = signal<Servicio[]>([]);

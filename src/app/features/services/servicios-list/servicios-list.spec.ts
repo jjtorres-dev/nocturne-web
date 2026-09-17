@@ -5,6 +5,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { ServiciosList } from './servicios-list';
 import { ServiciosApi } from '../servicios-api';
 import { ServiceType, type Servicio } from '../servicio.model';
+import { Auth, UserRole } from '../../../core/auth/auth';
 
 describe('ServiciosList', () => {
   const servicio: Servicio = {
@@ -15,6 +16,7 @@ describe('ServiciosList', () => {
     pantallasMax: 4,
     precioBase: 10,
     activo: true,
+    owner: { id: 'admin-0', name: 'Admin', email: 'admin@nocturne.dev' },
     createdAt: '',
     updatedAt: '',
   };
@@ -28,19 +30,23 @@ describe('ServiciosList', () => {
     reactivate: ReturnType<typeof vi.fn>;
   };
   let dialog: { open: ReturnType<typeof vi.fn> };
+  let auth: { currentUser: ReturnType<typeof vi.fn> };
 
-  beforeEach(async () => {
+  async function setup(role: UserRole = UserRole.ADMIN) {
+    TestBed.resetTestingModule();
     api = {
       list: vi.fn().mockResolvedValue([servicio]),
       deactivate: vi.fn().mockResolvedValue({ ...servicio, activo: false }),
       reactivate: vi.fn().mockResolvedValue({ ...servicioInactivo, activo: true }),
     };
     dialog = { open: vi.fn() };
+    auth = { currentUser: vi.fn().mockReturnValue({ id: 'admin-0', role }) };
 
     await TestBed.configureTestingModule({
       imports: [ServiciosList],
       providers: [
         { provide: ServiciosApi, useValue: api },
+        { provide: Auth, useValue: auth },
         { provide: MatDialog, useValue: dialog },
         {
           provide: MatSnackBar,
@@ -51,6 +57,10 @@ describe('ServiciosList', () => {
 
     fixture = TestBed.createComponent(ServiciosList);
     component = fixture.componentInstance;
+  }
+
+  beforeEach(async () => {
+    await setup();
   });
 
   it('carga los servicios al iniciar', async () => {
@@ -121,5 +131,21 @@ describe('ServiciosList', () => {
 
     // fila activa: editar + desactivar (block); fila inactiva: editar + reactivar (restart_alt)
     expect(iconNames).toEqual(['edit', 'block', 'edit', 'restart_alt']);
+  });
+
+  it('muestra la columna Dueño para un ADMIN', async () => {
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.mat-column-dueno')).not.toBeNull();
+    expect(fixture.nativeElement.textContent).toContain('Admin');
+  });
+
+  it('no muestra la columna Dueño para un REVENDEDOR', async () => {
+    await setup(UserRole.REVENDEDOR);
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.mat-column-dueno')).toBeNull();
   });
 });

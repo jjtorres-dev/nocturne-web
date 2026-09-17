@@ -9,8 +9,10 @@ import { ServiciosApi } from '../../services/servicios-api';
 import { ServiceType, type Servicio } from '../../services/servicio.model';
 import { ContactosApi } from '../../contacts/contactos-api';
 import { ContactType, type Contacto } from '../../contacts/contacto.model';
+import { Auth, UserRole } from '../../../core/auth/auth';
 
 describe('CuentasList', () => {
+  const owner = { id: 'admin-0', name: 'Admin', email: 'admin@nocturne.dev' };
   const servicio: Servicio = {
     id: 'srv-1',
     nombre: 'Netflix',
@@ -19,6 +21,7 @@ describe('CuentasList', () => {
     pantallasMax: 5,
     precioBase: 10,
     activo: true,
+    owner,
     createdAt: '',
     updatedAt: '',
   };
@@ -28,6 +31,7 @@ describe('CuentasList', () => {
     whatsapp: '+51999999999',
     tipo: ContactType.PROVEEDOR,
     activo: true,
+    owner,
     createdAt: '',
     updatedAt: '',
   };
@@ -45,6 +49,7 @@ describe('CuentasList', () => {
     renovacionAutomatica: false,
     activo: true,
     perfilesCount: 2,
+    owner,
     createdAt: '',
     updatedAt: '',
   };
@@ -55,12 +60,15 @@ describe('CuentasList', () => {
   let serviciosApi: { list: ReturnType<typeof vi.fn> };
   let contactosApi: { list: ReturnType<typeof vi.fn> };
   let router: { navigate: ReturnType<typeof vi.fn> };
+  let auth: { currentUser: ReturnType<typeof vi.fn> };
 
-  beforeEach(async () => {
+  async function setup(role: UserRole = UserRole.ADMIN) {
+    TestBed.resetTestingModule();
     api = { list: vi.fn().mockResolvedValue([cuenta]) };
     serviciosApi = { list: vi.fn().mockResolvedValue([servicio]) };
     contactosApi = { list: vi.fn().mockResolvedValue([proveedor]) };
     router = { navigate: vi.fn() };
+    auth = { currentUser: vi.fn().mockReturnValue({ id: 'admin-0', role }) };
 
     await TestBed.configureTestingModule({
       imports: [CuentasList],
@@ -68,6 +76,7 @@ describe('CuentasList', () => {
         { provide: CuentasApi, useValue: api },
         { provide: ServiciosApi, useValue: serviciosApi },
         { provide: ContactosApi, useValue: contactosApi },
+        { provide: Auth, useValue: auth },
         { provide: MatDialog, useValue: { open: vi.fn() } },
         { provide: MatSnackBar, useValue: { open: vi.fn() } },
         { provide: Router, useValue: router },
@@ -76,6 +85,10 @@ describe('CuentasList', () => {
 
     fixture = TestBed.createComponent(CuentasList);
     component = fixture.componentInstance;
+  }
+
+  beforeEach(async () => {
+    await setup();
   });
 
   it('carga cuentas, servicios y proveedores al iniciar', async () => {
@@ -121,5 +134,21 @@ describe('CuentasList', () => {
     row.click();
 
     expect(router.navigate).toHaveBeenCalledWith(['/accounts', 'cta-1']);
+  });
+
+  it('muestra la columna Dueño para un ADMIN', async () => {
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.mat-column-dueno')).not.toBeNull();
+    expect(fixture.nativeElement.textContent).toContain('Admin');
+  });
+
+  it('no muestra la columna Dueño para un REVENDEDOR', async () => {
+    await setup(UserRole.REVENDEDOR);
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.mat-column-dueno')).toBeNull();
   });
 });

@@ -1,3 +1,5 @@
+import type { Owner } from '../../shared/owner.model';
+
 export interface Cuenta {
   id: string;
   servicioId: string;
@@ -13,6 +15,7 @@ export interface Cuenta {
   url: string | null;
   renovacionAutomatica: boolean;
   activo: boolean;
+  owner: Owner;
   createdAt: string;
   updatedAt: string;
 }
@@ -34,6 +37,7 @@ export interface CuentaListItem {
   renovacionAutomatica: boolean;
   activo: boolean;
   perfilesCount: number;
+  owner: Owner;
   createdAt: string;
   updatedAt: string;
 }

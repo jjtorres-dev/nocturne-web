@@ -1,4 +1,5 @@
 import { Moneda } from '../sales/venta.model';
+import type { Owner } from '../../shared/owner.model';
 
 export interface Gasto {
   id: string;
@@ -10,6 +11,7 @@ export interface Gasto {
   metodoPago: string;
   fecha: string;
   activo: boolean;
+  owner: Owner;
   createdAt: string;
   updatedAt: string;
 }

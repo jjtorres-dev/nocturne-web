@@ -1,3 +1,5 @@
+import type { Owner } from '../../shared/owner.model';
+
 export enum ServiceType {
   CON_PERFILES = 'CON_PERFILES',
   SIN_PERFILES = 'SIN_PERFILES',
@@ -20,6 +22,7 @@ export interface Servicio {
   pantallasMax: number | null;
   precioBase: number;
   activo: boolean;
+  owner: Owner;
   createdAt: string;
   updatedAt: string;
 }

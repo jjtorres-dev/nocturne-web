@@ -23,6 +23,9 @@ function rangeParams(filters: AccountingRangeFilters): HttpParams {
   if (filters.hasta) {
     params = params.set('hasta', filters.hasta);
   }
+  if (filters.viewOwnerId) {
+    params = params.set('viewOwnerId', filters.viewOwnerId);
+  }
   return params;
 }
 

@@ -8,6 +8,7 @@ import { ContactosApi } from '../../contacts/contactos-api';
 import { ContactType, type Contacto } from '../../contacts/contacto.model';
 
 describe('CuentaFormDialog', () => {
+  const owner = { id: 'admin-0', name: 'Admin', email: 'admin@nocturne.dev' };
   const servicio: Servicio = {
     id: 'srv-1',
     nombre: 'Netflix',
@@ -16,6 +17,7 @@ describe('CuentaFormDialog', () => {
     pantallasMax: 5,
     precioBase: 10,
     activo: true,
+    owner,
     createdAt: '',
     updatedAt: '',
   };
@@ -25,6 +27,7 @@ describe('CuentaFormDialog', () => {
     whatsapp: '+51999999999',
     tipo: ContactType.PROVEEDOR,
     activo: true,
+    owner,
     createdAt: '',
     updatedAt: '',
   };

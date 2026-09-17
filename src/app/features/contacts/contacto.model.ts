@@ -1,3 +1,5 @@
+import type { Owner } from '../../shared/owner.model';
+
 export enum ContactType {
   CLIENTE_FINAL = 'CLIENTE_FINAL',
   PROVEEDOR = 'PROVEEDOR',
@@ -16,6 +18,7 @@ export interface Contacto {
   whatsapp: string;
   tipo: ContactType;
   activo: boolean;
+  owner: Owner;
   createdAt: string;
   updatedAt: string;
 }

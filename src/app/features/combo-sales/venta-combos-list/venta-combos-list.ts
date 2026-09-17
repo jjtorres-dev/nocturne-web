@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -21,6 +21,7 @@ import { ContactosApi } from '../../contacts/contactos-api';
 import { type Contacto } from '../../contacts/contacto.model';
 import { ConfirmDialog } from '../../../shared/confirm-dialog/confirm-dialog';
 import { SolesPipe } from '../../../shared/soles.pipe';
+import { Auth, UserRole } from '../../../core/auth/auth';
 
 type ActivoFilter = 'todos' | 'activos' | 'inactivos';
 
@@ -48,21 +49,39 @@ export class VentaCombosList implements OnInit {
   private readonly api = inject(VentaCombosApi);
   private readonly combosApi = inject(CombosApi);
   private readonly contactosApi = inject(ContactosApi);
+  private readonly auth = inject(Auth);
   private readonly dialog = inject(MatDialog);
   private readonly snackBar = inject(MatSnackBar);
   private readonly router = inject(Router);
 
   protected readonly Moneda = Moneda;
-  protected readonly displayedColumns = [
-    'codigoVenta',
-    'cliente',
-    'combo',
-    'fechaInicio',
-    'fechaFin',
-    'precio',
-    'activo',
-    'acciones',
-  ];
+  protected readonly isAdmin = computed(
+    () => this.auth.currentUser()?.role === UserRole.ADMIN,
+  );
+  protected readonly displayedColumns = computed(() =>
+    this.isAdmin()
+      ? [
+          'codigoVenta',
+          'cliente',
+          'combo',
+          'fechaInicio',
+          'fechaFin',
+          'precio',
+          'dueno',
+          'activo',
+          'acciones',
+        ]
+      : [
+          'codigoVenta',
+          'cliente',
+          'combo',
+          'fechaInicio',
+          'fechaFin',
+          'precio',
+          'activo',
+          'acciones',
+        ],
+  );
 
   readonly ventasCombo = signal<VentaCombo[]>([]);
   readonly combos = signal<Combo[]>([]);

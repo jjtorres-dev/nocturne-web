@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatTableModule } from '@angular/material/table';
@@ -17,6 +17,7 @@ import { Moneda } from '../../sales/venta.model';
 import { GastoFormDialog } from '../gasto-form-dialog/gasto-form-dialog';
 import { ConfirmDialog } from '../../../shared/confirm-dialog/confirm-dialog';
 import { SolesPipe } from '../../../shared/soles.pipe';
+import { Auth, UserRole } from '../../../core/auth/auth';
 
 type ActivoFilter = 'todos' | 'activos' | 'inactivos';
 
@@ -41,18 +42,19 @@ type ActivoFilter = 'todos' | 'activos' | 'inactivos';
 })
 export class GastosList implements OnInit {
   private readonly api = inject(GastosApi);
+  private readonly auth = inject(Auth);
   private readonly dialog = inject(MatDialog);
   private readonly snackBar = inject(MatSnackBar);
 
   protected readonly Moneda = Moneda;
-  protected readonly displayedColumns = [
-    'descripcion',
-    'monto',
-    'metodoPago',
-    'fecha',
-    'activo',
-    'acciones',
-  ];
+  protected readonly isAdmin = computed(
+    () => this.auth.currentUser()?.role === UserRole.ADMIN,
+  );
+  protected readonly displayedColumns = computed(() =>
+    this.isAdmin()
+      ? ['descripcion', 'monto', 'metodoPago', 'fecha', 'dueno', 'activo', 'acciones']
+      : ['descripcion', 'monto', 'metodoPago', 'fecha', 'activo', 'acciones'],
+  );
 
   readonly gastos = signal<Gasto[]>([]);
   readonly loading = signal(false);

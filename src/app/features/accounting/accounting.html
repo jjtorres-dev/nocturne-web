@@ -3,6 +3,19 @@
 </div>
 
 <div class="filters">
+  @if (isAdmin()) {
+    <mat-form-field appearance="outline">
+      <mat-label>Viendo</mat-label>
+      <mat-select [(ngModel)]="viewOwnerId" (selectionChange)="onViewOwnerChange()">
+        <mat-option [value]="VIEW_MINE">Mi negocio</mat-option>
+        <mat-option [value]="VIEW_ALL">Todo el negocio</mat-option>
+        @for (u of usuarios(); track u.id) {
+          <mat-option [value]="u.id">{{ u.name }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+  }
+
   <mat-form-field appearance="outline">
     <mat-label>Desde</mat-label>
     <input matInput type="date" [(ngModel)]="desde" />

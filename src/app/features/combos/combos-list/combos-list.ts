@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatTableModule } from '@angular/material/table';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -15,6 +15,7 @@ import { type Combo } from '../combo.model';
 import { ComboFormDialog } from '../combo-form-dialog/combo-form-dialog';
 import { ConfirmDialog } from '../../../shared/confirm-dialog/confirm-dialog';
 import { SolesPipe } from '../../../shared/soles.pipe';
+import { Auth, UserRole } from '../../../core/auth/auth';
 
 type ActivoFilter = 'todos' | 'activos' | 'inactivos';
 
@@ -37,17 +38,18 @@ type ActivoFilter = 'todos' | 'activos' | 'inactivos';
 })
 export class CombosList implements OnInit {
   private readonly api = inject(CombosApi);
+  private readonly auth = inject(Auth);
   private readonly dialog = inject(MatDialog);
   private readonly snackBar = inject(MatSnackBar);
 
-  protected readonly displayedColumns = [
-    'nombre',
-    'descripcion',
-    'servicios',
-    'precioCombo',
-    'activo',
-    'acciones',
-  ];
+  protected readonly isAdmin = computed(
+    () => this.auth.currentUser()?.role === UserRole.ADMIN,
+  );
+  protected readonly displayedColumns = computed(() =>
+    this.isAdmin()
+      ? ['nombre', 'descripcion', 'servicios', 'precioCombo', 'dueno', 'activo', 'acciones']
+      : ['nombre', 'descripcion', 'servicios', 'precioCombo', 'activo', 'acciones'],
+  );
 
   readonly combos = signal<Combo[]>([]);
   readonly loading = signal(false);

@@ -1,4 +1,5 @@
 import type { Servicio } from '../services/servicio.model';
+import type { Owner } from '../../shared/owner.model';
 
 export interface Combo {
   id: string;
@@ -7,6 +8,7 @@ export interface Combo {
   servicios: Servicio[];
   precioCombo: number;
   activo: boolean;
+  owner: Owner;
   createdAt: string;
   updatedAt: string;
 }

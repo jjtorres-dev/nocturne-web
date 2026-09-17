@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
@@ -19,6 +19,7 @@ import { type Contacto } from '../../contacts/contacto.model';
 import { VentaComboEditDialog } from '../venta-combo-edit-dialog/venta-combo-edit-dialog';
 import { ConfirmDialog } from '../../../shared/confirm-dialog/confirm-dialog';
 import { SolesPipe } from '../../../shared/soles.pipe';
+import { Auth, UserRole } from '../../../core/auth/auth';
 
 @Component({
   imports: [
@@ -42,10 +43,14 @@ export class VentaComboDetail implements OnInit {
   private readonly api = inject(VentaCombosApi);
   private readonly combosApi = inject(CombosApi);
   private readonly contactosApi = inject(ContactosApi);
+  private readonly auth = inject(Auth);
   private readonly dialog = inject(MatDialog);
   private readonly snackBar = inject(MatSnackBar);
 
   protected readonly Moneda = Moneda;
+  protected readonly isAdmin = computed(
+    () => this.auth.currentUser()?.role === UserRole.ADMIN,
+  );
   protected readonly displayedSaleColumns = [
     'servicio',
     'cuentaPerfil',

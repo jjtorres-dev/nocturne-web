@@ -1,3 +1,5 @@
+import type { Owner } from '../../shared/owner.model';
+
 export enum Moneda {
   PEN = 'PEN',
   USD = 'USD',
@@ -34,6 +36,7 @@ export interface Venta {
   // /api/combo-sales): en ese caso se gestiona desde Ventas de Combo, no
   // desde esta pantalla (ver VentasList.esDeCombo).
   ventaComboId: string | null;
+  owner: Owner;
   createdAt: string;
   updatedAt: string;
 }

@@ -30,6 +30,12 @@
   </div>
 
   <section class="details-card">
+    @if (isAdmin()) {
+      <div class="detail-row">
+        <span class="detail-label">Dueño</span>
+        <span>{{ c.owner.name }}</span>
+      </div>
+    }
     <div class="detail-row">
       <span class="detail-label">Servicio</span>
       <span>{{ servicio()?.nombre ?? '—' }}</span>

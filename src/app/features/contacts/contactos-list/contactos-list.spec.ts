@@ -5,6 +5,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { ContactosList } from './contactos-list';
 import { ContactosApi } from '../contactos-api';
 import { ContactType, type Contacto } from '../contacto.model';
+import { Auth, UserRole } from '../../../core/auth/auth';
 
 describe('ContactosList', () => {
   const contacto: Contacto = {
@@ -13,6 +14,7 @@ describe('ContactosList', () => {
     whatsapp: '+51999999999',
     tipo: ContactType.CLIENTE_FINAL,
     activo: true,
+    owner: { id: 'admin-0', name: 'Admin', email: 'admin@nocturne.dev' },
     createdAt: '',
     updatedAt: '',
   };
@@ -26,19 +28,23 @@ describe('ContactosList', () => {
     reactivate: ReturnType<typeof vi.fn>;
   };
   let dialog: { open: ReturnType<typeof vi.fn> };
+  let auth: { currentUser: ReturnType<typeof vi.fn> };
 
-  beforeEach(async () => {
+  async function setup(role: UserRole = UserRole.ADMIN) {
+    TestBed.resetTestingModule();
     api = {
       list: vi.fn().mockResolvedValue([contacto]),
       deactivate: vi.fn().mockResolvedValue({ ...contacto, activo: false }),
       reactivate: vi.fn().mockResolvedValue({ ...contactoInactivo, activo: true }),
     };
     dialog = { open: vi.fn() };
+    auth = { currentUser: vi.fn().mockReturnValue({ id: 'admin-0', role }) };
 
     await TestBed.configureTestingModule({
       imports: [ContactosList],
       providers: [
         { provide: ContactosApi, useValue: api },
+        { provide: Auth, useValue: auth },
         { provide: MatDialog, useValue: dialog },
         {
           provide: MatSnackBar,
@@ -49,6 +55,10 @@ describe('ContactosList', () => {
 
     fixture = TestBed.createComponent(ContactosList);
     component = fixture.componentInstance;
+  }
+
+  beforeEach(async () => {
+    await setup();
   });
 
   it('carga los contactos al iniciar', async () => {
@@ -101,5 +111,21 @@ describe('ContactosList', () => {
     ).map((el) => (el as HTMLElement).textContent?.trim());
 
     expect(iconNames).toEqual(['edit', 'block', 'edit', 'restart_alt']);
+  });
+
+  it('muestra la columna Dueño para un ADMIN', async () => {
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.mat-column-dueno')).not.toBeNull();
+    expect(fixture.nativeElement.textContent).toContain('Admin');
+  });
+
+  it('no muestra la columna Dueño para un REVENDEDOR', async () => {
+    await setup(UserRole.REVENDEDOR);
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.mat-column-dueno')).toBeNull();
   });
 });

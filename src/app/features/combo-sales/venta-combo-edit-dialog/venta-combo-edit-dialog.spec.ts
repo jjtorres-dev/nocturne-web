@@ -21,6 +21,7 @@ describe('VentaComboEditDialog', () => {
     metodoPago: 'Yape',
     renovacionAutomatica: false,
     activo: true,
+    owner: { id: 'admin-0', name: 'Admin', email: 'admin@nocturne.dev' },
     createdAt: '',
     updatedAt: '',
   };
