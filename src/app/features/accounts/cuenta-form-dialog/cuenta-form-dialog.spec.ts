@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { CuentaFormDialog } from './cuenta-form-dialog';
 import { CuentasApi } from '../cuentas-api';
 import { ServiciosApi } from '../../services/servicios-api';
@@ -241,5 +242,33 @@ describe('CuentaFormDialog', () => {
       'cta-1',
       expect.objectContaining({ claveServicio: undefined }),
     );
+  });
+
+  it('si falla el guardado, muestra el error en el formulario y en un snackbar', async () => {
+    await setup();
+    await fixture.whenStable();
+    const openSpy = vi
+      .spyOn(fixture.debugElement.injector.get(MatSnackBar), 'open')
+      .mockImplementation(() => ({}) as never);
+    api.create.mockRejectedValue(new Error('boom'));
+    component.form.patchValue({
+      servicioId: 'srv-1',
+      correo: 'a@b.com',
+      claveServicio: 'secreta',
+      fechaInicio: '2026-01-01',
+      fechaFin: '2026-02-01',
+      costo: 10,
+      metodoPago: 'Yape',
+    });
+
+    await component.submit();
+
+    expect(component.errorMessage()).toBe('No se pudo guardar la cuenta. Intenta de nuevo.');
+    expect(openSpy).toHaveBeenCalledWith(
+      'No se pudo guardar la cuenta. Intenta de nuevo.',
+      'Cerrar',
+      expect.anything(),
+    );
+    expect(dialogRef.close).not.toHaveBeenCalled();
   });
 });

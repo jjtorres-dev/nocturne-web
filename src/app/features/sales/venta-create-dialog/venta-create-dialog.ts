@@ -30,6 +30,7 @@ import { PerfilesApi } from '../../accounts/profiles/perfiles-api';
 import { type Perfil } from '../../accounts/profiles/perfil.model';
 import { ClienteQuickCreateDialog } from '../../../shared/cliente-quick-create-dialog/cliente-quick-create-dialog';
 import { sumarMeses } from '../../../shared/fecha.util';
+import { injectFormError } from '../../../shared/form-error';
 
 // Sentinel para la opción "+ Nuevo cliente" del selector — nunca un id real.
 const NUEVO_CLIENTE = '__nuevo_cliente__';
@@ -78,7 +79,8 @@ export class VentaCreateDialog implements OnInit {
 
   readonly saving = signal(false);
   readonly loadingOptions = signal(true);
-  readonly errorMessage = signal<string | null>(null);
+  private readonly formError = injectFormError();
+  readonly errorMessage = this.formError.message;
 
   readonly servicios = signal<Servicio[]>([]);
   readonly clientes = signal<Contacto[]>([]);
@@ -229,19 +231,19 @@ export class VentaCreateDialog implements OnInit {
     if (this.form.invalid || this.saving()) {
       return;
     }
-    this.errorMessage.set(null);
+    this.formError.clear();
 
     const raw = this.form.getRawValue();
 
     if (this.requierePerfil()) {
       if (!raw.perfilId) {
-        this.errorMessage.set('Selecciona un perfil para esta cuenta.');
+        this.formError.show('Selecciona un perfil para esta cuenta.');
         return;
       }
     } else {
       const cuenta = this.cuentas().find((c) => c.id === raw.cuentaId);
       if (cuenta?.clienteId) {
-        this.errorMessage.set('Esta cuenta ya tiene un cliente asignado.');
+        this.formError.show('Esta cuenta ya tiene un cliente asignado.');
         return;
       }
     }
@@ -266,12 +268,12 @@ export class VentaCreateDialog implements OnInit {
     } catch (error) {
       if (error instanceof HttpErrorResponse && error.status === 409) {
         // Carrera: alguien más vendió el perfil/cuenta justo antes.
-        this.errorMessage.set(
+        this.formError.show(
           (error.error?.message as string | undefined) ??
             'El perfil o la cuenta ya no están disponibles.',
         );
       } else {
-        this.errorMessage.set('No se pudo crear la venta. Intenta de nuevo.');
+        this.formError.show('No se pudo crear la venta. Intenta de nuevo.');
       }
     } finally {
       this.saving.set(false);

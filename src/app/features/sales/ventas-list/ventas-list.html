@@ -6,36 +6,55 @@
   </button>
 </div>
 
-<div class="filters">
-  <mat-form-field appearance="outline">
-    <mat-label>Cliente</mat-label>
-    <mat-select [(ngModel)]="clienteFilter" (selectionChange)="refresh()">
-      <mat-option value="todos">Todos</mat-option>
-      @for (c of clientes(); track c.id) {
-        <mat-option [value]="c.id">{{ c.nombre }}</mat-option>
-      }
-    </mat-select>
-  </mat-form-field>
+@if (isMobile()) {
+  <button
+    mat-stroked-button
+    class="filters-toggle"
+    aria-controls="ventas-filters"
+    [attr.aria-expanded]="filtersOpen()"
+    (click)="toggleFilters()"
+  >
+    <mat-icon>filter_list</mat-icon>
+    Filtros
+    @if (filtrosActivos() > 0) {
+      <span class="filters-count">({{ filtrosActivos() }})</span>
+    }
+    <mat-icon iconPositionEnd>{{ filtersOpen() ? 'expand_less' : 'expand_more' }}</mat-icon>
+  </button>
+}
 
-  <mat-form-field appearance="outline">
-    <mat-label>Servicio</mat-label>
-    <mat-select [(ngModel)]="servicioFilter" (selectionChange)="refresh()">
-      <mat-option value="todos">Todos</mat-option>
-      @for (s of servicios(); track s.id) {
-        <mat-option [value]="s.id">{{ s.nombre }}</mat-option>
-      }
-    </mat-select>
-  </mat-form-field>
+@if (!isMobile() || filtersOpen()) {
+  <div class="filters" id="ventas-filters">
+    <mat-form-field appearance="outline">
+      <mat-label>Cliente</mat-label>
+      <mat-select [(ngModel)]="clienteFilter" (selectionChange)="refresh()">
+        <mat-option value="todos">Todos</mat-option>
+        @for (c of clientes(); track c.id) {
+          <mat-option [value]="c.id">{{ c.nombre }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
 
-  <mat-form-field appearance="outline">
-    <mat-label>Estado</mat-label>
-    <mat-select [(ngModel)]="activoFilter" (selectionChange)="refresh()">
-      <mat-option value="todos">Todos</mat-option>
-      <mat-option value="activos">Activos</mat-option>
-      <mat-option value="inactivos">Inactivos</mat-option>
-    </mat-select>
-  </mat-form-field>
-</div>
+    <mat-form-field appearance="outline">
+      <mat-label>Servicio</mat-label>
+      <mat-select [(ngModel)]="servicioFilter" (selectionChange)="refresh()">
+        <mat-option value="todos">Todos</mat-option>
+        @for (s of servicios(); track s.id) {
+          <mat-option [value]="s.id">{{ s.nombre }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Estado</mat-label>
+      <mat-select [(ngModel)]="activoFilter" (selectionChange)="refresh()">
+        <mat-option value="todos">Todos</mat-option>
+        <mat-option value="activos">Activos</mat-option>
+        <mat-option value="inactivos">Inactivos</mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+}
 
 @if (loading()) {
   <div class="loading">

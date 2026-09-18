@@ -7,6 +7,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ContactosApi } from '../../features/contacts/contactos-api';
 import { ContactType, type Contacto } from '../../features/contacts/contacto.model';
+import { injectFormError } from '../form-error';
 
 // Modal chico para crear un cliente sin salir del formulario de venta que
 // lo abrió (Ventas / Ventas Combo): solo nombre y WhatsApp, tipo fijo en
@@ -33,7 +34,8 @@ export class ClienteQuickCreateDialog {
   );
 
   readonly saving = signal(false);
-  readonly errorMessage = signal<string | null>(null);
+  private readonly formError = injectFormError();
+  readonly errorMessage = this.formError.message;
 
   readonly form = this.fb.nonNullable.group({
     nombre: ['', [Validators.required, Validators.minLength(1)]],
@@ -46,7 +48,7 @@ export class ClienteQuickCreateDialog {
     }
 
     this.saving.set(true);
-    this.errorMessage.set(null);
+    this.formError.clear();
 
     try {
       const result = await this.api.create({
@@ -55,7 +57,7 @@ export class ClienteQuickCreateDialog {
       });
       this.dialogRef.close(result);
     } catch {
-      this.errorMessage.set('No se pudo crear el cliente. Intenta de nuevo.');
+      this.formError.show('No se pudo crear el cliente. Intenta de nuevo.');
     } finally {
       this.saving.set(false);
     }

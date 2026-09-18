@@ -49,7 +49,7 @@
     <mat-checkbox formControlName="renovacionAutomatica">Renovación automática</mat-checkbox>
 
     @if (errorMessage()) {
-      <p class="error-message">{{ errorMessage() }}</p>
+      <p class="error-message" role="alert">{{ errorMessage() }}</p>
     }
   </mat-dialog-content>
 

@@ -29,6 +29,7 @@ import { type CuentaListItem } from '../../accounts/cuenta.model';
 import { PerfilesApi } from '../../accounts/profiles/perfiles-api';
 import { type Perfil } from '../../accounts/profiles/perfil.model';
 import { ClienteQuickCreateDialog } from '../../../shared/cliente-quick-create-dialog/cliente-quick-create-dialog';
+import { injectFormError } from '../../../shared/form-error';
 
 // Sentinel para la opción "+ Nuevo cliente" del selector — nunca un id real.
 const NUEVO_CLIENTE = '__nuevo_cliente__';
@@ -88,7 +89,8 @@ export class VentaComboCreate implements OnInit {
 
   readonly saving = signal(false);
   readonly loadingOptions = signal(true);
-  readonly errorMessage = signal<string | null>(null);
+  private readonly formError = injectFormError();
+  readonly errorMessage = this.formError.message;
 
   readonly combos = signal<Combo[]>([]);
   readonly clientes = signal<Contacto[]>([]);
@@ -236,11 +238,11 @@ export class VentaComboCreate implements OnInit {
 
     const validationError = this.validateAsignaciones();
     if (validationError) {
-      this.errorMessage.set(validationError);
+      this.formError.show(validationError);
       return;
     }
 
-    this.errorMessage.set(null);
+    this.formError.clear();
     this.saving.set(true);
 
     const raw = this.form.getRawValue();
@@ -270,12 +272,12 @@ export class VentaComboCreate implements OnInit {
         // El backend identifica en el mensaje CUÁL servicio/asignación
         // falló (ver ComboSalesService.validarAsignacion): se muestra tal
         // cual, no un error genérico.
-        this.errorMessage.set(
+        this.formError.show(
           (error.error?.message as string | undefined) ??
             'No se pudo crear la venta de combo.',
         );
       } else {
-        this.errorMessage.set(
+        this.formError.show(
           'No se pudo crear la venta de combo. Intenta de nuevo.',
         );
       }

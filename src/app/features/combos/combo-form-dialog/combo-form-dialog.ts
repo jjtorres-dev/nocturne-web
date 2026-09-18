@@ -23,6 +23,7 @@ import { CombosApi } from '../combos-api';
 import type { Combo } from '../combo.model';
 import { ServiciosApi } from '../../services/servicios-api';
 import { type Servicio } from '../../services/servicio.model';
+import { injectFormError } from '../../../shared/form-error';
 
 export interface ComboFormDialogData {
   combo?: Combo;
@@ -57,7 +58,8 @@ export class ComboFormDialog implements OnInit {
 
   readonly saving = signal(false);
   readonly loadingOptions = signal(true);
-  readonly errorMessage = signal<string | null>(null);
+  private readonly formError = injectFormError();
+  readonly errorMessage = this.formError.message;
   readonly servicios = signal<Servicio[]>([]);
 
   readonly form = this.fb.nonNullable.group({
@@ -106,7 +108,7 @@ export class ComboFormDialog implements OnInit {
     }
 
     this.saving.set(true);
-    this.errorMessage.set(null);
+    this.formError.clear();
 
     const raw = this.form.getRawValue();
     const payload = {
@@ -122,7 +124,7 @@ export class ComboFormDialog implements OnInit {
         : await this.api.create(payload);
       this.dialogRef.close(result);
     } catch {
-      this.errorMessage.set('No se pudo guardar el combo. Intenta de nuevo.');
+      this.formError.show('No se pudo guardar el combo. Intenta de nuevo.');
     } finally {
       this.saving.set(false);
     }

@@ -3,6 +3,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { of } from 'rxjs';
 import { provideRouter, Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { VentaComboCreate } from './venta-combo-create';
 import { VentaCombosApi } from '../venta-combos-api';
 import { Moneda } from '../../sales/venta.model';
@@ -310,6 +311,39 @@ describe('VentaComboCreate', () => {
 
     expect(component.errorMessage()).toBe(
       'El servicio "IPTV Básico": esa cuenta ya tiene una venta activa (V-00042).',
+    );
+  });
+
+  it('si el backend rechaza la venta de combo, además del formulario abre un snackbar con el mismo mensaje', async () => {
+    await setup();
+    await fixture.whenStable();
+    const openSpy = vi
+      .spyOn(fixture.debugElement.injector.get(MatSnackBar), 'open')
+      .mockImplementation(() => ({}) as never);
+    await component.onComboChange('combo-1');
+    await component.onAsignacionCuentaChange(0, 'cta-1');
+    component.onAsignacionPerfilChange(0, 'per-1');
+    await component.onAsignacionCuentaChange(1, 'cta-2');
+    component.form.patchValue({
+      clienteId: 'cli-1',
+      comboId: 'combo-1',
+      duracionMeses: 1,
+      fechaInicio: '2026-01-01',
+      fechaFin: '2026-02-01',
+      precio: 25,
+      moneda: Moneda.PEN,
+      metodoPago: 'Yape',
+    });
+    api.create.mockRejectedValue(new HttpErrorResponse({ status: 500 }));
+
+    await component.submit();
+
+    const mensaje = 'No se pudo crear la venta de combo.';
+    expect(component.errorMessage()).toContain(mensaje);
+    expect(openSpy).toHaveBeenCalledWith(
+      expect.stringContaining(mensaje),
+      'Cerrar',
+      expect.anything(),
     );
   });
 });

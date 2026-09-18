@@ -104,10 +104,24 @@ export class VentasList implements OnInit {
   readonly perfilNombres = signal<Map<string, string>>(new Map());
   readonly comboCodigos = signal<Map<string, string>>(new Map());
   readonly loading = signal(false);
+  // Solo aplica en pantalla angosta: en desktop los filtros siempre se ven.
+  protected readonly filtersOpen = signal(false);
 
   clienteFilter = 'todos';
   servicioFilter = 'todos';
   activoFilter: ActivoFilter = 'activos';
+
+  protected toggleFilters(): void {
+    this.filtersOpen.update((open) => !open);
+  }
+
+  // Cuántos filtros están aplicando (distintos de "todos"), para mostrarlo
+  // en el botón mientras el panel está colapsado.
+  protected filtrosActivos(): number {
+    return [this.clienteFilter, this.servicioFilter, this.activoFilter].filter(
+      (f) => f !== 'todos',
+    ).length;
+  }
 
   ngOnInit(): void {
     void this.loadOptions();

@@ -16,6 +16,7 @@ import {
   ServiceType,
   type Servicio,
 } from '../servicio.model';
+import { injectFormError } from '../../../shared/form-error';
 
 export interface ServicioFormDialogData {
   servicio?: Servicio;
@@ -48,7 +49,8 @@ export class ServicioFormDialog {
   protected readonly isEdit = !!this.data.servicio;
 
   readonly saving = signal(false);
-  readonly errorMessage = signal<string | null>(null);
+  private readonly formError = injectFormError();
+  readonly errorMessage = this.formError.message;
 
   readonly form = this.fb.nonNullable.group({
     nombre: [this.data.servicio?.nombre ?? '', [Validators.required, Validators.minLength(1)]],
@@ -70,7 +72,7 @@ export class ServicioFormDialog {
     }
 
     this.saving.set(true);
-    this.errorMessage.set(null);
+    this.formError.clear();
 
     const raw = this.form.getRawValue();
     const payload = {
@@ -84,7 +86,7 @@ export class ServicioFormDialog {
         : await this.api.create(payload);
       this.dialogRef.close(result);
     } catch {
-      this.errorMessage.set('No se pudo guardar el servicio. Intenta de nuevo.');
+      this.formError.show('No se pudo guardar el servicio. Intenta de nuevo.');
     } finally {
       this.saving.set(false);
     }

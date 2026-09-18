@@ -16,6 +16,7 @@ import {
   ContactType,
   type Contacto,
 } from '../contacto.model';
+import { injectFormError } from '../../../shared/form-error';
 
 export interface ContactoFormDialogData {
   contacto?: Contacto;
@@ -48,7 +49,8 @@ export class ContactoFormDialog {
   protected readonly isEdit = !!this.data.contacto;
 
   readonly saving = signal(false);
-  readonly errorMessage = signal<string | null>(null);
+  private readonly formError = injectFormError();
+  readonly errorMessage = this.formError.message;
 
   readonly form = this.fb.nonNullable.group({
     nombre: [this.data.contacto?.nombre ?? '', [Validators.required, Validators.minLength(1)]],
@@ -62,7 +64,7 @@ export class ContactoFormDialog {
     }
 
     this.saving.set(true);
-    this.errorMessage.set(null);
+    this.formError.clear();
 
     const payload = this.form.getRawValue();
 
@@ -72,7 +74,7 @@ export class ContactoFormDialog {
         : await this.api.create(payload);
       this.dialogRef.close(result);
     } catch {
-      this.errorMessage.set('No se pudo guardar el contacto. Intenta de nuevo.');
+      this.formError.show('No se pudo guardar el contacto. Intenta de nuevo.');
     } finally {
       this.saving.set(false);
     }

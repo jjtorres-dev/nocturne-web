@@ -12,6 +12,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { PerfilesApi } from '../perfiles-api';
 import { type Perfil } from '../perfil.model';
+import { injectFormError } from '../../../../shared/form-error';
 
 export interface PerfilFormDialogData {
   accountId: string;
@@ -43,7 +44,8 @@ export class PerfilFormDialog {
   protected readonly isEdit = !!this.data.perfil;
 
   readonly saving = signal(false);
-  readonly errorMessage = signal<string | null>(null);
+  private readonly formError = injectFormError();
+  readonly errorMessage = this.formError.message;
   readonly showPin = signal(false);
 
   readonly form = this.fb.nonNullable.group({
@@ -64,7 +66,7 @@ export class PerfilFormDialog {
     }
 
     this.saving.set(true);
-    this.errorMessage.set(null);
+    this.formError.clear();
 
     const raw = this.form.getRawValue();
     const payload = { ...raw, pin: raw.pin || undefined };
@@ -75,7 +77,7 @@ export class PerfilFormDialog {
         : await this.api.create(this.data.accountId, payload);
       this.dialogRef.close(result);
     } catch {
-      this.errorMessage.set('No se pudo guardar el perfil. Intenta de nuevo.');
+      this.formError.show('No se pudo guardar el perfil. Intenta de nuevo.');
     } finally {
       this.saving.set(false);
     }

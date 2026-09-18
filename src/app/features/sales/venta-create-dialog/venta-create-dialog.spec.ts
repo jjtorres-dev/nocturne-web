@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { HttpErrorResponse } from '@angular/common/http';
 import { of } from 'rxjs';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { VentaCreateDialog } from './venta-create-dialog';
 import { VentasApi } from '../ventas-api';
 import { Moneda } from '../venta.model';
@@ -366,5 +367,86 @@ describe('VentaCreateDialog', () => {
     expect(component.errorMessage()).toBe(
       'Ese perfil ya tiene una venta activa (V-00001).',
     );
+  });
+
+  describe('snackbar de error al fallar el submit', () => {
+    let openSpy: ReturnType<typeof vi.spyOn>;
+
+    async function prepararFormulario() {
+      await setup();
+      await fixture.whenStable();
+      await component.onServicioChange('srv-1');
+      await component.onCuentaChange('cta-1');
+      openSpy = vi
+        .spyOn(fixture.debugElement.injector.get(MatSnackBar), 'open')
+        .mockImplementation(() => ({}) as never);
+      component.form.patchValue({
+        servicioId: 'srv-1',
+        cuentaId: 'cta-1',
+        perfilId: 'per-1',
+        clienteId: 'cli-1',
+        fechaInicio: '2026-01-01',
+        fechaFin: '2026-02-01',
+        precio: 10,
+        moneda: Moneda.PEN,
+        metodoPago: 'Yape',
+      });
+    }
+
+    it('con el 409 de exclusividad: mismo mensaje en el formulario y en el snackbar', async () => {
+      await prepararFormulario();
+      api.create.mockRejectedValue(
+        new HttpErrorResponse({
+          status: 409,
+          error: { message: 'Ese perfil ya tiene una venta activa (V-00001).' },
+        }),
+      );
+
+      await component.submit();
+
+      expect(component.errorMessage()).toBe('Ese perfil ya tiene una venta activa (V-00001).');
+      expect(openSpy).toHaveBeenCalledWith(
+        'Ese perfil ya tiene una venta activa (V-00001).',
+        'Cerrar',
+        expect.anything(),
+      );
+    });
+
+    it('con cualquier otro error del backend (no solo 409) también abre el snackbar', async () => {
+      await prepararFormulario();
+      api.create.mockRejectedValue(new HttpErrorResponse({ status: 500 }));
+
+      await component.submit();
+
+      expect(component.errorMessage()).toBe('No se pudo crear la venta. Intenta de nuevo.');
+      expect(openSpy).toHaveBeenCalledWith(
+        'No se pudo crear la venta. Intenta de nuevo.',
+        'Cerrar',
+        expect.anything(),
+      );
+    });
+
+    it('con una validación del cliente (sin llamar al backend) también abre el snackbar', async () => {
+      await prepararFormulario();
+      component.form.patchValue({ perfilId: '' });
+
+      await component.submit();
+
+      expect(api.create).not.toHaveBeenCalled();
+      expect(openSpy).toHaveBeenCalledWith(
+        expect.stringContaining('Selecciona un perfil'),
+        'Cerrar',
+        expect.anything(),
+      );
+    });
+
+    it('un submit exitoso no abre ningún snackbar de error', async () => {
+      await prepararFormulario();
+
+      await component.submit();
+
+      expect(dialogRef.close).toHaveBeenCalled();
+      expect(openSpy).not.toHaveBeenCalled();
+    });
   });
 });

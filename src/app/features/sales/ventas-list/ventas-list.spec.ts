@@ -1,3 +1,4 @@
+import { ChangeDetectorRef } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -503,6 +504,89 @@ describe('VentasList', () => {
       const badge = card.querySelector('.combo-badge')!;
       expect(badge.textContent).toContain('Parte de combo C-00001');
       expect(badge.getAttribute('href')).toBe('/combo-sales/vc-1');
+    });
+  });
+
+  describe('panel de filtros', () => {
+    async function render(mobile: boolean) {
+      await setup(UserRole.ADMIN, { mobile });
+      await fixture.whenStable();
+      fixture.detectChanges();
+    }
+
+    const toggle = (): HTMLButtonElement | null =>
+      fixture.nativeElement.querySelector('.filters-toggle');
+    const filters = (): HTMLElement | null => fixture.nativeElement.querySelector('.filters');
+
+    async function click(el: HTMLElement) {
+      el.click();
+      await fixture.whenStable();
+      fixture.detectChanges();
+    }
+
+    it('en desktop los filtros están siempre visibles y no hay botón "Filtros"', async () => {
+      await render(false);
+
+      expect(filters()).not.toBeNull();
+      expect(toggle()).toBeNull();
+    });
+
+    it('en móvil arrancan colapsados: hay botón "Filtros" pero no los selectores', async () => {
+      await render(true);
+
+      expect(toggle()).not.toBeNull();
+      expect(toggle()!.getAttribute('aria-expanded')).toBe('false');
+      expect(filters()).toBeNull();
+    });
+
+    it('en móvil el botón expande y vuelve a colapsar los filtros', async () => {
+      await render(true);
+
+      await click(toggle()!);
+      expect(filters()).not.toBeNull();
+      expect(filters()!.querySelectorAll('mat-form-field').length).toBe(3);
+      expect(toggle()!.getAttribute('aria-expanded')).toBe('true');
+
+      await click(toggle()!);
+      expect(filters()).toBeNull();
+      expect(toggle()!.getAttribute('aria-expanded')).toBe('false');
+    });
+
+    it('el botón indica cuántos filtros están aplicando (Estado=Activos por defecto)', async () => {
+      await render(true);
+      // Los filtros son campos planos (ngModel los cambia y marca la vista);
+      // acá se cambian a mano, así que hay que marcarla como sucia.
+      const redibujar = () => {
+        fixture.componentRef.injector.get(ChangeDetectorRef).markForCheck();
+        fixture.detectChanges();
+      };
+
+      expect(toggle()!.textContent).toContain('(1)');
+
+      component.clienteFilter = 'cli-1';
+      component.activoFilter = 'todos';
+      redibujar();
+      expect(toggle()!.textContent).toContain('(1)');
+
+      component.servicioFilter = 'srv-1';
+      redibujar();
+      expect(toggle()!.textContent).toContain('(2)');
+
+      component.clienteFilter = 'todos';
+      component.servicioFilter = 'todos';
+      redibujar();
+      expect(toggle()!.textContent).not.toContain('(');
+    });
+
+    it('colapsar el panel conserva los filtros aplicados', async () => {
+      await render(true);
+      await click(toggle()!);
+      component.servicioFilter = 'srv-1';
+
+      await click(toggle()!);
+
+      expect(filters()).toBeNull();
+      expect(component.servicioFilter).toBe('srv-1');
     });
   });
 });

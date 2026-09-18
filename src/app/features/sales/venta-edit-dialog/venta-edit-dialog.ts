@@ -13,6 +13,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { VentasApi } from '../ventas-api';
 import { Moneda, type Venta } from '../venta.model';
+import { injectFormError } from '../../../shared/form-error';
 
 export interface VentaEditDialogData {
   venta: Venta;
@@ -44,7 +45,8 @@ export class VentaEditDialog {
   protected readonly monedas = Object.values(Moneda);
 
   readonly saving = signal(false);
-  readonly errorMessage = signal<string | null>(null);
+  private readonly formError = injectFormError();
+  readonly errorMessage = this.formError.message;
 
   readonly form = this.fb.nonNullable.group({
     fechaFin: [this.data.venta.fechaFin, Validators.required],
@@ -70,7 +72,7 @@ export class VentaEditDialog {
     }
 
     this.saving.set(true);
-    this.errorMessage.set(null);
+    this.formError.clear();
 
     const payload = this.form.getRawValue();
 
@@ -78,7 +80,7 @@ export class VentaEditDialog {
       const result = await this.api.update(this.data.venta.id, payload);
       this.dialogRef.close(result);
     } catch {
-      this.errorMessage.set('No se pudo guardar la venta. Intenta de nuevo.');
+      this.formError.show('No se pudo guardar la venta. Intenta de nuevo.');
     } finally {
       this.saving.set(false);
     }
