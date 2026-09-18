@@ -6,18 +6,26 @@
   width: 240px;
   display: flex;
   flex-direction: column;
+  border-inline-end: 1px solid var(--nc-border);
 }
 
 .brand {
   padding: 16px;
-  font-size: 1.25rem;
-  font-weight: 600;
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  background: var(--nc-gradient-primary);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
 }
 
 .header {
   position: sticky;
   top: 0;
   z-index: 1;
+  border-bottom: 1px solid var(--nc-border);
 }
 
 .spacer {
@@ -33,6 +41,27 @@
   padding: 24px;
 }
 
+// El indicador activo no usa el secondary-container de Material (ese token
+// alimenta también los chips de Activo/Inactivo, que no debemos tocar):
+// en su lugar, una superficie elevada + una barra de acento con glow.
 .active-link {
-  --mat-list-active-indicator-color: var(--mat-sys-secondary-container);
+  --mat-list-active-indicator-color: var(--nc-surface-elevated);
+  position: relative;
+  color: var(--nc-accent-solid) !important;
+
+  .mat-icon {
+    color: var(--nc-accent-solid);
+  }
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset-inline-start: 0;
+    top: 8px;
+    bottom: 8px;
+    width: 3px;
+    border-radius: 0 4px 4px 0;
+    background: var(--nc-gradient-primary);
+    box-shadow: 0 0 12px 1px rgba(59, 130, 246, 0.5);
+  }
 }

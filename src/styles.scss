@@ -13,21 +13,84 @@ html {
         primary: mat.$azure-palette,
         tertiary: mat.$blue-palette,
       ),
-      typography: Roboto,
+      typography: Inter,
       density: 0,
     )
   );
 }
 
-body {
-  // Default the application to a light color theme. This can be changed to
-  // `dark` to enable the dark color theme, or to `light dark` to defer to the
-  // user's system settings.
-  color-scheme: light;
+// ---------------------------------------------------------------------------
+// Nocturne — design tokens (Fase 1)
+//
+// Paleta de fondos oscuros (azul-marino) + acento en degradado azul -> verde-
+// turquesa. Documentados en detalle en PROGRESS.md (nocturne-api) para
+// referencia al propagar el resto de pantallas en Fase 2.
+//
+// Los tokens `--mat-sys-secondary*`, `--mat-sys-tertiary*` y `--mat-sys-error*`
+// quedan intactos a propósito: de ahí salen los colores de Activo/Inactivo
+// (mat-chip con/sin `highlighted`) y Vencida (mat-sys-error), que no debemos
+// tocar en esta fase.
+// ---------------------------------------------------------------------------
+:root {
+  // Fondos
+  --nc-bg: #0a0e17;
+  --nc-surface: #131826;
+  --nc-surface-elevated: #1c2333;
+  --nc-border: #232b40;
 
-  // Set a default background, font and text colors for the application using
-  // Angular Material's system-level CSS variables. Learn more about these
-  // variables at https://material.angular.dev/guide/system-variables
+  // Texto (nunca blanco/negro puro)
+  --nc-text-primary: #e6e9f0;
+  --nc-text-secondary: #94a3b8;
+
+  // Acento: degradado azul eléctrico -> verde-turquesa
+  --nc-accent-blue: #3b82f6;
+  --nc-accent-cyan: #06b6d4;
+  --nc-accent-green: #10b981;
+  --nc-accent-solid: #14b8a6; // color intermedio sólido, para texto/íconos
+  --nc-gradient-primary: linear-gradient(135deg, #3b82f6 0%, #06b6d4 50%, #10b981 100%);
+  --nc-glow-primary:
+    0 0 16px 1px rgba(59, 130, 246, 0.35),
+    0 0 28px 4px rgba(16, 185, 129, 0.2);
+
+  // Tipografía
+  --nc-font-sans: 'Inter', 'Roboto', sans-serif;
+  // Definida para Fase 2 (códigos de venta/combo tipo V-00001 / C-00001).
+  --nc-font-mono: 'JetBrains Mono', 'Roboto Mono', monospace;
+}
+
+// Reasigna los tokens M3 de superficie/fondo/primario a la paleta oscura de
+// Nocturne. No se tocan secondary/tertiary/error (ver nota arriba).
+html {
+  --mat-sys-surface: var(--nc-bg);
+  --mat-sys-surface-dim: var(--nc-bg);
+  --mat-sys-surface-bright: var(--nc-surface-elevated);
+  --mat-sys-surface-container-lowest: var(--nc-bg);
+  --mat-sys-surface-container-low: var(--nc-surface);
+  --mat-sys-surface-container: var(--nc-surface);
+  --mat-sys-surface-container-high: var(--nc-surface-elevated);
+  --mat-sys-surface-container-highest: var(--nc-surface-elevated);
+  --mat-sys-background: var(--nc-bg);
+  --mat-sys-on-background: var(--nc-text-primary);
+  --mat-sys-on-surface: var(--nc-text-primary);
+  --mat-sys-on-surface-variant: var(--nc-text-secondary);
+  --mat-sys-outline: #2f3a52;
+  --mat-sys-outline-variant: #1c2333;
+  --mat-sys-inverse-surface: var(--nc-text-primary);
+  --mat-sys-inverse-on-surface: var(--nc-bg);
+
+  --mat-sys-primary: var(--nc-accent-solid);
+  --mat-sys-on-primary: #ffffff;
+  --mat-sys-primary-container: var(--nc-surface-elevated);
+  --mat-sys-on-primary-container: var(--nc-text-primary);
+}
+
+body {
+  // La app usa el esquema oscuro de Nocturne (scrollbars/inputs nativos
+  // también se pintan oscuros).
+  color-scheme: dark;
+
+  // Fondo y colores base usando los system-tokens de Material 3, ya
+  // remapeados arriba a la paleta oscura de Nocturne.
   background-color: var(--mat-sys-surface);
   color: var(--mat-sys-on-surface);
   font: var(--mat-sys-body-medium);
@@ -37,3 +100,43 @@ body {
   height: 100%;
 }
 /* You can add global styles to this file, and also import other style files */
+
+// ---------------------------------------------------------------------------
+// Botones primarios: fondo en degradado + glow sutil al hover.
+// ---------------------------------------------------------------------------
+.mat-mdc-unelevated-button.mat-primary:not(:disabled),
+.mat-mdc-raised-button.mat-primary:not(:disabled) {
+  background-image: var(--nc-gradient-primary);
+  background-color: transparent;
+  color: #ffffff;
+  transition:
+    box-shadow 150ms ease,
+    transform 150ms ease;
+}
+
+.mat-mdc-unelevated-button.mat-primary:not(:disabled):hover,
+.mat-mdc-raised-button.mat-primary:not(:disabled):hover {
+  box-shadow: var(--nc-glow-primary);
+}
+
+// ---------------------------------------------------------------------------
+// Tarjetas: borde sutil + sombra suave (el fondo ya sale de
+// --mat-sys-surface-container-low, remapeado arriba).
+// ---------------------------------------------------------------------------
+.mat-mdc-card {
+  border: 1px solid var(--nc-border);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
+}
+
+// ---------------------------------------------------------------------------
+// Tablas: encabezados más discretos, filas con hover sutil.
+// ---------------------------------------------------------------------------
+.mat-mdc-header-cell {
+  color: var(--nc-text-secondary);
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+
+.mat-mdc-row:hover {
+  background-color: var(--nc-surface-elevated);
+}
