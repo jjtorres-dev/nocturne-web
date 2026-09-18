@@ -1,14 +1,81 @@
 .login-page {
+  position: relative;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 24px;
   min-height: 100vh;
   padding: 16px;
+  overflow: hidden;
+}
+
+// Glow decorativo con el degradado de marca: dos manchas grandes,
+// desenfocadas y con opacidad baja, en diagonal (misma dirección que
+// --nc-gradient-primary) — de fondo, nunca compiten con la tarjeta.
+.login-page::before,
+.login-page::after {
+  content: '';
+  position: absolute;
+  z-index: 0;
+  pointer-events: none;
+  border-radius: 50%;
+  filter: blur(90px);
+  opacity: 0.35;
+}
+
+.login-page::before {
+  top: -160px;
+  left: -160px;
+  width: 480px;
+  height: 480px;
+  background: radial-gradient(circle, var(--nc-accent-blue), transparent 70%);
+}
+
+.login-page::after {
+  bottom: -160px;
+  right: -160px;
+  width: 480px;
+  height: 480px;
+  background: radial-gradient(circle, var(--nc-accent-green), transparent 70%);
+}
+
+.login-brand {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brand-icon {
+  font-size: 2rem;
+  width: 2rem;
+  height: 2rem;
+  background: var(--nc-gradient-primary);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+
+.brand-text {
+  font-size: 2.5rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  background: var(--nc-gradient-primary);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
 }
 
 .login-card {
+  position: relative;
+  z-index: 1;
   width: 100%;
   max-width: 360px;
+  background-color: var(--nc-surface-elevated);
 }
 
 .login-form {
