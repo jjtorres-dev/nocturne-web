@@ -6,7 +6,9 @@ export interface Cuenta {
   proveedorId: string | null;
   clienteId: string | null;
   correo: string;
-  claveServicio: string;
+  // Puede llegar en null: hay proveedores que solo dan un código, sin
+  // contraseña (backend ya lo acepta al crear/editar la cuenta).
+  claveServicio: string | null;
   claveCorreo: string | null;
   fechaInicio: string;
   fechaFin: string;
@@ -46,7 +48,10 @@ export interface CuentaPayload {
   servicioId: string;
   proveedorId?: string;
   correo: string;
-  claveServicio: string;
+  // Opcional al crear y al editar: hay proveedores que solo dan un
+  // código, sin contraseña (backend ya la acepta vacía en POST y PATCH
+  // /accounts).
+  claveServicio?: string;
   claveCorreo?: string;
   fechaInicio: string;
   fechaFin: string;

@@ -130,6 +130,28 @@ describe('CuentaFormDialog', () => {
     expect(dialogRef.close).toHaveBeenCalledWith({ id: 'cta-1' });
   });
 
+  it('al crear, la clave del servicio es opcional (proveedor que solo da un código, sin clave)', async () => {
+    await setup();
+    await fixture.whenStable();
+
+    component.form.patchValue({
+      servicioId: 'srv-1',
+      correo: 'a@b.com',
+      fechaInicio: '2026-01-01',
+      fechaFin: '2026-02-01',
+      costo: 10,
+      metodoPago: 'Yape',
+    });
+
+    expect(component.form.valid).toBe(true);
+
+    await component.submit();
+
+    expect(api.create).toHaveBeenCalledWith(
+      expect.objectContaining({ claveServicio: undefined }),
+    );
+  });
+
   it('al elegir el servicio, autocompleta costo con precioBase y fechaFin si ya hay fechaInicio', async () => {
     await setup();
     await fixture.whenStable();
@@ -187,5 +209,37 @@ describe('CuentaFormDialog', () => {
     expect(component.isEdit).toBe(true);
     expect(component.form.controls.correo.value).toBe('a@b.com');
     expect(component.form.controls.claveServicio.value).toBe('secreta');
+  });
+
+  it('en modo edición, la clave del servicio es opcional y se omite del payload si queda vacía', async () => {
+    const cuenta = {
+      id: 'cta-1',
+      servicioId: 'srv-1',
+      proveedorId: null,
+      correo: 'a@b.com',
+      claveServicio: 'secreta',
+      claveCorreo: null,
+      fechaInicio: '2026-01-01',
+      fechaFin: '2026-02-01',
+      costo: 10,
+      metodoPago: 'Yape',
+      url: null,
+      renovacionAutomatica: false,
+      activo: true,
+      createdAt: '',
+      updatedAt: '',
+    };
+    await setup({ cuenta });
+    await fixture.whenStable();
+
+    component.form.patchValue({ claveServicio: '' });
+    expect(component.form.valid).toBe(true);
+
+    await component.submit();
+
+    expect(api.update).toHaveBeenCalledWith(
+      'cta-1',
+      expect.objectContaining({ claveServicio: undefined }),
+    );
   });
 });

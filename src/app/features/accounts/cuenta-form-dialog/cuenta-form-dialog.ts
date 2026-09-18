@@ -85,10 +85,11 @@ export class CuentaFormDialog implements OnInit {
         this.data.cuenta?.correo ?? '',
         [Validators.required, Validators.email],
       ],
-      claveServicio: [
-        this.data.cuenta?.claveServicio ?? '',
-        [Validators.required, Validators.minLength(1)],
-      ],
+      // Opcional al crear y al editar: hay proveedores que solo dan un
+      // código, sin contraseña (caso real reportado por un revendedor), y
+      // al editar tampoco siempre se reenvía la clave — backend ya la
+      // acepta vacía en el PATCH.
+      claveServicio: [this.data.cuenta?.claveServicio ?? ''],
       claveCorreo: [this.data.cuenta?.claveCorreo ?? ''],
       fechaInicio: [this.data.cuenta?.fechaInicio ?? '', Validators.required],
       fechaFin: [this.data.cuenta?.fechaFin ?? '', Validators.required],
@@ -176,6 +177,7 @@ export class CuentaFormDialog implements OnInit {
     const payload = {
       ...raw,
       proveedorId: raw.proveedorId || undefined,
+      claveServicio: raw.claveServicio || undefined,
       claveCorreo: raw.claveCorreo || undefined,
       url: raw.url || undefined,
     };
