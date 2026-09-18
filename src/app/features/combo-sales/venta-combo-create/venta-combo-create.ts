@@ -8,6 +8,7 @@ import {
   ValidationErrors,
   Validators,
 } from '@angular/forms';
+import { MatDialog } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
@@ -22,11 +23,15 @@ import { CombosApi } from '../../combos/combos-api';
 import { type Combo } from '../../combos/combo.model';
 import { ServiceType, type Servicio } from '../../services/servicio.model';
 import { ContactosApi } from '../../contacts/contactos-api';
-import { type Contacto } from '../../contacts/contacto.model';
+import { ContactType, type Contacto } from '../../contacts/contacto.model';
 import { CuentasApi } from '../../accounts/cuentas-api';
 import { type CuentaListItem } from '../../accounts/cuenta.model';
 import { PerfilesApi } from '../../accounts/profiles/perfiles-api';
 import { type Perfil } from '../../accounts/profiles/perfil.model';
+import { ClienteQuickCreateDialog } from '../../../shared/cliente-quick-create-dialog/cliente-quick-create-dialog';
+
+// Sentinel para la opción "+ Nuevo cliente" del selector — nunca un id real.
+const NUEVO_CLIENTE = '__nuevo_cliente__';
 
 interface AsignacionSection {
   servicio: Servicio;
@@ -73,10 +78,13 @@ export class VentaComboCreate implements OnInit {
   private readonly contactosApi = inject(ContactosApi);
   private readonly cuentasApi = inject(CuentasApi);
   private readonly perfilesApi = inject(PerfilesApi);
+  private readonly dialog = inject(MatDialog);
   private readonly router = inject(Router);
 
   protected readonly monedas = Object.values(Moneda);
   protected readonly ServiceType = ServiceType;
+  readonly NUEVO_CLIENTE = NUEVO_CLIENTE;
+  private clienteIdPrevio = '';
 
   readonly saving = signal(false);
   readonly loadingOptions = signal(true);
@@ -109,13 +117,39 @@ export class VentaComboCreate implements OnInit {
     try {
       const [combos, clientes] = await Promise.all([
         this.combosApi.list({ activo: true }),
-        this.contactosApi.list({ activo: true }),
+        this.contactosApi.list({
+          tipo: ContactType.CLIENTE_FINAL,
+          activo: true,
+        }),
       ]);
       this.combos.set(combos);
       this.clientes.set(clientes);
     } finally {
       this.loadingOptions.set(false);
     }
+  }
+
+  onClienteSelectionChange(clienteId: string): void {
+    if (clienteId !== NUEVO_CLIENTE) {
+      this.clienteIdPrevio = clienteId;
+      return;
+    }
+
+    // Mientras se decide en el modal chico, el selector vuelve al cliente
+    // que estaba antes (no se puede dejar el sentinel "seleccionado").
+    this.form.patchValue({ clienteId: this.clienteIdPrevio });
+
+    const ref = this.dialog.open(ClienteQuickCreateDialog, {
+      width: '360px',
+    });
+    ref.afterClosed().subscribe((creado?: Contacto) => {
+      if (!creado) {
+        return;
+      }
+      this.clientes.update((lista) => [...lista, creado]);
+      this.clienteIdPrevio = creado.id;
+      this.form.patchValue({ clienteId: creado.id });
+    });
   }
 
   async onComboChange(comboId: string): Promise<void> {

@@ -1,6 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { HttpErrorResponse } from '@angular/common/http';
+import { of } from 'rxjs';
 import { provideRouter, Router } from '@angular/router';
+import { MatDialog } from '@angular/material/dialog';
 import { VentaComboCreate } from './venta-combo-create';
 import { VentaCombosApi } from '../venta-combos-api';
 import { Moneda } from '../../sales/venta.model';
@@ -97,6 +99,7 @@ describe('VentaComboCreate', () => {
   let contactosApi: { list: ReturnType<typeof vi.fn> };
   let cuentasApi: { list: ReturnType<typeof vi.fn> };
   let perfilesApi: { list: ReturnType<typeof vi.fn> };
+  let dialog: { open: ReturnType<typeof vi.fn> };
   let router: Router;
 
   async function setup() {
@@ -111,6 +114,7 @@ describe('VentaComboCreate', () => {
       ),
     };
     perfilesApi = { list: vi.fn().mockResolvedValue([perfilLibre]) };
+    dialog = { open: vi.fn() };
 
     await TestBed.configureTestingModule({
       imports: [VentaComboCreate],
@@ -121,6 +125,7 @@ describe('VentaComboCreate', () => {
         { provide: ContactosApi, useValue: contactosApi },
         { provide: CuentasApi, useValue: cuentasApi },
         { provide: PerfilesApi, useValue: perfilesApi },
+        { provide: MatDialog, useValue: dialog },
       ],
     }).compileComponents();
 
@@ -129,13 +134,45 @@ describe('VentaComboCreate', () => {
     router = TestBed.inject(Router);
   }
 
-  it('carga combos y clientes activos al iniciar', async () => {
+  it('carga combos y solo clientes tipo CLIENTE_FINAL al iniciar', async () => {
     await setup();
     await fixture.whenStable();
 
     expect(combosApi.list).toHaveBeenCalledWith({ activo: true });
-    expect(contactosApi.list).toHaveBeenCalledWith({ activo: true });
+    expect(contactosApi.list).toHaveBeenCalledWith({
+      tipo: ContactType.CLIENTE_FINAL,
+      activo: true,
+    });
     expect(component.combos()).toEqual([combo]);
+  });
+
+  it('"+ Nuevo cliente" abre el modal chico y selecciona el contacto creado sin perder lo ya llenado', async () => {
+    const nuevoCliente = {
+      id: 'cli-nuevo',
+      nombre: 'Cliente Nuevo',
+      whatsapp: '+51988888888',
+      tipo: ContactType.CLIENTE_FINAL,
+      activo: true,
+      owner,
+      createdAt: '',
+      updatedAt: '',
+    };
+    await setup();
+    dialog.open.mockReturnValue({ afterClosed: () => of(nuevoCliente) });
+    await fixture.whenStable();
+    await component.onComboChange('combo-1');
+    component.form.patchValue({ comboId: 'combo-1', precio: 30, metodoPago: 'Yape' });
+
+    component.onClienteSelectionChange(component.NUEVO_CLIENTE);
+
+    expect(dialog.open).toHaveBeenCalled();
+    expect(component.clientes()).toEqual([cliente, nuevoCliente]);
+    expect(component.form.controls.clienteId.value).toBe('cli-nuevo');
+    // El resto del formulario (armado a partir del combo) sigue intacto.
+    expect(component.form.controls.comboId.value).toBe('combo-1');
+    expect(component.asignaciones().length).toBe(2);
+    expect(component.form.controls.precio.value).toBe(30);
+    expect(component.form.controls.metodoPago.value).toBe('Yape');
   });
 
   it('al elegir un combo, arma una sección de asignación por cada servicio y precarga el precio', async () => {

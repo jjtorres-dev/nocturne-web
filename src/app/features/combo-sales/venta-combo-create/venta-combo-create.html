@@ -14,10 +14,14 @@
     <section class="form-grid">
       <mat-form-field appearance="outline">
         <mat-label>Cliente</mat-label>
-        <mat-select formControlName="clienteId">
+        <mat-select
+          formControlName="clienteId"
+          (selectionChange)="onClienteSelectionChange($event.value)"
+        >
           @for (c of clientes(); track c.id) {
             <mat-option [value]="c.id">{{ c.nombre }}</mat-option>
           }
+          <mat-option [value]="NUEVO_CLIENTE">+ Nuevo cliente</mat-option>
         </mat-select>
         @if (form.controls.clienteId.hasError('required')) {
           <mat-error>El cliente es obligatorio.</mat-error>

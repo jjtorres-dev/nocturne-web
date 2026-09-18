@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { HttpErrorResponse } from '@angular/common/http';
-import { MatDialogRef } from '@angular/material/dialog';
+import { of } from 'rxjs';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { VentaCreateDialog } from './venta-create-dialog';
 import { VentasApi } from '../ventas-api';
 import { Moneda } from '../venta.model';
@@ -90,6 +91,7 @@ describe('VentaCreateDialog', () => {
   let contactosApi: { list: ReturnType<typeof vi.fn> };
   let cuentasApi: { list: ReturnType<typeof vi.fn> };
   let perfilesApi: { list: ReturnType<typeof vi.fn> };
+  let dialog: MatDialog;
   let dialogRef: { close: ReturnType<typeof vi.fn> };
 
   async function setup(servicios: Servicio[] = [servicioConPerfiles]) {
@@ -116,15 +118,108 @@ describe('VentaCreateDialog', () => {
 
     fixture = TestBed.createComponent(VentaCreateDialog);
     component = fixture.componentInstance;
+    // MatDialogModule reprovee MatDialog a nivel del propio componente
+    // (VentaCreateDialog se abre a sí mismo como diálogo), así que un
+    // `{ provide: MatDialog, useValue: ... }` en el TestBed no lo alcanza
+    // a pisar — se espía la instancia real que efectivamente usa el
+    // componente, obtenida del injector de la propia fixture.
+    dialog = fixture.debugElement.injector.get(MatDialog);
   }
 
-  it('carga servicios y clientes activos (cualquier tipo) al iniciar', async () => {
+  it('carga servicios y solo clientes tipo CLIENTE_FINAL al iniciar', async () => {
     await setup();
     await fixture.whenStable();
 
     expect(serviciosApi.list).toHaveBeenCalledWith({ activo: true });
-    expect(contactosApi.list).toHaveBeenCalledWith({ activo: true });
+    expect(contactosApi.list).toHaveBeenCalledWith({
+      tipo: ContactType.CLIENTE_FINAL,
+      activo: true,
+    });
     expect(component.servicios()).toEqual([servicioConPerfiles]);
+    expect(component.clientes()).toEqual([cliente]);
+  });
+
+  it('al elegir cuenta, autocompleta fechaFin con la duración del servicio de esa cuenta', async () => {
+    await setup();
+    await fixture.whenStable();
+    await component.onServicioChange('srv-1');
+
+    component.form.patchValue({ fechaInicio: '2026-01-15' });
+    await component.onCuentaChange('cta-1');
+
+    expect(component.form.controls.fechaFin.value).toBe('2026-02-15');
+  });
+
+  it('recalcula fechaFin si cambia fechaInicio con la cuenta ya elegida', async () => {
+    await setup();
+    await fixture.whenStable();
+    await component.onServicioChange('srv-1');
+    await component.onCuentaChange('cta-1');
+
+    component.form.patchValue({ fechaInicio: '2026-03-01' });
+
+    expect(component.form.controls.fechaFin.value).toBe('2026-04-01');
+  });
+
+  it('el autocompletado de fechaFin no impide editarla a mano', async () => {
+    await setup();
+    await fixture.whenStable();
+    await component.onServicioChange('srv-1');
+    component.form.patchValue({ fechaInicio: '2026-01-15' });
+    await component.onCuentaChange('cta-1');
+
+    component.form.patchValue({ fechaFin: '2026-05-01' });
+
+    expect(component.form.controls.fechaFin.value).toBe('2026-05-01');
+  });
+
+  it('"+ Nuevo cliente" abre el modal chico y selecciona el contacto creado sin perder lo ya llenado', async () => {
+    const nuevoCliente = {
+      id: 'cli-nuevo',
+      nombre: 'Cliente Nuevo',
+      whatsapp: '+51988888888',
+      tipo: ContactType.CLIENTE_FINAL,
+      activo: true,
+      owner,
+      createdAt: '',
+      updatedAt: '',
+    };
+    await setup();
+    const openSpy = vi
+      .spyOn(dialog, 'open')
+      .mockReturnValue({ afterClosed: () => of(nuevoCliente) } as never);
+    await fixture.whenStable();
+
+    component.form.patchValue({
+      servicioId: 'srv-1',
+      fechaInicio: '2026-01-01',
+      precio: 25,
+      metodoPago: 'Yape',
+    });
+
+    component.onClienteSelectionChange(component.NUEVO_CLIENTE);
+
+    expect(openSpy).toHaveBeenCalled();
+    expect(component.clientes()).toEqual([cliente, nuevoCliente]);
+    expect(component.form.controls.clienteId.value).toBe('cli-nuevo');
+    // El resto del formulario sigue intacto.
+    expect(component.form.controls.servicioId.value).toBe('srv-1');
+    expect(component.form.controls.fechaInicio.value).toBe('2026-01-01');
+    expect(component.form.controls.precio.value).toBe(25);
+    expect(component.form.controls.metodoPago.value).toBe('Yape');
+  });
+
+  it('si se cancela "+ Nuevo cliente", vuelve al cliente que estaba antes', async () => {
+    await setup();
+    vi.spyOn(dialog, 'open').mockReturnValue({
+      afterClosed: () => of(undefined),
+    } as never);
+    await fixture.whenStable();
+
+    component.onClienteSelectionChange('cli-1');
+    component.onClienteSelectionChange(component.NUEVO_CLIENTE);
+
+    expect(component.form.controls.clienteId.value).toBe('cli-1');
     expect(component.clientes()).toEqual([cliente]);
   });
 

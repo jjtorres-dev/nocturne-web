@@ -24,6 +24,7 @@ import { ServiciosApi } from '../../services/servicios-api';
 import { type Servicio } from '../../services/servicio.model';
 import { ContactosApi } from '../../contacts/contactos-api';
 import { ContactType, type Contacto } from '../../contacts/contacto.model';
+import { sumarMeses } from '../../../shared/fecha.util';
 
 export interface CuentaFormDialogData {
   cuenta?: Cuenta;
@@ -106,6 +107,40 @@ export class CuentaFormDialog implements OnInit {
     },
     { validators: fechaFinPosteriorValidator },
   );
+
+  constructor() {
+    // Autocompletado de fechaFin/costo a partir del servicio elegido (ver
+    // PROGRESS.md, feedback de revendedor): ambos campos se quedan
+    // editables, esto solo sugiere un valor de partida. No dispara en modo
+    // edición mientras no se toque nada, porque `valueChanges` no emite
+    // por el valor inicial del form, solo por cambios reales del usuario.
+    this.form.controls.servicioId.valueChanges.subscribe((servicioId) => {
+      this.aplicarSugerenciasDeServicio(servicioId);
+    });
+    this.form.controls.fechaInicio.valueChanges.subscribe(() => {
+      this.recalcularFechaFin();
+    });
+  }
+
+  private aplicarSugerenciasDeServicio(servicioId: string): void {
+    const servicio = this.servicios().find((s) => s.id === servicioId);
+    if (!servicio) {
+      return;
+    }
+    this.form.controls.costo.setValue(servicio.precioBase);
+    this.recalcularFechaFin();
+  }
+
+  private recalcularFechaFin(): void {
+    const { servicioId, fechaInicio } = this.form.getRawValue();
+    const servicio = this.servicios().find((s) => s.id === servicioId);
+    if (!servicio || !fechaInicio) {
+      return;
+    }
+    this.form.controls.fechaFin.setValue(
+      sumarMeses(fechaInicio, servicio.duracionMeses),
+    );
+  }
 
   async ngOnInit(): Promise<void> {
     this.loadingOptions.set(true);

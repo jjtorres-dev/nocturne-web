@@ -7,7 +7,11 @@ import {
   ValidationErrors,
   Validators,
 } from '@angular/forms';
-import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import {
+  MatDialog,
+  MatDialogModule,
+  MatDialogRef,
+} from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
@@ -19,11 +23,16 @@ import { Moneda, type Venta } from '../venta.model';
 import { ServiciosApi } from '../../services/servicios-api';
 import { ServiceType, type Servicio } from '../../services/servicio.model';
 import { ContactosApi } from '../../contacts/contactos-api';
-import { type Contacto } from '../../contacts/contacto.model';
+import { ContactType, type Contacto } from '../../contacts/contacto.model';
 import { CuentasApi } from '../../accounts/cuentas-api';
 import { type CuentaListItem } from '../../accounts/cuenta.model';
 import { PerfilesApi } from '../../accounts/profiles/perfiles-api';
 import { type Perfil } from '../../accounts/profiles/perfil.model';
+import { ClienteQuickCreateDialog } from '../../../shared/cliente-quick-create-dialog/cliente-quick-create-dialog';
+import { sumarMeses } from '../../../shared/fecha.util';
+
+// Sentinel para la opción "+ Nuevo cliente" del selector — nunca un id real.
+const NUEVO_CLIENTE = '__nuevo_cliente__';
 
 function fechaFinPosteriorValidator(
   group: AbstractControl,
@@ -58,11 +67,14 @@ export class VentaCreateDialog implements OnInit {
   private readonly contactosApi = inject(ContactosApi);
   private readonly cuentasApi = inject(CuentasApi);
   private readonly perfilesApi = inject(PerfilesApi);
+  private readonly dialog = inject(MatDialog);
   private readonly dialogRef = inject(
     MatDialogRef<VentaCreateDialog, Venta | undefined>,
   );
 
   protected readonly monedas = Object.values(Moneda);
+  readonly NUEVO_CLIENTE = NUEVO_CLIENTE;
+  private clienteIdPrevio = '';
 
   readonly saving = signal(false);
   readonly loadingOptions = signal(true);
@@ -97,18 +109,70 @@ export class VentaCreateDialog implements OnInit {
     { validators: fechaFinPosteriorValidator },
   );
 
+  constructor() {
+    // fechaFin se recalcula con la duración del servicio de la cuenta
+    // elegida (ver onCuentaChange) cada vez que cambia fechaInicio; se
+    // queda editable, esto solo sugiere un valor de partida.
+    this.form.controls.fechaInicio.valueChanges.subscribe(() => {
+      this.recalcularFechaFin();
+    });
+  }
+
   async ngOnInit(): Promise<void> {
     this.loadingOptions.set(true);
     try {
       const [servicios, clientes] = await Promise.all([
         this.serviciosApi.list({ activo: true }),
-        this.contactosApi.list({ activo: true }),
+        this.contactosApi.list({
+          tipo: ContactType.CLIENTE_FINAL,
+          activo: true,
+        }),
       ]);
       this.servicios.set(servicios);
       this.clientes.set(clientes);
     } finally {
       this.loadingOptions.set(false);
     }
+  }
+
+  private recalcularFechaFin(): void {
+    const fechaInicio = this.form.controls.fechaInicio.value;
+    const cuentaId = this.cuentaSeleccionadaId();
+    if (!cuentaId || !fechaInicio) {
+      return;
+    }
+    const cuenta = this.cuentas().find((c) => c.id === cuentaId);
+    const servicio =
+      cuenta && this.servicios().find((s) => s.id === cuenta.servicioId);
+    if (!servicio) {
+      return;
+    }
+    this.form.controls.fechaFin.setValue(
+      sumarMeses(fechaInicio, servicio.duracionMeses),
+    );
+  }
+
+  onClienteSelectionChange(clienteId: string): void {
+    if (clienteId !== NUEVO_CLIENTE) {
+      this.clienteIdPrevio = clienteId;
+      return;
+    }
+
+    // Mientras se decide en el modal chico, el selector vuelve al cliente
+    // que estaba antes (no se puede dejar el sentinel "seleccionado").
+    this.form.patchValue({ clienteId: this.clienteIdPrevio });
+
+    const ref = this.dialog.open(ClienteQuickCreateDialog, {
+      width: '360px',
+    });
+    ref.afterClosed().subscribe((creado?: Contacto) => {
+      if (!creado) {
+        return;
+      }
+      this.clientes.update((lista) => [...lista, creado]);
+      this.clienteIdPrevio = creado.id;
+      this.form.patchValue({ clienteId: creado.id });
+    });
   }
 
   async onServicioChange(servicioId: string): Promise<void> {
@@ -142,6 +206,7 @@ export class VentaCreateDialog implements OnInit {
     this.cuentaSeleccionadaId.set(cuentaId);
     this.perfiles.set([]);
     this.form.patchValue({ perfilId: '' });
+    this.recalcularFechaFin();
 
     if (!cuentaId || !this.requierePerfil()) {
       return;
