@@ -69,30 +69,32 @@
   <div class="tables-grid">
     <div class="table-section">
       <h2>Por servicio</h2>
-      <table mat-table [dataSource]="byService()" class="breakdown-table">
-        <ng-container matColumnDef="nombre">
-          <th mat-header-cell *matHeaderCellDef>Servicio</th>
-          <td mat-cell *matCellDef="let r">{{ r.nombre }}</td>
-        </ng-container>
+      <div class="table-scroll">
+        <table mat-table [dataSource]="byService()" class="breakdown-table">
+          <ng-container matColumnDef="nombre">
+            <th mat-header-cell *matHeaderCellDef>Servicio</th>
+            <td mat-cell *matCellDef="let r">{{ r.nombre }}</td>
+          </ng-container>
 
-        <ng-container matColumnDef="inversion">
-          <th mat-header-cell *matHeaderCellDef>Inversión</th>
-          <td mat-cell *matCellDef="let r">{{ r.inversion | soles }}</td>
-        </ng-container>
+          <ng-container matColumnDef="inversion">
+            <th mat-header-cell *matHeaderCellDef>Inversión</th>
+            <td mat-cell *matCellDef="let r">{{ r.inversion | soles }}</td>
+          </ng-container>
 
-        <ng-container matColumnDef="ingresos">
-          <th mat-header-cell *matHeaderCellDef>Ingresos</th>
-          <td mat-cell *matCellDef="let r">{{ r.ingresos | soles }}</td>
-        </ng-container>
+          <ng-container matColumnDef="ingresos">
+            <th mat-header-cell *matHeaderCellDef>Ingresos</th>
+            <td mat-cell *matCellDef="let r">{{ r.ingresos | soles }}</td>
+          </ng-container>
 
-        <ng-container matColumnDef="ganancia">
-          <th mat-header-cell *matHeaderCellDef>Ganancia</th>
-          <td mat-cell *matCellDef="let r">{{ r.ganancia | soles }}</td>
-        </ng-container>
+          <ng-container matColumnDef="ganancia">
+            <th mat-header-cell *matHeaderCellDef>Ganancia</th>
+            <td mat-cell *matCellDef="let r">{{ r.ganancia | soles }}</td>
+          </ng-container>
 
-        <tr mat-header-row *matHeaderRowDef="byServiceColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: byServiceColumns"></tr>
-      </table>
+          <tr mat-header-row *matHeaderRowDef="byServiceColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: byServiceColumns"></tr>
+        </table>
+      </div>
       @if (byService().length === 0) {
         <p class="empty-state">Sin datos en este rango.</p>
       }
@@ -100,30 +102,32 @@
 
     <div class="table-section">
       <h2>Por método de pago</h2>
-      <table mat-table [dataSource]="byPaymentMethod()" class="breakdown-table">
-        <ng-container matColumnDef="metodoPago">
-          <th mat-header-cell *matHeaderCellDef>Método</th>
-          <td mat-cell *matCellDef="let r">{{ r.metodoPago }}</td>
-        </ng-container>
+      <div class="table-scroll">
+        <table mat-table [dataSource]="byPaymentMethod()" class="breakdown-table">
+          <ng-container matColumnDef="metodoPago">
+            <th mat-header-cell *matHeaderCellDef>Método</th>
+            <td mat-cell *matCellDef="let r">{{ r.metodoPago }}</td>
+          </ng-container>
 
-        <ng-container matColumnDef="ingresos">
-          <th mat-header-cell *matHeaderCellDef>Ingresos</th>
-          <td mat-cell *matCellDef="let r">{{ r.ingresos | soles }}</td>
-        </ng-container>
+          <ng-container matColumnDef="ingresos">
+            <th mat-header-cell *matHeaderCellDef>Ingresos</th>
+            <td mat-cell *matCellDef="let r">{{ r.ingresos | soles }}</td>
+          </ng-container>
 
-        <ng-container matColumnDef="gastos">
-          <th mat-header-cell *matHeaderCellDef>Gastos</th>
-          <td mat-cell *matCellDef="let r">{{ r.gastos | soles }}</td>
-        </ng-container>
+          <ng-container matColumnDef="gastos">
+            <th mat-header-cell *matHeaderCellDef>Gastos</th>
+            <td mat-cell *matCellDef="let r">{{ r.gastos | soles }}</td>
+          </ng-container>
 
-        <ng-container matColumnDef="neto">
-          <th mat-header-cell *matHeaderCellDef>Neto</th>
-          <td mat-cell *matCellDef="let r">{{ r.neto | soles }}</td>
-        </ng-container>
+          <ng-container matColumnDef="neto">
+            <th mat-header-cell *matHeaderCellDef>Neto</th>
+            <td mat-cell *matCellDef="let r">{{ r.neto | soles }}</td>
+          </ng-container>
 
-        <tr mat-header-row *matHeaderRowDef="byPaymentMethodColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: byPaymentMethodColumns"></tr>
-      </table>
+          <tr mat-header-row *matHeaderRowDef="byPaymentMethodColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: byPaymentMethodColumns"></tr>
+        </table>
+      </div>
       @if (byPaymentMethod().length === 0) {
         <p class="empty-state">Sin datos en este rango.</p>
       }

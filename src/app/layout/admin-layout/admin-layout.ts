@@ -1,11 +1,15 @@
+import { BreakpointObserver } from '@angular/cdk/layout';
 import { Component, computed, inject } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { map } from 'rxjs';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { MatToolbarModule } from '@angular/material/toolbar';
-import { MatSidenavModule } from '@angular/material/sidenav';
+import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
 import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { Auth, UserRole } from '../../core/auth/auth';
+import { MOBILE_BREAKPOINT_QUERY } from '../../shared/breakpoints';
 
 interface NavItem {
   label: string;
@@ -33,6 +37,14 @@ interface NavItem {
 })
 export class AdminLayout {
   protected readonly auth = inject(Auth);
+  private readonly breakpoints = inject(BreakpointObserver);
+
+  // En pantallas angostas el sidenav pasa a modo "over" (oculto por defecto,
+  // se abre con el botón de hamburguesa); en desktop queda fijo y visible.
+  protected readonly isMobile = toSignal(
+    this.breakpoints.observe(MOBILE_BREAKPOINT_QUERY).pipe(map((state) => state.matches)),
+    { initialValue: this.breakpoints.isMatched(MOBILE_BREAKPOINT_QUERY) },
+  );
 
   // Se irán sumando secciones a medida que avancen las fases del roadmap.
   private readonly allNavItems: NavItem[] = [
@@ -57,6 +69,14 @@ export class AdminLayout {
       (item) => !item.role || item.role === this.auth.currentUser()?.role,
     ),
   );
+
+  // Al elegir una opción del menú en modo "over" se cierra solo; en desktop
+  // (modo "side") no hay nada que cerrar.
+  protected closeIfMobile(sidenav: MatSidenav): void {
+    if (this.isMobile()) {
+      void sidenav.close();
+    }
+  }
 
   async logout(): Promise<void> {
     await this.auth.logout();

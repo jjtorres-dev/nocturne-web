@@ -170,3 +170,61 @@ html {
 .chip-inactive {
   opacity: 0.8;
 }
+
+// ---------------------------------------------------------------------------
+// Responsive — pantallas angostas (< 768px)
+//
+// El mismo corte vive en shared/breakpoints.ts (lo usa el sidenav del layout).
+// ---------------------------------------------------------------------------
+
+// Tablas: el wrapper `.table-scroll` (alrededor de cada <table mat-table>)
+// hace scroll horizontal en vez de romper el layout de la página.
+.table-scroll {
+  overflow-x: auto;
+}
+
+@media (max-width: 767.98px) {
+  // Con muchas columnas, que las celdas no se partan en varias líneas: es
+  // mejor scrollear que leer texto apretado.
+  .table-scroll {
+    .mat-mdc-header-cell,
+    .mat-mdc-cell {
+      white-space: nowrap;
+    }
+  }
+
+  // Diálogos (panelClass `nc-dialog`, ver app.config.ts): casi todo el ancho
+  // de la pantalla. `!important` porque MatDialog fija `max-width: 80vw` (y
+  // `width` en algunos diálogos) como estilo inline en el overlay pane.
+  .cdk-overlay-pane.nc-dialog {
+    width: calc(100vw - 32px) !important;
+    max-width: calc(100vw - 32px) !important;
+    max-height: calc(100dvh - 32px);
+
+    // Los formularios declaran un min-width de escritorio (320–360px) que
+    // desbordaría un celular de 375px. El contenido ya hace scroll
+    // vertical (mat-dialog-content: overflow auto); solo se limita su alto
+    // al de la pantalla menos título/acciones para que sea así también en
+    // horizontal.
+    .mat-mdc-dialog-content {
+      min-width: 0 !important;
+      max-height: calc(100dvh - 180px);
+    }
+  }
+
+  // Encabezado de página y filtros: los botones/selectores pasan a otra
+  // línea o a ancho completo en vez de quedar apretados en fila.
+  .page-header {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .filters {
+    flex-direction: column;
+    gap: 0;
+
+    > * {
+      width: 100%;
+    }
+  }
+}

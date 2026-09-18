@@ -1,5 +1,7 @@
 .layout-container {
   height: 100vh;
+  // En móvil 100vh incluye la barra de URL y desborda; dvh la descuenta.
+  height: 100dvh;
 }
 
 .sidenav {
@@ -32,6 +34,10 @@
   flex: 1 1 auto;
 }
 
+.menu-button {
+  margin-right: 8px;
+}
+
 .user-name {
   margin-right: 8px;
   font-size: 0.875rem;
@@ -39,6 +45,24 @@
 
 .content {
   padding: 24px;
+}
+
+@media (max-width: 767.98px) {
+  .header {
+    padding-inline: 8px;
+  }
+
+  .content {
+    padding: 16px;
+  }
+}
+
+// En pantallas muy angostas el nombre del usuario compite con el título
+// del header; el botón de cerrar sesión basta.
+@media (max-width: 479.98px) {
+  .user-name {
+    display: none;
+  }
 }
 
 // El indicador activo no usa el secondary-container de Material (ese token

@@ -1,9 +1,19 @@
 <mat-sidenav-container class="layout-container">
-  <mat-sidenav mode="side" opened class="sidenav">
+  <mat-sidenav
+    #sidenav
+    class="sidenav"
+    [mode]="isMobile() ? 'over' : 'side'"
+    [opened]="!isMobile()"
+  >
     <div class="brand">Nocturne</div>
     <mat-nav-list>
       @for (item of navItems(); track item.route) {
-        <a mat-list-item [routerLink]="item.route" routerLinkActive="active-link">
+        <a
+          mat-list-item
+          [routerLink]="item.route"
+          routerLinkActive="active-link"
+          (click)="closeIfMobile(sidenav)"
+        >
           <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
           <span matListItemTitle>{{ item.label }}</span>
         </a>
@@ -13,6 +23,16 @@
 
   <mat-sidenav-content>
     <mat-toolbar class="header">
+      @if (isMobile()) {
+        <button
+          mat-icon-button
+          class="menu-button"
+          (click)="sidenav.toggle()"
+          aria-label="Abrir menú"
+        >
+          <mat-icon>menu</mat-icon>
+        </button>
+      }
       <span>Panel de administración</span>
       <span class="spacer"></span>
       @if (auth.currentUser(); as user) {

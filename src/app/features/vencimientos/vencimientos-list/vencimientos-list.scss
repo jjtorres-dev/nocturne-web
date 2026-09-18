@@ -19,6 +19,18 @@
   width: 140px;
 }
 
+// Filtros apilados en pantallas angostas (ver .filters en styles.scss): este
+// componente fija align-items y un ancho propio que lo impedirían.
+@media (max-width: 767.98px) {
+  .filters {
+    align-items: stretch;
+  }
+
+  .dias-alerta {
+    width: 100%;
+  }
+}
+
 .vencimientos-table {
   width: 100%;
 }

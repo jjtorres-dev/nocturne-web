@@ -26,6 +26,10 @@
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 16px;
   margin-bottom: 24px;
+
+  @media (max-width: 767.98px) {
+    grid-template-columns: 1fr;
+  }
 }
 
 .summary-card {
@@ -68,9 +72,15 @@
 
 .tables-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr));
   gap: 24px;
   margin-bottom: 24px;
+}
+
+.table-section {
+  // Sin esto el item del grid no se achica por debajo del ancho de su tabla
+  // y el scroll horizontal (.table-scroll) nunca se activa.
+  min-width: 0;
 }
 
 .table-section h2 {
