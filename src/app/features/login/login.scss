@@ -46,6 +46,9 @@
   display: flex;
   align-items: center;
   gap: 10px;
+  // Margen de seguridad: background-clip: text puede recortar un par de
+  // píxeles del borde inferior del glyph incluso con line-height correcto.
+  padding-bottom: 4px;
 }
 
 .brand-icon {
@@ -61,6 +64,10 @@
 
 .brand-text {
   font-size: 2.5rem;
+  // El body hereda un line-height chico (fijo, en rem) desde
+  // --mat-sys-body-medium; a 2.5rem de font-size eso alcanza a recortar
+  // el wordmark contra el overflow: hidden de .login-page.
+  line-height: 1.35;
   font-weight: 700;
   letter-spacing: 0.01em;
   background: var(--nc-gradient-primary);
