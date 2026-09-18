@@ -56,3 +56,31 @@
   font-size: 0.85em;
   margin-left: 4px;
 }
+
+// Badge de días de la tarjeta (móvil): vencida/negativo en rojo, por vencer
+// en ámbar (mismos colores que el Dashboard), al día en el color primario.
+.dias-badge {
+  flex-shrink: 0;
+  padding: 4px 10px;
+  border-radius: 16px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  white-space: nowrap;
+  color: var(--mat-sys-primary);
+  background: color-mix(in srgb, currentColor 14%, transparent);
+}
+
+.dias-vencida {
+  color: var(--mat-sys-error);
+}
+
+.dias-por-vencer {
+  color: #b8860b;
+}
+
+// Acción principal de la tarjeta: botón grande, a todo el ancho.
+.whatsapp-button {
+  --mat-button-filled-container-height: 48px;
+  width: 100%;
+  font-size: 1rem;
+}

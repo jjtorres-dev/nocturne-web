@@ -42,96 +42,171 @@
     <mat-spinner diameter="32" />
   </div>
 } @else {
-  <table mat-table [dataSource]="ventas()" class="sales-table">
-    <ng-container matColumnDef="codigoVenta">
-      <th mat-header-cell *matHeaderCellDef>Código</th>
-      <td mat-cell *matCellDef="let v"><span class="nc-code">{{ v.codigoVenta }}</span></td>
-    </ng-container>
+  @if (isMobile()) {
+    <div class="nc-card-list">
+      @for (v of ventas(); track v.id) {
+        <mat-card class="nc-card">
+          <mat-card-content>
+            <div class="nc-card-header">
+              <span class="nc-card-title">{{ clienteNombre(v.clienteId) }}</span>
+              <mat-chip [highlighted]="v.activo" [class.chip-inactive]="!v.activo">
+                {{ v.activo ? 'Activo' : 'Inactivo' }}
+              </mat-chip>
+            </div>
 
-    <ng-container matColumnDef="cliente">
-      <th mat-header-cell *matHeaderCellDef>Cliente</th>
-      <td mat-cell *matCellDef="let v">{{ clienteNombre(v.clienteId) }}</td>
-    </ng-container>
+            <p class="nc-card-subtitle">
+              <span class="nc-code">{{ v.codigoVenta }}</span>
+              @if (isAdmin()) {
+                <span> · Dueño: {{ v.owner.name }}</span>
+              }
+            </p>
 
-    <ng-container matColumnDef="servicio">
-      <th mat-header-cell *matHeaderCellDef>Servicio</th>
-      <td mat-cell *matCellDef="let v">{{ servicioNombre(v.servicioId) }}</td>
-    </ng-container>
+            <dl class="nc-card-fields">
+              <div>
+                <dt>Servicio</dt>
+                <dd>{{ servicioNombre(v.servicioId) }}</dd>
+              </div>
+              <div>
+                <dt>Cuenta / Perfil</dt>
+                <dd>{{ cuentaPerfilLabel(v) }}</dd>
+              </div>
+              <div>
+                <dt>Periodo</dt>
+                <dd>{{ v.fechaInicio | date: 'dd/MM/yyyy' }} → {{ v.fechaFin | date: 'dd/MM/yyyy' }}</dd>
+              </div>
+              <div>
+                <dt>Precio</dt>
+                <dd>
+                  {{ v.precioPEN | soles }}
+                  @if (v.moneda !== Moneda.PEN) {
+                    <span class="original-amount">({{ v.precio | number: '1.2-2' }} {{ v.moneda }})</span>
+                  }
+                </dd>
+              </div>
+            </dl>
+          </mat-card-content>
 
-    <ng-container matColumnDef="cuentaPerfil">
-      <th mat-header-cell *matHeaderCellDef>Cuenta / Perfil</th>
-      <td mat-cell *matCellDef="let v">{{ cuentaPerfilLabel(v) }}</td>
-    </ng-container>
+          <div class="nc-card-footer">
+            @if (v.ventaComboId) {
+              <a class="combo-badge" [routerLink]="['/combo-sales', v.ventaComboId]">
+                <mat-icon>link</mat-icon>
+                {{ comboLabel(v) }}
+              </a>
+            } @else {
+              <button mat-button (click)="openEdit(v)">
+                Editar
+              </button>
+              @if (v.activo) {
+                <button mat-button (click)="confirmRenew(v)">
+                  Renovar
+                </button>
+                <button mat-button (click)="confirmDeactivate(v)">
+                  Desactivar
+                </button>
+              } @else {
+                <button mat-button (click)="confirmReactivate(v)">
+                  Reactivar
+                </button>
+              }
+            }
+          </div>
+        </mat-card>
+      }
+    </div>
+  } @else {
+    <div class="table-scroll">
+      <table mat-table [dataSource]="ventas()" class="sales-table">
+        <ng-container matColumnDef="codigoVenta">
+          <th mat-header-cell *matHeaderCellDef>Código</th>
+          <td mat-cell *matCellDef="let v"><span class="nc-code">{{ v.codigoVenta }}</span></td>
+        </ng-container>
 
-    <ng-container matColumnDef="fechaInicio">
-      <th mat-header-cell *matHeaderCellDef>Inicio</th>
-      <td mat-cell *matCellDef="let v">{{ v.fechaInicio | date: 'dd/MM/yyyy' }}</td>
-    </ng-container>
+        <ng-container matColumnDef="cliente">
+          <th mat-header-cell *matHeaderCellDef>Cliente</th>
+          <td mat-cell *matCellDef="let v">{{ clienteNombre(v.clienteId) }}</td>
+        </ng-container>
 
-    <ng-container matColumnDef="fechaFin">
-      <th mat-header-cell *matHeaderCellDef>Fin</th>
-      <td mat-cell *matCellDef="let v">{{ v.fechaFin | date: 'dd/MM/yyyy' }}</td>
-    </ng-container>
+        <ng-container matColumnDef="servicio">
+          <th mat-header-cell *matHeaderCellDef>Servicio</th>
+          <td mat-cell *matCellDef="let v">{{ servicioNombre(v.servicioId) }}</td>
+        </ng-container>
 
-    <ng-container matColumnDef="precio">
-      <th mat-header-cell *matHeaderCellDef>Precio</th>
-      <td mat-cell *matCellDef="let v">
-        {{ v.precioPEN | soles }}
-        @if (v.moneda !== Moneda.PEN) {
-          <span class="original-amount">({{ v.precio | number: '1.2-2' }} {{ v.moneda }})</span>
-        }
-      </td>
-    </ng-container>
+        <ng-container matColumnDef="cuentaPerfil">
+          <th mat-header-cell *matHeaderCellDef>Cuenta / Perfil</th>
+          <td mat-cell *matCellDef="let v">{{ cuentaPerfilLabel(v) }}</td>
+        </ng-container>
 
-    <ng-container matColumnDef="dueno">
-      <th mat-header-cell *matHeaderCellDef>Dueño</th>
-      <td mat-cell *matCellDef="let v" [matTooltip]="v.owner.email">{{ v.owner.name }}</td>
-    </ng-container>
+        <ng-container matColumnDef="fechaInicio">
+          <th mat-header-cell *matHeaderCellDef>Inicio</th>
+          <td mat-cell *matCellDef="let v">{{ v.fechaInicio | date: 'dd/MM/yyyy' }}</td>
+        </ng-container>
 
-    <ng-container matColumnDef="activo">
-      <th mat-header-cell *matHeaderCellDef>Estado</th>
-      <td mat-cell *matCellDef="let v">
-        <mat-chip [highlighted]="v.activo" [class.chip-inactive]="!v.activo">
-          {{ v.activo ? 'Activo' : 'Inactivo' }}
-        </mat-chip>
-      </td>
-    </ng-container>
+        <ng-container matColumnDef="fechaFin">
+          <th mat-header-cell *matHeaderCellDef>Fin</th>
+          <td mat-cell *matCellDef="let v">{{ v.fechaFin | date: 'dd/MM/yyyy' }}</td>
+        </ng-container>
 
-    <ng-container matColumnDef="acciones">
-      <th mat-header-cell *matHeaderCellDef></th>
-      <td mat-cell *matCellDef="let v">
-        @if (v.ventaComboId) {
-          <a
-            class="combo-badge"
-            [routerLink]="['/combo-sales', v.ventaComboId]"
-            matTooltip="Ver la venta de combo"
-          >
-            <mat-icon>link</mat-icon>
-            {{ comboLabel(v) }}
-          </a>
-        } @else {
-          <button mat-icon-button matTooltip="Editar" (click)="openEdit(v)">
-            <mat-icon>edit</mat-icon>
-          </button>
-          @if (v.activo) {
-            <button mat-icon-button matTooltip="Renovar" (click)="confirmRenew(v)">
-              <mat-icon>autorenew</mat-icon>
-            </button>
-            <button mat-icon-button matTooltip="Desactivar" (click)="confirmDeactivate(v)">
-              <mat-icon>block</mat-icon>
-            </button>
-          } @else {
-            <button mat-icon-button matTooltip="Reactivar" (click)="confirmReactivate(v)">
-              <mat-icon>restart_alt</mat-icon>
-            </button>
-          }
-        }
-      </td>
-    </ng-container>
+        <ng-container matColumnDef="precio">
+          <th mat-header-cell *matHeaderCellDef>Precio</th>
+          <td mat-cell *matCellDef="let v">
+            {{ v.precioPEN | soles }}
+            @if (v.moneda !== Moneda.PEN) {
+              <span class="original-amount">({{ v.precio | number: '1.2-2' }} {{ v.moneda }})</span>
+            }
+          </td>
+        </ng-container>
 
-    <tr mat-header-row *matHeaderRowDef="displayedColumns()"></tr>
-    <tr mat-row *matRowDef="let row; columns: displayedColumns()"></tr>
-  </table>
+        <ng-container matColumnDef="dueno">
+          <th mat-header-cell *matHeaderCellDef>Dueño</th>
+          <td mat-cell *matCellDef="let v" [matTooltip]="v.owner.email">{{ v.owner.name }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="activo">
+          <th mat-header-cell *matHeaderCellDef>Estado</th>
+          <td mat-cell *matCellDef="let v">
+            <mat-chip [highlighted]="v.activo" [class.chip-inactive]="!v.activo">
+              {{ v.activo ? 'Activo' : 'Inactivo' }}
+            </mat-chip>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="acciones">
+          <th mat-header-cell *matHeaderCellDef></th>
+          <td mat-cell *matCellDef="let v">
+            @if (v.ventaComboId) {
+              <a
+                class="combo-badge"
+                [routerLink]="['/combo-sales', v.ventaComboId]"
+                matTooltip="Ver la venta de combo"
+              >
+                <mat-icon>link</mat-icon>
+                {{ comboLabel(v) }}
+              </a>
+            } @else {
+              <button mat-icon-button matTooltip="Editar" (click)="openEdit(v)">
+                <mat-icon>edit</mat-icon>
+              </button>
+              @if (v.activo) {
+                <button mat-icon-button matTooltip="Renovar" (click)="confirmRenew(v)">
+                  <mat-icon>autorenew</mat-icon>
+                </button>
+                <button mat-icon-button matTooltip="Desactivar" (click)="confirmDeactivate(v)">
+                  <mat-icon>block</mat-icon>
+                </button>
+              } @else {
+                <button mat-icon-button matTooltip="Reactivar" (click)="confirmReactivate(v)">
+                  <mat-icon>restart_alt</mat-icon>
+                </button>
+              }
+            }
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns()"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns()"></tr>
+      </table>
+    </div>
+  }
 
   @if (ventas().length === 0) {
     <p class="empty-state">No hay ventas con estos filtros.</p>

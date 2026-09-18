@@ -1,4 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { BreakpointObserver } from '@angular/cdk/layout';
+import { of } from 'rxjs';
 import { ActivatedRoute, convertToParamMap } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { VencimientosList } from './vencimientos-list';
@@ -85,7 +87,10 @@ describe('VencimientosList', () => {
   let cuentasApi: { list: ReturnType<typeof vi.fn> };
   let perfilesApi: { list: ReturnType<typeof vi.fn> };
 
-  async function setup(queryParams: Record<string, string> = {}) {
+  async function setup(
+    queryParams: Record<string, string> = {},
+    { mobile = false }: { mobile?: boolean } = {},
+  ) {
     api = { list: vi.fn().mockResolvedValue([venta]) };
     serviciosApi = { list: vi.fn().mockResolvedValue([servicio]) };
     contactosApi = { list: vi.fn().mockResolvedValue([cliente]) };
@@ -101,6 +106,13 @@ describe('VencimientosList', () => {
         { provide: CuentasApi, useValue: cuentasApi },
         { provide: PerfilesApi, useValue: perfilesApi },
         { provide: MatSnackBar, useValue: { open: vi.fn() } },
+        {
+          provide: BreakpointObserver,
+          useValue: {
+            observe: () => of({ matches: mobile, breakpoints: {} }),
+            isMatched: () => mobile,
+          },
+        },
         {
           provide: ActivatedRoute,
           useValue: {
@@ -228,5 +240,124 @@ describe('VencimientosList', () => {
     expect(decodeURIComponent(url as string)).toContain('Netflix');
 
     openSpy.mockRestore();
+  });
+
+  describe('en pantalla angosta (tarjetas)', () => {
+    // Fecha fija: los badges de días dependen de "hoy".
+    const HOY = new Date('2026-09-18T12:00:00');
+
+    beforeEach(() => {
+      vi.useFakeTimers({ toFake: ['Date'] });
+      vi.setSystemTime(HOY);
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    function cards(): HTMLElement[] {
+      return Array.from(fixture.nativeElement.querySelectorAll('mat-card.nc-card'));
+    }
+
+    async function render(
+      queryParams: Record<string, string>,
+      mobile: boolean,
+      ventas: Venta[] = [venta],
+    ) {
+      await setup(queryParams, { mobile });
+      api.list.mockResolvedValue(ventas);
+      await fixture.whenStable();
+      fixture.detectChanges();
+    }
+
+    it('renderiza tarjetas y no la tabla', async () => {
+      await render({}, true);
+
+      expect(cards().length).toBe(1);
+      expect(fixture.nativeElement.querySelector('table')).toBeNull();
+    });
+
+    it('en desktop sigue saliendo la tabla y no las tarjetas', async () => {
+      await render({}, false);
+
+      expect(fixture.nativeElement.querySelector('.table-scroll table[mat-table]')).not.toBeNull();
+      expect(cards().length).toBe(0);
+    });
+
+    it('muestra cliente, servicio, cuenta, fecha de fin y precio', async () => {
+      await render({}, true);
+
+      const card = cards()[0];
+      expect(card.querySelector('.nc-card-title')!.textContent).toContain('Cliente Uno');
+      const text = card.textContent!;
+      expect(text).toContain('Netflix');
+      expect(text).toContain('cuenta@correo.com');
+      expect(text).toContain('09/09/2026');
+      expect(text).toContain('S/ 15.00');
+    });
+
+    it('vencida: badge en rojo con los días vencidos', async () => {
+      await render({ estado: 'vencida' }, true);
+
+      const badge = cards()[0].querySelector('.dias-badge')!;
+      expect(badge.textContent).toContain('Venció hace 9 días');
+      expect(badge.classList).toContain('dias-vencida');
+      expect(badge.classList).not.toContain('dias-por-vencer');
+    });
+
+    it('por vencer: badge en ámbar', async () => {
+      await render({ estado: 'por_vencer' }, true, [{ ...venta, fechaFin: '2026-09-20' }]);
+
+      const badge = cards()[0].querySelector('.dias-badge')!;
+      expect(badge.textContent).toContain('Vence en 2 días');
+      expect(badge.classList).toContain('dias-por-vencer');
+      expect(badge.classList).not.toContain('dias-vencida');
+    });
+
+    it('al día: badge sin color de alerta', async () => {
+      await render({ estado: 'al_dia' }, true, [{ ...venta, fechaFin: '2026-10-18' }]);
+
+      const badge = cards()[0].querySelector('.dias-badge')!;
+      expect(badge.classList).not.toContain('dias-vencida');
+      expect(badge.classList).not.toContain('dias-por-vencer');
+    });
+
+    it.each(['vencida', 'por_vencer'])(
+      'el botón de WhatsApp aparece en %s',
+      async (estado) => {
+        await render({ estado }, true);
+
+        expect(cards()[0].querySelector('.whatsapp-button')).not.toBeNull();
+      },
+    );
+
+    it('el botón de WhatsApp no aparece en al_dia (ni siquiera el pie)', async () => {
+      await render({ estado: 'al_dia' }, true);
+
+      expect(cards()[0].querySelector('.whatsapp-button')).toBeNull();
+      expect(cards()[0].querySelector('.nc-card-footer')).toBeNull();
+    });
+
+    it('el botón de WhatsApp de la tarjeta abre wa.me con los datos de esa venta', async () => {
+      await render({ estado: 'vencida' }, true);
+      const openSpy = vi.spyOn(window, 'open').mockImplementation(() => null);
+
+      (cards()[0].querySelector('.whatsapp-button') as HTMLButtonElement).click();
+
+      expect(openSpy).toHaveBeenCalledTimes(1);
+      const [url, target] = openSpy.mock.calls[0];
+      expect(target).toBe('_blank');
+      expect(url).toContain('https://wa.me/51999999999?text=');
+      expect(decodeURIComponent(url as string)).toContain('Cliente Uno');
+      expect(decodeURIComponent(url as string)).toContain('Netflix');
+
+      openSpy.mockRestore();
+    });
+
+    it('una tarjeta por venta', async () => {
+      await render({}, true, [venta, { ...venta, id: 'v-2' }, { ...venta, id: 'v-3' }]);
+
+      expect(cards().length).toBe(3);
+    });
   });
 });

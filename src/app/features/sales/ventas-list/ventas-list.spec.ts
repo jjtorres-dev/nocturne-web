@@ -1,8 +1,10 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { BreakpointObserver } from '@angular/cdk/layout';
 import { HttpErrorResponse } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
 import { of } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
+import { VentaEditDialog } from '../venta-edit-dialog/venta-edit-dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { VentasList } from './ventas-list';
 import { VentasApi } from '../ventas-api';
@@ -116,7 +118,10 @@ describe('VentasList', () => {
   let snackBar: { open: ReturnType<typeof vi.fn> };
   let auth: { currentUser: ReturnType<typeof vi.fn> };
 
-  async function setup(role: UserRole = UserRole.ADMIN) {
+  async function setup(
+    role: UserRole = UserRole.ADMIN,
+    { mobile = false }: { mobile?: boolean } = {},
+  ) {
     TestBed.resetTestingModule();
     api = {
       list: vi.fn().mockResolvedValue([venta]),
@@ -148,6 +153,13 @@ describe('VentasList', () => {
         { provide: Auth, useValue: auth },
         { provide: MatDialog, useValue: dialog },
         { provide: MatSnackBar, useValue: snackBar },
+        {
+          provide: BreakpointObserver,
+          useValue: {
+            observe: () => of({ matches: mobile, breakpoints: {} }),
+            isMatched: () => mobile,
+          },
+        },
       ],
     }).compileComponents();
 
@@ -323,5 +335,174 @@ describe('VentasList', () => {
     fixture.detectChanges();
 
     expect(fixture.nativeElement.querySelector('.mat-column-dueno')).toBeNull();
+  });
+
+  describe('en pantalla angosta (tarjetas)', () => {
+    function cards(): HTMLElement[] {
+      return Array.from(fixture.nativeElement.querySelectorAll('mat-card.nc-card'));
+    }
+
+    function button(card: HTMLElement, label: string): HTMLButtonElement | undefined {
+      return (Array.from(card.querySelectorAll('button')) as HTMLButtonElement[]).find(
+        (b) => b.textContent?.includes(label),
+      );
+    }
+
+    async function render(
+      mobile: boolean,
+      { role = UserRole.ADMIN, ventas = [venta] }: { role?: UserRole; ventas?: Venta[] } = {},
+    ) {
+      await setup(role, { mobile });
+      api.list.mockResolvedValue(ventas);
+      await fixture.whenStable();
+      fixture.detectChanges();
+    }
+
+    it('renderiza tarjetas y no la tabla', async () => {
+      await render(true);
+
+      expect(cards().length).toBe(1);
+      expect(fixture.nativeElement.querySelector('table')).toBeNull();
+    });
+
+    it('en desktop sigue saliendo la tabla y no las tarjetas', async () => {
+      await render(false);
+
+      expect(fixture.nativeElement.querySelector('table[mat-table]')).not.toBeNull();
+      expect(cards().length).toBe(0);
+    });
+
+    it('la tabla de desktop va dentro del contenedor con scroll horizontal', async () => {
+      await render(false);
+
+      expect(
+        fixture.nativeElement.querySelector('.table-scroll table[mat-table]'),
+      ).not.toBeNull();
+    });
+
+    it('muestra cliente, estado, servicio, cuenta/perfil, periodo y precio', async () => {
+      await render(true);
+
+      const card = cards()[0];
+      expect(card.querySelector('.nc-card-title')!.textContent).toContain('Cliente Uno');
+      expect(card.querySelector('mat-chip')!.textContent).toContain('Activo');
+      const text = card.textContent!;
+      expect(text).toContain('V-00001');
+      expect(text).toContain('Netflix');
+      expect(text).toContain('cuenta@correo.com — Perfil 1');
+      expect(text).toContain('01/01/2026 → 01/02/2026');
+      expect(text).toContain('S/ 15.00');
+    });
+
+    it('muestra el precio original si la moneda no es PEN', async () => {
+      await render(true, {
+        ventas: [
+          { ...venta, precio: 20, moneda: Moneda.USD, tasaCambio: 3.8, precioPEN: 76 },
+        ],
+      });
+
+      expect(cards()[0].textContent).toContain('S/ 76.00');
+      expect(cards()[0].textContent).toContain('(20.00 USD)');
+    });
+
+    it('un ADMIN ve el Dueño en la tarjeta', async () => {
+      await render(true);
+
+      expect(cards()[0].querySelector('.nc-card-subtitle')!.textContent).toContain(
+        'Dueño: Admin',
+      );
+    });
+
+    it('un REVENDEDOR no ve el Dueño en la tarjeta', async () => {
+      await render(true, { role: UserRole.REVENDEDOR });
+
+      expect(cards()[0].textContent).not.toContain('Dueño');
+    });
+
+    it('una venta activa ofrece Editar, Renovar y Desactivar (no Reactivar)', async () => {
+      await render(true);
+
+      const card = cards()[0];
+      expect(button(card, 'Editar')).toBeDefined();
+      expect(button(card, 'Renovar')).toBeDefined();
+      expect(button(card, 'Desactivar')).toBeDefined();
+      expect(button(card, 'Reactivar')).toBeUndefined();
+    });
+
+    it('una venta inactiva ofrece Editar y Reactivar (no Renovar ni Desactivar)', async () => {
+      await render(true, { ventas: [ventaInactiva] });
+
+      const card = cards()[0];
+      expect(card.querySelector('mat-chip')!.textContent).toContain('Inactivo');
+      expect(button(card, 'Editar')).toBeDefined();
+      expect(button(card, 'Reactivar')).toBeDefined();
+      expect(button(card, 'Renovar')).toBeUndefined();
+      expect(button(card, 'Desactivar')).toBeUndefined();
+    });
+
+    it('Editar abre el modal de edición con la venta', async () => {
+      await render(true);
+      dialog.open.mockReturnValue({ afterClosed: () => of(undefined) });
+
+      button(cards()[0], 'Editar')!.click();
+
+      expect(dialog.open).toHaveBeenCalledWith(
+        VentaEditDialog,
+        expect.objectContaining({ data: { venta } }),
+      );
+    });
+
+    it('Renovar pide confirmación y renueva la venta', async () => {
+      await render(true);
+      dialog.open.mockReturnValue({ afterClosed: () => of(true) });
+
+      button(cards()[0], 'Renovar')!.click();
+      await Promise.resolve();
+      await Promise.resolve();
+
+      expect(api.renew).toHaveBeenCalledWith('v-1');
+    });
+
+    it('Desactivar pide confirmación y desactiva la venta', async () => {
+      await render(true);
+      dialog.open.mockReturnValue({ afterClosed: () => of(true) });
+
+      button(cards()[0], 'Desactivar')!.click();
+      await Promise.resolve();
+      await Promise.resolve();
+
+      expect(api.deactivate).toHaveBeenCalledWith('v-1');
+    });
+
+    it('Desactivar no hace nada si se cancela la confirmación', async () => {
+      await render(true);
+      dialog.open.mockReturnValue({ afterClosed: () => of(false) });
+
+      button(cards()[0], 'Desactivar')!.click();
+      await Promise.resolve();
+
+      expect(api.deactivate).not.toHaveBeenCalled();
+    });
+
+    it('Reactivar pide confirmación y reactiva la venta', async () => {
+      await render(true, { ventas: [ventaInactiva] });
+      dialog.open.mockReturnValue({ afterClosed: () => of(true) });
+
+      button(cards()[0], 'Reactivar')!.click();
+      await Promise.resolve();
+      await Promise.resolve();
+
+      expect(api.reactivate).toHaveBeenCalledWith('v-2');
+    });
+
+    it('una venta hija de combo muestra el badge en vez de las acciones', async () => {
+      await render(true, { ventas: [ventaDeCombo] });
+
+      const card = cards()[0];
+      expect(card.querySelectorAll('button').length).toBe(0);
+      const badge = card.querySelector('.combo-badge')!;
+      expect(badge.textContent).toContain('Parte de combo C-00001');
+      expect(badge.getAttribute('href')).toBe('/combo-sales/vc-1');
+    });
   });
 });

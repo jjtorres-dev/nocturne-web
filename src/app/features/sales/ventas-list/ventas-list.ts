@@ -8,6 +8,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -26,6 +27,7 @@ import { VentaCombosApi } from '../../combo-sales/venta-combos-api';
 import { VentaCreateDialog } from '../venta-create-dialog/venta-create-dialog';
 import { VentaEditDialog } from '../venta-edit-dialog/venta-edit-dialog';
 import { ConfirmDialog } from '../../../shared/confirm-dialog/confirm-dialog';
+import { injectIsMobile } from '../../../shared/breakpoints';
 import { SolesPipe } from '../../../shared/soles.pipe';
 import { Auth, UserRole } from '../../../core/auth/auth';
 
@@ -39,6 +41,7 @@ type ActivoFilter = 'todos' | 'activos' | 'inactivos';
     RouterLink,
     SolesPipe,
     MatTableModule,
+    MatCardModule,
     MatFormFieldModule,
     MatSelectModule,
     MatButtonModule,
@@ -62,6 +65,7 @@ export class VentasList implements OnInit {
   private readonly dialog = inject(MatDialog);
   private readonly snackBar = inject(MatSnackBar);
 
+  protected readonly isMobile = injectIsMobile();
   protected readonly Moneda = Moneda;
   protected readonly isAdmin = computed(
     () => this.auth.currentUser()?.role === UserRole.ADMIN,

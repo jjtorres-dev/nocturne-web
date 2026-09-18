@@ -5,6 +5,7 @@ import { ActivatedRoute } from '@angular/router';
 import { MatTableModule } from '@angular/material/table';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatIconModule } from '@angular/material/icon';
@@ -26,6 +27,7 @@ import { type Contacto } from '../../contacts/contacto.model';
 import { CuentasApi } from '../../accounts/cuentas-api';
 import { type CuentaListItem } from '../../accounts/cuenta.model';
 import { PerfilesApi } from '../../accounts/profiles/perfiles-api';
+import { injectIsMobile } from '../../../shared/breakpoints';
 import { SolesPipe } from '../../../shared/soles.pipe';
 
 const ESTADOS_VALIDOS = new Set<string>(Object.values(VencimientoFiltro));
@@ -37,6 +39,7 @@ const ESTADOS_VALIDOS = new Set<string>(Object.values(VencimientoFiltro));
     DecimalPipe,
     SolesPipe,
     MatTableModule,
+    MatCardModule,
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
@@ -58,6 +61,7 @@ export class VencimientosList implements OnInit {
   private readonly perfilesApi = inject(PerfilesApi);
   private readonly snackBar = inject(MatSnackBar);
 
+  protected readonly isMobile = injectIsMobile();
   protected readonly Moneda = Moneda;
   protected readonly estados = Object.values(VencimientoFiltro);
   protected readonly estadoLabels = VENCIMIENTO_LABELS;
@@ -165,6 +169,15 @@ export class VencimientosList implements OnInit {
     );
     const fin = new Date(`${fechaFin}T00:00:00Z`).getTime();
     return Math.round((fin - hoyUTC) / 86_400_000);
+  }
+
+  protected diasLabel(dias: number): string {
+    if (dias === 0) {
+      return 'Vence hoy';
+    }
+    const n = Math.abs(dias);
+    const unidad = n === 1 ? 'día' : 'días';
+    return dias < 0 ? `Venció hace ${n} ${unidad}` : `Vence en ${n} ${unidad}`;
   }
 
   mostrarWhatsapp(): boolean {

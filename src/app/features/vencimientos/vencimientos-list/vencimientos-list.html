@@ -30,62 +30,124 @@
     <mat-spinner diameter="32" />
   </div>
 } @else {
-  <table mat-table [dataSource]="ventas()" class="vencimientos-table">
-    <ng-container matColumnDef="cliente">
-      <th mat-header-cell *matHeaderCellDef>Cliente</th>
-      <td mat-cell *matCellDef="let v">{{ clienteNombre(v.clienteId) }}</td>
-    </ng-container>
+  @if (isMobile()) {
+    <div class="nc-card-list">
+      @for (v of ventas(); track v.id) {
+        @let dias = diasDiferencia(v.fechaFin);
+        <mat-card class="nc-card">
+          <mat-card-content>
+            <div class="nc-card-header">
+              <span class="nc-card-title">{{ clienteNombre(v.clienteId) }}</span>
+              <span
+                class="dias-badge"
+                [class.dias-vencida]="dias < 0"
+                [class.dias-por-vencer]="dias >= 0 && estado === VencimientoFiltro.POR_VENCER"
+              >
+                {{ diasLabel(dias) }}
+              </span>
+            </div>
 
-    <ng-container matColumnDef="servicio">
-      <th mat-header-cell *matHeaderCellDef>Servicio</th>
-      <td mat-cell *matCellDef="let v">{{ servicioNombre(v.servicioId) }}</td>
-    </ng-container>
+            <dl class="nc-card-fields">
+              <div>
+                <dt>Servicio</dt>
+                <dd>{{ servicioNombre(v.servicioId) }}</dd>
+              </div>
+              <div>
+                <dt>Cuenta / Perfil</dt>
+                <dd>{{ cuentaPerfilLabel(v) }}</dd>
+              </div>
+              <div>
+                <dt>Fecha de fin</dt>
+                <dd>{{ v.fechaFin | date: 'dd/MM/yyyy' }}</dd>
+              </div>
+              <div>
+                <dt>Precio</dt>
+                <dd>
+                  {{ v.precioPEN | soles }}
+                  @if (v.moneda !== Moneda.PEN) {
+                    <span class="original-amount">({{ v.precio | number: '1.2-2' }} {{ v.moneda }})</span>
+                  }
+                </dd>
+              </div>
+            </dl>
+          </mat-card-content>
 
-    <ng-container matColumnDef="cuentaPerfil">
-      <th mat-header-cell *matHeaderCellDef>Cuenta / Perfil</th>
-      <td mat-cell *matCellDef="let v">{{ cuentaPerfilLabel(v) }}</td>
-    </ng-container>
+          @if (mostrarWhatsapp()) {
+            <div class="nc-card-footer">
+              <button
+                mat-flat-button
+                color="primary"
+                class="whatsapp-button"
+                (click)="abrirWhatsapp(v)"
+              >
+                <mat-icon>chat</mat-icon>
+                Enviar por WhatsApp
+              </button>
+            </div>
+          }
+        </mat-card>
+      }
+    </div>
+  } @else {
+    <div class="table-scroll">
+      <table mat-table [dataSource]="ventas()" class="vencimientos-table">
+        <ng-container matColumnDef="cliente">
+          <th mat-header-cell *matHeaderCellDef>Cliente</th>
+          <td mat-cell *matCellDef="let v">{{ clienteNombre(v.clienteId) }}</td>
+        </ng-container>
 
-    <ng-container matColumnDef="fechaFin">
-      <th mat-header-cell *matHeaderCellDef>Fecha de fin</th>
-      <td mat-cell *matCellDef="let v">{{ v.fechaFin | date: 'dd/MM/yyyy' }}</td>
-    </ng-container>
+        <ng-container matColumnDef="servicio">
+          <th mat-header-cell *matHeaderCellDef>Servicio</th>
+          <td mat-cell *matCellDef="let v">{{ servicioNombre(v.servicioId) }}</td>
+        </ng-container>
 
-    <ng-container matColumnDef="dias">
-      <th mat-header-cell *matHeaderCellDef>Días</th>
-      <td mat-cell *matCellDef="let v" [class.dias-negativo]="diasDiferencia(v.fechaFin) < 0">
-        {{ diasDiferencia(v.fechaFin) }}
-      </td>
-    </ng-container>
+        <ng-container matColumnDef="cuentaPerfil">
+          <th mat-header-cell *matHeaderCellDef>Cuenta / Perfil</th>
+          <td mat-cell *matCellDef="let v">{{ cuentaPerfilLabel(v) }}</td>
+        </ng-container>
 
-    <ng-container matColumnDef="precio">
-      <th mat-header-cell *matHeaderCellDef>Precio</th>
-      <td mat-cell *matCellDef="let v">
-        {{ v.precioPEN | soles }}
-        @if (v.moneda !== Moneda.PEN) {
-          <span class="original-amount">({{ v.precio | number: '1.2-2' }} {{ v.moneda }})</span>
-        }
-      </td>
-    </ng-container>
+        <ng-container matColumnDef="fechaFin">
+          <th mat-header-cell *matHeaderCellDef>Fecha de fin</th>
+          <td mat-cell *matCellDef="let v">{{ v.fechaFin | date: 'dd/MM/yyyy' }}</td>
+        </ng-container>
 
-    <ng-container matColumnDef="acciones">
-      <th mat-header-cell *matHeaderCellDef></th>
-      <td mat-cell *matCellDef="let v">
-        @if (mostrarWhatsapp()) {
-          <button
-            mat-icon-button
-            matTooltip="Enviar recordatorio por WhatsApp"
-            (click)="abrirWhatsapp(v)"
-          >
-            <mat-icon>chat</mat-icon>
-          </button>
-        }
-      </td>
-    </ng-container>
+        <ng-container matColumnDef="dias">
+          <th mat-header-cell *matHeaderCellDef>Días</th>
+          <td mat-cell *matCellDef="let v" [class.dias-negativo]="diasDiferencia(v.fechaFin) < 0">
+            {{ diasDiferencia(v.fechaFin) }}
+          </td>
+        </ng-container>
 
-    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-    <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
-  </table>
+        <ng-container matColumnDef="precio">
+          <th mat-header-cell *matHeaderCellDef>Precio</th>
+          <td mat-cell *matCellDef="let v">
+            {{ v.precioPEN | soles }}
+            @if (v.moneda !== Moneda.PEN) {
+              <span class="original-amount">({{ v.precio | number: '1.2-2' }} {{ v.moneda }})</span>
+            }
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="acciones">
+          <th mat-header-cell *matHeaderCellDef></th>
+          <td mat-cell *matCellDef="let v">
+            @if (mostrarWhatsapp()) {
+              <button
+                mat-icon-button
+                matTooltip="Enviar recordatorio por WhatsApp"
+                (click)="abrirWhatsapp(v)"
+              >
+                <mat-icon>chat</mat-icon>
+              </button>
+            }
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+      </table>
+    </div>
+  }
 
   @if (ventas().length === 0) {
     <p class="empty-state">No hay ventas en este estado.</p>

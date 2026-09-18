@@ -228,3 +228,82 @@ html {
     }
   }
 }
+
+// ---------------------------------------------------------------------------
+// Tarjetas de lista (móvil)
+//
+// Ventas y Vencimientos reemplazan su tabla por una lista de <mat-card
+// class="nc-card"> por debajo del breakpoint (ver injectIsMobile en
+// shared/breakpoints.ts). La estructura es la misma en ambas pantallas:
+// encabezado (título + chip/badge), campos etiqueta/valor y pie de acciones.
+// ---------------------------------------------------------------------------
+.nc-card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.nc-card {
+  // El pie no es un mat-card-actions, así que el contenido no es el último
+  // hijo y Material no le da padding inferior.
+  .mat-mdc-card-content {
+    padding-bottom: 12px;
+  }
+
+  .nc-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .nc-card-title {
+    min-width: 0;
+    font-size: 1.05rem;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+  }
+
+  .nc-card-subtitle {
+    margin: 2px 0 0;
+    font-size: 0.8125rem;
+    color: var(--nc-text-secondary);
+  }
+
+  .nc-card-fields {
+    display: grid;
+    gap: 8px;
+    margin: 12px 0 0;
+
+    > div {
+      display: grid;
+      grid-template-columns: 104px minmax(0, 1fr);
+      gap: 8px;
+    }
+
+    dt {
+      font-size: 0.8125rem;
+      color: var(--nc-text-secondary);
+    }
+
+    dd {
+      margin: 0;
+      overflow-wrap: anywhere;
+    }
+  }
+
+  // Botones de igual ancho en una sola fila, con el área táctil de 48px de
+  // alto de Material.
+  .nc-card-footer {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 12px 12px;
+    border-top: 1px solid var(--nc-border);
+
+    .mat-mdc-button {
+      flex: 1 1 0;
+      min-width: 0;
+    }
+  }
+}
