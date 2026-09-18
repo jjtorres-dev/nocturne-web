@@ -46,7 +46,7 @@
     <ng-container matColumnDef="codigoVenta">
       <th mat-header-cell *matHeaderCellDef>Código</th>
       <td mat-cell *matCellDef="let v">
-        <a [routerLink]="['/combo-sales', v.id]">{{ v.codigoVenta }}</a>
+        <a class="nc-code" [routerLink]="['/combo-sales', v.id]">{{ v.codigoVenta }}</a>
       </td>
     </ng-container>
 

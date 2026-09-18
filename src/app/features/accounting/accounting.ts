@@ -204,10 +204,37 @@ export class Accounting implements OnInit, AfterViewInit, OnDestroy {
       this.chart.update();
       return;
     }
+    // Colores fijos que reflejan los tokens de Nocturne (--nc-text-secondary,
+    // --nc-text-primary, --nc-surface-elevated, --nc-border): Chart.js pinta
+    // en un <canvas>, así que no puede tomar `var(--mat-sys-*)` directo.
     this.chart = new Chart(ctx, {
       type: 'bar',
       data,
-      options: { responsive: true, maintainAspectRatio: false },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        color: '#94a3b8',
+        scales: {
+          x: {
+            ticks: { color: '#94a3b8' },
+            grid: { color: 'rgba(255, 255, 255, 0.06)' },
+          },
+          y: {
+            ticks: { color: '#94a3b8' },
+            grid: { color: 'rgba(255, 255, 255, 0.06)' },
+          },
+        },
+        plugins: {
+          legend: { labels: { color: '#e6e9f0' } },
+          tooltip: {
+            backgroundColor: '#1c2333',
+            titleColor: '#e6e9f0',
+            bodyColor: '#e6e9f0',
+            borderColor: '#232b40',
+            borderWidth: 1,
+          },
+        },
+      },
     });
   }
 }

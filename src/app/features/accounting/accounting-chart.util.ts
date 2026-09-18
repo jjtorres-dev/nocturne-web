@@ -12,17 +12,17 @@ export function buildTimelineChartData(
       {
         label: 'Ingresos',
         data: points.map((p) => p.ingresos),
-        backgroundColor: '#2e7d32',
+        backgroundColor: '#10b981', // --nc-accent-green
       },
       {
         label: 'Gastos',
         data: points.map((p) => p.gastos),
-        backgroundColor: '#c62828',
+        backgroundColor: '#ef4444',
       },
       {
         label: 'Ganancia',
         data: points.map((p) => p.ganancia),
-        backgroundColor: '#1565c0',
+        backgroundColor: '#3b82f6', // --nc-accent-blue
       },
     ],
   };

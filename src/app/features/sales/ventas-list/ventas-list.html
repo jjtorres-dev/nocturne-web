@@ -45,7 +45,7 @@
   <table mat-table [dataSource]="ventas()" class="sales-table">
     <ng-container matColumnDef="codigoVenta">
       <th mat-header-cell *matHeaderCellDef>Código</th>
-      <td mat-cell *matCellDef="let v">{{ v.codigoVenta }}</td>
+      <td mat-cell *matCellDef="let v"><span class="nc-code">{{ v.codigoVenta }}</span></td>
     </ng-container>
 
     <ng-container matColumnDef="cliente">

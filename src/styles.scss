@@ -140,3 +140,33 @@ body {
 .mat-mdc-row:hover {
   background-color: var(--nc-surface-elevated);
 }
+
+// ---------------------------------------------------------------------------
+// Fase 2 — detalles compartidos
+// ---------------------------------------------------------------------------
+
+// Códigos de venta/combo (V-00001, C-00001): tipografía monoespaciada en
+// vez del texto general, en tablas y páginas de detalle.
+.nc-code {
+  font-family: var(--nc-font-mono);
+  letter-spacing: 0.02em;
+}
+
+// Diálogos: superficie elevada (no la misma que el fondo/sidebar) + borde
+// sutil, igual que las tarjetas.
+html {
+  --mat-dialog-container-color: var(--nc-surface-elevated);
+}
+
+.mat-mdc-dialog-surface {
+  border: 1px solid var(--nc-border);
+}
+
+// mat-chip sin "highlighted" (Inactivo, en todas las pantallas): con
+// opacity 0.7 el texto (on-surface-variant) queda por debajo de 4.5:1 de
+// contraste contra el nuevo fondo oscuro. Se sube a 0.8 (~4.9:1) sin tocar
+// el color en sí — antes vivía duplicado en cada *-list.scss/*.detail.scss,
+// se centraliza acá.
+.chip-inactive {
+  opacity: 0.8;
+}
