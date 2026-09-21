@@ -11,6 +11,19 @@
   border-inline-end: 1px solid var(--nc-border);
 }
 
+// Columna que ocupa todo el alto del drawer: la navegación crece y el pie
+// queda pegado al fondo (sticky, para que siga visible si la lista de links
+// desborda en pantallas bajas).
+.sidenav-body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
+.nav-list {
+  flex: 1 1 auto;
+}
+
 .brand {
   padding: 16px;
   font-size: 1.35rem;
@@ -30,17 +43,8 @@
   border-bottom: 1px solid var(--nc-border);
 }
 
-.spacer {
-  flex: 1 1 auto;
-}
-
 .menu-button {
   margin-right: 8px;
-}
-
-.user-name {
-  margin-right: 8px;
-  font-size: 0.875rem;
 }
 
 .content {
@@ -54,14 +58,6 @@
 
   .content {
     padding: 16px;
-  }
-}
-
-// En pantallas muy angostas el nombre del usuario compite con el título
-// del header; el botón de cerrar sesión basta.
-@media (max-width: 479.98px) {
-  .user-name {
-    display: none;
   }
 }
 
@@ -88,4 +84,63 @@
     background: var(--nc-gradient-primary);
     box-shadow: 0 0 12px 1px rgba(59, 130, 246, 0.5);
   }
+}
+
+.sidenav-footer {
+  position: sticky;
+  bottom: 0;
+  padding: 8px;
+  border-top: 1px solid var(--nc-border);
+  background: var(--mat-sys-surface-container-low);
+}
+
+// Tarjeta chica clickeable: avatar + nombre + rol; abre el menú del usuario.
+.user-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+
+  &:hover,
+  &[aria-expanded='true'] {
+    background: var(--nc-surface-elevated);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--nc-accent-solid);
+    outline-offset: 2px;
+  }
+}
+
+.user-info {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.user-name {
+  overflow: hidden;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.user-role {
+  font-size: 0.75rem;
+  color: var(--nc-text-secondary);
+}
+
+.user-chevron {
+  flex-shrink: 0;
+  color: var(--nc-text-secondary);
 }

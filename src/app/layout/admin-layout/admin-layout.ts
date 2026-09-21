@@ -5,8 +5,11 @@ import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
 import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
+import { MatMenuModule } from '@angular/material/menu';
 import { Auth, UserRole } from '../../core/auth/auth';
+import { AvatarInicial } from '../../shared/avatar-inicial/avatar-inicial';
 import { injectIsMobile } from '../../shared/breakpoints';
+import { USER_ROLE_LABELS } from '../../features/users/usuario.model';
 
 interface NavItem {
   label: string;
@@ -19,6 +22,7 @@ interface NavItem {
 
 @Component({
   imports: [
+    AvatarInicial,
     RouterLink,
     RouterLinkActive,
     RouterOutlet,
@@ -27,6 +31,7 @@ interface NavItem {
     MatListModule,
     MatIconModule,
     MatButtonModule,
+    MatMenuModule,
   ],
   selector: 'app-admin-layout',
   styleUrl: './admin-layout.scss',
@@ -38,6 +43,8 @@ export class AdminLayout {
   // En pantallas angostas el sidenav pasa a modo "over" (oculto por defecto,
   // se abre con el botón de hamburguesa); en desktop queda fijo y visible.
   protected readonly isMobile = injectIsMobile();
+
+  protected readonly roleLabels = USER_ROLE_LABELS;
 
   // Se irán sumando secciones a medida que avancen las fases del roadmap.
   private readonly allNavItems: NavItem[] = [

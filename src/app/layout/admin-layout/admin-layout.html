@@ -5,20 +5,47 @@
     [mode]="isMobile() ? 'over' : 'side'"
     [opened]="!isMobile()"
   >
-    <div class="brand">Nocturne</div>
-    <mat-nav-list>
-      @for (item of navItems(); track item.route) {
-        <a
-          mat-list-item
-          [routerLink]="item.route"
-          routerLinkActive="active-link"
-          (click)="closeIfMobile(sidenav)"
-        >
-          <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
-          <span matListItemTitle>{{ item.label }}</span>
-        </a>
+    <div class="sidenav-body">
+      <div class="brand">Nocturne</div>
+      <mat-nav-list class="nav-list">
+        @for (item of navItems(); track item.route) {
+          <a
+            mat-list-item
+            [routerLink]="item.route"
+            routerLinkActive="active-link"
+            (click)="closeIfMobile(sidenav)"
+          >
+            <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
+            <span matListItemTitle>{{ item.label }}</span>
+          </a>
+        }
+      </mat-nav-list>
+
+      <!-- Usuario y sesión: pegados al fondo, debajo de la navegación. -->
+      @if (auth.currentUser(); as user) {
+        <div class="sidenav-footer">
+          <button type="button" class="user-card" [matMenuTriggerFor]="userMenu">
+            <app-avatar-inicial [nombre]="user.name" [size]="36" />
+            <span class="user-info">
+              <span class="user-name">{{ user.name }}</span>
+              <span class="user-role">{{ roleLabels[user.role] }}</span>
+            </span>
+            <mat-icon class="user-chevron" aria-hidden="true">unfold_more</mat-icon>
+          </button>
+
+          <mat-menu #userMenu="matMenu" class="nc-user-menu" yPosition="above">
+            <a mat-menu-item routerLink="/configuracion" (click)="closeIfMobile(sidenav)">
+              <mat-icon>settings</mat-icon>
+              <span>Configuración</span>
+            </a>
+            <button mat-menu-item type="button" (click)="logout()">
+              <mat-icon>logout</mat-icon>
+              <span>Cerrar sesión</span>
+            </button>
+          </mat-menu>
+        </div>
       }
-    </mat-nav-list>
+    </div>
   </mat-sidenav>
 
   <mat-sidenav-content>
@@ -34,13 +61,6 @@
         </button>
       }
       <span>Panel de administración</span>
-      <span class="spacer"></span>
-      @if (auth.currentUser(); as user) {
-        <span class="user-name">{{ user.name }}</span>
-      }
-      <button mat-icon-button (click)="logout()" aria-label="Cerrar sesión">
-        <mat-icon>logout</mat-icon>
-      </button>
     </mat-toolbar>
 
     <main class="content">

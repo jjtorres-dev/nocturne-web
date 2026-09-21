@@ -102,6 +102,15 @@ export const routes: Routes = [
           ),
       },
       {
+        // Sin `role`: cualquier usuario logueado (el authGuard del padre basta).
+        // No está en `navItems`: se llega solo desde el menú del pie del sidebar.
+        path: 'configuracion',
+        loadComponent: () =>
+          import('./features/configuracion/configuracion').then(
+            (m) => m.Configuracion,
+          ),
+      },
+      {
         path: 'users',
         loadComponent: () =>
           import('./features/users/usuarios-list/usuarios-list').then(

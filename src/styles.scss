@@ -152,6 +152,13 @@ body {
   letter-spacing: 0.02em;
 }
 
+// Menú del usuario (pie del sidebar): el panel se renderiza en un overlay,
+// fuera del encapsulamiento del layout.
+// (Doble clase: Material fija `min-width: 112px` en `.mat-mdc-menu-panel`.)
+.mat-mdc-menu-panel.nc-user-menu {
+  min-width: 208px;
+}
+
 // Ícono/avatar (shared/service-icon, shared/avatar-inicial) junto al nombre
 // en una celda de tabla.
 .nc-name-cell {
