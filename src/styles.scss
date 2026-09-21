@@ -152,6 +152,14 @@ body {
   letter-spacing: 0.02em;
 }
 
+// Ícono/avatar (shared/service-icon, shared/avatar-inicial) junto al nombre
+// en una celda de tabla.
+.nc-name-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
 // Diálogos: superficie elevada (no la misma que el fondo/sidebar) + borde
 // sutil, igual que las tarjetas.
 html {

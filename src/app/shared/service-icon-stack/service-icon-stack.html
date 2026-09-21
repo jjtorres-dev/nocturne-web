@@ -1,0 +1,20 @@
+<span class="stack" role="list">
+  @for (s of visibles(); track s.id) {
+    <span class="item" role="listitem" [matTooltip]="s.nombre" [attr.aria-label]="s.nombre">
+      <app-service-icon [nombre]="s.nombre" [size]="size()" />
+    </span>
+  }
+  @if (ocultos().length > 0) {
+    <span
+      class="item more"
+      role="listitem"
+      [matTooltip]="ocultosLabel()"
+      [attr.aria-label]="ocultosLabel()"
+      [style.width.px]="size()"
+      [style.height.px]="size()"
+      [style.font-size.px]="size() * 0.38"
+    >
+      +{{ ocultos().length }}
+    </span>
+  }
+</span>

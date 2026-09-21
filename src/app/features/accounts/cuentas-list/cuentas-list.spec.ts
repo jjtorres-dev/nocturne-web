@@ -151,4 +151,31 @@ describe('CuentasList', () => {
 
     expect(fixture.nativeElement.querySelector('.mat-column-dueno')).toBeNull();
   });
+
+  it('muestra el ícono del servicio al que pertenece la cuenta', async () => {
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const cell: HTMLElement = fixture.nativeElement.querySelector('td.mat-column-servicio');
+    expect(cell.querySelector('app-service-icon')).not.toBeNull();
+    expect(cell.textContent).toContain(servicio.nombre);
+  });
+
+  it('muestra el estado vacío cuando no hay resultados', async () => {
+    api.list.mockResolvedValue([]);
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const empty: HTMLElement | null = fixture.nativeElement.querySelector('app-empty-state');
+    expect(empty).not.toBeNull();
+    expect(empty?.textContent).toContain('No hay cuentas con estos filtros.');
+    expect(empty?.textContent).toContain('Prueba cambiando o quitando los filtros.');
+  });
+
+  it('no muestra el estado vacío cuando hay resultados', async () => {
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('app-empty-state')).toBeNull();
+  });
 });

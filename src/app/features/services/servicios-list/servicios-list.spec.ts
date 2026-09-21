@@ -148,4 +148,41 @@ describe('ServiciosList', () => {
 
     expect(fixture.nativeElement.querySelector('.mat-column-dueno')).toBeNull();
   });
+
+  it('muestra el ícono de marca junto al nombre del servicio', async () => {
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const cell: HTMLElement = fixture.nativeElement.querySelector('td.mat-column-nombre');
+    expect(cell.querySelector('app-service-icon svg')).not.toBeNull();
+    expect(cell.textContent).toContain('Netflix');
+  });
+
+  it('cae al avatar de iniciales si el servicio no tiene ícono de marca', async () => {
+    api.list.mockResolvedValue([{ ...servicio, nombre: 'Servicio Inventado' }]);
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const cell: HTMLElement = fixture.nativeElement.querySelector('td.mat-column-nombre');
+    expect(cell.querySelector('svg')).toBeNull();
+    expect(cell.querySelector('app-avatar-inicial')?.textContent?.trim()).toBe('SI');
+  });
+
+  it('muestra el estado vacío cuando no hay resultados', async () => {
+    api.list.mockResolvedValue([]);
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const empty: HTMLElement | null = fixture.nativeElement.querySelector('app-empty-state');
+    expect(empty).not.toBeNull();
+    expect(empty?.textContent).toContain('No hay servicios con estos filtros.');
+    expect(empty?.textContent).toContain('Prueba cambiando o quitando los filtros.');
+  });
+
+  it('no muestra el estado vacío cuando hay resultados', async () => {
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('app-empty-state')).toBeNull();
+  });
 });

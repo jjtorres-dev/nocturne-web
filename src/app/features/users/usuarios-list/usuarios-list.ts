@@ -16,11 +16,13 @@ import { UsuariosApi } from '../usuarios-api';
 import { USER_ROLE_LABELS, type Usuario, type UserRole } from '../usuario.model';
 import { UsuarioFormDialog } from '../usuario-form-dialog/usuario-form-dialog';
 import { ConfirmDialog } from '../../../shared/confirm-dialog/confirm-dialog';
+import { EmptyState } from '../../../shared/empty-state/empty-state';
 
 type ActivoFilter = 'todos' | 'activos' | 'inactivos';
 
 @Component({
   imports: [
+    EmptyState,
     FormsModule,
     MatTableModule,
     MatFormFieldModule,

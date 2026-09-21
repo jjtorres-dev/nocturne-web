@@ -20,9 +20,11 @@ import { VentaComboEditDialog } from '../venta-combo-edit-dialog/venta-combo-edi
 import { ConfirmDialog } from '../../../shared/confirm-dialog/confirm-dialog';
 import { SolesPipe } from '../../../shared/soles.pipe';
 import { Auth, UserRole } from '../../../core/auth/auth';
+import { ServiceIconStack } from '../../../shared/service-icon-stack/service-icon-stack';
 
 @Component({
   imports: [
+    ServiceIconStack,
     DatePipe,
     DecimalPipe,
     RouterLink,

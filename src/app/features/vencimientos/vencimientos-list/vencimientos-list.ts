@@ -29,11 +29,13 @@ import { type CuentaListItem } from '../../accounts/cuenta.model';
 import { PerfilesApi } from '../../accounts/profiles/perfiles-api';
 import { injectIsMobile } from '../../../shared/breakpoints';
 import { SolesPipe } from '../../../shared/soles.pipe';
+import { EmptyState } from '../../../shared/empty-state/empty-state';
 
 const ESTADOS_VALIDOS = new Set<string>(Object.values(VencimientoFiltro));
 
 @Component({
   imports: [
+    EmptyState,
     FormsModule,
     DatePipe,
     DecimalPipe,

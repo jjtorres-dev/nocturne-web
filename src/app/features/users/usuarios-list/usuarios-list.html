@@ -92,7 +92,7 @@
     </div>
 
     @if (usuariosFiltrados().length === 0) {
-      <p class="empty-state">No hay usuarios con estos filtros.</p>
+      <app-empty-state icon="group" mensaje="No hay usuarios con estos filtros." submensaje="Prueba cambiando o quitando los filtros." />
     }
   }
 }

@@ -46,7 +46,14 @@
     </div>
     <div class="detail-row">
       <span class="detail-label">Combo</span>
-      <span>{{ combo()?.nombre ?? '—' }}</span>
+      @if (combo(); as cb) {
+        <span class="nc-name-cell">
+          <app-service-icon-stack [servicios]="cb.servicios" />
+          {{ cb.nombre }}
+        </span>
+      } @else {
+        <span>—</span>
+      }
     </div>
     <div class="detail-row">
       <span class="detail-label">Duración</span>

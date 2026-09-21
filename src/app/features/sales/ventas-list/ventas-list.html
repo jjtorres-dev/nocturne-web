@@ -228,6 +228,6 @@
   }
 
   @if (ventas().length === 0) {
-    <p class="empty-state">No hay ventas con estos filtros.</p>
+    <app-empty-state icon="point_of_sale" mensaje="No hay ventas con estos filtros." submensaje="Prueba cambiando o quitando los filtros." />
   }
 }

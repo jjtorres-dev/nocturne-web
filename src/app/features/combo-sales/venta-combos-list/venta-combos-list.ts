@@ -22,11 +22,13 @@ import { type Contacto } from '../../contacts/contacto.model';
 import { ConfirmDialog } from '../../../shared/confirm-dialog/confirm-dialog';
 import { SolesPipe } from '../../../shared/soles.pipe';
 import { Auth, UserRole } from '../../../core/auth/auth';
+import { EmptyState } from '../../../shared/empty-state/empty-state';
 
 type ActivoFilter = 'todos' | 'activos' | 'inactivos';
 
 @Component({
   imports: [
+    EmptyState,
     FormsModule,
     DatePipe,
     DecimalPipe,

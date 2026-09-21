@@ -19,11 +19,15 @@ import {
 import { ContactoFormDialog } from '../contacto-form-dialog/contacto-form-dialog';
 import { ConfirmDialog } from '../../../shared/confirm-dialog/confirm-dialog';
 import { Auth, UserRole } from '../../../core/auth/auth';
+import { EmptyState } from '../../../shared/empty-state/empty-state';
+import { AvatarInicial } from '../../../shared/avatar-inicial/avatar-inicial';
 
 type ActivoFilter = 'todos' | 'activos' | 'inactivos';
 
 @Component({
   imports: [
+    AvatarInicial,
+    EmptyState,
     FormsModule,
     MatTableModule,
     MatFormFieldModule,

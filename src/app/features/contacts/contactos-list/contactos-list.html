@@ -36,7 +36,12 @@
     <table mat-table [dataSource]="contactos()" class="contacts-table">
       <ng-container matColumnDef="nombre">
         <th mat-header-cell *matHeaderCellDef>Nombre</th>
-        <td mat-cell *matCellDef="let c">{{ c.nombre }}</td>
+        <td mat-cell *matCellDef="let c">
+          <span class="nc-name-cell">
+            <app-avatar-inicial [nombre]="c.nombre" />
+            {{ c.nombre }}
+          </span>
+        </td>
       </ng-container>
 
       <ng-container matColumnDef="whatsapp">
@@ -87,6 +92,6 @@
   </div>
 
   @if (contactos().length === 0) {
-    <p class="empty-state">No hay contactos con estos filtros.</p>
+    <app-empty-state icon="contacts" mensaje="No hay contactos con estos filtros." submensaje="Prueba cambiando o quitando los filtros." />
   }
 }

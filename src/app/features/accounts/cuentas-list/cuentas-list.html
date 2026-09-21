@@ -46,7 +46,12 @@
     <table mat-table [dataSource]="cuentas()" class="accounts-table">
       <ng-container matColumnDef="servicio">
         <th mat-header-cell *matHeaderCellDef>Servicio</th>
-        <td mat-cell *matCellDef="let c">{{ servicioNombre(c.servicioId) }}</td>
+        <td mat-cell *matCellDef="let c">
+          <span class="nc-name-cell">
+            <app-service-icon [nombre]="servicioNombre(c.servicioId)" />
+            {{ servicioNombre(c.servicioId) }}
+          </span>
+        </td>
       </ng-container>
 
       <ng-container matColumnDef="correo">
@@ -99,6 +104,6 @@
   </div>
 
   @if (cuentas().length === 0) {
-    <p class="empty-state">No hay cuentas con estos filtros.</p>
+    <app-empty-state icon="account_circle" mensaje="No hay cuentas con estos filtros." submensaje="Prueba cambiando o quitando los filtros." />
   }
 }

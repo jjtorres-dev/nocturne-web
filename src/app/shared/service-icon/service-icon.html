@@ -1,0 +1,16 @@
+@if (icon(); as i) {
+  <span
+    class="tile"
+    aria-hidden="true"
+    [style.width.px]="size()"
+    [style.height.px]="size()"
+    [style.background-color]="i.bg"
+    [style.color]="i.fg"
+  >
+    <svg viewBox="0 0 24 24" fill="currentColor" focusable="false">
+      <path [attr.d]="i.path" />
+    </svg>
+  </span>
+} @else {
+  <app-avatar-inicial [nombre]="nombre()" [size]="size()" />
+}

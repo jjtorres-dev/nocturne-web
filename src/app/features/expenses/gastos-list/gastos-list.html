@@ -87,6 +87,6 @@
   </div>
 
   @if (gastos().length === 0) {
-    <p class="empty-state">No hay gastos con estos filtros.</p>
+    <app-empty-state icon="payments" mensaje="No hay gastos con estos filtros." submensaje="Prueba cambiando o quitando los filtros." />
   }
 }

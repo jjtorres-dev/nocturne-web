@@ -166,4 +166,31 @@ describe('CombosList', () => {
 
     expect(fixture.nativeElement.querySelector('.mat-column-dueno')).toBeNull();
   });
+
+  it('muestra los íconos de los servicios que componen el combo', async () => {
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const cell: HTMLElement = fixture.nativeElement.querySelector('td.mat-column-servicios');
+    const items = Array.from(cell.querySelectorAll('app-service-icon-stack .item'));
+    expect(items.map((i) => i.getAttribute('aria-label'))).toEqual(['Netflix', 'Disney+']);
+  });
+
+  it('muestra el estado vacío cuando no hay resultados', async () => {
+    api.list.mockResolvedValue([]);
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const empty: HTMLElement | null = fixture.nativeElement.querySelector('app-empty-state');
+    expect(empty).not.toBeNull();
+    expect(empty?.textContent).toContain('No hay combos con estos filtros.');
+    expect(empty?.textContent).toContain('Prueba cambiando o quitando los filtros.');
+  });
+
+  it('no muestra el estado vacío cuando hay resultados', async () => {
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('app-empty-state')).toBeNull();
+  });
 });

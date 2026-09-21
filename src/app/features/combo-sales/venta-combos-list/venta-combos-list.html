@@ -122,6 +122,6 @@
   </div>
 
   @if (ventasCombo().length === 0) {
-    <p class="empty-state">No hay ventas de combo con estos filtros.</p>
+    <app-empty-state icon="shopping_cart" mensaje="No hay ventas de combo con estos filtros." submensaje="Prueba cambiando o quitando los filtros." />
   }
 }

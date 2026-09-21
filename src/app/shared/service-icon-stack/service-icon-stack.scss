@@ -1,0 +1,34 @@
+:host {
+  display: inline-flex;
+  vertical-align: middle;
+}
+
+.stack {
+  display: inline-flex;
+  align-items: center;
+}
+
+// Anillo del color de la superficie: separa visualmente cada ícono del que
+// tiene debajo al superponerlos.
+.item {
+  display: inline-flex;
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px var(--nc-surface);
+
+  & + .item {
+    margin-left: -8px;
+  }
+
+  &:hover {
+    position: relative;
+    z-index: 1;
+  }
+}
+
+.more {
+  align-items: center;
+  justify-content: center;
+  background: var(--nc-surface-elevated);
+  color: var(--nc-text-secondary);
+  font-weight: 600;
+}

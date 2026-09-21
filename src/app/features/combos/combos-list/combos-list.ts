@@ -16,11 +16,15 @@ import { ComboFormDialog } from '../combo-form-dialog/combo-form-dialog';
 import { ConfirmDialog } from '../../../shared/confirm-dialog/confirm-dialog';
 import { SolesPipe } from '../../../shared/soles.pipe';
 import { Auth, UserRole } from '../../../core/auth/auth';
+import { EmptyState } from '../../../shared/empty-state/empty-state';
+import { ServiceIconStack } from '../../../shared/service-icon-stack/service-icon-stack';
 
 type ActivoFilter = 'todos' | 'activos' | 'inactivos';
 
 @Component({
   imports: [
+    ServiceIconStack,
+    EmptyState,
     FormsModule,
     SolesPipe,
     MatTableModule,

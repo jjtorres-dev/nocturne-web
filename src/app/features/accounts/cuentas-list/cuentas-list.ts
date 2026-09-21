@@ -20,11 +20,15 @@ import { ContactosApi } from '../../contacts/contactos-api';
 import { ContactType, type Contacto } from '../../contacts/contacto.model';
 import { CuentaFormDialog } from '../cuenta-form-dialog/cuenta-form-dialog';
 import { Auth, UserRole } from '../../../core/auth/auth';
+import { EmptyState } from '../../../shared/empty-state/empty-state';
+import { ServiceIcon } from '../../../shared/service-icon/service-icon';
 
 type ActivoFilter = 'todos' | 'activos' | 'inactivos';
 
 @Component({
   imports: [
+    ServiceIcon,
+    EmptyState,
     FormsModule,
     DatePipe,
     MatTableModule,

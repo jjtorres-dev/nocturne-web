@@ -128,4 +128,31 @@ describe('ContactosList', () => {
 
     expect(fixture.nativeElement.querySelector('.mat-column-dueno')).toBeNull();
   });
+
+  it('muestra el avatar con la inicial del contacto junto al nombre', async () => {
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const cell: HTMLElement = fixture.nativeElement.querySelector('td.mat-column-nombre');
+    expect(cell.querySelector('app-avatar-inicial')?.textContent?.trim()).toBe('J');
+    expect(cell.textContent).toContain('Juan');
+  });
+
+  it('muestra el estado vacío cuando no hay resultados', async () => {
+    api.list.mockResolvedValue([]);
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const empty: HTMLElement | null = fixture.nativeElement.querySelector('app-empty-state');
+    expect(empty).not.toBeNull();
+    expect(empty?.textContent).toContain('No hay contactos con estos filtros.');
+    expect(empty?.textContent).toContain('Prueba cambiando o quitando los filtros.');
+  });
+
+  it('no muestra el estado vacío cuando hay resultados', async () => {
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('app-empty-state')).toBeNull();
+  });
 });

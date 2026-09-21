@@ -20,11 +20,15 @@ import { ServicioFormDialog } from '../servicio-form-dialog/servicio-form-dialog
 import { ConfirmDialog } from '../../../shared/confirm-dialog/confirm-dialog';
 import { SolesPipe } from '../../../shared/soles.pipe';
 import { Auth, UserRole } from '../../../core/auth/auth';
+import { EmptyState } from '../../../shared/empty-state/empty-state';
+import { ServiceIcon } from '../../../shared/service-icon/service-icon';
 
 type ActivoFilter = 'todos' | 'activos' | 'inactivos';
 
 @Component({
   imports: [
+    ServiceIcon,
+    EmptyState,
     FormsModule,
     SolesPipe,
     MatTableModule,
