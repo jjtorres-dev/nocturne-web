@@ -32,17 +32,30 @@ describe('resolveServiceIcon', () => {
 
   it('devuelve null si no hay match', () => {
     expect(resolveServiceIcon('Servicio Inventado')).toBeNull();
-    expect(resolveServiceIcon('Disney+')).toBeNull();
     expect(resolveServiceIcon('')).toBeNull();
     expect(resolveServiceIcon(null)).toBeNull();
     expect(resolveServiceIcon(undefined)).toBeNull();
   });
 
-  it('el set curado tiene 15-20 íconos, cada uno con path y keywords', () => {
+  it('Disney+ y Prime Video resuelven a un ícono real (archivo SVG local), no a un color de marca', () => {
+    for (const nombre of ['Disney+', 'DISNEY+ Premium 3 Meses', 'Disney Plus']) {
+      const icon = resolveServiceIcon(nombre);
+      expect(icon?.slug).toBe('disneyplus');
+      expect(icon && 'src' in icon && icon.src).toBe('service-icons/disney-plus.svg');
+    }
+    for (const nombre of ['Prime Video', 'Amazon Prime Video 1 mes', 'PrimeVideo']) {
+      const icon = resolveServiceIcon(nombre);
+      expect(icon?.slug).toBe('primevideo');
+      expect(icon && 'src' in icon && icon.src).toBe('service-icons/prime-video-alt.svg');
+    }
+  });
+
+  it('el set curado tiene 15-25 íconos, cada uno con su gráfico (path o src) y keywords', () => {
     expect(SERVICE_ICONS.length).toBeGreaterThanOrEqual(15);
-    expect(SERVICE_ICONS.length).toBeLessThanOrEqual(20);
+    expect(SERVICE_ICONS.length).toBeLessThanOrEqual(25);
     for (const icon of SERVICE_ICONS) {
-      expect(icon.path.length).toBeGreaterThan(0);
+      const grafico = 'path' in icon ? icon.path : icon.src;
+      expect(grafico.length).toBeGreaterThan(0);
       expect(icon.keywords.length).toBeGreaterThan(0);
     }
   });

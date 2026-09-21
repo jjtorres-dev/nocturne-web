@@ -1,15 +1,25 @@
-@if (icon(); as i) {
+@if (glyph(); as g) {
   <span
     class="tile"
     aria-hidden="true"
     [style.width.px]="size()"
     [style.height.px]="size()"
-    [style.background-color]="i.bg"
-    [style.color]="i.fg"
+    [style.background-color]="g.bg"
+    [style.color]="g.fg"
   >
     <svg viewBox="0 0 24 24" fill="currentColor" focusable="false">
-      <path [attr.d]="i.path" />
+      <path [attr.d]="g.path" />
     </svg>
+  </span>
+} @else if (image(); as im) {
+  <span
+    class="tile"
+    aria-hidden="true"
+    [style.width.px]="size()"
+    [style.height.px]="size()"
+    [style.background-color]="im.bg"
+  >
+    <img [src]="im.src" alt="" draggable="false" [class.full-bleed]="im.fullBleed" />
   </span>
 } @else {
   <app-avatar-inicial [nombre]="nombre()" [size]="size()" />

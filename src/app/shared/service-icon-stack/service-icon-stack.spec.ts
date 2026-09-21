@@ -12,13 +12,16 @@ describe('ServiceIconStack', () => {
   });
 
   it('muestra un ícono o avatar por servicio, con su nombre como aria-label', () => {
-    fixture.componentRef.setInput('servicios', servicios(['Netflix', 'Disney+']));
+    fixture.componentRef.setInput('servicios', servicios(['Netflix', 'Servicio Inventado']));
     fixture.detectChanges();
 
     const items: HTMLElement[] = Array.from(fixture.nativeElement.querySelectorAll('.item'));
-    expect(items.map((i) => i.getAttribute('aria-label'))).toEqual(['Netflix', 'Disney+']);
+    expect(items.map((i) => i.getAttribute('aria-label'))).toEqual([
+      'Netflix',
+      'Servicio Inventado',
+    ]);
     expect(items[0].querySelector('svg')).not.toBeNull(); // Netflix: ícono de marca
-    expect(items[1].querySelector('app-avatar-inicial')).not.toBeNull(); // Disney+: avatar
+    expect(items[1].querySelector('app-avatar-inicial')).not.toBeNull(); // sin ícono: avatar
   });
 
   it('colapsa el excedente en un "+N"', () => {

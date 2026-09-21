@@ -6,23 +6,38 @@
 // Las marcas son propiedad de sus respectivos dueños; se usan solo para
 // identificar el servicio dentro del panel (ver DISCLAIMER.md del paquete).
 //
-// Disney+ y Prime Video no existen en Simple Icons (fueron retirados), así
-// que esos servicios caen al avatar de iniciales.
+// Disney+ y Prime Video no existen en Simple Icons (fueron retirados): salen de
+// Dashboard Icons (Apache-2.0), como archivos SVG con sus propios colores en
+// ./assets, servidos localmente en /service-icons/ (ver assets/NOTICE.md).
 //
-// `bg` / `fg` son el fondo y el trazo del "tile" donde se dibuja el ícono:
-// el color de marca con el trazo de mayor contraste, o un tile claro cuando la
-// marca es (casi) negra y desaparecería sobre el tema oscuro.
+// `bg` es el fondo del "tile" circular donde se dibuja el ícono. En los íconos
+// monocromos (`path`), `fg` es el trazo: el color de marca con el de mayor
+// contraste, o un tile claro cuando la marca es (casi) negra y desaparecería
+// sobre el tema oscuro.
 
-export interface ServiceIconDef {
+interface ServiceIconBase {
   slug: string;
   title: string;
   // Fragmentos en minúsculas y sin acentos que identifican al servicio dentro
   // de Servicio.nombre (ver service-icon.util.ts para las reglas de match).
   keywords: string[];
   bg: string;
-  fg: string;
-  path: string;
 }
+
+// Glifo monocromo: path SVG en viewBox 24x24, pintado con `fg`.
+export interface GlyphIconDef extends ServiceIconBase {
+  path: string;
+  fg: string;
+}
+
+// Logo con colores propios, como archivo SVG servido localmente. Con
+// `fullBleed` el logo ya trae su propio fondo y ocupa todo el tile.
+export interface ImageIconDef extends ServiceIconBase {
+  src: string;
+  fullBleed?: boolean;
+}
+
+export type ServiceIconDef = GlyphIconDef | ImageIconDef;
 
 export const SERVICE_ICONS: readonly ServiceIconDef[] = [
   {
@@ -168,5 +183,20 @@ export const SERVICE_ICONS: readonly ServiceIconDef[] = [
     bg: '#7408ff',
     fg: '#ffffff',
     path: 'M16.696 15.272v-.752c.4.548 1.107.917 1.934.917 1.475 0 2.28-.956 2.28-2.865 0-1.714-.893-2.858-2.235-2.858-.851 0-1.55.347-1.979.908v-2.06h-2.674v6.71zm1.57-2.614c0 .827-.337 1.275-.827 1.275-.486 0-.837-.452-.837-1.275s.342-1.28.837-1.28c.495 0 .828.452.828 1.28zM6.94 9.988v3.6c0 1.236.754 1.841 1.955 1.841.959 0 1.625-.396 2.028-1.064v.91h2.597V9.989h-2.675v3.14c0 .493-.346.693-.666.693-.321 0-.568-.192-.568-.655V9.989Zm14.39 0H24v5.276h-2.67ZM6.553 11.136c0 .781-.635 1.415-1.42 1.415-.783 0-1.419-.634-1.419-1.415 0-.782.636-1.415 1.42-1.415.784 0 1.42.633 1.42 1.415zM3.49 9.702v2.668c.005.653.327.924.976.924.225 0 .526-.053.672-.166v1.931c-.49.243-.869.378-1.535.378 0 0-.069 0-.18-.006l-.003.006c-1.614 0-2.51-1.035-2.482-2.686v-.47H0V9.99h.92V8.563h2.569Z',
+  },
+  {
+    slug: 'disneyplus',
+    title: 'Disney+',
+    keywords: ['disney'],
+    bg: '#1a1d29',
+    src: 'service-icons/disney-plus.svg',
+    fullBleed: true,
+  },
+  {
+    slug: 'primevideo',
+    title: 'Prime Video',
+    keywords: ['prime video', 'primevideo', 'amazon prime'],
+    bg: '#00a8e1',
+    src: 'service-icons/prime-video-alt.svg',
   },
 ];
