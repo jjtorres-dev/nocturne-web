@@ -1,9 +1,15 @@
 <div class="page-header">
   <h1>Ventas</h1>
-  <button mat-flat-button color="primary" (click)="openCreate()">
-    <mat-icon>add</mat-icon>
-    Nueva venta
-  </button>
+  <div class="page-header-actions">
+    <button mat-stroked-button (click)="exportCsv()" [disabled]="ventas().length === 0">
+      <mat-icon>file_download</mat-icon>
+      Exportar CSV
+    </button>
+    <button mat-flat-button color="primary" (click)="openCreate()">
+      <mat-icon>add</mat-icon>
+      Nueva venta
+    </button>
+  </div>
 </div>
 
 @if (isMobile()) {

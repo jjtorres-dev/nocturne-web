@@ -338,6 +338,96 @@ describe('VentasList', () => {
     expect(fixture.nativeElement.querySelector('.mat-column-dueno')).toBeNull();
   });
 
+  describe('exportar CSV', () => {
+    async function exportar(): Promise<string> {
+      const createObjectURL = vi.fn().mockReturnValue('blob:mock');
+      const revokeObjectURL = vi.fn();
+      vi.stubGlobal('URL', { ...URL, createObjectURL, revokeObjectURL });
+      const clickSpy = vi
+        .spyOn(HTMLAnchorElement.prototype, 'click')
+        .mockImplementation(() => ({}) as never);
+
+      component.exportCsv();
+
+      const blob = createObjectURL.mock.calls[0][0] as Blob;
+      const text = await blob.text();
+
+      clickSpy.mockRestore();
+      vi.unstubAllGlobals();
+      return text;
+    }
+
+    it('exporta código, cliente, servicio, cuenta, perfil, fechas, precio, moneda, método de pago, estado y dueño (admin)', async () => {
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      const csv = await exportar();
+
+      expect(csv).toContain(
+        'Código;Cliente;Servicio;Cuenta (correo);Perfil;Fecha Inicio;Fecha Fin;' +
+          'Precio;Moneda;Método de Pago;Estado;Dueño',
+      );
+      expect(csv).toContain(
+        'V-00001;Cliente Uno;Netflix;cuenta@correo.com;Perfil 1;01/01/2026;01/02/2026;' +
+          '15.00;PEN;Yape;Activo;Admin',
+      );
+    });
+
+    it('no incluye la columna Dueño para un REVENDEDOR', async () => {
+      await setup(UserRole.REVENDEDOR);
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      const csv = await exportar();
+
+      // blob.text() decodifica con TextDecoder, que por defecto descarta el
+      // BOM inicial (eso ya se verifica en csv-export.spec.ts sobre el
+      // string crudo de buildCsv, antes de pasar por el Blob).
+      expect(csv.split('\r\n')[0]).toBe(
+        'Código;Cliente;Servicio;Cuenta (correo);Perfil;Fecha Inicio;Fecha Fin;' +
+          'Precio;Moneda;Método de Pago;Estado',
+      );
+      expect(csv).not.toContain('Admin');
+    });
+
+    it('exporta solo lo filtrado en pantalla, no todas las ventas', async () => {
+      // Simula el filtro "Servicio" ya aplicado: el backend solo devolvió
+      // la venta que matchea, la otra ni siquiera llegó a component.ventas().
+      api.list.mockResolvedValue([venta]);
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      const csv = await exportar();
+
+      expect(csv).toContain('V-00001');
+      expect((csv.match(/\r\n/g) ?? []).length).toBe(1);
+    });
+
+    it('nombra el archivo ventas-YYYY-MM-DD.csv con la fecha de hoy', async () => {
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date(2026, 8, 22, 12, 0));
+
+      const createObjectURL = vi.fn().mockReturnValue('blob:mock');
+      vi.stubGlobal('URL', { ...URL, createObjectURL, revokeObjectURL: vi.fn() });
+      const clicked: HTMLAnchorElement[] = [];
+      const clickSpy = vi
+        .spyOn(HTMLAnchorElement.prototype, 'click')
+        .mockImplementation(function (this: HTMLAnchorElement) {
+          clicked.push(this);
+        });
+
+      await fixture.whenStable();
+      fixture.detectChanges();
+      component.exportCsv();
+
+      expect(clicked[0].download).toBe('ventas-2026-09-22.csv');
+
+      clickSpy.mockRestore();
+      vi.unstubAllGlobals();
+      vi.useRealTimers();
+    });
+  });
+
   describe('en pantalla angosta (tarjetas)', () => {
     function cards(): HTMLElement[] {
       return Array.from(fixture.nativeElement.querySelectorAll('mat-card.nc-card'));

@@ -29,6 +29,8 @@ import { VentaEditDialog } from '../venta-edit-dialog/venta-edit-dialog';
 import { ConfirmDialog } from '../../../shared/confirm-dialog/confirm-dialog';
 import { injectIsMobile } from '../../../shared/breakpoints';
 import { SolesPipe } from '../../../shared/soles.pipe';
+import { exportToCsv, type CsvColumn } from '../../../shared/csv-export';
+import { formatFechaCorta, hoyIso } from '../../../shared/fecha.util';
 import { Auth, UserRole } from '../../../core/auth/auth';
 import { EmptyState } from '../../../shared/empty-state/empty-state';
 
@@ -269,13 +271,44 @@ export class VentasList implements OnInit {
   }
 
   protected cuentaPerfilLabel(venta: Venta): string {
-    const cuenta = this.cuentas().find((c) => c.id === venta.cuentaId);
-    const correo = cuenta?.correo ?? '—';
+    const correo = this.cuentaCorreo(venta);
+    const perfil = this.perfilLabel(venta);
+    return perfil ? `${correo} — ${perfil}` : correo;
+  }
+
+  private cuentaCorreo(venta: Venta): string {
+    return this.cuentas().find((c) => c.id === venta.cuentaId)?.correo ?? '—';
+  }
+
+  // Vacío (no '—') cuando la venta no tiene perfil: es un estado válido
+  // (servicio sin perfiles), no un dato que debería existir y no se encontró.
+  private perfilLabel(venta: Venta): string {
     if (!venta.perfilId) {
-      return correo;
+      return '';
     }
-    const perfilNombre = this.perfilNombres().get(venta.perfilId) ?? '—';
-    return `${correo} — ${perfilNombre}`;
+    return this.perfilNombres().get(venta.perfilId) ?? '—';
+  }
+
+  exportCsv(): void {
+    const columns: CsvColumn<Venta>[] = [
+      { header: 'Código', value: (v) => v.codigoVenta },
+      { header: 'Cliente', value: (v) => this.clienteNombre(v.clienteId) },
+      { header: 'Servicio', value: (v) => this.servicioNombre(v.servicioId) },
+      { header: 'Cuenta (correo)', value: (v) => this.cuentaCorreo(v) },
+      { header: 'Perfil', value: (v) => this.perfilLabel(v) },
+      { header: 'Fecha Inicio', value: (v) => formatFechaCorta(v.fechaInicio) },
+      { header: 'Fecha Fin', value: (v) => formatFechaCorta(v.fechaFin) },
+      { header: 'Precio', value: (v) => v.precio.toFixed(2) },
+      { header: 'Moneda', value: (v) => v.moneda },
+      { header: 'Método de Pago', value: (v) => v.metodoPago },
+      { header: 'Estado', value: (v) => (v.activo ? 'Activo' : 'Inactivo') },
+    ];
+    if (this.isAdmin()) {
+      columns.push({ header: 'Dueño', value: (v) => v.owner.name });
+    }
+    // this.ventas() ya viene filtrada por los filtros de Cliente/Servicio/
+    // Activo aplicados (ver refresh()): se exporta tal cual está en pantalla.
+    exportToCsv(`ventas-${hoyIso()}.csv`, columns, this.ventas());
   }
 
   private async renew(venta: Venta): Promise<void> {
