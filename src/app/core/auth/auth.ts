@@ -37,6 +37,10 @@ interface RefreshResponse {
   refreshToken: string;
 }
 
+// Motivo por el que la sesión se cierra a propósito; /login lo lee del query
+// param para mostrar un aviso distinto al de "sesión expirada".
+export type LogoutReason = 'passwordChanged';
+
 const ACCESS_TOKEN_STORAGE_KEY = 'nocturne_access_token';
 const REFRESH_TOKEN_STORAGE_KEY = 'nocturne_refresh_token';
 const USER_STORAGE_KEY = 'nocturne_user';
@@ -106,8 +110,23 @@ export class Auth {
     return this.refreshInProgress$;
   }
 
+  /**
+   * Cambia la contraseña del usuario logueado. El backend revoca todos sus
+   * refresh tokens (también el de esta sesión): quien llama debe cerrar la
+   * sesión después (`logout('passwordChanged')`). Una contraseña actual
+   * incorrecta llega como HttpErrorResponse 400 con el mensaje del backend.
+   */
+  async changePassword(currentPassword: string, newPassword: string): Promise<void> {
+    await firstValueFrom(
+      this.http.patch(`${environment.apiUrl}/auth/change-password`, {
+        currentPassword,
+        newPassword,
+      }),
+    );
+  }
+
   /** Logout iniciado por el usuario: intenta revocar en el servidor, pero nunca bloquea el logout local. */
-  async logout(): Promise<void> {
+  async logout(reason?: LogoutReason): Promise<void> {
     const refreshToken = this.getRefreshToken();
     if (refreshToken) {
       try {
@@ -119,7 +138,11 @@ export class Auth {
       }
     }
     this.clearSession();
-    this.router.navigate(['/login']);
+    if (reason) {
+      this.router.navigate(['/login'], { queryParams: { [reason]: '1' } });
+    } else {
+      this.router.navigate(['/login']);
+    }
   }
 
   /** Invocado cuando el refresh también falla con 401: limpia todo y manda a /login con aviso. */

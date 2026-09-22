@@ -126,4 +126,54 @@ describe('Auth', () => {
       queryParams: { sessionExpired: '1' },
     });
   });
+
+  it('changePassword envía PATCH /auth/change-password con la contraseña actual y la nueva', async () => {
+    const promise = service.changePassword('vieja-1234', 'nueva-5678');
+
+    const req = httpMock.expectOne(`${environment.apiUrl}/auth/change-password`);
+    expect(req.request.method).toBe('PATCH');
+    expect(req.request.body).toEqual({
+      currentPassword: 'vieja-1234',
+      newPassword: 'nueva-5678',
+    });
+    req.flush({ message: 'Contraseña actualizada' });
+
+    await expect(promise).resolves.toBeUndefined();
+  });
+
+  it('changePassword propaga el 400 del backend sin tocar la sesión', async () => {
+    localStorage.setItem('nocturne_access_token', 'access-1');
+    localStorage.setItem('nocturne_refresh_token', 'refresh-1');
+
+    const promise = service.changePassword('mal', 'nueva-5678');
+    httpMock
+      .expectOne(`${environment.apiUrl}/auth/change-password`)
+      .flush(
+        { message: 'La contraseña actual no es correcta' },
+        { status: 400, statusText: 'Bad Request' },
+      );
+
+    await expect(promise).rejects.toMatchObject({ status: 400 });
+    expect(service.getAccessToken()).toBe('access-1');
+    expect(service.getRefreshToken()).toBe('refresh-1');
+    expect(router.navigate).not.toHaveBeenCalled();
+  });
+
+  it('logout("passwordChanged") hace el mismo logout y redirige a /login con ?passwordChanged=1 (no sessionExpired)', async () => {
+    localStorage.setItem('nocturne_access_token', 'access-1');
+    localStorage.setItem('nocturne_refresh_token', 'refresh-1');
+
+    const promise = service.logout('passwordChanged');
+    const req = httpMock.expectOne(`${environment.apiUrl}/auth/logout`);
+    expect(req.request.body).toEqual({ refreshToken: 'refresh-1' });
+    req.flush({ message: 'Sesión cerrada' });
+    await promise;
+
+    expect(service.getAccessToken()).toBeNull();
+    expect(service.getRefreshToken()).toBeNull();
+    expect(service.isAuthenticated()).toBe(false);
+    expect(router.navigate).toHaveBeenCalledWith(['/login'], {
+      queryParams: { passwordChanged: '1' },
+    });
+  });
 });

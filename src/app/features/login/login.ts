@@ -31,16 +31,26 @@ export class Login {
 
   readonly loading = signal(false);
   readonly errorMessage = signal<string | null>(null);
-  readonly infoMessage = signal<string | null>(
-    this.route.snapshot.queryParamMap.get('sessionExpired')
-      ? 'Tu sesión expiró, inicia sesión de nuevo.'
-      : null,
-  );
+  readonly infoMessage = signal<string | null>(this.readInfoMessage());
 
   readonly form = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required, Validators.minLength(8)]],
   });
+
+  // `passwordChanged` (cambio de contraseña, ver Auth.logout) y
+  // `sessionExpired` (refresh fallido, ver Auth.handleSessionExpired) son
+  // avisos distintos: el primero no es un error de la sesión.
+  private readInfoMessage(): string | null {
+    const params = this.route.snapshot.queryParamMap;
+    if (params.get('passwordChanged')) {
+      return 'Contraseña actualizada. Inicia sesión de nuevo.';
+    }
+    if (params.get('sessionExpired')) {
+      return 'Tu sesión expiró, inicia sesión de nuevo.';
+    }
+    return null;
+  }
 
   async submit(): Promise<void> {
     if (this.form.invalid || this.loading()) {

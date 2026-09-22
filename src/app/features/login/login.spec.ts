@@ -68,3 +68,48 @@ describe('Login con sesión expirada', () => {
     expect(component.infoMessage()).toBe('Tu sesión expiró, inicia sesión de nuevo.');
   });
 });
+
+describe('Login tras cambiar la contraseña', () => {
+  let component: Login;
+  let fixture: ComponentFixture<Login>;
+
+  async function setup(queryParams: Record<string, string>) {
+    await TestBed.configureTestingModule({
+      imports: [Login],
+      providers: [
+        provideRouter([]),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        {
+          provide: ActivatedRoute,
+          useValue: { snapshot: { queryParamMap: convertToParamMap(queryParams) } },
+        },
+      ],
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(Login);
+    component = fixture.componentInstance;
+    await fixture.whenStable();
+    fixture.detectChanges();
+  }
+
+  it('muestra "Contraseña actualizada. Inicia sesión de nuevo." con ?passwordChanged=1', async () => {
+    await setup({ passwordChanged: '1' });
+
+    expect(component.infoMessage()).toBe('Contraseña actualizada. Inicia sesión de nuevo.');
+    expect(fixture.nativeElement.querySelector('.info-message').textContent).toContain(
+      'Contraseña actualizada. Inicia sesión de nuevo.',
+    );
+  });
+
+  it('es un aviso distinto al de sesión expirada', async () => {
+    await setup({ passwordChanged: '1' });
+    const passwordChanged = component.infoMessage();
+    TestBed.resetTestingModule();
+
+    await setup({ sessionExpired: '1' });
+
+    expect(component.infoMessage()).toBe('Tu sesión expiró, inicia sesión de nuevo.');
+    expect(component.infoMessage()).not.toBe(passwordChanged);
+  });
+});
