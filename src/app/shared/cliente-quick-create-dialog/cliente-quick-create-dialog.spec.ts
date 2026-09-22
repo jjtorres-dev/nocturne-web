@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { HttpErrorResponse } from '@angular/common/http';
 import { MatDialogRef } from '@angular/material/dialog';
 import { ClienteQuickCreateDialog } from './cliente-quick-create-dialog';
 import { ContactosApi } from '../../features/contacts/contactos-api';
@@ -53,6 +54,21 @@ describe('ClienteQuickCreateDialog', () => {
     await component.submit();
 
     expect(component.errorMessage()).toBe('No se pudo crear el cliente. Intenta de nuevo.');
+    expect(dialogRef.close).not.toHaveBeenCalled();
+  });
+
+  it('si el backend manda un mensaje real (ej. una validación), lo muestra tal cual', async () => {
+    api.create.mockRejectedValue(
+      new HttpErrorResponse({
+        status: 400,
+        error: { message: ['whatsapp must be a valid phone number'] },
+      }),
+    );
+    component.form.setValue({ nombre: 'Juan Pérez', whatsapp: '123' });
+
+    await component.submit();
+
+    expect(component.errorMessage()).toBe('whatsapp must be a valid phone number');
     expect(dialogRef.close).not.toHaveBeenCalled();
   });
 

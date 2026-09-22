@@ -7,7 +7,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ContactosApi } from '../../features/contacts/contactos-api';
 import { ContactType, type Contacto } from '../../features/contacts/contacto.model';
-import { injectFormError } from '../form-error';
+import { extractErrorMessage, injectFormError } from '../form-error';
 
 // Modal chico para crear un cliente sin salir del formulario de venta que
 // lo abrió (Ventas / Ventas Combo): solo nombre y WhatsApp, tipo fijo en
@@ -56,8 +56,10 @@ export class ClienteQuickCreateDialog {
         tipo: ContactType.CLIENTE_FINAL,
       });
       this.dialogRef.close(result);
-    } catch {
-      this.formError.show('No se pudo crear el cliente. Intenta de nuevo.');
+    } catch (error) {
+      this.formError.show(
+        extractErrorMessage(error, 'No se pudo crear el cliente. Intenta de nuevo.'),
+      );
     } finally {
       this.saving.set(false);
     }

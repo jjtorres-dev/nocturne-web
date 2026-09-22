@@ -25,7 +25,7 @@ import { type Servicio } from '../../services/servicio.model';
 import { ContactosApi } from '../../contacts/contactos-api';
 import { ContactType, type Contacto } from '../../contacts/contacto.model';
 import { sumarMeses } from '../../../shared/fecha.util';
-import { injectFormError } from '../../../shared/form-error';
+import { extractErrorMessage, injectFormError } from '../../../shared/form-error';
 
 export interface CuentaFormDialogData {
   cuenta?: Cuenta;
@@ -189,8 +189,10 @@ export class CuentaFormDialog implements OnInit {
         ? await this.api.update(this.data.cuenta!.id, payload)
         : await this.api.create(payload);
       this.dialogRef.close(result);
-    } catch {
-      this.formError.show('No se pudo guardar la cuenta. Intenta de nuevo.');
+    } catch (error) {
+      this.formError.show(
+        extractErrorMessage(error, 'No se pudo guardar la cuenta. Intenta de nuevo.'),
+      );
     } finally {
       this.saving.set(false);
     }

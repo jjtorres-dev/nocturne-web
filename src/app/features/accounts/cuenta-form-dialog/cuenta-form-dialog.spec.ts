@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { HttpErrorResponse } from '@angular/common/http';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { CuentaFormDialog } from './cuenta-form-dialog';
@@ -270,5 +271,31 @@ describe('CuentaFormDialog', () => {
       expect.anything(),
     );
     expect(dialogRef.close).not.toHaveBeenCalled();
+  });
+
+  it('si el backend manda un mensaje real (ej. correo duplicado), lo muestra tal cual', async () => {
+    await setup();
+    await fixture.whenStable();
+    api.create.mockRejectedValue(
+      new HttpErrorResponse({
+        status: 409,
+        error: { message: 'Ya existe una cuenta con ese correo para este servicio.' },
+      }),
+    );
+    component.form.patchValue({
+      servicioId: 'srv-1',
+      correo: 'a@b.com',
+      claveServicio: 'secreta',
+      fechaInicio: '2026-01-01',
+      fechaFin: '2026-02-01',
+      costo: 10,
+      metodoPago: 'Yape',
+    });
+
+    await component.submit();
+
+    expect(component.errorMessage()).toBe(
+      'Ya existe una cuenta con ese correo para este servicio.',
+    );
   });
 });

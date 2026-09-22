@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { HttpErrorResponse } from '@angular/common/http';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { UsuarioFormDialog } from './usuario-form-dialog';
 import { UsuariosApi } from '../usuarios-api';
@@ -146,5 +147,42 @@ describe('UsuarioFormDialog', () => {
       'admin-0',
       expect.objectContaining({ role: expect.anything() }),
     );
+  });
+
+  it('muestra el mensaje real del backend (ej. el 409 de email duplicado), no el genérico', async () => {
+    await setup();
+    await fixture.whenStable();
+    api.create.mockRejectedValue(
+      new HttpErrorResponse({
+        status: 409,
+        error: { message: 'Ya existe un usuario con ese email.' },
+      }),
+    );
+
+    component.form.patchValue({
+      email: 'nuevo@nocturne.dev',
+      name: 'Nuevo',
+      role: UserRole.REVENDEDOR,
+      password: 'password123',
+    });
+    await component.submit();
+
+    expect(component.errorMessage()).toBe('Ya existe un usuario con ese email.');
+  });
+
+  it('cae al mensaje genérico si el backend no mandó ninguno (ej. caída de red)', async () => {
+    await setup();
+    await fixture.whenStable();
+    api.create.mockRejectedValue(new Error('network down'));
+
+    component.form.patchValue({
+      email: 'nuevo@nocturne.dev',
+      name: 'Nuevo',
+      role: UserRole.REVENDEDOR,
+      password: 'password123',
+    });
+    await component.submit();
+
+    expect(component.errorMessage()).toBe('No se pudo guardar el usuario. Intenta de nuevo.');
   });
 });

@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { HttpErrorResponse } from '@angular/common/http';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { VentaComboEditDialog } from './venta-combo-edit-dialog';
 import { VentaCombosApi } from '../venta-combos-api';
@@ -78,5 +79,30 @@ describe('VentaComboEditDialog', () => {
       renovacionAutomatica: false,
     });
     expect(dialogRef.close).toHaveBeenCalledWith({ ...ventaCombo, precio: 25 });
+  });
+
+  it('muestra el mensaje real del backend, no el genérico', async () => {
+    api.update.mockRejectedValue(
+      new HttpErrorResponse({
+        status: 400,
+        error: { message: 'La tasa de cambio debe ser mayor que cero.' },
+      }),
+    );
+
+    component.form.patchValue({ precio: 25 });
+    await component.submit();
+
+    expect(component.errorMessage()).toBe('La tasa de cambio debe ser mayor que cero.');
+  });
+
+  it('cae al mensaje genérico si el backend no mandó ninguno (ej. caída de red)', async () => {
+    api.update.mockRejectedValue(new Error('network down'));
+
+    component.form.patchValue({ precio: 25 });
+    await component.submit();
+
+    expect(component.errorMessage()).toBe(
+      'No se pudo guardar la venta de combo. Intenta de nuevo.',
+    );
   });
 });

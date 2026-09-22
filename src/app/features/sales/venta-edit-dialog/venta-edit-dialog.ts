@@ -13,7 +13,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { VentasApi } from '../ventas-api';
 import { Moneda, type Venta } from '../venta.model';
-import { injectFormError } from '../../../shared/form-error';
+import { extractErrorMessage, injectFormError } from '../../../shared/form-error';
 
 export interface VentaEditDialogData {
   venta: Venta;
@@ -79,8 +79,10 @@ export class VentaEditDialog {
     try {
       const result = await this.api.update(this.data.venta.id, payload);
       this.dialogRef.close(result);
-    } catch {
-      this.formError.show('No se pudo guardar la venta. Intenta de nuevo.');
+    } catch (error) {
+      this.formError.show(
+        extractErrorMessage(error, 'No se pudo guardar la venta. Intenta de nuevo.'),
+      );
     } finally {
       this.saving.set(false);
     }

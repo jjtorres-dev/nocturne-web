@@ -12,7 +12,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { PerfilesApi } from '../perfiles-api';
 import { type Perfil } from '../perfil.model';
-import { injectFormError } from '../../../../shared/form-error';
+import { extractErrorMessage, injectFormError } from '../../../../shared/form-error';
 
 export interface PerfilFormDialogData {
   accountId: string;
@@ -76,8 +76,10 @@ export class PerfilFormDialog {
         ? await this.api.update(this.data.accountId, this.data.perfil!.id, payload)
         : await this.api.create(this.data.accountId, payload);
       this.dialogRef.close(result);
-    } catch {
-      this.formError.show('No se pudo guardar el perfil. Intenta de nuevo.');
+    } catch (error) {
+      this.formError.show(
+        extractErrorMessage(error, 'No se pudo guardar el perfil. Intenta de nuevo.'),
+      );
     } finally {
       this.saving.set(false);
     }

@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { HttpErrorResponse } from '@angular/common/http';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { VentaEditDialog } from './venta-edit-dialog';
 import { VentasApi } from '../ventas-api';
@@ -90,5 +91,28 @@ describe('VentaEditDialog', () => {
       renovacionAutomatica: false,
     });
     expect(dialogRef.close).toHaveBeenCalledWith({ ...venta, precio: 20 });
+  });
+
+  it('muestra el mensaje real del backend, no el genérico', async () => {
+    api.update.mockRejectedValue(
+      new HttpErrorResponse({
+        status: 400,
+        error: { message: 'La fecha de fin debe ser posterior a la de inicio.' },
+      }),
+    );
+
+    component.form.patchValue({ precio: 20 });
+    await component.submit();
+
+    expect(component.errorMessage()).toBe('La fecha de fin debe ser posterior a la de inicio.');
+  });
+
+  it('cae al mensaje genérico si el backend no mandó ninguno (ej. caída de red)', async () => {
+    api.update.mockRejectedValue(new Error('network down'));
+
+    component.form.patchValue({ precio: 20 });
+    await component.submit();
+
+    expect(component.errorMessage()).toBe('No se pudo guardar la venta. Intenta de nuevo.');
   });
 });

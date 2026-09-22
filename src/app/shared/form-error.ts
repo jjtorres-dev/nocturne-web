@@ -1,4 +1,5 @@
 import { ElementRef, Injector, afterNextRender, inject, signal, type Signal } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
 export interface FormError {
@@ -9,6 +10,24 @@ export interface FormError {
   // interno y el error (al final del formulario) quedaba fuera de vista.
   show(message: string): void;
   clear(): void;
+}
+
+// Saca el mensaje real que mandó el backend (ValidationPipe manda `message`
+// como array si hay varias validaciones fallidas; una BadRequestException o
+// ConflictException con un solo mensaje lo manda como string). `fallback`
+// solo se usa cuando el backend no mandó ningún mensaje útil (p. ej. una
+// caída de red, sin respuesta HTTP de por medio).
+export function extractErrorMessage(error: unknown, fallback: string): string {
+  if (error instanceof HttpErrorResponse) {
+    const message: unknown = error.error?.message;
+    if (typeof message === 'string' && message.trim().length > 0) {
+      return message;
+    }
+    if (Array.isArray(message) && message.length > 0) {
+      return message.join(' ');
+    }
+  }
+  return fallback;
 }
 
 // Estado de error de submit compartido por los formularios (diálogos y la

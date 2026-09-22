@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { HttpErrorResponse } from '@angular/common/http';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { ComboFormDialog } from './combo-form-dialog';
 import { CombosApi } from '../combos-api';
@@ -135,5 +136,40 @@ describe('ComboFormDialog', () => {
       'c-1',
       expect.objectContaining({ precioCombo: 35 }),
     );
+  });
+
+  it('muestra el mensaje real del backend (ej. nombre duplicado), no el genérico', async () => {
+    await setup();
+    await fixture.whenStable();
+    api.create.mockRejectedValue(
+      new HttpErrorResponse({
+        status: 409,
+        error: { message: 'Ya existe un combo con ese nombre.' },
+      }),
+    );
+
+    component.form.patchValue({
+      nombre: 'Combo Netflix + Disney',
+      servicioIds: ['srv-1', 'srv-2'],
+      precioCombo: 20,
+    });
+    await component.submit();
+
+    expect(component.errorMessage()).toBe('Ya existe un combo con ese nombre.');
+  });
+
+  it('cae al mensaje genérico si el backend no mandó ninguno (ej. caída de red)', async () => {
+    await setup();
+    await fixture.whenStable();
+    api.create.mockRejectedValue(new Error('network down'));
+
+    component.form.patchValue({
+      nombre: 'Combo Netflix + Disney',
+      servicioIds: ['srv-1', 'srv-2'],
+      precioCombo: 20,
+    });
+    await component.submit();
+
+    expect(component.errorMessage()).toBe('No se pudo guardar el combo. Intenta de nuevo.');
   });
 });

@@ -14,7 +14,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { VentaCombosApi } from '../venta-combos-api';
 import { type VentaCombo } from '../venta-combo.model';
 import { Moneda } from '../../sales/venta.model';
-import { injectFormError } from '../../../shared/form-error';
+import { extractErrorMessage, injectFormError } from '../../../shared/form-error';
 
 export interface VentaComboEditDialogData {
   ventaCombo: VentaCombo;
@@ -80,9 +80,9 @@ export class VentaComboEditDialog {
     try {
       const result = await this.api.update(this.data.ventaCombo.id, payload);
       this.dialogRef.close(result);
-    } catch {
+    } catch (error) {
       this.formError.show(
-        'No se pudo guardar la venta de combo. Intenta de nuevo.',
+        extractErrorMessage(error, 'No se pudo guardar la venta de combo. Intenta de nuevo.'),
       );
     } finally {
       this.saving.set(false);

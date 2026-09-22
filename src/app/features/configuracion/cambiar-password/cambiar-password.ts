@@ -1,5 +1,4 @@
 import { Component, inject, signal } from '@angular/core';
-import { HttpErrorResponse } from '@angular/common/http';
 import {
   AbstractControl,
   FormBuilder,
@@ -14,7 +13,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Auth } from '../../../core/auth/auth';
-import { injectFormError } from '../../../shared/form-error';
+import { extractErrorMessage, injectFormError } from '../../../shared/form-error';
 
 const GENERIC_ERROR = 'No se pudo cambiar la contraseña. Inténtalo de nuevo.';
 
@@ -84,7 +83,7 @@ export class CambiarPassword {
     try {
       await this.auth.changePassword(currentPassword, newPassword);
     } catch (error) {
-      this.formError.show(this.errorText(error));
+      this.formError.show(extractErrorMessage(error, GENERIC_ERROR));
       this.saving.set(false);
       return;
     }
@@ -93,21 +92,5 @@ export class CambiarPassword {
     // sesión: se cierra con el mismo flujo de logout, con aviso propio.
     await this.auth.logout('passwordChanged');
     this.saving.set(false);
-  }
-
-  // 400 = el backend rechazó el cambio (p. ej. "La contraseña actual no es
-  // correcta") y 429 = demasiados intentos (rate limit, 5 por minuto): en
-  // ambos se muestra el mensaje del backend. Cualquier otro error, uno genérico.
-  private errorText(error: unknown): string {
-    if (error instanceof HttpErrorResponse && (error.status === 400 || error.status === 429)) {
-      const message: unknown = error.error?.message;
-      if (typeof message === 'string') {
-        return message;
-      }
-      if (Array.isArray(message) && message.length > 0) {
-        return message.join(' ');
-      }
-    }
-    return GENERIC_ERROR;
   }
 }

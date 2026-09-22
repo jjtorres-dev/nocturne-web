@@ -1,7 +1,8 @@
 import { Component } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { HttpErrorResponse } from '@angular/common/http';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { injectFormError } from './form-error';
+import { extractErrorMessage, injectFormError } from './form-error';
 
 @Component({
   selector: 'app-form-error-host',
@@ -86,5 +87,40 @@ describe('injectFormError', () => {
     expect(host.formError.message()).toBeNull();
     expect(fixture.nativeElement.querySelector('[role="alert"]')).toBeNull();
     expect(openSpy).not.toHaveBeenCalled();
+  });
+});
+
+describe('extractErrorMessage', () => {
+  it('devuelve el mensaje del backend cuando es un string', () => {
+    const error = new HttpErrorResponse({
+      status: 409,
+      error: { message: 'Ya existe un usuario con ese email.' },
+    });
+    expect(extractErrorMessage(error, 'genérico')).toBe('Ya existe un usuario con ese email.');
+  });
+
+  it('une los mensajes cuando el backend manda un array (class-validator)', () => {
+    const error = new HttpErrorResponse({
+      status: 400,
+      error: { message: ['El email es requerido.', 'La contraseña es muy corta.'] },
+    });
+    expect(extractErrorMessage(error, 'genérico')).toBe(
+      'El email es requerido. La contraseña es muy corta.',
+    );
+  });
+
+  it('cae al mensaje genérico si el backend no mandó message', () => {
+    const error = new HttpErrorResponse({ status: 500, error: {} });
+    expect(extractErrorMessage(error, 'genérico')).toBe('genérico');
+  });
+
+  it('cae al mensaje genérico si el backend mandó un array vacío', () => {
+    const error = new HttpErrorResponse({ status: 400, error: { message: [] } });
+    expect(extractErrorMessage(error, 'genérico')).toBe('genérico');
+  });
+
+  it('cae al mensaje genérico si no es un HttpErrorResponse (ej. caída de red)', () => {
+    expect(extractErrorMessage(new TypeError('Failed to fetch'), 'genérico')).toBe('genérico');
+    expect(extractErrorMessage(null, 'genérico')).toBe('genérico');
   });
 });

@@ -16,7 +16,7 @@ import {
   ContactType,
   type Contacto,
 } from '../contacto.model';
-import { injectFormError } from '../../../shared/form-error';
+import { extractErrorMessage, injectFormError } from '../../../shared/form-error';
 
 export interface ContactoFormDialogData {
   contacto?: Contacto;
@@ -73,8 +73,10 @@ export class ContactoFormDialog {
         ? await this.api.update(this.data.contacto!.id, payload)
         : await this.api.create(payload);
       this.dialogRef.close(result);
-    } catch {
-      this.formError.show('No se pudo guardar el contacto. Intenta de nuevo.');
+    } catch (error) {
+      this.formError.show(
+        extractErrorMessage(error, 'No se pudo guardar el contacto. Intenta de nuevo.'),
+      );
     } finally {
       this.saving.set(false);
     }

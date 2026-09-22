@@ -1,5 +1,4 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
-import { HttpErrorResponse } from '@angular/common/http';
 import {
   AbstractControl,
   FormBuilder,
@@ -30,7 +29,7 @@ import { PerfilesApi } from '../../accounts/profiles/perfiles-api';
 import { type Perfil } from '../../accounts/profiles/perfil.model';
 import { ClienteQuickCreateDialog } from '../../../shared/cliente-quick-create-dialog/cliente-quick-create-dialog';
 import { sumarMeses } from '../../../shared/fecha.util';
-import { injectFormError } from '../../../shared/form-error';
+import { extractErrorMessage, injectFormError } from '../../../shared/form-error';
 
 // Sentinel para la opción "+ Nuevo cliente" del selector — nunca un id real.
 const NUEVO_CLIENTE = '__nuevo_cliente__';
@@ -266,15 +265,9 @@ export class VentaCreateDialog implements OnInit {
       const result = await this.api.create(payload);
       this.dialogRef.close(result);
     } catch (error) {
-      if (error instanceof HttpErrorResponse && error.status === 409) {
-        // Carrera: alguien más vendió el perfil/cuenta justo antes.
-        this.formError.show(
-          (error.error?.message as string | undefined) ??
-            'El perfil o la cuenta ya no están disponibles.',
-        );
-      } else {
-        this.formError.show('No se pudo crear la venta. Intenta de nuevo.');
-      }
+      this.formError.show(
+        extractErrorMessage(error, 'No se pudo crear la venta. Intenta de nuevo.'),
+      );
     } finally {
       this.saving.set(false);
     }

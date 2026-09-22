@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { HttpErrorResponse } from '@angular/common/http';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { GastoFormDialog } from './gasto-form-dialog';
 import { GastosApi } from '../gastos-api';
@@ -124,5 +125,46 @@ describe('GastoFormDialog', () => {
     await component.submit();
 
     expect(api.create).not.toHaveBeenCalled();
+  });
+
+  it('muestra el mensaje real del backend (ej. una validación), no el genérico', async () => {
+    await setup();
+    await fixture.whenStable();
+    api.create.mockRejectedValue(
+      new HttpErrorResponse({
+        status: 400,
+        error: { message: ['monto must be a positive number'] },
+      }),
+    );
+
+    component.form.patchValue({
+      descripcion: 'Hosting',
+      monto: 50,
+      moneda: Moneda.PEN,
+      tasaCambio: 1,
+      metodoPago: 'Yape',
+      fecha: '2026-01-05',
+    });
+    await component.submit();
+
+    expect(component.errorMessage()).toBe('monto must be a positive number');
+  });
+
+  it('cae al mensaje genérico si el backend no mandó ninguno (ej. caída de red)', async () => {
+    await setup();
+    await fixture.whenStable();
+    api.create.mockRejectedValue(new Error('network down'));
+
+    component.form.patchValue({
+      descripcion: 'Hosting',
+      monto: 50,
+      moneda: Moneda.PEN,
+      tasaCambio: 1,
+      metodoPago: 'Yape',
+      fecha: '2026-01-05',
+    });
+    await component.submit();
+
+    expect(component.errorMessage()).toBe('No se pudo guardar el gasto. Intenta de nuevo.');
   });
 });

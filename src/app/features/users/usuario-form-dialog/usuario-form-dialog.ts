@@ -1,5 +1,4 @@
 import { Component, inject, signal } from '@angular/core';
-import { HttpErrorResponse } from '@angular/common/http';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import {
   MAT_DIALOG_DATA,
@@ -20,7 +19,7 @@ import {
   type UpdateUsuarioPayload,
   type Usuario,
 } from '../usuario.model';
-import { injectFormError } from '../../../shared/form-error';
+import { extractErrorMessage, injectFormError } from '../../../shared/form-error';
 
 export interface UsuarioFormDialogData {
   usuario?: Usuario;
@@ -115,14 +114,9 @@ export class UsuarioFormDialog {
       }
       this.dialogRef.close(result);
     } catch (error) {
-      if (error instanceof HttpErrorResponse && error.status === 409) {
-        this.formError.show(
-          (error.error?.message as string | undefined) ??
-            'Ya existe un usuario con ese email.',
-        );
-      } else {
-        this.formError.show('No se pudo guardar el usuario. Intenta de nuevo.');
-      }
+      this.formError.show(
+        extractErrorMessage(error, 'No se pudo guardar el usuario. Intenta de nuevo.'),
+      );
     } finally {
       this.saving.set(false);
     }

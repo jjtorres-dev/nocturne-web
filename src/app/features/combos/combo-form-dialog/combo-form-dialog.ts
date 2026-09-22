@@ -23,7 +23,7 @@ import { CombosApi } from '../combos-api';
 import type { Combo } from '../combo.model';
 import { ServiciosApi } from '../../services/servicios-api';
 import { type Servicio } from '../../services/servicio.model';
-import { injectFormError } from '../../../shared/form-error';
+import { extractErrorMessage, injectFormError } from '../../../shared/form-error';
 
 export interface ComboFormDialogData {
   combo?: Combo;
@@ -123,8 +123,10 @@ export class ComboFormDialog implements OnInit {
         ? await this.api.update(this.data.combo!.id, payload)
         : await this.api.create(payload);
       this.dialogRef.close(result);
-    } catch {
-      this.formError.show('No se pudo guardar el combo. Intenta de nuevo.');
+    } catch (error) {
+      this.formError.show(
+        extractErrorMessage(error, 'No se pudo guardar el combo. Intenta de nuevo.'),
+      );
     } finally {
       this.saving.set(false);
     }

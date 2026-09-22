@@ -1,5 +1,4 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
-import { HttpErrorResponse } from '@angular/common/http';
 import { Router, RouterLink } from '@angular/router';
 import {
   AbstractControl,
@@ -29,7 +28,7 @@ import { type CuentaListItem } from '../../accounts/cuenta.model';
 import { PerfilesApi } from '../../accounts/profiles/perfiles-api';
 import { type Perfil } from '../../accounts/profiles/perfil.model';
 import { ClienteQuickCreateDialog } from '../../../shared/cliente-quick-create-dialog/cliente-quick-create-dialog';
-import { injectFormError } from '../../../shared/form-error';
+import { extractErrorMessage, injectFormError } from '../../../shared/form-error';
 
 // Sentinel para la opción "+ Nuevo cliente" del selector — nunca un id real.
 const NUEVO_CLIENTE = '__nuevo_cliente__';
@@ -268,19 +267,12 @@ export class VentaComboCreate implements OnInit {
       const result = await this.api.create(payload);
       void this.router.navigate(['/combo-sales', result.id]);
     } catch (error) {
-      if (error instanceof HttpErrorResponse) {
-        // El backend identifica en el mensaje CUÁL servicio/asignación
-        // falló (ver ComboSalesService.validarAsignacion): se muestra tal
-        // cual, no un error genérico.
-        this.formError.show(
-          (error.error?.message as string | undefined) ??
-            'No se pudo crear la venta de combo.',
-        );
-      } else {
-        this.formError.show(
-          'No se pudo crear la venta de combo. Intenta de nuevo.',
-        );
-      }
+      // El backend identifica en el mensaje CUÁL servicio/asignación falló
+      // (ver ComboSalesService.validarAsignacion): se muestra tal cual, no un
+      // error genérico.
+      this.formError.show(
+        extractErrorMessage(error, 'No se pudo crear la venta de combo. Intenta de nuevo.'),
+      );
     } finally {
       this.saving.set(false);
     }

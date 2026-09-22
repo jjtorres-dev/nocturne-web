@@ -13,7 +13,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { GastosApi } from '../gastos-api';
 import type { Gasto } from '../expense.model';
 import { Moneda } from '../../sales/venta.model';
-import { injectFormError } from '../../../shared/form-error';
+import { extractErrorMessage, injectFormError } from '../../../shared/form-error';
 
 export interface GastoFormDialogData {
   gasto?: Gasto;
@@ -84,8 +84,10 @@ export class GastoFormDialog {
         ? await this.api.update(this.data.gasto!.id, payload)
         : await this.api.create(payload);
       this.dialogRef.close(result);
-    } catch {
-      this.formError.show('No se pudo guardar el gasto. Intenta de nuevo.');
+    } catch (error) {
+      this.formError.show(
+        extractErrorMessage(error, 'No se pudo guardar el gasto. Intenta de nuevo.'),
+      );
     } finally {
       this.saving.set(false);
     }

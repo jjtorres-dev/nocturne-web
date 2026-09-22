@@ -16,7 +16,7 @@ import {
   ServiceType,
   type Servicio,
 } from '../servicio.model';
-import { injectFormError } from '../../../shared/form-error';
+import { extractErrorMessage, injectFormError } from '../../../shared/form-error';
 
 export interface ServicioFormDialogData {
   servicio?: Servicio;
@@ -85,8 +85,10 @@ export class ServicioFormDialog {
         ? await this.api.update(this.data.servicio!.id, payload)
         : await this.api.create(payload);
       this.dialogRef.close(result);
-    } catch {
-      this.formError.show('No se pudo guardar el servicio. Intenta de nuevo.');
+    } catch (error) {
+      this.formError.show(
+        extractErrorMessage(error, 'No se pudo guardar el servicio. Intenta de nuevo.'),
+      );
     } finally {
       this.saving.set(false);
     }
