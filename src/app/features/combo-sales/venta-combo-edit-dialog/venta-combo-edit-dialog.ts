@@ -16,6 +16,8 @@ import { type VentaCombo } from '../venta-combo.model';
 import { Moneda } from '../../sales/venta.model';
 import { extractErrorMessage, injectFormError } from '../../../shared/form-error';
 import { MetodoPagoSelect } from '../../../shared/metodo-pago/metodo-pago-select/metodo-pago-select';
+import { UltimoMetodoPago } from '../../../shared/metodo-pago/ultimo-metodo-pago';
+import { Auth } from '../../../core/auth/auth';
 
 export interface VentaComboEditDialogData {
   ventaCombo: VentaCombo;
@@ -40,12 +42,15 @@ export interface VentaComboEditDialogData {
 export class VentaComboEditDialog {
   private readonly fb = inject(FormBuilder);
   private readonly api = inject(VentaCombosApi);
+  private readonly auth = inject(Auth);
+  private readonly ultimoMetodoPago = inject(UltimoMetodoPago);
   private readonly dialogRef = inject(
     MatDialogRef<VentaComboEditDialog, VentaCombo | undefined>,
   );
   protected readonly data = inject<VentaComboEditDialogData>(MAT_DIALOG_DATA);
 
   protected readonly monedas = Object.values(Moneda);
+  protected readonly Moneda = Moneda;
 
   readonly saving = signal(false);
   private readonly formError = injectFormError();
@@ -69,6 +74,17 @@ export class VentaComboEditDialog {
     renovacionAutomatica: [this.data.ventaCombo.renovacionAutomatica],
   });
 
+  constructor() {
+    // En PEN no tiene sentido pedir una tasa de cambio contra sí misma: el
+    // campo se fuerza a 1 y se oculta en el template. Con cualquier otra
+    // moneda se muestra y queda editable a mano.
+    this.form.controls.moneda.valueChanges.subscribe((moneda) => {
+      if (moneda === Moneda.PEN) {
+        this.form.controls.tasaCambio.setValue(1);
+      }
+    });
+  }
+
   async submit(): Promise<void> {
     if (this.form.invalid || this.saving()) {
       return;
@@ -81,6 +97,7 @@ export class VentaComboEditDialog {
 
     try {
       const result = await this.api.update(this.data.ventaCombo.id, payload);
+      this.recordarMetodoPago(payload.metodoPago);
       this.dialogRef.close(result);
     } catch (error) {
       this.formError.show(
@@ -88,6 +105,13 @@ export class VentaComboEditDialog {
       );
     } finally {
       this.saving.set(false);
+    }
+  }
+
+  private recordarMetodoPago(metodoPago: string): void {
+    const userId = this.auth.currentUser()?.id;
+    if (userId) {
+      this.ultimoMetodoPago.set(userId, metodoPago);
     }
   }
 

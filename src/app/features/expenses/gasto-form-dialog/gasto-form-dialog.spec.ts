@@ -7,19 +7,31 @@ import { GastoFormDialog } from './gasto-form-dialog';
 import { GastosApi } from '../gastos-api';
 import { Moneda } from '../../sales/venta.model';
 import type { Gasto } from '../expense.model';
+import { Auth, UserRole } from '../../../core/auth/auth';
+import { UltimoMetodoPago } from '../../../shared/metodo-pago/ultimo-metodo-pago';
 
 describe('GastoFormDialog', () => {
   let fixture: ComponentFixture<GastoFormDialog>;
   let component: GastoFormDialog;
   let api: { create: ReturnType<typeof vi.fn>; update: ReturnType<typeof vi.fn> };
   let dialogRef: { close: ReturnType<typeof vi.fn> };
+  let auth: { currentUser: ReturnType<typeof vi.fn> };
+  let ultimoMetodoPago: { get: ReturnType<typeof vi.fn>; set: ReturnType<typeof vi.fn> };
 
-  async function setup(data: { gasto?: Gasto } = {}) {
+  async function setup(
+    data: { gasto?: Gasto } = {},
+    ultimoMetodoPagoGuardado: string | null = null,
+  ) {
     api = {
       create: vi.fn().mockResolvedValue({ id: 'gasto-1' }),
       update: vi.fn().mockResolvedValue({ id: 'gasto-1' }),
     };
     dialogRef = { close: vi.fn() };
+    auth = { currentUser: vi.fn().mockReturnValue({ id: 'admin-0', role: UserRole.ADMIN }) };
+    ultimoMetodoPago = {
+      get: vi.fn().mockReturnValue(ultimoMetodoPagoGuardado),
+      set: vi.fn(),
+    };
 
     await TestBed.configureTestingModule({
       imports: [GastoFormDialog],
@@ -27,6 +39,8 @@ describe('GastoFormDialog', () => {
         { provide: GastosApi, useValue: api },
         { provide: MatDialogRef, useValue: dialogRef },
         { provide: MAT_DIALOG_DATA, useValue: data },
+        { provide: Auth, useValue: auth },
+        { provide: UltimoMetodoPago, useValue: ultimoMetodoPago },
       ],
     }).compileComponents();
 
@@ -41,6 +55,80 @@ describe('GastoFormDialog', () => {
     expect(component.isEdit).toBe(false);
     expect(component.form.controls.moneda.value).toBe(Moneda.PEN);
     expect(component.form.controls.tasaCambio.value).toBe(1);
+  });
+
+  it('tasaCambio: oculta el campo en PEN, aparece con otra moneda, y vuelve a 1 al volver a PEN', async () => {
+    await setup();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(
+      fixture.nativeElement.querySelector('input[formcontrolname="tasaCambio"]'),
+    ).toBeNull();
+
+    component.form.controls.moneda.setValue(Moneda.USD);
+    component.form.controls.tasaCambio.setValue(3.75);
+    fixture.detectChanges();
+
+    expect(
+      fixture.nativeElement.querySelector('input[formcontrolname="tasaCambio"]'),
+    ).not.toBeNull();
+    expect(component.form.controls.tasaCambio.value).toBe(3.75);
+
+    component.form.controls.moneda.setValue(Moneda.PEN);
+    fixture.detectChanges();
+
+    expect(component.form.controls.tasaCambio.value).toBe(1);
+    expect(
+      fixture.nativeElement.querySelector('input[formcontrolname="tasaCambio"]'),
+    ).toBeNull();
+  });
+
+  it('al crear, arranca con el último método de pago guardado para este usuario', async () => {
+    await setup({}, 'Plin');
+    await fixture.whenStable();
+
+    expect(ultimoMetodoPago.get).toHaveBeenCalledWith('admin-0');
+    expect(component.form.controls.metodoPago.value).toBe('Plin');
+  });
+
+  it('al editar, ignora lo guardado y arranca con el metodoPago real del gasto', async () => {
+    const gasto: Gasto = {
+      id: 'gasto-1',
+      descripcion: 'Hosting',
+      monto: 50,
+      moneda: Moneda.PEN,
+      tasaCambio: 1,
+      montoPEN: 50,
+      metodoPago: 'Tarjeta',
+      fecha: '2026-01-05',
+      activo: true,
+      owner: { id: 'admin-0', name: 'Admin', email: 'admin@nocturne.dev' },
+      createdAt: '',
+      updatedAt: '',
+    };
+    await setup({ gasto }, 'Plin');
+    await fixture.whenStable();
+
+    expect(ultimoMetodoPago.get).not.toHaveBeenCalled();
+    expect(component.form.controls.metodoPago.value).toBe('Tarjeta');
+  });
+
+  it('al guardar con éxito (crear o editar), graba el método de pago usado', async () => {
+    await setup();
+    await fixture.whenStable();
+    component.form.patchValue({
+      descripcion: 'Hosting',
+      monto: 50,
+      moneda: Moneda.PEN,
+      tasaCambio: 1,
+      metodoPago: 'Plin',
+      fecha: '2026-01-05',
+    });
+
+    await component.submit();
+
+    expect(ultimoMetodoPago.set).toHaveBeenCalledWith('admin-0', 'Plin');
   });
 
   it('crea un gasto con el payload del formulario', async () => {

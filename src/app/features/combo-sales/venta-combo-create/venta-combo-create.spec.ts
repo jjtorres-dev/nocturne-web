@@ -18,6 +18,8 @@ import { CuentasApi } from '../../accounts/cuentas-api';
 import { type CuentaListItem } from '../../accounts/cuenta.model';
 import { PerfilesApi } from '../../accounts/profiles/perfiles-api';
 import { type Perfil } from '../../accounts/profiles/perfil.model';
+import { Auth, UserRole } from '../../../core/auth/auth';
+import { UltimoMetodoPago } from '../../../shared/metodo-pago/ultimo-metodo-pago';
 
 describe('VentaComboCreate', () => {
   const owner = { id: 'admin-0', name: 'Admin', email: 'admin@nocturne.dev' };
@@ -104,8 +106,10 @@ describe('VentaComboCreate', () => {
   let perfilesApi: { list: ReturnType<typeof vi.fn> };
   let dialog: { open: ReturnType<typeof vi.fn> };
   let router: Router;
+  let auth: { currentUser: ReturnType<typeof vi.fn> };
+  let ultimoMetodoPago: { get: ReturnType<typeof vi.fn>; set: ReturnType<typeof vi.fn> };
 
-  async function setup() {
+  async function setup(ultimoMetodoPagoGuardado: string | null = null) {
     api = {
       create: vi.fn().mockResolvedValue({ id: 'vc-1', codigoVenta: 'C-00001' }),
     };
@@ -118,6 +122,11 @@ describe('VentaComboCreate', () => {
     };
     perfilesApi = { list: vi.fn().mockResolvedValue([perfilLibre]) };
     dialog = { open: vi.fn() };
+    auth = { currentUser: vi.fn().mockReturnValue({ id: 'admin-0', role: UserRole.ADMIN }) };
+    ultimoMetodoPago = {
+      get: vi.fn().mockReturnValue(ultimoMetodoPagoGuardado),
+      set: vi.fn(),
+    };
 
     await TestBed.configureTestingModule({
       imports: [VentaComboCreate],
@@ -129,6 +138,8 @@ describe('VentaComboCreate', () => {
         { provide: CuentasApi, useValue: cuentasApi },
         { provide: PerfilesApi, useValue: perfilesApi },
         { provide: MatDialog, useValue: dialog },
+        { provide: Auth, useValue: auth },
+        { provide: UltimoMetodoPago, useValue: ultimoMetodoPago },
       ],
     }).compileComponents();
 
@@ -152,6 +163,33 @@ describe('VentaComboCreate', () => {
     await select.clickOptions({ text: 'Zelle' });
 
     expect(component.form.controls.metodoPago.value).toBe('Zelle');
+  });
+
+  it('tasaCambio: oculta el campo en PEN, aparece con otra moneda, y vuelve a 1 al volver a PEN', async () => {
+    await setup();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(
+      fixture.nativeElement.querySelector('input[formcontrolname="tasaCambio"]'),
+    ).toBeNull();
+
+    component.form.controls.moneda.setValue(Moneda.USD);
+    component.form.controls.tasaCambio.setValue(3.75);
+    fixture.detectChanges();
+
+    expect(
+      fixture.nativeElement.querySelector('input[formcontrolname="tasaCambio"]'),
+    ).not.toBeNull();
+    expect(component.form.controls.tasaCambio.value).toBe(3.75);
+
+    component.form.controls.moneda.setValue(Moneda.PEN);
+    fixture.detectChanges();
+
+    expect(component.form.controls.tasaCambio.value).toBe(1);
+    expect(
+      fixture.nativeElement.querySelector('input[formcontrolname="tasaCambio"]'),
+    ).toBeNull();
   });
 
   it('carga combos y solo clientes tipo CLIENTE_FINAL al iniciar', async () => {
@@ -295,6 +333,38 @@ describe('VentaComboCreate', () => {
       }),
     );
     expect(navigateSpy).toHaveBeenCalledWith(['/combo-sales', 'vc-1']);
+  });
+
+  it('arranca con el último método de pago guardado para este usuario', async () => {
+    await setup('Plin');
+    await fixture.whenStable();
+
+    expect(ultimoMetodoPago.get).toHaveBeenCalledWith('admin-0');
+    expect(component.form.controls.metodoPago.value).toBe('Plin');
+  });
+
+  it('al guardar con éxito, graba el método de pago usado', async () => {
+    await setup();
+    await fixture.whenStable();
+    await component.onComboChange('combo-1');
+    await component.onAsignacionCuentaChange(0, 'cta-1');
+    component.onAsignacionPerfilChange(0, 'per-1');
+    await component.onAsignacionCuentaChange(1, 'cta-2');
+    component.form.patchValue({
+      clienteId: 'cli-1',
+      comboId: 'combo-1',
+      duracionMeses: 1,
+      fechaInicio: '2026-01-01',
+      fechaFin: '2026-02-01',
+      precio: 25,
+      moneda: Moneda.PEN,
+      metodoPago: 'Plin',
+    });
+    vi.spyOn(router, 'navigate').mockResolvedValue(true);
+
+    await component.submit();
+
+    expect(ultimoMetodoPago.set).toHaveBeenCalledWith('admin-0', 'Plin');
   });
 
   it('muestra cuál servicio/asignación falló cuando el backend responde 409 (rollback)', async () => {

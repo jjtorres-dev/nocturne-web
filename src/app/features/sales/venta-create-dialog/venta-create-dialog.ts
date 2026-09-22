@@ -28,9 +28,11 @@ import { type CuentaListItem } from '../../accounts/cuenta.model';
 import { PerfilesApi } from '../../accounts/profiles/perfiles-api';
 import { type Perfil } from '../../accounts/profiles/perfil.model';
 import { ClienteQuickCreateDialog } from '../../../shared/cliente-quick-create-dialog/cliente-quick-create-dialog';
-import { sumarMeses } from '../../../shared/fecha.util';
+import { hoyIso, sumarMeses } from '../../../shared/fecha.util';
 import { extractErrorMessage, injectFormError } from '../../../shared/form-error';
 import { MetodoPagoSelect } from '../../../shared/metodo-pago/metodo-pago-select/metodo-pago-select';
+import { UltimoMetodoPago } from '../../../shared/metodo-pago/ultimo-metodo-pago';
+import { Auth } from '../../../core/auth/auth';
 
 // Sentinel para la opción "+ Nuevo cliente" del selector — nunca un id real.
 const NUEVO_CLIENTE = '__nuevo_cliente__';
@@ -70,11 +72,14 @@ export class VentaCreateDialog implements OnInit {
   private readonly cuentasApi = inject(CuentasApi);
   private readonly perfilesApi = inject(PerfilesApi);
   private readonly dialog = inject(MatDialog);
+  private readonly auth = inject(Auth);
+  private readonly ultimoMetodoPago = inject(UltimoMetodoPago);
   private readonly dialogRef = inject(
     MatDialogRef<VentaCreateDialog, Venta | undefined>,
   );
 
   protected readonly monedas = Object.values(Moneda);
+  protected readonly Moneda = Moneda;
   readonly NUEVO_CLIENTE = NUEVO_CLIENTE;
   private clienteIdPrevio = '';
 
@@ -101,12 +106,15 @@ export class VentaCreateDialog implements OnInit {
       cuentaId: ['', Validators.required],
       perfilId: [''],
       clienteId: ['', Validators.required],
-      fechaInicio: ['', Validators.required],
+      fechaInicio: [hoyIso(), Validators.required],
       fechaFin: ['', Validators.required],
       precio: [0, [Validators.required, Validators.min(0.01)]],
       moneda: [Moneda.PEN, Validators.required],
       tasaCambio: [1, [Validators.required, Validators.min(0.0001)]],
-      metodoPago: ['', [Validators.required, Validators.minLength(1)]],
+      metodoPago: [
+        this.metodoPagoInicial(),
+        [Validators.required, Validators.minLength(1)],
+      ],
       renovacionAutomatica: [false],
     },
     { validators: fechaFinPosteriorValidator },
@@ -118,6 +126,15 @@ export class VentaCreateDialog implements OnInit {
     // queda editable, esto solo sugiere un valor de partida.
     this.form.controls.fechaInicio.valueChanges.subscribe(() => {
       this.recalcularFechaFin();
+    });
+    // En PEN no tiene sentido pedir una tasa de cambio contra sí misma:
+    // el campo se fuerza a 1 y se oculta en el template (ver
+    // venta-create-dialog.html). Con cualquier otra moneda se muestra y
+    // queda editable a mano.
+    this.form.controls.moneda.valueChanges.subscribe((moneda) => {
+      if (moneda === Moneda.PEN) {
+        this.form.controls.tasaCambio.setValue(1);
+      }
     });
   }
 
@@ -138,21 +155,45 @@ export class VentaCreateDialog implements OnInit {
     }
   }
 
+  private servicioDeCuentaActual(): Servicio | undefined {
+    const cuentaId = this.cuentaSeleccionadaId();
+    const cuenta = this.cuentas().find((c) => c.id === cuentaId);
+    return cuenta && this.servicios().find((s) => s.id === cuenta.servicioId);
+  }
+
   private recalcularFechaFin(): void {
     const fechaInicio = this.form.controls.fechaInicio.value;
-    const cuentaId = this.cuentaSeleccionadaId();
-    if (!cuentaId || !fechaInicio) {
-      return;
-    }
-    const cuenta = this.cuentas().find((c) => c.id === cuentaId);
-    const servicio =
-      cuenta && this.servicios().find((s) => s.id === cuenta.servicioId);
-    if (!servicio) {
+    const servicio = this.servicioDeCuentaActual();
+    if (!servicio || !fechaInicio) {
       return;
     }
     this.form.controls.fechaFin.setValue(
       sumarMeses(fechaInicio, servicio.duracionMeses),
     );
+  }
+
+  // Precio de venta sugerido = precioBase del Servicio de la cuenta elegida
+  // (el costo de la Cuenta es lo que se pagó al proveedor por la cuenta
+  // completa; esto es lo que se le cobra al cliente por un perfil — no
+  // tienen por qué coincidir). Se queda editable: `dirty` (no un flag
+  // propio) detecta si el usuario ya lo tocó a mano — `setValue()`
+  // programático no marca dirty, solo la interacción real con el input.
+  private aplicarSugerenciaDePrecio(): void {
+    if (this.form.controls.precio.dirty) {
+      return;
+    }
+    const servicio = this.servicioDeCuentaActual();
+    if (!servicio) {
+      return;
+    }
+    this.form.controls.precio.setValue(servicio.precioBase);
+  }
+
+  // Si el usuario ya creó una venta antes, arranca con ese método en vez
+  // de vacío.
+  private metodoPagoInicial(): string {
+    const userId = this.auth.currentUser()?.id;
+    return (userId && this.ultimoMetodoPago.get(userId)) || '';
   }
 
   onClienteSelectionChange(clienteId: string): void {
@@ -210,6 +251,7 @@ export class VentaCreateDialog implements OnInit {
     this.perfiles.set([]);
     this.form.patchValue({ perfilId: '' });
     this.recalcularFechaFin();
+    this.aplicarSugerenciaDePrecio();
 
     if (!cuentaId || !this.requierePerfil()) {
       return;
@@ -265,6 +307,7 @@ export class VentaCreateDialog implements OnInit {
 
     try {
       const result = await this.api.create(payload);
+      this.recordarMetodoPago(raw.metodoPago);
       this.dialogRef.close(result);
     } catch (error) {
       this.formError.show(
@@ -272,6 +315,13 @@ export class VentaCreateDialog implements OnInit {
       );
     } finally {
       this.saving.set(false);
+    }
+  }
+
+  private recordarMetodoPago(metodoPago: string): void {
+    const userId = this.auth.currentUser()?.id;
+    if (userId) {
+      this.ultimoMetodoPago.set(userId, metodoPago);
     }
   }
 

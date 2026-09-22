@@ -30,13 +30,15 @@
       </mat-select>
     </mat-form-field>
 
-    <mat-form-field appearance="outline">
-      <mat-label>Tasa de cambio</mat-label>
-      <input matInput type="number" step="0.0001" formControlName="tasaCambio" />
-      @if (form.controls.tasaCambio.hasError('min')) {
-        <mat-error>Debe ser un número positivo.</mat-error>
-      }
-    </mat-form-field>
+    @if (form.controls.moneda.value !== Moneda.PEN) {
+      <mat-form-field appearance="outline">
+        <mat-label>Tasa de cambio</mat-label>
+        <input matInput type="number" step="0.0001" formControlName="tasaCambio" />
+        @if (form.controls.tasaCambio.hasError('min')) {
+          <mat-error>Debe ser un número positivo.</mat-error>
+        }
+      </mat-form-field>
+    }
 
     <app-metodo-pago-select formControlName="metodoPago" />
 

@@ -27,6 +27,8 @@ import { ContactType, type Contacto } from '../../contacts/contacto.model';
 import { sumarMeses } from '../../../shared/fecha.util';
 import { extractErrorMessage, injectFormError } from '../../../shared/form-error';
 import { MetodoPagoSelect } from '../../../shared/metodo-pago/metodo-pago-select/metodo-pago-select';
+import { UltimoMetodoPago } from '../../../shared/metodo-pago/ultimo-metodo-pago';
+import { Auth } from '../../../core/auth/auth';
 
 export interface CuentaFormDialogData {
   cuenta?: Cuenta;
@@ -65,6 +67,8 @@ export class CuentaFormDialog implements OnInit {
   private readonly api = inject(CuentasApi);
   private readonly serviciosApi = inject(ServiciosApi);
   private readonly contactosApi = inject(ContactosApi);
+  private readonly auth = inject(Auth);
+  private readonly ultimoMetodoPago = inject(UltimoMetodoPago);
   private readonly dialogRef = inject(
     MatDialogRef<CuentaFormDialog, Cuenta | undefined>,
   );
@@ -102,7 +106,7 @@ export class CuentaFormDialog implements OnInit {
         [Validators.required, Validators.min(0.01)],
       ],
       metodoPago: [
-        this.data.cuenta?.metodoPago ?? '',
+        this.metodoPagoInicial(),
         [Validators.required, Validators.minLength(1)],
       ],
       url: [this.data.cuenta?.url ?? ''],
@@ -130,6 +134,17 @@ export class CuentaFormDialog implements OnInit {
     this.form.controls.fechaInicio.valueChanges.subscribe(() => {
       this.recalcularFechaFin();
     });
+  }
+
+  // Solo al CREAR: si el usuario ya guardó una cuenta antes, arranca con
+  // ese método en vez de vacío (editar siempre parte del valor real de la
+  // cuenta, nunca de esto).
+  private metodoPagoInicial(): string {
+    if (this.data.cuenta) {
+      return this.data.cuenta.metodoPago;
+    }
+    const userId = this.auth.currentUser()?.id;
+    return (userId && this.ultimoMetodoPago.get(userId)) || '';
   }
 
   private recalcularFechaFin(): void {
@@ -186,6 +201,7 @@ export class CuentaFormDialog implements OnInit {
       const result = this.isEdit
         ? await this.api.update(this.data.cuenta!.id, payload)
         : await this.api.create(payload);
+      this.recordarMetodoPago(raw.metodoPago);
       this.dialogRef.close(result);
     } catch (error) {
       this.formError.show(
@@ -198,5 +214,14 @@ export class CuentaFormDialog implements OnInit {
 
   cancel(): void {
     this.dialogRef.close(undefined);
+  }
+
+  // Se graba al guardar con éxito, tanto en crear como en editar: ambos
+  // representan un método de pago realmente usado (ver metodoPagoInicial).
+  private recordarMetodoPago(metodoPago: string): void {
+    const userId = this.auth.currentUser()?.id;
+    if (userId) {
+      this.ultimoMetodoPago.set(userId, metodoPago);
+    }
   }
 }

@@ -15,6 +15,8 @@ import type { Gasto } from '../expense.model';
 import { Moneda } from '../../sales/venta.model';
 import { extractErrorMessage, injectFormError } from '../../../shared/form-error';
 import { MetodoPagoSelect } from '../../../shared/metodo-pago/metodo-pago-select/metodo-pago-select';
+import { UltimoMetodoPago } from '../../../shared/metodo-pago/ultimo-metodo-pago';
+import { Auth } from '../../../core/auth/auth';
 
 export interface GastoFormDialogData {
   gasto?: Gasto;
@@ -38,12 +40,15 @@ export interface GastoFormDialogData {
 export class GastoFormDialog {
   private readonly fb = inject(FormBuilder);
   private readonly api = inject(GastosApi);
+  private readonly auth = inject(Auth);
+  private readonly ultimoMetodoPago = inject(UltimoMetodoPago);
   private readonly dialogRef = inject(
     MatDialogRef<GastoFormDialog, Gasto | undefined>,
   );
   protected readonly data = inject<GastoFormDialogData>(MAT_DIALOG_DATA);
 
   protected readonly monedas = Object.values(Moneda);
+  protected readonly Moneda = Moneda;
   readonly isEdit = !!this.data.gasto;
 
   readonly saving = signal(false);
@@ -65,11 +70,22 @@ export class GastoFormDialog {
       [Validators.required, Validators.min(0.0001)],
     ],
     metodoPago: [
-      this.data.gasto?.metodoPago ?? '',
+      this.metodoPagoInicial(),
       [Validators.required, Validators.minLength(1)],
     ],
     fecha: [this.data.gasto?.fecha ?? '', Validators.required],
   });
+
+  constructor() {
+    // En PEN no tiene sentido pedir una tasa de cambio contra sí misma: el
+    // campo se fuerza a 1 y se oculta en el template. Con cualquier otra
+    // moneda se muestra y queda editable a mano.
+    this.form.controls.moneda.valueChanges.subscribe((moneda) => {
+      if (moneda === Moneda.PEN) {
+        this.form.controls.tasaCambio.setValue(1);
+      }
+    });
+  }
 
   async submit(): Promise<void> {
     if (this.form.invalid || this.saving()) {
@@ -85,6 +101,7 @@ export class GastoFormDialog {
       const result = this.isEdit
         ? await this.api.update(this.data.gasto!.id, payload)
         : await this.api.create(payload);
+      this.recordarMetodoPago(payload.metodoPago);
       this.dialogRef.close(result);
     } catch (error) {
       this.formError.show(
@@ -97,5 +114,23 @@ export class GastoFormDialog {
 
   cancel(): void {
     this.dialogRef.close(undefined);
+  }
+
+  // Solo al CREAR: si el usuario ya guardó un gasto antes, arranca con ese
+  // método en vez de vacío (editar siempre parte del valor real del gasto).
+  private metodoPagoInicial(): string {
+    if (this.data.gasto) {
+      return this.data.gasto.metodoPago;
+    }
+    const userId = this.auth.currentUser()?.id;
+    return (userId && this.ultimoMetodoPago.get(userId)) || '';
+  }
+
+  // Se graba al guardar con éxito, tanto en crear como en editar.
+  private recordarMetodoPago(metodoPago: string): void {
+    const userId = this.auth.currentUser()?.id;
+    if (userId) {
+      this.ultimoMetodoPago.set(userId, metodoPago);
+    }
   }
 }

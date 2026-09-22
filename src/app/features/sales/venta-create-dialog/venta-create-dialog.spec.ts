@@ -6,6 +6,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { TestbedHarnessEnvironment } from '@angular/cdk/testing/testbed';
 import { MatSelectHarness } from '@angular/material/select/testing';
 import { VentaCreateDialog } from './venta-create-dialog';
+import { hoyIso } from '../../../shared/fecha.util';
 import { VentasApi } from '../ventas-api';
 import { Moneda } from '../venta.model';
 import { ServiciosApi } from '../../services/servicios-api';
@@ -16,6 +17,8 @@ import { CuentasApi } from '../../accounts/cuentas-api';
 import { type CuentaListItem } from '../../accounts/cuenta.model';
 import { PerfilesApi } from '../../accounts/profiles/perfiles-api';
 import { type Perfil } from '../../accounts/profiles/perfil.model';
+import { Auth, UserRole } from '../../../core/auth/auth';
+import { UltimoMetodoPago } from '../../../shared/metodo-pago/ultimo-metodo-pago';
 
 describe('VentaCreateDialog', () => {
   const owner = { id: 'admin-0', name: 'Admin', email: 'admin@nocturne.dev' };
@@ -96,8 +99,13 @@ describe('VentaCreateDialog', () => {
   let perfilesApi: { list: ReturnType<typeof vi.fn> };
   let dialog: MatDialog;
   let dialogRef: { close: ReturnType<typeof vi.fn> };
+  let auth: { currentUser: ReturnType<typeof vi.fn> };
+  let ultimoMetodoPago: { get: ReturnType<typeof vi.fn>; set: ReturnType<typeof vi.fn> };
 
-  async function setup(servicios: Servicio[] = [servicioConPerfiles]) {
+  async function setup(
+    servicios: Servicio[] = [servicioConPerfiles],
+    ultimoMetodoPagoGuardado: string | null = null,
+  ) {
     api = { create: vi.fn().mockResolvedValue({ id: 'v-1', codigoVenta: 'V-00001' }) };
     serviciosApi = { list: vi.fn().mockResolvedValue(servicios) };
     contactosApi = { list: vi.fn().mockResolvedValue([cliente]) };
@@ -106,6 +114,11 @@ describe('VentaCreateDialog', () => {
       list: vi.fn().mockResolvedValue([perfilLibre, perfilOcupado]),
     };
     dialogRef = { close: vi.fn() };
+    auth = { currentUser: vi.fn().mockReturnValue({ id: 'admin-0', role: UserRole.ADMIN }) };
+    ultimoMetodoPago = {
+      get: vi.fn().mockReturnValue(ultimoMetodoPagoGuardado),
+      set: vi.fn(),
+    };
 
     await TestBed.configureTestingModule({
       imports: [VentaCreateDialog],
@@ -116,6 +129,8 @@ describe('VentaCreateDialog', () => {
         { provide: CuentasApi, useValue: cuentasApi },
         { provide: PerfilesApi, useValue: perfilesApi },
         { provide: MatDialogRef, useValue: dialogRef },
+        { provide: Auth, useValue: auth },
+        { provide: UltimoMetodoPago, useValue: ultimoMetodoPago },
       ],
     }).compileComponents();
 
@@ -191,6 +206,97 @@ describe('VentaCreateDialog', () => {
     component.form.patchValue({ fechaFin: '2026-05-01' });
 
     expect(component.form.controls.fechaFin.value).toBe('2026-05-01');
+  });
+
+  it('fechaInicio arranca en el día de hoy por defecto', async () => {
+    await setup();
+    await fixture.whenStable();
+
+    expect(component.form.controls.fechaInicio.value).toBe(hoyIso());
+  });
+
+  it('arranca con el último método de pago guardado para este usuario', async () => {
+    await setup([servicioConPerfiles], 'Plin');
+    await fixture.whenStable();
+
+    expect(ultimoMetodoPago.get).toHaveBeenCalledWith('admin-0');
+    expect(component.form.controls.metodoPago.value).toBe('Plin');
+  });
+
+  it('al guardar con éxito, graba el método de pago usado', async () => {
+    await setup();
+    await fixture.whenStable();
+    await component.onServicioChange('srv-1');
+    await component.onCuentaChange('cta-1');
+    component.form.patchValue({
+      servicioId: 'srv-1',
+      cuentaId: 'cta-1',
+      perfilId: 'per-1',
+      clienteId: 'cli-1',
+      fechaInicio: '2026-01-01',
+      fechaFin: '2026-02-01',
+      precio: 10,
+      moneda: Moneda.PEN,
+      metodoPago: 'Plin',
+    });
+
+    await component.submit();
+
+    expect(ultimoMetodoPago.set).toHaveBeenCalledWith('admin-0', 'Plin');
+  });
+
+  it('al elegir cuenta, autocompleta precio con el precioBase del servicio de esa cuenta', async () => {
+    await setup();
+    await fixture.whenStable();
+    await component.onServicioChange('srv-1');
+
+    await component.onCuentaChange('cta-1');
+
+    expect(component.form.controls.precio.value).toBe(servicioConPerfiles.precioBase);
+  });
+
+  it('el autocompletado de precio no pisa un valor que el usuario ya editó a mano', async () => {
+    await setup();
+    await fixture.whenStable();
+    await component.onServicioChange('srv-1');
+
+    // Simula edición real del usuario: `dirty` es lo que dispara el guard,
+    // y setValue() por sí solo (sin markAsDirty) no lo marca — por eso el
+    // guard puede confiar en `dirty` para distinguir "lo tocó el usuario"
+    // de "lo puso el autocompletado".
+    component.form.controls.precio.setValue(999);
+    component.form.controls.precio.markAsDirty();
+
+    await component.onCuentaChange('cta-1');
+
+    expect(component.form.controls.precio.value).toBe(999);
+  });
+
+  it('tasaCambio: oculta el campo en PEN, aparece con otra moneda, y vuelve a 1 al volver a PEN', async () => {
+    await setup();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(
+      fixture.nativeElement.querySelector('input[formcontrolname="tasaCambio"]'),
+    ).toBeNull();
+
+    component.form.controls.moneda.setValue(Moneda.USD);
+    component.form.controls.tasaCambio.setValue(3.75);
+    fixture.detectChanges();
+
+    expect(
+      fixture.nativeElement.querySelector('input[formcontrolname="tasaCambio"]'),
+    ).not.toBeNull();
+    expect(component.form.controls.tasaCambio.value).toBe(3.75);
+
+    component.form.controls.moneda.setValue(Moneda.PEN);
+    fixture.detectChanges();
+
+    expect(component.form.controls.tasaCambio.value).toBe(1);
+    expect(
+      fixture.nativeElement.querySelector('input[formcontrolname="tasaCambio"]'),
+    ).toBeNull();
   });
 
   it('"+ Nuevo cliente" abre el modal chico y selecciona el contacto creado sin perder lo ya llenado', async () => {

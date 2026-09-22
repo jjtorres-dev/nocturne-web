@@ -10,6 +10,8 @@ import { ServiciosApi } from '../../services/servicios-api';
 import { ServiceType, type Servicio } from '../../services/servicio.model';
 import { ContactosApi } from '../../contacts/contactos-api';
 import { ContactType, type Contacto } from '../../contacts/contacto.model';
+import { Auth, UserRole } from '../../../core/auth/auth';
+import { UltimoMetodoPago } from '../../../shared/metodo-pago/ultimo-metodo-pago';
 
 describe('CuentaFormDialog', () => {
   const owner = { id: 'admin-0', name: 'Admin', email: 'admin@nocturne.dev' };
@@ -42,8 +44,13 @@ describe('CuentaFormDialog', () => {
   let serviciosApi: { list: ReturnType<typeof vi.fn> };
   let contactosApi: { list: ReturnType<typeof vi.fn> };
   let dialogRef: { close: ReturnType<typeof vi.fn> };
+  let auth: { currentUser: ReturnType<typeof vi.fn> };
+  let ultimoMetodoPago: { get: ReturnType<typeof vi.fn>; set: ReturnType<typeof vi.fn> };
 
-  async function setup(data: { cuenta?: unknown } = {}) {
+  async function setup(
+    data: { cuenta?: unknown } = {},
+    ultimoMetodoPagoGuardado: string | null = null,
+  ) {
     api = {
       create: vi.fn().mockResolvedValue({ id: 'cta-1' }),
       update: vi.fn().mockResolvedValue({ id: 'cta-1' }),
@@ -51,6 +58,11 @@ describe('CuentaFormDialog', () => {
     serviciosApi = { list: vi.fn().mockResolvedValue([servicio]) };
     contactosApi = { list: vi.fn().mockResolvedValue([proveedor]) };
     dialogRef = { close: vi.fn() };
+    auth = { currentUser: vi.fn().mockReturnValue({ id: 'admin-0', role: UserRole.ADMIN }) };
+    ultimoMetodoPago = {
+      get: vi.fn().mockReturnValue(ultimoMetodoPagoGuardado),
+      set: vi.fn(),
+    };
 
     await TestBed.configureTestingModule({
       imports: [CuentaFormDialog],
@@ -60,6 +72,8 @@ describe('CuentaFormDialog', () => {
         { provide: ContactosApi, useValue: contactosApi },
         { provide: MatDialogRef, useValue: dialogRef },
         { provide: MAT_DIALOG_DATA, useValue: data },
+        { provide: Auth, useValue: auth },
+        { provide: UltimoMetodoPago, useValue: ultimoMetodoPago },
       ],
     }).compileComponents();
 
@@ -137,6 +151,65 @@ describe('CuentaFormDialog', () => {
     input.dispatchEvent(new Event('input'));
 
     expect(component.form.controls.metodoPago.value).toBe('Depósito en agencia');
+  });
+
+  it('al crear, arranca con el último método de pago guardado para este usuario', async () => {
+    await setup({}, 'Plin');
+    await fixture.whenStable();
+
+    expect(ultimoMetodoPago.get).toHaveBeenCalledWith('admin-0');
+    expect(component.form.controls.metodoPago.value).toBe('Plin');
+  });
+
+  it('al crear sin nada guardado todavía, arranca vacío', async () => {
+    await setup({}, null);
+    await fixture.whenStable();
+
+    expect(component.form.controls.metodoPago.value).toBe('');
+  });
+
+  it('al editar, ignora lo guardado y arranca con el metodoPago real de la cuenta', async () => {
+    const cuenta = {
+      id: 'cta-1',
+      servicioId: 'srv-1',
+      proveedorId: null,
+      correo: 'a@b.com',
+      claveServicio: 'secreta',
+      claveCorreo: null,
+      fechaInicio: '2026-01-01',
+      fechaFin: '2026-02-01',
+      costo: 10,
+      metodoPago: 'Transferencia bancaria',
+      url: null,
+      renovacionAutomatica: false,
+      activo: true,
+      createdAt: '',
+      updatedAt: '',
+    };
+    await setup({ cuenta }, 'Plin');
+    await fixture.whenStable();
+
+    expect(ultimoMetodoPago.get).not.toHaveBeenCalled();
+    expect(component.form.controls.metodoPago.value).toBe('Transferencia bancaria');
+  });
+
+  it('al guardar con éxito (crear o editar), graba el método de pago usado', async () => {
+    await setup();
+    await fixture.whenStable();
+
+    component.form.patchValue({
+      servicioId: 'srv-1',
+      correo: 'a@b.com',
+      claveServicio: 'secreta',
+      fechaInicio: '2026-01-01',
+      fechaFin: '2026-02-01',
+      costo: 10,
+      metodoPago: 'Plin',
+    });
+
+    await component.submit();
+
+    expect(ultimoMetodoPago.set).toHaveBeenCalledWith('admin-0', 'Plin');
   });
 
   it('crea una cuenta con el payload del formulario', async () => {

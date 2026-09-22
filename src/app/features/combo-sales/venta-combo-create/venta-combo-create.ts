@@ -30,6 +30,8 @@ import { type Perfil } from '../../accounts/profiles/perfil.model';
 import { ClienteQuickCreateDialog } from '../../../shared/cliente-quick-create-dialog/cliente-quick-create-dialog';
 import { extractErrorMessage, injectFormError } from '../../../shared/form-error';
 import { MetodoPagoSelect } from '../../../shared/metodo-pago/metodo-pago-select/metodo-pago-select';
+import { UltimoMetodoPago } from '../../../shared/metodo-pago/ultimo-metodo-pago';
+import { Auth } from '../../../core/auth/auth';
 
 // Sentinel para la opción "+ Nuevo cliente" del selector — nunca un id real.
 const NUEVO_CLIENTE = '__nuevo_cliente__';
@@ -82,8 +84,11 @@ export class VentaComboCreate implements OnInit {
   private readonly perfilesApi = inject(PerfilesApi);
   private readonly dialog = inject(MatDialog);
   private readonly router = inject(Router);
+  private readonly auth = inject(Auth);
+  private readonly ultimoMetodoPago = inject(UltimoMetodoPago);
 
   protected readonly monedas = Object.values(Moneda);
+  protected readonly Moneda = Moneda;
   protected readonly ServiceType = ServiceType;
   readonly NUEVO_CLIENTE = NUEVO_CLIENTE;
   private clienteIdPrevio = '';
@@ -109,11 +114,25 @@ export class VentaComboCreate implements OnInit {
       precio: [0, [Validators.required, Validators.min(0.01)]],
       moneda: [Moneda.PEN, Validators.required],
       tasaCambio: [1, [Validators.required, Validators.min(0.0001)]],
-      metodoPago: ['', [Validators.required, Validators.minLength(1)]],
+      metodoPago: [
+        this.metodoPagoInicial(),
+        [Validators.required, Validators.minLength(1)],
+      ],
       renovacionAutomatica: [false],
     },
     { validators: fechaFinPosteriorValidator },
   );
+
+  constructor() {
+    // En PEN no tiene sentido pedir una tasa de cambio contra sí misma: el
+    // campo se fuerza a 1 y se oculta en el template. Con cualquier otra
+    // moneda se muestra y queda editable a mano.
+    this.form.controls.moneda.valueChanges.subscribe((moneda) => {
+      if (moneda === Moneda.PEN) {
+        this.form.controls.tasaCambio.setValue(1);
+      }
+    });
+  }
 
   async ngOnInit(): Promise<void> {
     this.loadingOptions.set(true);
@@ -267,6 +286,7 @@ export class VentaComboCreate implements OnInit {
 
     try {
       const result = await this.api.create(payload);
+      this.recordarMetodoPago(raw.metodoPago);
       void this.router.navigate(['/combo-sales', result.id]);
     } catch (error) {
       // El backend identifica en el mensaje CUÁL servicio/asignación falló
@@ -277,6 +297,20 @@ export class VentaComboCreate implements OnInit {
       );
     } finally {
       this.saving.set(false);
+    }
+  }
+
+  // Si el usuario ya creó una venta de combo antes, arranca con ese método
+  // en vez de vacío.
+  private metodoPagoInicial(): string {
+    const userId = this.auth.currentUser()?.id;
+    return (userId && this.ultimoMetodoPago.get(userId)) || '';
+  }
+
+  private recordarMetodoPago(metodoPago: string): void {
+    const userId = this.auth.currentUser()?.id;
+    if (userId) {
+      this.ultimoMetodoPago.set(userId, metodoPago);
     }
   }
 

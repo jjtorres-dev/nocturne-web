@@ -6,6 +6,8 @@ import { MatSelectHarness } from '@angular/material/select/testing';
 import { VentaEditDialog } from './venta-edit-dialog';
 import { VentasApi } from '../ventas-api';
 import { Moneda, type Venta } from '../venta.model';
+import { Auth, UserRole } from '../../../core/auth/auth';
+import { UltimoMetodoPago } from '../../../shared/metodo-pago/ultimo-metodo-pago';
 
 describe('VentaEditDialog', () => {
   const venta: Venta = {
@@ -35,10 +37,14 @@ describe('VentaEditDialog', () => {
   let component: VentaEditDialog;
   let api: { update: ReturnType<typeof vi.fn> };
   let dialogRef: { close: ReturnType<typeof vi.fn> };
+  let auth: { currentUser: ReturnType<typeof vi.fn> };
+  let ultimoMetodoPago: { get: ReturnType<typeof vi.fn>; set: ReturnType<typeof vi.fn> };
 
   beforeEach(async () => {
     api = { update: vi.fn().mockResolvedValue({ ...venta, precio: 20 }) };
     dialogRef = { close: vi.fn() };
+    auth = { currentUser: vi.fn().mockReturnValue({ id: 'admin-0', role: UserRole.ADMIN }) };
+    ultimoMetodoPago = { get: vi.fn().mockReturnValue(null), set: vi.fn() };
 
     await TestBed.configureTestingModule({
       imports: [VentaEditDialog],
@@ -46,6 +52,8 @@ describe('VentaEditDialog', () => {
         { provide: VentasApi, useValue: api },
         { provide: MatDialogRef, useValue: dialogRef },
         { provide: MAT_DIALOG_DATA, useValue: { venta } },
+        { provide: Auth, useValue: auth },
+        { provide: UltimoMetodoPago, useValue: ultimoMetodoPago },
       ],
     }).compileComponents();
 
@@ -61,6 +69,29 @@ describe('VentaEditDialog', () => {
     expect(component.form.controls.tasaCambio.value).toBe(1);
     expect(component.form.controls.metodoPago.value).toBe('Yape');
     expect(component.form.controls.renovacionAutomatica.value).toBe(false);
+  });
+
+  it('tasaCambio: oculta el campo en PEN (ya lo está al precargar), aparece con otra moneda y vuelve a 1 al volver a PEN', () => {
+    expect(
+      fixture.nativeElement.querySelector('input[formcontrolname="tasaCambio"]'),
+    ).toBeNull();
+
+    component.form.controls.moneda.setValue(Moneda.USD);
+    component.form.controls.tasaCambio.setValue(3.75);
+    fixture.detectChanges();
+
+    expect(
+      fixture.nativeElement.querySelector('input[formcontrolname="tasaCambio"]'),
+    ).not.toBeNull();
+    expect(component.form.controls.tasaCambio.value).toBe(3.75);
+
+    component.form.controls.moneda.setValue(Moneda.PEN);
+    fixture.detectChanges();
+
+    expect(component.form.controls.tasaCambio.value).toBe(1);
+    expect(
+      fixture.nativeElement.querySelector('input[formcontrolname="tasaCambio"]'),
+    ).toBeNull();
   });
 
   it('el método de pago usa el selector reusable y precarga la opción fija correcta', async () => {
@@ -104,6 +135,14 @@ describe('VentaEditDialog', () => {
       renovacionAutomatica: false,
     });
     expect(dialogRef.close).toHaveBeenCalledWith({ ...venta, precio: 20 });
+  });
+
+  it('al guardar con éxito, graba el método de pago usado (editar también cuenta)', async () => {
+    component.form.patchValue({ metodoPago: 'Plin' });
+
+    await component.submit();
+
+    expect(ultimoMetodoPago.set).toHaveBeenCalledWith('admin-0', 'Plin');
   });
 
   it('muestra el mensaje real del backend, no el genérico', async () => {
