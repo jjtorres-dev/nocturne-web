@@ -6,9 +6,10 @@
 // Las marcas son propiedad de sus respectivos dueños; se usan solo para
 // identificar el servicio dentro del panel (ver DISCLAIMER.md del paquete).
 //
-// Disney+ y Prime Video no existen en Simple Icons (fueron retirados): salen de
-// Dashboard Icons (Apache-2.0), como archivos SVG con sus propios colores en
-// ./assets, servidos localmente en /service-icons/ (ver assets/NOTICE.md).
+// Disney+, Prime Video y ChatGPT/OpenAI no existen en Simple Icons (los dos
+// primeros fueron retirados; OpenAI nunca se agregó): salen de Dashboard Icons
+// (Apache-2.0), como archivos SVG con sus propios colores en ./assets,
+// servidos localmente en /service-icons/ (ver assets/NOTICE.md).
 //
 // `bg` es el fondo del "tile" circular donde se dibuja el ícono. En los íconos
 // monocromos (`path`), `fg` es el trazo: el color de marca con el de mayor
@@ -198,5 +199,13 @@ export const SERVICE_ICONS: readonly ServiceIconDef[] = [
     keywords: ['prime video', 'primevideo', 'amazon prime'],
     bg: '#00a8e1',
     src: 'service-icons/prime-video-alt.svg',
+  },
+  {
+    slug: 'chatgpt',
+    title: 'ChatGPT',
+    keywords: ['chatgpt', 'chat gpt', 'openai', 'gpt'],
+    bg: '#74aa9c',
+    src: 'service-icons/chatgpt.svg',
+    fullBleed: true,
   },
 ];

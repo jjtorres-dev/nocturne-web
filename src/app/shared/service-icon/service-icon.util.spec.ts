@@ -50,6 +50,14 @@ describe('resolveServiceIcon', () => {
     }
   });
 
+  it('ChatGPT/OpenAI resuelve al ícono de ChatGPT (archivo SVG local), no a Simple Icons', () => {
+    for (const nombre of ['ChatGPT Plus 1 mes', 'OpenAI Team', 'Chat GPT Personal', 'GPT Plus']) {
+      const icon = resolveServiceIcon(nombre);
+      expect(icon?.slug).toBe('chatgpt');
+      expect(icon && 'src' in icon && icon.src).toBe('service-icons/chatgpt.svg');
+    }
+  });
+
   it('el set curado tiene 15-25 íconos, cada uno con su gráfico (path o src) y keywords', () => {
     expect(SERVICE_ICONS.length).toBeGreaterThanOrEqual(15);
     expect(SERVICE_ICONS.length).toBeLessThanOrEqual(25);
