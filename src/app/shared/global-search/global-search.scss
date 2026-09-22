@@ -1,0 +1,133 @@
+// El host no aporta caja propia: sus hijos participan directo del layout
+// flex del <mat-toolbar> del header (ver admin-layout.html/scss).
+:host {
+  display: contents;
+}
+
+.search-bar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-inline: 12px;
+  height: 40px;
+  border-radius: 20px;
+  background: var(--nc-surface-elevated);
+  border: 1px solid var(--nc-border);
+}
+
+.search-bar--desktop {
+  // Empuja la barra al extremo derecho del toolbar sin tocar el resto del
+  // header (no hace falta un spacer aparte).
+  margin-inline-start: auto;
+  width: min(360px, 40vw);
+}
+
+.search-bar--mobile {
+  // Los hermanos (hamburguesa/título) se ocultan en admin-layout.html
+  // cuando está expandido, así que esta barra pasa a ocupar todo el ancho.
+  flex: 1 1 auto;
+}
+
+.search-icon {
+  flex-shrink: 0;
+  color: var(--nc-text-secondary);
+}
+
+.search-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  color: var(--nc-text-primary);
+  font: inherit;
+  outline: none;
+
+  &::placeholder {
+    color: var(--nc-text-secondary);
+  }
+}
+
+.result-panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  inset-inline: 0;
+  max-height: min(70vh, 480px);
+  overflow-y: auto;
+  padding: 8px;
+  border-radius: 12px;
+  background: var(--nc-surface-elevated);
+  border: 1px solid var(--nc-border);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
+  z-index: 10;
+}
+
+.panel-status {
+  margin: 0;
+  padding: 12px;
+  color: var(--nc-text-secondary);
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+.result-group + .result-group {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--nc-border);
+}
+
+.result-group-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 8px;
+  color: var(--nc-text-secondary);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+
+  .mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+  }
+}
+
+.result-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  width: 100%;
+  padding: 8px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+
+  &:hover,
+  &.active {
+    background: var(--nc-surface);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--nc-accent-solid);
+    outline-offset: -2px;
+  }
+}
+
+.result-main {
+  overflow: hidden;
+  width: 100%;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.result-owner {
+  color: var(--nc-text-secondary);
+  font-size: 0.75rem;
+}

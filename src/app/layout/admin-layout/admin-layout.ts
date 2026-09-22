@@ -1,4 +1,4 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
@@ -9,6 +9,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { Auth, UserRole } from '../../core/auth/auth';
 import { AvatarInicial } from '../../shared/avatar-inicial/avatar-inicial';
 import { injectIsMobile } from '../../shared/breakpoints';
+import { GlobalSearch } from '../../shared/global-search/global-search';
 import { USER_ROLE_LABELS } from '../../features/users/usuario.model';
 
 interface NavItem {
@@ -23,6 +24,7 @@ interface NavItem {
 @Component({
   imports: [
     AvatarInicial,
+    GlobalSearch,
     RouterLink,
     RouterLinkActive,
     RouterOutlet,
@@ -45,6 +47,12 @@ export class AdminLayout {
   protected readonly isMobile = injectIsMobile();
 
   protected readonly roleLabels = USER_ROLE_LABELS;
+
+  // Mientras el buscador global está expandido en móvil, oculta la
+  // hamburguesa y el título para que ocupe todo el ancho del header (ver
+  // GlobalSearch, que lo maneja con [(mobileExpanded)]). Sin `protected`:
+  // el test de responsive lo fuerza directo, sin simular el click real.
+  readonly searchExpanded = signal(false);
 
   // Se irán sumando secciones a medida que avancen las fases del roadmap.
   private readonly allNavItems: NavItem[] = [

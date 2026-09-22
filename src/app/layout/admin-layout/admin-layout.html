@@ -50,7 +50,7 @@
 
   <mat-sidenav-content>
     <mat-toolbar class="header">
-      @if (isMobile()) {
+      @if (isMobile() && !searchExpanded()) {
         <button
           mat-icon-button
           class="menu-button"
@@ -60,7 +60,10 @@
           <mat-icon>menu</mat-icon>
         </button>
       }
-      <span>Panel de administración</span>
+      @if (!isMobile() || !searchExpanded()) {
+        <span>Panel de administración</span>
+      }
+      <app-global-search [(mobileExpanded)]="searchExpanded" />
     </mat-toolbar>
 
     <main class="content">

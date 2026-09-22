@@ -1,0 +1,71 @@
+@if (isMobile() && !mobileExpanded()) {
+  <button type="button" mat-icon-button aria-label="Buscar" (click)="expandMobile()">
+    <mat-icon>search</mat-icon>
+  </button>
+} @else {
+  <div
+    class="search-bar"
+    [class.search-bar--mobile]="isMobile()"
+    [class.search-bar--desktop]="!isMobile()"
+  >
+    <mat-icon class="search-icon" aria-hidden="true">search</mat-icon>
+    <input
+      #searchInput
+      type="text"
+      class="search-input"
+      placeholder="Buscar…"
+      autocomplete="off"
+      aria-label="Buscar"
+      [value]="query()"
+      (input)="onQueryInput(searchInput.value)"
+      (focus)="onFocus()"
+      (keydown)="onKeydown($event)"
+    />
+    @if (isMobile()) {
+      <button
+        type="button"
+        mat-icon-button
+        aria-label="Cerrar buscador"
+        (click)="collapseMobile()"
+      >
+        <mat-icon>close</mat-icon>
+      </button>
+    }
+
+    @if (showPanel()) {
+      <div class="result-panel">
+        @if (loading()) {
+          <p class="panel-status">Buscando…</p>
+        } @else if (showEmptyState()) {
+          <app-empty-state
+            icon="search_off"
+            mensaje="Sin resultados para tu búsqueda."
+            submensaje="Prueba con otro término."
+          />
+        } @else {
+          @for (group of groups(); track group.category.key) {
+            <div class="result-group">
+              <div class="result-group-header">
+                <mat-icon aria-hidden="true">{{ group.category.icon }}</mat-icon>
+                <span>{{ group.category.label }}</span>
+              </div>
+              @for (item of group.items; track item.id) {
+                <button
+                  type="button"
+                  class="result-item"
+                  [class.active]="activeIndex() === item.globalIndex"
+                  (click)="select(item)"
+                >
+                  <span class="result-main">{{ item.main }}</span>
+                  @if (isAdmin() && item.owner) {
+                    <span class="result-owner">{{ item.owner }}</span>
+                  }
+                </button>
+              }
+            </div>
+          }
+        }
+      </div>
+    }
+  </div>
+}

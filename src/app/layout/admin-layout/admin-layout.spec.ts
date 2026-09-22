@@ -139,6 +139,22 @@ describe('AdminLayout', () => {
       expect(sidenav().classList).not.toContain('mat-drawer-opened');
     });
 
+    it('el buscador global vive en el header, y expandirlo en móvil oculta hamburguesa y título', async () => {
+      await setup(admin, { mobile: true });
+      fixture.detectChanges();
+
+      const header: HTMLElement = fixture.nativeElement.querySelector('.header');
+      expect(header.querySelector('app-global-search')).not.toBeNull();
+      expect(menuButton()).not.toBeNull();
+      expect(header.textContent).toContain('Panel de administración');
+
+      component.searchExpanded.set(true);
+      fixture.detectChanges();
+
+      expect(menuButton()).toBeNull();
+      expect(header.textContent).not.toContain('Panel de administración');
+    });
+
     it('en desktop elegir una opción no cierra el sidebar', async () => {
       await setup(admin);
       fixture.detectChanges();
