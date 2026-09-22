@@ -232,6 +232,109 @@ describe('CuentaFormDialog', () => {
     expect(dialogRef.close).toHaveBeenCalledWith({ id: 'cta-1' });
   });
 
+  it('el checkbox de perfiles automáticos se muestra al crear si el servicio tiene pantallasMax, marcado por defecto', async () => {
+    await setup();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    component.form.patchValue({ servicioId: 'srv-1' });
+    fixture.detectChanges();
+
+    const checkbox = fixture.nativeElement.querySelector(
+      'mat-checkbox[formcontrolname="crearPerfiles"]',
+    );
+    expect(checkbox).not.toBeNull();
+    expect(component.form.controls.crearPerfiles.value).toBe(true);
+  });
+
+  it('el checkbox de perfiles automáticos NO se muestra sin servicio elegido', async () => {
+    await setup();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(
+      fixture.nativeElement.querySelector('mat-checkbox[formcontrolname="crearPerfiles"]'),
+    ).toBeNull();
+  });
+
+  it('el checkbox de perfiles automáticos NO se muestra al editar', async () => {
+    const cuenta = {
+      id: 'cta-1',
+      servicioId: 'srv-1',
+      proveedorId: null,
+      correo: 'a@b.com',
+      claveServicio: 'secreta',
+      claveCorreo: null,
+      fechaInicio: '2026-01-01',
+      fechaFin: '2026-02-01',
+      costo: 10,
+      metodoPago: 'Yape',
+      url: null,
+      renovacionAutomatica: false,
+      activo: true,
+      createdAt: '',
+      updatedAt: '',
+    };
+    await setup({ cuenta });
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(
+      fixture.nativeElement.querySelector('mat-checkbox[formcontrolname="crearPerfiles"]'),
+    ).toBeNull();
+  });
+
+  it('crea la cuenta con crearPerfiles: true en el payload cuando el checkbox está marcado', async () => {
+    await setup();
+    await fixture.whenStable();
+
+    component.form.patchValue({
+      servicioId: 'srv-1',
+      correo: 'a@b.com',
+      claveServicio: 'secreta',
+      fechaInicio: '2026-01-01',
+      fechaFin: '2026-02-01',
+      costo: 10,
+      metodoPago: 'Yape',
+      crearPerfiles: true,
+    });
+
+    await component.submit();
+
+    expect(api.create).toHaveBeenCalledWith(
+      expect.objectContaining({ crearPerfiles: true }),
+    );
+  });
+
+  it('al editar, nunca manda crearPerfiles en el payload (ni aunque el form lo tenga en true)', async () => {
+    const cuenta = {
+      id: 'cta-1',
+      servicioId: 'srv-1',
+      proveedorId: null,
+      correo: 'a@b.com',
+      claveServicio: 'secreta',
+      claveCorreo: null,
+      fechaInicio: '2026-01-01',
+      fechaFin: '2026-02-01',
+      costo: 10,
+      metodoPago: 'Yape',
+      url: null,
+      renovacionAutomatica: false,
+      activo: true,
+      createdAt: '',
+      updatedAt: '',
+    };
+    await setup({ cuenta });
+    await fixture.whenStable();
+
+    await component.submit();
+
+    expect(api.update).toHaveBeenCalledWith(
+      'cta-1',
+      expect.objectContaining({ crearPerfiles: undefined }),
+    );
+  });
+
   it('al crear, la clave del servicio es opcional (proveedor que solo da un código, sin clave)', async () => {
     await setup();
     await fixture.whenStable();

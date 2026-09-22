@@ -113,6 +113,10 @@ export class CuentaFormDialog implements OnInit {
       renovacionAutomatica: [
         this.data.cuenta?.renovacionAutomatica ?? false,
       ],
+      // Solo tiene efecto al crear (ver submit): marcado por defecto,
+      // el checkbox mismo solo se muestra si el servicio elegido tiene
+      // pantallasMax (ver crearPerfilesVisible).
+      crearPerfiles: [true],
     },
     { validators: fechaFinPosteriorValidator },
   );
@@ -158,6 +162,23 @@ export class CuentaFormDialog implements OnInit {
     );
   }
 
+  // El checkbox de perfiles automáticos solo tiene sentido al crear (ver
+  // submit, que descarta el valor al editar) y solo si el servicio elegido
+  // tiene pantallasMax (SIN_PERFILES no tiene nada que generar).
+  protected crearPerfilesVisible(): boolean {
+    return !this.isEdit && !!this.servicioSeleccionado()?.pantallasMax;
+  }
+
+  protected pantallasMaxDeServicioElegido(): number {
+    return this.servicioSeleccionado()?.pantallasMax ?? 0;
+  }
+
+  private servicioSeleccionado(): Servicio | undefined {
+    return this.servicios().find(
+      (s) => s.id === this.form.controls.servicioId.value,
+    );
+  }
+
   async ngOnInit(): Promise<void> {
     this.loadingOptions.set(true);
     try {
@@ -195,6 +216,8 @@ export class CuentaFormDialog implements OnInit {
       claveServicio: raw.claveServicio || undefined,
       claveCorreo: raw.claveCorreo || undefined,
       url: raw.url || undefined,
+      // Solo tiene efecto al crear — ver crearPerfilesVisible.
+      crearPerfiles: this.isEdit ? undefined : raw.crearPerfiles,
     };
 
     try {

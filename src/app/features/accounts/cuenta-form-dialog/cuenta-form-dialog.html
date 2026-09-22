@@ -121,6 +121,12 @@
 
       <mat-checkbox formControlName="renovacionAutomatica">Renovación automática</mat-checkbox>
 
+      @if (crearPerfilesVisible()) {
+        <mat-checkbox formControlName="crearPerfiles">
+          Crear {{ pantallasMaxDeServicioElegido() }} perfiles automáticamente
+        </mat-checkbox>
+      }
+
       @if (errorMessage()) {
         <p class="error-message" role="alert">{{ errorMessage() }}</p>
       }

@@ -59,6 +59,10 @@ export interface CuentaPayload {
   metodoPago: string;
   url?: string;
   renovacionAutomatica?: boolean;
+  // Solo tiene efecto al crear (el backend lo ignora en editar, ni
+  // siquiera se manda ahí — ver CuentaFormDialog): si el servicio elegido
+  // tiene pantallasMax, crea "Perfil 1".."Perfil N" junto con la cuenta.
+  crearPerfiles?: boolean;
 }
 
 export interface CuentaFilters {
