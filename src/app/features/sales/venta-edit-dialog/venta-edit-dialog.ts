@@ -14,6 +14,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { VentasApi } from '../ventas-api';
 import { Moneda, type Venta } from '../venta.model';
 import { extractErrorMessage, injectFormError } from '../../../shared/form-error';
+import { MetodoPagoSelect } from '../../../shared/metodo-pago/metodo-pago-select/metodo-pago-select';
 
 export interface VentaEditDialogData {
   venta: Venta;
@@ -29,6 +30,7 @@ export interface VentaEditDialogData {
     MatCheckboxModule,
     MatButtonModule,
     MatProgressSpinnerModule,
+    MetodoPagoSelect,
   ],
   selector: 'app-venta-edit-dialog',
   styleUrl: './venta-edit-dialog.scss',

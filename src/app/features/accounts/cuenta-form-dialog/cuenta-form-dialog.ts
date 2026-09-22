@@ -26,6 +26,7 @@ import { ContactosApi } from '../../contacts/contactos-api';
 import { ContactType, type Contacto } from '../../contacts/contacto.model';
 import { sumarMeses } from '../../../shared/fecha.util';
 import { extractErrorMessage, injectFormError } from '../../../shared/form-error';
+import { MetodoPagoSelect } from '../../../shared/metodo-pago/metodo-pago-select/metodo-pago-select';
 
 export interface CuentaFormDialogData {
   cuenta?: Cuenta;
@@ -53,6 +54,7 @@ function fechaFinPosteriorValidator(
     MatButtonModule,
     MatIconModule,
     MatProgressSpinnerModule,
+    MetodoPagoSelect,
   ],
   selector: 'app-cuenta-form-dialog',
   styleUrl: './cuenta-form-dialog.scss',

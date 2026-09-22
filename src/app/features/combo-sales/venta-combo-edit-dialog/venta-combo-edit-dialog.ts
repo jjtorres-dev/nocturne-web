@@ -15,6 +15,7 @@ import { VentaCombosApi } from '../venta-combos-api';
 import { type VentaCombo } from '../venta-combo.model';
 import { Moneda } from '../../sales/venta.model';
 import { extractErrorMessage, injectFormError } from '../../../shared/form-error';
+import { MetodoPagoSelect } from '../../../shared/metodo-pago/metodo-pago-select/metodo-pago-select';
 
 export interface VentaComboEditDialogData {
   ventaCombo: VentaCombo;
@@ -30,6 +31,7 @@ export interface VentaComboEditDialogData {
     MatCheckboxModule,
     MatButtonModule,
     MatProgressSpinnerModule,
+    MetodoPagoSelect,
   ],
   selector: 'app-venta-combo-edit-dialog',
   styleUrl: './venta-combo-edit-dialog.scss',

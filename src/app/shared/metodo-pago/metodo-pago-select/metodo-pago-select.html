@@ -1,0 +1,39 @@
+<mat-form-field appearance="outline">
+  <mat-label>Método de pago</mat-label>
+  <mat-select
+    [value]="selected()"
+    [disabled]="disabled()"
+    (selectionChange)="onSelectChange($event.value)"
+    (blur)="markTouched()"
+  >
+    @for (opt of options; track opt) {
+      <mat-option [value]="opt">{{ opt }}</mat-option>
+    }
+    <mat-option [value]="OTRO">Otro</mat-option>
+  </mat-select>
+</mat-form-field>
+
+@if (showRequiredError()) {
+  <!--
+    Fuera de mat-form-field a propósito: su proyección de mat-error solo se
+    activa si el control que envuelve (el mat-select) reporta errorState, y
+    eso requiere un NgControl atado directo a él — acá el mat-select no
+    tiene uno (el value accessor real es este componente, no el select).
+    MatError funciona igual como directiva suelta, solo sin el spacing
+    automático del subscript del form-field.
+  -->
+  <mat-error>El método de pago es obligatorio.</mat-error>
+}
+
+@if (selected() === OTRO) {
+  <mat-form-field appearance="outline">
+    <mat-label>Especifica el método de pago</mat-label>
+    <input
+      matInput
+      [value]="customText()"
+      [disabled]="disabled()"
+      (input)="onCustomTextChange($event)"
+      (blur)="markTouched()"
+    />
+  </mat-form-field>
+}

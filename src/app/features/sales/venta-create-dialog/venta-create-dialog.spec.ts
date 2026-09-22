@@ -3,6 +3,8 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { of } from 'rxjs';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { TestbedHarnessEnvironment } from '@angular/cdk/testing/testbed';
+import { MatSelectHarness } from '@angular/material/select/testing';
 import { VentaCreateDialog } from './venta-create-dialog';
 import { VentasApi } from '../ventas-api';
 import { Moneda } from '../venta.model';
@@ -126,6 +128,23 @@ describe('VentaCreateDialog', () => {
     // componente, obtenida del injector de la propia fixture.
     dialog = fixture.debugElement.injector.get(MatDialog);
   }
+
+  it('el método de pago usa el selector reusable: elegir una opción fija guarda su etiqueta', async () => {
+    await setup();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('app-metodo-pago-select')).not.toBeNull();
+
+    const loader = TestbedHarnessEnvironment.loader(fixture);
+    const select = await loader.getHarness(
+      MatSelectHarness.with({ ancestor: 'app-metodo-pago-select' }),
+    );
+    await select.open();
+    await select.clickOptions({ text: 'Zelle' });
+
+    expect(component.form.controls.metodoPago.value).toBe('Zelle');
+  });
 
   it('carga servicios y solo clientes tipo CLIENTE_FINAL al iniciar', async () => {
     await setup();

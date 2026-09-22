@@ -1,6 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { HttpErrorResponse } from '@angular/common/http';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { TestbedHarnessEnvironment } from '@angular/cdk/testing/testbed';
+import { MatSelectHarness } from '@angular/material/select/testing';
 import { VentaEditDialog } from './venta-edit-dialog';
 import { VentasApi } from '../ventas-api';
 import { Moneda, type Venta } from '../venta.model';
@@ -59,6 +61,17 @@ describe('VentaEditDialog', () => {
     expect(component.form.controls.tasaCambio.value).toBe(1);
     expect(component.form.controls.metodoPago.value).toBe('Yape');
     expect(component.form.controls.renovacionAutomatica.value).toBe(false);
+  });
+
+  it('el método de pago usa el selector reusable y precarga la opción fija correcta', async () => {
+    expect(fixture.nativeElement.querySelector('app-metodo-pago-select')).not.toBeNull();
+
+    const loader = TestbedHarnessEnvironment.loader(fixture);
+    const select = await loader.getHarness(
+      MatSelectHarness.with({ ancestor: 'app-metodo-pago-select' }),
+    );
+
+    expect(await select.getValueText()).toBe('Yape');
   });
 
   it('no expone campos estructurales (servicio, cuenta, perfil, cliente) en el DOM', () => {

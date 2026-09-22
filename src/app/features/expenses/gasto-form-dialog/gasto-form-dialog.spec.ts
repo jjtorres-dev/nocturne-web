@@ -1,6 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { HttpErrorResponse } from '@angular/common/http';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { TestbedHarnessEnvironment } from '@angular/cdk/testing/testbed';
+import { MatSelectHarness } from '@angular/material/select/testing';
 import { GastoFormDialog } from './gasto-form-dialog';
 import { GastosApi } from '../gastos-api';
 import { Moneda } from '../../sales/venta.model';
@@ -88,6 +90,35 @@ describe('GastoFormDialog', () => {
     expect(component.isEdit).toBe(true);
     expect(component.form.controls.descripcion.value).toBe('Hosting');
     expect(component.form.controls.monto.value).toBe(50);
+  });
+
+  it('el método de pago usa el selector reusable y precarga la opción fija correcta', async () => {
+    const gasto: Gasto = {
+      id: 'gasto-1',
+      descripcion: 'Hosting',
+      monto: 50,
+      moneda: Moneda.PEN,
+      tasaCambio: 1,
+      montoPEN: 50,
+      metodoPago: 'Yape',
+      fecha: '2026-01-05',
+      activo: true,
+      owner: { id: 'admin-0', name: 'Admin', email: 'admin@nocturne.dev' },
+      createdAt: '',
+      updatedAt: '',
+    };
+    await setup({ gasto });
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('app-metodo-pago-select')).not.toBeNull();
+
+    const loader = TestbedHarnessEnvironment.loader(fixture);
+    const select = await loader.getHarness(
+      MatSelectHarness.with({ ancestor: 'app-metodo-pago-select' }),
+    );
+
+    expect(await select.getValueText()).toBe('Yape');
   });
 
   it('actualiza un gasto existente', async () => {

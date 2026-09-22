@@ -29,6 +29,7 @@ import { PerfilesApi } from '../../accounts/profiles/perfiles-api';
 import { type Perfil } from '../../accounts/profiles/perfil.model';
 import { ClienteQuickCreateDialog } from '../../../shared/cliente-quick-create-dialog/cliente-quick-create-dialog';
 import { extractErrorMessage, injectFormError } from '../../../shared/form-error';
+import { MetodoPagoSelect } from '../../../shared/metodo-pago/metodo-pago-select/metodo-pago-select';
 
 // Sentinel para la opción "+ Nuevo cliente" del selector — nunca un id real.
 const NUEVO_CLIENTE = '__nuevo_cliente__';
@@ -66,6 +67,7 @@ function fechaFinPosteriorValidator(
     MatButtonModule,
     MatIconModule,
     MatProgressSpinnerModule,
+    MetodoPagoSelect,
   ],
   selector: 'app-venta-combo-create',
   styleUrl: './venta-combo-create.scss',

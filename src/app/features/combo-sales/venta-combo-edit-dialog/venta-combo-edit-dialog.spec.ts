@@ -1,6 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { HttpErrorResponse } from '@angular/common/http';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { TestbedHarnessEnvironment } from '@angular/cdk/testing/testbed';
+import { MatSelectHarness } from '@angular/material/select/testing';
 import { VentaComboEditDialog } from './venta-combo-edit-dialog';
 import { VentaCombosApi } from '../venta-combos-api';
 import { type VentaCombo } from '../venta-combo.model';
@@ -57,6 +59,17 @@ describe('VentaComboEditDialog', () => {
     expect(component.form.controls.tasaCambio.value).toBe(1);
     expect(component.form.controls.metodoPago.value).toBe('Yape');
     expect(component.form.controls.renovacionAutomatica.value).toBe(false);
+  });
+
+  it('el método de pago usa el selector reusable y precarga la opción fija correcta', async () => {
+    expect(fixture.nativeElement.querySelector('app-metodo-pago-select')).not.toBeNull();
+
+    const loader = TestbedHarnessEnvironment.loader(fixture);
+    const select = await loader.getHarness(
+      MatSelectHarness.with({ ancestor: 'app-metodo-pago-select' }),
+    );
+
+    expect(await select.getValueText()).toBe('Yape');
   });
 
   it('no expone campos estructurales (cliente, combo, asignaciones) en el FormGroup', () => {

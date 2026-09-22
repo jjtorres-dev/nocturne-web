@@ -30,6 +30,7 @@ import { type Perfil } from '../../accounts/profiles/perfil.model';
 import { ClienteQuickCreateDialog } from '../../../shared/cliente-quick-create-dialog/cliente-quick-create-dialog';
 import { sumarMeses } from '../../../shared/fecha.util';
 import { extractErrorMessage, injectFormError } from '../../../shared/form-error';
+import { MetodoPagoSelect } from '../../../shared/metodo-pago/metodo-pago-select/metodo-pago-select';
 
 // Sentinel para la opción "+ Nuevo cliente" del selector — nunca un id real.
 const NUEVO_CLIENTE = '__nuevo_cliente__';
@@ -55,6 +56,7 @@ function fechaFinPosteriorValidator(
     MatCheckboxModule,
     MatButtonModule,
     MatProgressSpinnerModule,
+    MetodoPagoSelect,
   ],
   selector: 'app-venta-create-dialog',
   styleUrl: './venta-create-dialog.scss',

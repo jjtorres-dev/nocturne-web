@@ -2,6 +2,8 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { HttpErrorResponse } from '@angular/common/http';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { TestbedHarnessEnvironment } from '@angular/cdk/testing/testbed';
+import { MatSelectHarness } from '@angular/material/select/testing';
 import { CuentaFormDialog } from './cuenta-form-dialog';
 import { CuentasApi } from '../cuentas-api';
 import { ServiciosApi } from '../../services/servicios-api';
@@ -110,6 +112,31 @@ describe('CuentaFormDialog', () => {
 
     expect(component.form.hasError('fechaFinInvalida')).toBe(true);
     expect(component.form.valid).toBe(false);
+  });
+
+  it('el método de pago usa el selector reusable: elegir "Otro" y escribir guarda el texto custom', async () => {
+    await setup();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('app-metodo-pago-select')).not.toBeNull();
+
+    const loader = TestbedHarnessEnvironment.loader(fixture);
+    const select = await loader.getHarness(
+      MatSelectHarness.with({ ancestor: 'app-metodo-pago-select' }),
+    );
+    await select.open();
+    await select.clickOptions({ text: 'Otro' });
+    fixture.detectChanges();
+
+    const input = fixture.nativeElement.querySelector(
+      'app-metodo-pago-select input[matInput]',
+    ) as HTMLInputElement;
+    expect(input).not.toBeNull();
+    input.value = 'Depósito en agencia';
+    input.dispatchEvent(new Event('input'));
+
+    expect(component.form.controls.metodoPago.value).toBe('Depósito en agencia');
   });
 
   it('crea una cuenta con el payload del formulario', async () => {

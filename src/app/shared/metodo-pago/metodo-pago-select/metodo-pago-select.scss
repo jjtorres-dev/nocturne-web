@@ -1,0 +1,12 @@
+// Los formularios que lo usan son flex-column con mat-form-field como hijos
+// directos (que estiran a lo ancho); sin esto el host queda `inline` (el
+// default de un componente sin estilos) y rompe ese layout.
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+mat-form-field {
+  width: 100%;
+}

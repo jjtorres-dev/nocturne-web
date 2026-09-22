@@ -14,6 +14,7 @@ import { GastosApi } from '../gastos-api';
 import type { Gasto } from '../expense.model';
 import { Moneda } from '../../sales/venta.model';
 import { extractErrorMessage, injectFormError } from '../../../shared/form-error';
+import { MetodoPagoSelect } from '../../../shared/metodo-pago/metodo-pago-select/metodo-pago-select';
 
 export interface GastoFormDialogData {
   gasto?: Gasto;
@@ -28,6 +29,7 @@ export interface GastoFormDialogData {
     MatSelectModule,
     MatButtonModule,
     MatProgressSpinnerModule,
+    MetodoPagoSelect,
   ],
   selector: 'app-gasto-form-dialog',
   styleUrl: './gasto-form-dialog.scss',
