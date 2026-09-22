@@ -83,9 +83,17 @@
   min-width: 0;
 }
 
-.table-section h2 {
-  font-size: 1.1rem;
-  margin: 0 0 8px;
+.table-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 8px;
+
+  h2 {
+    font-size: 1.1rem;
+    margin: 0;
+  }
 }
 
 .breakdown-table {

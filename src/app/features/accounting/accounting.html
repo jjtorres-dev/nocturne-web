@@ -68,7 +68,17 @@
 
   <div class="tables-grid">
     <div class="table-section">
-      <h2>Por servicio</h2>
+      <div class="table-section-header">
+        <h2>Por servicio</h2>
+        <button
+          mat-stroked-button
+          (click)="exportByServiceCsv()"
+          [disabled]="byService().length === 0"
+        >
+          <mat-icon>file_download</mat-icon>
+          Exportar CSV
+        </button>
+      </div>
       <div class="table-scroll">
         <table mat-table [dataSource]="byService()" class="breakdown-table">
           <ng-container matColumnDef="nombre">
@@ -101,7 +111,17 @@
     </div>
 
     <div class="table-section">
-      <h2>Por método de pago</h2>
+      <div class="table-section-header">
+        <h2>Por método de pago</h2>
+        <button
+          mat-stroked-button
+          (click)="exportByPaymentMethodCsv()"
+          [disabled]="byPaymentMethod().length === 0"
+        >
+          <mat-icon>file_download</mat-icon>
+          Exportar CSV
+        </button>
+      </div>
       <div class="table-scroll">
         <table mat-table [dataSource]="byPaymentMethod()" class="breakdown-table">
           <ng-container matColumnDef="metodoPago">

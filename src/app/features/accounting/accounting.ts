@@ -17,6 +17,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Chart, registerables } from 'chart.js';
@@ -33,6 +34,9 @@ import { SolesPipe } from '../../shared/soles.pipe';
 import { Auth, UserRole } from '../../core/auth/auth';
 import { UsuariosApi } from '../users/usuarios-api';
 import type { Usuario } from '../users/usuario.model';
+import { ServiciosApi } from '../services/servicios-api';
+import { exportToCsv, type CsvColumn } from '../../shared/csv-export';
+import { hoyIso } from '../../shared/fecha.util';
 
 // Sentinel para "sin filtro de dueño" en el backend (ver
 // AccountingService.VIEW_ALL en nocturne-api) — nunca un id real.
@@ -53,6 +57,7 @@ Chart.register(...registerables);
     MatInputModule,
     MatSelectModule,
     MatButtonModule,
+    MatIconModule,
     MatProgressSpinnerModule,
   ],
   selector: 'app-accounting',
@@ -62,6 +67,7 @@ Chart.register(...registerables);
 export class Accounting implements OnInit, AfterViewInit, OnDestroy {
   private readonly api = inject(AccountingApi);
   private readonly usuariosApi = inject(UsuariosApi);
+  private readonly serviciosApi = inject(ServiciosApi);
   private readonly auth = inject(Auth);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
@@ -188,6 +194,59 @@ export class Accounting implements OnInit, AfterViewInit, OnDestroy {
     } finally {
       this.loading.set(false);
     }
+  }
+
+  // Dueño solo tiene sentido en "Todo el negocio": ahí sí puede haber filas
+  // de dueños distintos. En "Mi negocio" o viendo a un usuario puntual todas
+  // las filas son del mismo dueño, así que la columna sería redundante.
+  private verTodoElNegocio(): boolean {
+    return this.isAdmin() && this.viewOwnerId === VIEW_ALL;
+  }
+
+  async exportByServiceCsv(): Promise<void> {
+    const columns: CsvColumn<ServiceBreakdown>[] = [
+      { header: 'Servicio', value: (r) => r.nombre },
+      { header: 'Inversión', value: (r) => r.inversion.toFixed(2) },
+      { header: 'Ingresos', value: (r) => r.ingresos.toFixed(2) },
+      { header: 'Ganancia', value: (r) => r.ganancia.toFixed(2) },
+    ];
+
+    if (this.verTodoElNegocio()) {
+      // GET /services sin filtro de owner: para un admin devuelve todos los
+      // servicios (de cualquier usuario) con `owner` incluido (ver
+      // ServicesService.findAllOwned en nocturne-api) — no hace falta tocar
+      // el backend de Contabilidad para esto.
+      const servicios = await this.serviciosApi.list();
+      const duenoById = new Map(servicios.map((s) => [s.id, s.owner.name]));
+      columns.push({
+        header: 'Dueño',
+        value: (r) => duenoById.get(r.servicioId) ?? '—',
+      });
+    }
+
+    exportToCsv(
+      `contabilidad-por-servicio-${hoyIso()}.csv`,
+      columns,
+      this.byService(),
+    );
+  }
+
+  // "Método de Pago" es un string libre, sin dueño único por fila (ver
+  // AccountingService.byPaymentMethod / metodoPago en nocturne-api): en
+  // "Todo el negocio" una misma fila ya suma pagos de varios dueños, así
+  // que nunca lleva columna Dueño.
+  exportByPaymentMethodCsv(): void {
+    const columns: CsvColumn<PaymentMethodBreakdown>[] = [
+      { header: 'Método de Pago', value: (r) => r.metodoPago },
+      { header: 'Ingresos', value: (r) => r.ingresos.toFixed(2) },
+      { header: 'Gastos', value: (r) => r.gastos.toFixed(2) },
+      { header: 'Neto', value: (r) => r.neto.toFixed(2) },
+    ];
+    exportToCsv(
+      `contabilidad-por-metodo-pago-${hoyIso()}.csv`,
+      columns,
+      this.byPaymentMethod(),
+    );
   }
 
   private renderChart(): void {

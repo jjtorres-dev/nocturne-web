@@ -18,6 +18,8 @@ import {
 import { Auth, UserRole } from '../../core/auth/auth';
 import { UsuariosApi } from '../users/usuarios-api';
 import type { Usuario } from '../users/usuario.model';
+import { ServiciosApi } from '../services/servicios-api';
+import { ServiceType, type Servicio } from '../services/servicio.model';
 
 describe('Accounting', () => {
   const summary: AccountingSummary = {
@@ -44,6 +46,18 @@ describe('Accounting', () => {
     createdAt: '',
     updatedAt: '',
   };
+  const servicioNetflix: Servicio = {
+    id: 's1',
+    nombre: 'Netflix',
+    tipo: ServiceType.CON_PERFILES,
+    duracionMeses: 1,
+    pantallasMax: 4,
+    precioBase: 10,
+    activo: true,
+    owner: { id: 'user-2', name: 'Otro Revendedor', email: 'otro@nocturne.dev' },
+    createdAt: '',
+    updatedAt: '',
+  };
 
   let fixture: ComponentFixture<Accounting>;
   let component: Accounting;
@@ -54,6 +68,7 @@ describe('Accounting', () => {
     timeline: ReturnType<typeof vi.fn>;
   };
   let usuariosApi: { list: ReturnType<typeof vi.fn> };
+  let serviciosApi: { list: ReturnType<typeof vi.fn> };
   let router: Router;
 
   async function setup(
@@ -68,6 +83,7 @@ describe('Accounting', () => {
       timeline: vi.fn().mockResolvedValue(timeline),
     };
     usuariosApi = { list: vi.fn().mockResolvedValue([otroUsuario]) };
+    serviciosApi = { list: vi.fn().mockResolvedValue([servicioNetflix]) };
 
     await TestBed.configureTestingModule({
       imports: [Accounting],
@@ -75,6 +91,7 @@ describe('Accounting', () => {
         provideRouter([]),
         { provide: AccountingApi, useValue: api },
         { provide: UsuariosApi, useValue: usuariosApi },
+        { provide: ServiciosApi, useValue: serviciosApi },
         {
           provide: Auth,
           useValue: { currentUser: () => ({ id: 'admin-0', role }) },
@@ -273,5 +290,149 @@ describe('Accounting', () => {
     expect(api.summary).toHaveBeenCalledWith(
       expect.objectContaining({ viewOwnerId: 'user-2' }),
     );
+  });
+
+  it('deshabilita cada botón "Exportar CSV" si su tabla no tiene filas', async () => {
+    api.byService.mockResolvedValue([]);
+    api.byPaymentMethod.mockResolvedValue([]);
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const botones = Array.from(
+      fixture.nativeElement.querySelectorAll('.table-section-header button'),
+    ) as HTMLButtonElement[];
+    expect(botones.length).toBe(2);
+    expect(botones.every((b) => b.disabled)).toBe(true);
+  });
+
+  it('habilita el botón "Exportar CSV" cuando la tabla sí tiene filas', async () => {
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const botones = Array.from(
+      fixture.nativeElement.querySelectorAll('.table-section-header button'),
+    ) as HTMLButtonElement[];
+    expect(botones.every((b) => !b.disabled)).toBe(true);
+  });
+
+  describe('exportar CSV', () => {
+    async function exportarViaBlob(run: () => void | Promise<void>): Promise<string> {
+      const createObjectURL = vi.fn().mockReturnValue('blob:mock');
+      const revokeObjectURL = vi.fn();
+      vi.stubGlobal('URL', { ...URL, createObjectURL, revokeObjectURL });
+      const clickSpy = vi
+        .spyOn(HTMLAnchorElement.prototype, 'click')
+        .mockImplementation(() => ({}) as never);
+
+      await run();
+
+      const blob = createObjectURL.mock.calls[0][0] as Blob;
+      const text = await blob.text();
+
+      clickSpy.mockRestore();
+      vi.unstubAllGlobals();
+      return text;
+    }
+
+    it('"por servicio" en "Todo el negocio" trae la columna Dueño poblada', async () => {
+      await setup(UserRole.ADMIN);
+      await fixture.whenStable();
+      component.viewOwnerId = 'all';
+      component.onViewOwnerChange();
+      await fixture.whenStable();
+
+      const csv = await exportarViaBlob(() => component.exportByServiceCsv());
+
+      expect(serviciosApi.list).toHaveBeenCalled();
+      expect(csv).toContain('Servicio;Inversión;Ingresos;Ganancia;Dueño');
+      expect(csv).toContain('Netflix;100.00;300.00;200.00;Otro Revendedor');
+    });
+
+    it('"por servicio" en "Mi negocio" NO incluye la columna Dueño', async () => {
+      await setup(UserRole.ADMIN);
+      await fixture.whenStable();
+
+      const csv = await exportarViaBlob(() => component.exportByServiceCsv());
+
+      expect(serviciosApi.list).not.toHaveBeenCalled();
+      expect(csv).toContain('Servicio;Inversión;Ingresos;Ganancia');
+      expect(csv).not.toContain('Dueño');
+    });
+
+    it('"por servicio" para un REVENDEDOR NO incluye la columna Dueño', async () => {
+      await setup(UserRole.REVENDEDOR);
+      await fixture.whenStable();
+
+      const csv = await exportarViaBlob(() => component.exportByServiceCsv());
+
+      expect(serviciosApi.list).not.toHaveBeenCalled();
+      expect(csv).not.toContain('Dueño');
+    });
+
+    it('"por servicio" viendo a un usuario específico NO incluye la columna Dueño', async () => {
+      await setup(UserRole.ADMIN);
+      await fixture.whenStable();
+      component.viewOwnerId = 'user-2';
+      component.onViewOwnerChange();
+      await fixture.whenStable();
+
+      const csv = await exportarViaBlob(() => component.exportByServiceCsv());
+
+      expect(serviciosApi.list).not.toHaveBeenCalled();
+      expect(csv).not.toContain('Dueño');
+    });
+
+    it('"por método de pago" nunca incluye la columna Dueño, ni en "Todo el negocio"', async () => {
+      await setup(UserRole.ADMIN);
+      await fixture.whenStable();
+      component.viewOwnerId = 'all';
+      component.onViewOwnerChange();
+      await fixture.whenStable();
+
+      const csv = await exportarViaBlob(() => component.exportByPaymentMethodCsv());
+
+      expect(csv).toContain('Método de Pago;Ingresos;Gastos;Neto');
+      expect(csv).toContain('Yape;300.00;20.00;280.00');
+      expect(csv).not.toContain('Dueño');
+    });
+
+    it('nombra los archivos con la fecha de hoy y respeta desde/hasta/viewOwnerId ya aplicados', async () => {
+      await setup(UserRole.ADMIN);
+      await fixture.whenStable();
+      component.desde = '2026-01-01';
+      component.hasta = '2026-01-31';
+      component.viewOwnerId = 'user-2';
+      component.onViewOwnerChange();
+      await fixture.whenStable();
+
+      expect(api.byService).toHaveBeenCalledWith(
+        expect.objectContaining({
+          desde: '2026-01-01',
+          hasta: '2026-01-31',
+          viewOwnerId: 'user-2',
+        }),
+      );
+
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date(2026, 8, 22, 12, 0));
+      const createObjectURL = vi.fn().mockReturnValue('blob:mock');
+      vi.stubGlobal('URL', { ...URL, createObjectURL, revokeObjectURL: vi.fn() });
+      const clicked: HTMLAnchorElement[] = [];
+      const clickSpy = vi
+        .spyOn(HTMLAnchorElement.prototype, 'click')
+        .mockImplementation(function (this: HTMLAnchorElement) {
+          clicked.push(this);
+        });
+
+      await component.exportByServiceCsv();
+      component.exportByPaymentMethodCsv();
+
+      expect(clicked[0].download).toBe('contabilidad-por-servicio-2026-09-22.csv');
+      expect(clicked[1].download).toBe('contabilidad-por-metodo-pago-2026-09-22.csv');
+
+      clickSpy.mockRestore();
+      vi.unstubAllGlobals();
+      vi.useRealTimers();
+    });
   });
 });
