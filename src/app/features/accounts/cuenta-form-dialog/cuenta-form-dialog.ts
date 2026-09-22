@@ -114,26 +114,22 @@ export class CuentaFormDialog implements OnInit {
   );
 
   constructor() {
-    // Autocompletado de fechaFin/costo a partir del servicio elegido (ver
-    // PROGRESS.md, feedback de revendedor): ambos campos se quedan
-    // editables, esto solo sugiere un valor de partida. No dispara en modo
-    // edición mientras no se toque nada, porque `valueChanges` no emite
-    // por el valor inicial del form, solo por cambios reales del usuario.
-    this.form.controls.servicioId.valueChanges.subscribe((servicioId) => {
-      this.aplicarSugerenciasDeServicio(servicioId);
+    // Autocompletado de fechaFin a partir del servicio elegido (ver
+    // PROGRESS.md, feedback de revendedor): se queda editable, esto solo
+    // sugiere un valor de partida. No dispara en modo edición mientras no
+    // se toque nada, porque `valueChanges` no emite por el valor inicial
+    // del form, solo por cambios reales del usuario.
+    //
+    // `costo` NO se autocompleta (a diferencia de fechaFin): es lo que se
+    // pagó al proveedor por la cuenta completa, no tiene relación con
+    // `precioBase` del servicio (que es el precio de venta de un perfil) —
+    // se escribe siempre a mano.
+    this.form.controls.servicioId.valueChanges.subscribe(() => {
+      this.recalcularFechaFin();
     });
     this.form.controls.fechaInicio.valueChanges.subscribe(() => {
       this.recalcularFechaFin();
     });
-  }
-
-  private aplicarSugerenciasDeServicio(servicioId: string): void {
-    const servicio = this.servicios().find((s) => s.id === servicioId);
-    if (!servicio) {
-      return;
-    }
-    this.form.controls.costo.setValue(servicio.precioBase);
-    this.recalcularFechaFin();
   }
 
   private recalcularFechaFin(): void {

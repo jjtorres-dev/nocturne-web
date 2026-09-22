@@ -181,15 +181,15 @@ describe('CuentaFormDialog', () => {
     );
   });
 
-  it('al elegir el servicio, autocompleta costo con precioBase y fechaFin si ya hay fechaInicio', async () => {
+  it('al elegir el servicio, autocompleta fechaFin si ya hay fechaInicio, pero NO toca costo', async () => {
     await setup();
     await fixture.whenStable();
 
-    component.form.patchValue({ fechaInicio: '2026-01-01' });
+    component.form.patchValue({ fechaInicio: '2026-01-01', costo: 0 });
     component.form.patchValue({ servicioId: 'srv-1' });
 
-    expect(component.form.controls.costo.value).toBe(10);
     expect(component.form.controls.fechaFin.value).toBe('2026-02-01');
+    expect(component.form.controls.costo.value).toBe(0);
   });
 
   it('recalcula fechaFin si cambia fechaInicio con el servicio ya elegido', async () => {
