@@ -86,6 +86,15 @@ export class GlobalSearch {
 
   private readonly searchInputRef =
     viewChild<ElementRef<HTMLInputElement>>('searchInput');
+  private readonly searchBarRef =
+    viewChild<ElementRef<HTMLDivElement>>('searchBarEl');
+
+  // En móvil el panel es `position: fixed` (ver global-search.scss — nada
+  // de % ni vw relativos al wrapper, que puede no llegar de punta a punta):
+  // este es el único valor que no se puede sacar por CSS puro, así que se
+  // mide el borde inferior real de la barra (después del render) en vez de
+  // asumir un alto de header en px que podría no coincidir con el tema.
+  readonly mobilePanelTop = signal(0);
 
   private readonly searchResponse = toSignal(
     toObservable(this.query).pipe(
@@ -144,12 +153,35 @@ export class GlobalSearch {
       const items = this.flatItems();
       this.activeIndex.set(items.length > 0 ? 0 : -1);
     });
+
+    // Se remide cada vez que el panel se abre en móvil (el borde inferior
+    // de la barra no cambia mientras está abierto, pero si el usuario rota
+    // el celular el listener de resize de abajo lo vuelve a medir).
+    effect(() => {
+      if (this.showPanel() && this.isMobile()) {
+        this.updateMobilePanelTop();
+      }
+    });
   }
 
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {
     if (!this.elementRef.nativeElement.contains(event.target as Node)) {
       this.open.set(false);
+    }
+  }
+
+  @HostListener('window:resize')
+  onWindowResize(): void {
+    if (this.showPanel() && this.isMobile()) {
+      this.updateMobilePanelTop();
+    }
+  }
+
+  private updateMobilePanelTop(): void {
+    const rect = this.searchBarRef()?.nativeElement.getBoundingClientRect();
+    if (rect) {
+      this.mobilePanelTop.set(rect.bottom);
     }
   }
 

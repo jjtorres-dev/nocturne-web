@@ -26,7 +26,11 @@
 .search-bar--mobile {
   // Los hermanos (hamburguesa/título) se ocultan en admin-layout.html
   // cuando está expandido, así que esta barra pasa a ocupar todo el ancho.
+  // min-width: 0 para que el flex item se pueda achicar por debajo de su
+  // contenido (si no, en pantallas muy angostas el input empuja el ancho
+  // total más allá del viewport en vez de recortarse).
   flex: 1 1 auto;
+  min-width: 0;
 }
 
 .search-icon {
@@ -60,6 +64,23 @@
   border: 1px solid var(--nc-border);
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
   z-index: 10;
+}
+
+// Por debajo del breakpoint móvil: `position: fixed` con left/right en 0
+// (heredados de `inset-inline: 0` de arriba, que en fixed también ancla al
+// viewport) en vez de `absolute` relativo a `.search-bar` — así el panel
+// siempre mide exactamente el ancho de la pantalla sin depender de que el
+// wrapper llegue de punta a punta. `top` se fija inline en px (ver
+// global-search.html, mobilePanelTop): es el único valor que no se puede
+// sacar por CSS puro, porque depende del alto real del header ya renderizado.
+// `bottom: 0` en vez de `max-height` en vh: dado top+bottom fijos, el
+// navegador calcula el alto exacto hasta el borde inferior de la pantalla
+// sin los saltos de `vh` en móvil (la barra de URL cambia el viewport).
+.result-panel.result-panel--mobile {
+  position: fixed;
+  bottom: 0;
+  max-height: none;
+  border-radius: 0;
 }
 
 .panel-status {

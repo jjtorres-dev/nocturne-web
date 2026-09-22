@@ -298,4 +298,42 @@ describe('GlobalSearch', () => {
     expect(component.mobileExpanded()).toBe(false);
     expect(component.query()).toBe('');
   });
+
+  it('en móvil, el panel es fijo a lo ancho de la pantalla y su top sigue el borde inferior real de la barra', async () => {
+    await setup(UserRole.ADMIN, true);
+    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue({
+      bottom: 64,
+    } as DOMRect);
+    api.search.mockReturnValue(
+      of({ ...emptyResponse, contactos: [{ id: 'c1', label: 'Uno' }] }),
+    );
+
+    component.expandMobile();
+    fixture.detectChanges();
+    component.onFocus();
+    component.onQueryInput('uno');
+    await vi.advanceTimersByTimeAsync(300);
+    fixture.detectChanges();
+
+    expect(component.mobilePanelTop()).toBe(64);
+    const panel: HTMLElement | null =
+      fixture.nativeElement.querySelector('.result-panel');
+    expect(panel?.classList.contains('result-panel--mobile')).toBe(true);
+    expect(panel?.style.top).toBe('64px');
+  });
+
+  it('en desktop, el panel no usa la variante fija ni un top inline', async () => {
+    api.search.mockReturnValue(
+      of({ ...emptyResponse, contactos: [{ id: 'c1', label: 'Uno' }] }),
+    );
+    component.onFocus();
+    component.onQueryInput('uno');
+    await vi.advanceTimersByTimeAsync(300);
+    fixture.detectChanges();
+
+    const panel: HTMLElement | null =
+      fixture.nativeElement.querySelector('.result-panel');
+    expect(panel?.classList.contains('result-panel--mobile')).toBe(false);
+    expect(panel?.style.top).toBe('');
+  });
 });

@@ -4,6 +4,7 @@
   </button>
 } @else {
   <div
+    #searchBarEl
     class="search-bar"
     [class.search-bar--mobile]="isMobile()"
     [class.search-bar--desktop]="!isMobile()"
@@ -33,7 +34,11 @@
     }
 
     @if (showPanel()) {
-      <div class="result-panel">
+      <div
+        class="result-panel"
+        [class.result-panel--mobile]="isMobile()"
+        [style.top.px]="isMobile() ? mobilePanelTop() : null"
+      >
         @if (loading()) {
           <p class="panel-status">Buscando…</p>
         } @else if (showEmptyState()) {
