@@ -13,6 +13,8 @@ import { ContactosApi } from '../../contacts/contactos-api';
 import { ContactType, type Contacto } from '../../contacts/contacto.model';
 import { ServiceType, type Servicio } from '../../services/servicio.model';
 import { Auth, UserRole } from '../../../core/auth/auth';
+import { CuentasApi } from '../../accounts/cuentas-api';
+import { PerfilesApi } from '../../accounts/profiles/perfiles-api';
 
 describe('VentaComboDetail', () => {
   const owner = { id: 'admin-0', name: 'Admin', email: 'admin@nocturne.dev' };
@@ -93,7 +95,10 @@ describe('VentaComboDetail', () => {
   };
   let combosApi: { list: ReturnType<typeof vi.fn> };
   let contactosApi: { list: ReturnType<typeof vi.fn> };
+  let cuentasApi: { findOne: ReturnType<typeof vi.fn> };
+  let perfilesApi: { list: ReturnType<typeof vi.fn> };
   let dialog: { open: ReturnType<typeof vi.fn> };
+  let snackBar: { open: ReturnType<typeof vi.fn> };
   let auth: { currentUser: ReturnType<typeof vi.fn> };
 
   async function setup(role: UserRole = UserRole.ADMIN) {
@@ -106,7 +111,19 @@ describe('VentaComboDetail', () => {
     };
     combosApi = { list: vi.fn().mockResolvedValue([combo]) };
     contactosApi = { list: vi.fn().mockResolvedValue([cliente]) };
+    cuentasApi = {
+      findOne: vi.fn().mockResolvedValue({
+        id: 'cta-1',
+        correo: 'netflix@correo.com',
+        claveServicio: 'clave-netflix',
+        claveCorreo: null,
+      }),
+    };
+    perfilesApi = {
+      list: vi.fn().mockResolvedValue([{ id: 'per-1', nombre: 'Perfil 1', pin: '1234' }]),
+    };
     dialog = { open: vi.fn() };
+    snackBar = { open: vi.fn() };
     auth = { currentUser: vi.fn().mockReturnValue({ id: 'admin-0', role }) };
 
     await TestBed.configureTestingModule({
@@ -116,9 +133,11 @@ describe('VentaComboDetail', () => {
         { provide: VentaCombosApi, useValue: api },
         { provide: CombosApi, useValue: combosApi },
         { provide: ContactosApi, useValue: contactosApi },
+        { provide: CuentasApi, useValue: cuentasApi },
+        { provide: PerfilesApi, useValue: perfilesApi },
         { provide: Auth, useValue: auth },
         { provide: MatDialog, useValue: dialog },
-        { provide: MatSnackBar, useValue: { open: vi.fn() } },
+        { provide: MatSnackBar, useValue: snackBar },
         {
           provide: ActivatedRoute,
           useValue: {
@@ -205,5 +224,67 @@ describe('VentaComboDetail', () => {
     fixture.detectChanges();
 
     expect(fixture.nativeElement.textContent).not.toContain('Dueño');
+  });
+
+  it('copiarDatos: pide el detalle de CADA cuenta del combo (GET /accounts/:id) y junta todo en un solo mensaje', async () => {
+    await fixture.whenStable();
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.assign(navigator, { clipboard: { writeText } });
+
+    await component.copiarDatos();
+
+    expect(cuentasApi.findOne).toHaveBeenCalledWith('cta-1');
+    expect(writeText).toHaveBeenCalledWith(
+      [
+        'Servicio: Netflix',
+        'Correo: netflix@correo.com',
+        'Contraseña: clave-netflix',
+        'Perfil: Perfil 1',
+        'PIN: 1234',
+        'Vence: 01/02/2026',
+      ].join('\n'),
+    );
+  });
+
+  it('copiarDatos: nunca usa la cuenta anidada de la propia respuesta de combo-sales para la contraseña', async () => {
+    await fixture.whenStable();
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.assign(navigator, { clipboard: { writeText } });
+
+    await component.copiarDatos();
+
+    // El fixture `ventaCombo.ventas[0].cuenta` no tiene claveServicio (ni
+    // siquiera está tipado ahí) — si el código usara ese objeto en vez de
+    // cuentasApi.findOne, la contraseña real nunca aparecería en absoluto.
+    expect(writeText).toHaveBeenCalledWith(expect.stringContaining('clave-netflix'));
+  });
+
+  it('copiarDatos: nunca usa una URL ni console.log', async () => {
+    await fixture.whenStable();
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.assign(navigator, { clipboard: { writeText } });
+    const openSpy = vi.spyOn(window, 'open').mockImplementation(() => null);
+    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => undefined);
+
+    await component.copiarDatos();
+
+    expect(openSpy).not.toHaveBeenCalled();
+    expect(logSpy).not.toHaveBeenCalled();
+
+    openSpy.mockRestore();
+    logSpy.mockRestore();
+  });
+
+  it('copiarDatos: si falla, muestra un snackbar de error', async () => {
+    await fixture.whenStable();
+    cuentasApi.findOne.mockRejectedValue(new Error('network down'));
+
+    await component.copiarDatos();
+
+    expect(snackBar.open).toHaveBeenCalledWith(
+      'No se pudieron copiar los datos.',
+      'Cerrar',
+      expect.anything(),
+    );
   });
 });

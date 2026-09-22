@@ -21,6 +21,12 @@ import { ConfirmDialog } from '../../../shared/confirm-dialog/confirm-dialog';
 import { SolesPipe } from '../../../shared/soles.pipe';
 import { Auth, UserRole } from '../../../core/auth/auth';
 import { ServiceIconStack } from '../../../shared/service-icon-stack/service-icon-stack';
+import { CuentasApi } from '../../accounts/cuentas-api';
+import { PerfilesApi } from '../../accounts/profiles/perfiles-api';
+import {
+  formatearDatosParaClienteCombo,
+  type DatosParaCliente,
+} from '../../sales/copiar-datos.util';
 
 @Component({
   imports: [
@@ -45,6 +51,8 @@ export class VentaComboDetail implements OnInit {
   private readonly api = inject(VentaCombosApi);
   private readonly combosApi = inject(CombosApi);
   private readonly contactosApi = inject(ContactosApi);
+  private readonly cuentasApi = inject(CuentasApi);
+  private readonly perfilesApi = inject(PerfilesApi);
   private readonly auth = inject(Auth);
   private readonly dialog = inject(MatDialog);
   private readonly snackBar = inject(MatSnackBar);
@@ -167,6 +175,46 @@ export class VentaComboDetail implements OnInit {
   protected cuentaPerfilLabel(cuenta?: { correo: string } | null, perfil?: { nombre: string } | null): string {
     const correo = cuenta?.correo ?? '—';
     return perfil ? `${correo} — ${perfil.nombre}` : correo;
+  }
+
+  // Junta los datos de TODAS las cuentas del combo en un solo mensaje. Las
+  // credenciales siempre se piden a GET /accounts/:id (único lugar donde
+  // vienen, ver copiar-datos.util) — nunca se confía en `s.cuenta` de este
+  // mismo detalle, aunque venga poblado.
+  async copiarDatos(): Promise<void> {
+    const ventas = this.ventaCombo()?.ventas;
+    if (!ventas || ventas.length === 0) {
+      return;
+    }
+    try {
+      const items: DatosParaCliente[] = await Promise.all(
+        ventas.map(async (v) => {
+          const cuenta = await this.cuentasApi.findOne(v.cuentaId);
+          let perfilPin: string | null = null;
+          if (v.perfilId) {
+            const perfiles = await this.perfilesApi.list(v.cuentaId);
+            perfilPin = perfiles.find((p) => p.id === v.perfilId)?.pin ?? null;
+          }
+          return {
+            servicioNombre: v.servicio?.nombre ?? '—',
+            correo: cuenta.correo,
+            claveServicio: cuenta.claveServicio,
+            perfilNombre: v.perfil?.nombre ?? null,
+            perfilPin,
+            fechaFin: v.fechaFin,
+          };
+        }),
+      );
+      const mensaje = formatearDatosParaClienteCombo(items);
+      await navigator.clipboard.writeText(mensaje);
+      this.snackBar.open('Datos copiados al portapapeles.', 'Cerrar', {
+        duration: 3000,
+      });
+    } catch {
+      this.snackBar.open('No se pudieron copiar los datos.', 'Cerrar', {
+        duration: 4000,
+      });
+    }
   }
 
   private async renew(): Promise<void> {

@@ -113,7 +113,7 @@ describe('VentasList', () => {
   };
   let serviciosApi: { list: ReturnType<typeof vi.fn> };
   let contactosApi: { list: ReturnType<typeof vi.fn> };
-  let cuentasApi: { list: ReturnType<typeof vi.fn> };
+  let cuentasApi: { list: ReturnType<typeof vi.fn>; findOne: ReturnType<typeof vi.fn> };
   let perfilesApi: { list: ReturnType<typeof vi.fn> };
   let ventaCombosApi: { list: ReturnType<typeof vi.fn> };
   let dialog: { open: ReturnType<typeof vi.fn> };
@@ -133,7 +133,14 @@ describe('VentasList', () => {
     };
     serviciosApi = { list: vi.fn().mockResolvedValue([servicio]) };
     contactosApi = { list: vi.fn().mockResolvedValue([cliente]) };
-    cuentasApi = { list: vi.fn().mockResolvedValue([cuenta]) };
+    cuentasApi = {
+      list: vi.fn().mockResolvedValue([cuenta]),
+      findOne: vi.fn().mockResolvedValue({
+        ...cuenta,
+        claveServicio: 'super-secreta',
+        claveCorreo: null,
+      }),
+    };
     perfilesApi = { list: vi.fn().mockResolvedValue([perfil]) };
     ventaCombosApi = {
       list: vi.fn().mockResolvedValue([{ id: 'vc-1', codigoVenta: 'C-00001' }]),
@@ -250,6 +257,91 @@ describe('VentasList', () => {
     expect(snackBar.open).not.toHaveBeenCalled();
   });
 
+  it('copiarDatos: pide el detalle de la cuenta (GET /accounts/:id, único lugar con credenciales) y copia servicio/correo/contraseña/perfil/PIN/vencimiento', async () => {
+    await fixture.whenStable();
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.assign(navigator, { clipboard: { writeText } });
+
+    await component.copiarDatos(venta);
+
+    expect(cuentasApi.findOne).toHaveBeenCalledWith('cta-1');
+    expect(writeText).toHaveBeenCalledWith(
+      [
+        'Servicio: Netflix',
+        'Correo: cuenta@correo.com',
+        'Contraseña: super-secreta',
+        'Perfil: Perfil 1',
+        'Vence: 01/02/2026',
+      ].join('\n'),
+    );
+  });
+
+  it('copiarDatos: omite la línea de Contraseña si la cuenta no tiene (proveedor que solo da código)', async () => {
+    await fixture.whenStable();
+    cuentasApi.findOne.mockResolvedValue({ ...cuenta, claveServicio: null, claveCorreo: null });
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.assign(navigator, { clipboard: { writeText } });
+
+    await component.copiarDatos(venta);
+
+    const mensaje = writeText.mock.calls[0][0] as string;
+    expect(mensaje).not.toContain('Contraseña');
+  });
+
+  it('copiarDatos: omite Perfil y PIN cuando la venta no tiene perfilId (servicio sin perfiles)', async () => {
+    await fixture.whenStable();
+    // loadPerfilNombres ya la llamó una vez al refrescar (la venta del
+    // fixture sí tiene perfilId): solo interesan las llamadas de ACÁ en
+    // adelante.
+    perfilesApi.list.mockClear();
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.assign(navigator, { clipboard: { writeText } });
+
+    await component.copiarDatos({ ...venta, perfilId: null });
+
+    expect(perfilesApi.list).not.toHaveBeenCalled();
+    const mensaje = writeText.mock.calls[0][0] as string;
+    expect(mensaje).not.toContain('Perfil');
+    expect(mensaje).not.toContain('PIN');
+  });
+
+  it('copiarDatos: nunca usa una URL ni console.log — solo navigator.clipboard.writeText', async () => {
+    await fixture.whenStable();
+    perfilesApi.list.mockResolvedValue([{ ...perfil, pin: '1234' }]);
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.assign(navigator, { clipboard: { writeText } });
+    const openSpy = vi.spyOn(window, 'open').mockImplementation(() => null);
+    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => undefined);
+
+    await component.copiarDatos(venta);
+
+    expect(writeText).toHaveBeenCalledWith(expect.stringContaining('PIN: 1234'));
+    expect(openSpy).not.toHaveBeenCalled();
+    expect(logSpy).not.toHaveBeenCalled();
+
+    openSpy.mockRestore();
+    logSpy.mockRestore();
+  });
+
+  it('el snackbar de "Venta creada" ofrece la acción "Copiar datos"', async () => {
+    await fixture.whenStable();
+    const onAction = vi.fn().mockReturnValue({ subscribe: vi.fn() });
+    snackBar.open.mockReturnValue({ onAction });
+    dialog.open.mockReturnValue({
+      afterClosed: () => of({ ...venta, codigoVenta: 'V-00009' }),
+    });
+
+    component.openCreate();
+    await Promise.resolve();
+
+    expect(snackBar.open).toHaveBeenCalledWith(
+      'Venta V-00009 creada.',
+      'Copiar datos',
+      expect.anything(),
+    );
+    expect(onAction).toHaveBeenCalled();
+  });
+
   it('desactiva una venta tras confirmar', async () => {
     await fixture.whenStable();
     dialog.open.mockReturnValue({ afterClosed: () => of(true) });
@@ -319,10 +411,12 @@ describe('VentasList', () => {
 
     const filaNormal = rows[0];
     expect(filaNormal.querySelector('.combo-badge')).toBeNull();
-    expect(filaNormal.querySelectorAll('button[mat-icon-button]').length).toBe(3);
+    // Copiar datos + Editar + Renovar + Desactivar.
+    expect(filaNormal.querySelectorAll('button[mat-icon-button]').length).toBe(4);
 
     const filaCombo = rows[1];
-    expect(filaCombo.querySelectorAll('button[mat-icon-button]').length).toBe(0);
+    // Solo Copiar datos: el resto lo reemplaza el badge de combo.
+    expect(filaCombo.querySelectorAll('button[mat-icon-button]').length).toBe(1);
     const badge = filaCombo.querySelector('.combo-badge');
     expect(badge).not.toBeNull();
     expect(badge!.textContent).toContain('Parte de combo C-00001');
@@ -607,7 +701,9 @@ describe('VentasList', () => {
       await render(true, { ventas: [ventaDeCombo] });
 
       const card = cards()[0];
-      expect(card.querySelectorAll('button').length).toBe(0);
+      // Solo Copiar datos: el resto lo reemplaza el badge de combo.
+      expect(card.querySelectorAll('button').length).toBe(1);
+      expect(button(card, 'Copiar datos')).toBeDefined();
       const badge = card.querySelector('.combo-badge')!;
       expect(badge.textContent).toContain('Parte de combo C-00001');
       expect(badge.getAttribute('href')).toBe('/combo-sales/vc-1');

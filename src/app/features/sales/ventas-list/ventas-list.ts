@@ -34,6 +34,7 @@ import { exportToCsv, type CsvColumn } from '../../../shared/csv-export';
 import { formatFechaCorta, hoyIso } from '../../../shared/fecha.util';
 import { Auth, UserRole } from '../../../core/auth/auth';
 import { EmptyState } from '../../../shared/empty-state/empty-state';
+import { formatearDatosParaCliente } from '../copiar-datos.util';
 
 type ActivoFilter = 'todos' | 'activos' | 'inactivos';
 
@@ -191,8 +192,16 @@ export class VentasList implements OnInit {
     const ref = this.dialog.open(VentaCreateDialog, {});
     ref.afterClosed().subscribe((result) => {
       if (result) {
-        this.snackBar.open(`Venta ${result.codigoVenta} creada.`, 'Cerrar', {
-          duration: 3000,
+        // Acción "Copiar datos" en el propio snackbar de éxito (ver Bloque
+        // B, punto 3): onAction() solo dispara si el usuario la toca, así
+        // que el fetch de la cuenta (con las credenciales) es perezoso.
+        const snackRef = this.snackBar.open(
+          `Venta ${result.codigoVenta} creada.`,
+          'Copiar datos',
+          { duration: 6000 },
+        );
+        snackRef.onAction().subscribe(() => {
+          void this.copiarDatos(result);
         });
         void this.refresh();
       }
@@ -221,6 +230,43 @@ export class VentasList implements OnInit {
         void this.refresh();
       }
     });
+  }
+
+  // Servicio, correo, contraseña (si la cuenta tiene), perfil y PIN (si el
+  // servicio tiene perfiles) y fecha de vencimiento — arma el mensaje y lo
+  // copia al portapapeles. NUNCA por URL (ni wa.me: la contraseña quedaría
+  // en el historial del navegador) y nunca por console.log.
+  async copiarDatos(venta: Venta): Promise<void> {
+    try {
+      const cuenta = await this.cuentasApi.findOne(venta.cuentaId);
+      const servicio = this.servicios().find((s) => s.id === venta.servicioId);
+
+      let perfilNombre: string | null = null;
+      let perfilPin: string | null = null;
+      if (venta.perfilId) {
+        const perfiles = await this.perfilesApi.list(venta.cuentaId);
+        const perfil = perfiles.find((p) => p.id === venta.perfilId);
+        perfilNombre = perfil?.nombre ?? null;
+        perfilPin = perfil?.pin ?? null;
+      }
+
+      const mensaje = formatearDatosParaCliente({
+        servicioNombre: servicio?.nombre ?? '—',
+        correo: cuenta.correo,
+        claveServicio: cuenta.claveServicio,
+        perfilNombre,
+        perfilPin,
+        fechaFin: venta.fechaFin,
+      });
+      await navigator.clipboard.writeText(mensaje);
+      this.snackBar.open('Datos copiados al portapapeles.', 'Cerrar', {
+        duration: 3000,
+      });
+    } catch {
+      this.snackBar.open('No se pudieron copiar los datos.', 'Cerrar', {
+        duration: 4000,
+      });
+    }
   }
 
   confirmDeactivate(venta: Venta): void {

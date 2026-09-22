@@ -11,6 +11,10 @@
   <div class="page-header">
     <h1>Venta de combo <span class="nc-code">{{ vc.codigoVenta }}</span></h1>
     <div class="header-actions">
+      <button mat-stroked-button (click)="copiarDatos()">
+        <mat-icon>content_copy</mat-icon>
+        Copiar datos
+      </button>
       <button mat-stroked-button (click)="openEdit()">
         <mat-icon>edit</mat-icon>
         Editar
