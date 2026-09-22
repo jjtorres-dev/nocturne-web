@@ -1,7 +1,7 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MatTableModule } from '@angular/material/table';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -11,6 +11,7 @@ import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { VentasApi } from '../../sales/ventas-api';
 import {
@@ -27,8 +28,11 @@ import { type Contacto } from '../../contacts/contacto.model';
 import { CuentasApi } from '../../accounts/cuentas-api';
 import { type CuentaListItem } from '../../accounts/cuenta.model';
 import { PerfilesApi } from '../../accounts/profiles/perfiles-api';
+import { VentaCombosApi } from '../../combo-sales/venta-combos-api';
+import { VentaRenewDialog } from '../../../shared/venta-renew-dialog/venta-renew-dialog';
 import { injectIsMobile } from '../../../shared/breakpoints';
 import { SolesPipe } from '../../../shared/soles.pipe';
+import { formatFechaCorta } from '../../../shared/fecha.util';
 import { EmptyState } from '../../../shared/empty-state/empty-state';
 
 const ESTADOS_VALIDOS = new Set<string>(Object.values(VencimientoFiltro));
@@ -37,6 +41,7 @@ const ESTADOS_VALIDOS = new Set<string>(Object.values(VencimientoFiltro));
   imports: [
     EmptyState,
     FormsModule,
+    RouterLink,
     DatePipe,
     DecimalPipe,
     SolesPipe,
@@ -61,6 +66,8 @@ export class VencimientosList implements OnInit {
   private readonly contactosApi = inject(ContactosApi);
   private readonly cuentasApi = inject(CuentasApi);
   private readonly perfilesApi = inject(PerfilesApi);
+  private readonly ventaCombosApi = inject(VentaCombosApi);
+  private readonly dialog = inject(MatDialog);
   private readonly snackBar = inject(MatSnackBar);
 
   protected readonly isMobile = injectIsMobile();
@@ -84,6 +91,7 @@ export class VencimientosList implements OnInit {
   readonly clientes = signal<Contacto[]>([]);
   readonly cuentas = signal<CuentaListItem[]>([]);
   readonly perfilNombres = signal<Map<string, string>>(new Map());
+  readonly comboCodigos = signal<Map<string, string>>(new Map());
   readonly loading = signal(false);
 
   estado: VencimientoFiltro = VencimientoFiltro.VENCIDA;
@@ -100,14 +108,18 @@ export class VencimientosList implements OnInit {
   }
 
   private async loadOptions(): Promise<void> {
-    const [servicios, clientes, cuentas] = await Promise.all([
+    const [servicios, clientes, cuentas, ventasCombo] = await Promise.all([
       this.serviciosApi.list(),
       this.contactosApi.list(),
       this.cuentasApi.list(),
+      this.ventaCombosApi.list(),
     ]);
     this.servicios.set(servicios);
     this.clientes.set(clientes);
     this.cuentas.set(cuentas);
+    this.comboCodigos.set(
+      new Map(ventasCombo.map((vc) => [vc.id, vc.codigoVenta])),
+    );
   }
 
   async refresh(): Promise<void> {
@@ -206,5 +218,33 @@ export class VencimientosList implements OnInit {
       dias: this.diasDiferencia(venta.fechaFin),
     });
     window.open(url, '_blank');
+  }
+
+  protected comboLabel(venta: Venta): string {
+    if (!venta.ventaComboId) {
+      return '';
+    }
+    const codigo = this.comboCodigos().get(venta.ventaComboId);
+    return codigo ? `Parte de combo ${codigo}` : 'Parte de combo';
+  }
+
+  // El backend bloquea renovar ventas hijas de un combo (se renuevan desde
+  // Ventas de Combo): acá se les muestra el badge en vez del botón (ver
+  // template).
+  openRenew(venta: Venta): void {
+    const ref = this.dialog.open(VentaRenewDialog, { data: { venta } });
+    ref.afterClosed().subscribe((result?: Venta) => {
+      if (result) {
+        this.snackBar.open(
+          `Venta renovada. Nueva fecha de fin: ${formatFechaCorta(result.fechaFin)}.`,
+          'Cerrar',
+          { duration: 4000 },
+        );
+        // La venta renovada sale de Vencidas (y puede salir de Por vencer
+        // también, según el nuevo diasAlerta): refrescar es lo que la saca
+        // de la lista actual.
+        void this.refresh();
+      }
+    });
   }
 }

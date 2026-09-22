@@ -122,7 +122,7 @@
                 Editar
               </button>
               @if (v.activo) {
-                <button mat-button (click)="confirmRenew(v)">
+                <button mat-button (click)="openRenew(v)">
                   Renovar
                 </button>
                 <button mat-button (click)="confirmDeactivate(v)">
@@ -212,7 +212,7 @@
                 <mat-icon>edit</mat-icon>
               </button>
               @if (v.activo) {
-                <button mat-icon-button matTooltip="Renovar" (click)="confirmRenew(v)">
+                <button mat-icon-button matTooltip="Renovar" (click)="openRenew(v)">
                   <mat-icon>autorenew</mat-icon>
                 </button>
                 <button mat-icon-button matTooltip="Desactivar" (click)="confirmDeactivate(v)">

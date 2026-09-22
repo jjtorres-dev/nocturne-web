@@ -1,11 +1,13 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { of } from 'rxjs';
-import { ActivatedRoute, convertToParamMap } from '@angular/router';
+import { ActivatedRoute, convertToParamMap, provideRouter } from '@angular/router';
+import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { VencimientosList } from './vencimientos-list';
 import { VentasApi } from '../../sales/ventas-api';
 import { Moneda, VencimientoFiltro, type Venta } from '../../sales/venta.model';
+import { VentaRenewDialog } from '../../../shared/venta-renew-dialog/venta-renew-dialog';
 import { ServiciosApi } from '../../services/servicios-api';
 import { ServiceType, type Servicio } from '../../services/servicio.model';
 import { ContactosApi } from '../../contacts/contactos-api';
@@ -13,6 +15,7 @@ import { ContactType, type Contacto } from '../../contacts/contacto.model';
 import { CuentasApi } from '../../accounts/cuentas-api';
 import { type CuentaListItem } from '../../accounts/cuenta.model';
 import { PerfilesApi } from '../../accounts/profiles/perfiles-api';
+import { VentaCombosApi } from '../../combo-sales/venta-combos-api';
 
 describe('VencimientosList', () => {
   const owner = { id: 'admin-0', name: 'Admin', email: 'admin@nocturne.dev' };
@@ -86,6 +89,9 @@ describe('VencimientosList', () => {
   let contactosApi: { list: ReturnType<typeof vi.fn> };
   let cuentasApi: { list: ReturnType<typeof vi.fn> };
   let perfilesApi: { list: ReturnType<typeof vi.fn> };
+  let ventaCombosApi: { list: ReturnType<typeof vi.fn> };
+  let dialog: { open: ReturnType<typeof vi.fn> };
+  let snackBar: { open: ReturnType<typeof vi.fn> };
 
   async function setup(
     queryParams: Record<string, string> = {},
@@ -96,16 +102,24 @@ describe('VencimientosList', () => {
     contactosApi = { list: vi.fn().mockResolvedValue([cliente]) };
     cuentasApi = { list: vi.fn().mockResolvedValue([cuenta]) };
     perfilesApi = { list: vi.fn().mockResolvedValue([]) };
+    ventaCombosApi = {
+      list: vi.fn().mockResolvedValue([{ id: 'vc-1', codigoVenta: 'C-00001' }]),
+    };
+    dialog = { open: vi.fn() };
+    snackBar = { open: vi.fn() };
 
     await TestBed.configureTestingModule({
       imports: [VencimientosList],
       providers: [
+        provideRouter([]),
         { provide: VentasApi, useValue: api },
         { provide: ServiciosApi, useValue: serviciosApi },
         { provide: ContactosApi, useValue: contactosApi },
         { provide: CuentasApi, useValue: cuentasApi },
         { provide: PerfilesApi, useValue: perfilesApi },
-        { provide: MatSnackBar, useValue: { open: vi.fn() } },
+        { provide: VentaCombosApi, useValue: ventaCombosApi },
+        { provide: MatDialog, useValue: dialog },
+        { provide: MatSnackBar, useValue: snackBar },
         {
           provide: BreakpointObserver,
           useValue: {
@@ -240,6 +254,67 @@ describe('VencimientosList', () => {
     expect(decodeURIComponent(url as string)).toContain('Netflix');
 
     openSpy.mockRestore();
+  });
+
+  it('openRenew abre VentaRenewDialog con la venta y, al cerrar con resultado, muestra snackbar y refresca', async () => {
+    await setup();
+    await fixture.whenStable();
+    const renovada = { ...venta, fechaFin: '2026-10-01' };
+    dialog.open.mockReturnValue({ afterClosed: () => of(renovada) });
+    api.list.mockClear();
+
+    component.openRenew(venta);
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(dialog.open).toHaveBeenCalledWith(
+      VentaRenewDialog,
+      expect.objectContaining({ data: { venta } }),
+    );
+    expect(snackBar.open).toHaveBeenCalledWith(
+      expect.stringContaining('01/10/2026'),
+      'Cerrar',
+      expect.anything(),
+    );
+    expect(api.list).toHaveBeenCalled();
+  });
+
+  it('openRenew: si el diálogo se cancela, no muestra snackbar', async () => {
+    await setup();
+    await fixture.whenStable();
+    dialog.open.mockReturnValue({ afterClosed: () => of(undefined) });
+
+    component.openRenew(venta);
+    await Promise.resolve();
+
+    expect(snackBar.open).not.toHaveBeenCalled();
+  });
+
+  it('una venta hija de combo NO tiene botón de Renovar: muestra el badge "Parte de combo" en su lugar', async () => {
+    const ventaDeCombo = { ...venta, ventaComboId: 'vc-1' };
+    await setup();
+    api.list.mockResolvedValue([ventaDeCombo]);
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(
+      fixture.nativeElement.querySelector('button[mattooltip="Renovar"]'),
+    ).toBeNull();
+    const badge = fixture.nativeElement.querySelector('.combo-badge');
+    expect(badge).not.toBeNull();
+    expect(badge.textContent).toContain('Parte de combo C-00001');
+    expect(badge.getAttribute('href')).toBe('/combo-sales/vc-1');
+  });
+
+  it('una venta que NO es de combo sí tiene botón de Renovar (en vencida/por_vencer)', async () => {
+    await setup();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(
+      fixture.nativeElement.querySelector('button[mattooltip="Renovar"]'),
+    ).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('.combo-badge')).toBeNull();
   });
 
   describe('en pantalla angosta (tarjetas)', () => {

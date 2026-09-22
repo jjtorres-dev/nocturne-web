@@ -26,6 +26,7 @@ import { PerfilesApi } from '../../accounts/profiles/perfiles-api';
 import { VentaCombosApi } from '../../combo-sales/venta-combos-api';
 import { VentaCreateDialog } from '../venta-create-dialog/venta-create-dialog';
 import { VentaEditDialog } from '../venta-edit-dialog/venta-edit-dialog';
+import { VentaRenewDialog } from '../../../shared/venta-renew-dialog/venta-renew-dialog';
 import { ConfirmDialog } from '../../../shared/confirm-dialog/confirm-dialog';
 import { injectIsMobile } from '../../../shared/breakpoints';
 import { SolesPipe } from '../../../shared/soles.pipe';
@@ -208,18 +209,16 @@ export class VentasList implements OnInit {
     });
   }
 
-  confirmRenew(venta: Venta): void {
-    const ref = this.dialog.open(ConfirmDialog, {
-      data: {
-        title: 'Renovar venta',
-        message:
-          '¿Renovar esta venta? Se extenderá la fecha de fin según la duración del servicio.',
-        confirmLabel: 'Renovar',
-      },
-    });
-    ref.afterClosed().subscribe((confirmed) => {
-      if (confirmed) {
-        void this.renew(venta);
+  openRenew(venta: Venta): void {
+    const ref = this.dialog.open(VentaRenewDialog, { data: { venta } });
+    ref.afterClosed().subscribe((result?: Venta) => {
+      if (result) {
+        this.snackBar.open(
+          `Venta renovada. Nueva fecha de fin: ${formatFechaCorta(result.fechaFin)}.`,
+          'Cerrar',
+          { duration: 4000 },
+        );
+        void this.refresh();
       }
     });
   }
@@ -309,22 +308,6 @@ export class VentasList implements OnInit {
     // this.ventas() ya viene filtrada por los filtros de Cliente/Servicio/
     // Activo aplicados (ver refresh()): se exporta tal cual está en pantalla.
     exportToCsv(`ventas-${hoyIso()}.csv`, columns, this.ventas());
-  }
-
-  private async renew(venta: Venta): Promise<void> {
-    try {
-      const result = await this.api.renew(venta.id);
-      this.snackBar.open(
-        `Venta renovada. Nueva fecha de fin: ${result.fechaFin}.`,
-        'Cerrar',
-        { duration: 4000 },
-      );
-      void this.refresh();
-    } catch {
-      this.snackBar.open('No se pudo renovar la venta.', 'Cerrar', {
-        duration: 4000,
-      });
-    }
   }
 
   private async deactivate(venta: Venta): Promise<void> {

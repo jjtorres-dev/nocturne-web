@@ -83,6 +83,17 @@
                 <mat-icon>chat</mat-icon>
                 Enviar por WhatsApp
               </button>
+              @if (v.ventaComboId) {
+                <a class="combo-badge" [routerLink]="['/combo-sales', v.ventaComboId]">
+                  <mat-icon>link</mat-icon>
+                  {{ comboLabel(v) }}
+                </a>
+              } @else {
+                <button mat-button (click)="openRenew(v)">
+                  <mat-icon>autorenew</mat-icon>
+                  Renovar
+                </button>
+              }
             </div>
           }
         </mat-card>
@@ -139,6 +150,20 @@
               >
                 <mat-icon>chat</mat-icon>
               </button>
+              @if (v.ventaComboId) {
+                <a
+                  class="combo-badge"
+                  [routerLink]="['/combo-sales', v.ventaComboId]"
+                  matTooltip="Ver la venta de combo"
+                >
+                  <mat-icon>link</mat-icon>
+                  {{ comboLabel(v) }}
+                </a>
+              } @else {
+                <button mat-icon-button matTooltip="Renovar" (click)="openRenew(v)">
+                  <mat-icon>autorenew</mat-icon>
+                </button>
+              }
             }
           </td>
         </ng-container>

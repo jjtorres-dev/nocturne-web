@@ -88,10 +88,22 @@ describe('VentasApi', () => {
     await promise;
   });
 
-  it('renueva con POST /:id/renew', async () => {
+  it('renueva con POST /:id/renew, sin body si no se pasa nada', async () => {
     const promise = api.renew('abc');
     const req = httpMock.expectOne(`${baseUrl}/abc/renew`);
     expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({});
+    req.flush({ id: 'abc', fechaFin: '2026-03-01' });
+    await promise;
+  });
+
+  it('renueva con POST /:id/renew mandando el body (precio, moneda, tasaCambio, metodoPago) — nunca fechaFin', async () => {
+    const payload = { precio: 20, moneda: Moneda.USD, tasaCambio: 3.75, metodoPago: 'Plin' };
+    const promise = api.renew('abc', payload);
+    const req = httpMock.expectOne(`${baseUrl}/abc/renew`);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual(payload);
+    expect(req.request.body.fechaFin).toBeUndefined();
     req.flush({ id: 'abc', fechaFin: '2026-03-01' });
     await promise;
   });

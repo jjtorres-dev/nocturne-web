@@ -6,6 +6,7 @@ import { provideRouter } from '@angular/router';
 import { of } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { VentaEditDialog } from '../venta-edit-dialog/venta-edit-dialog';
+import { VentaRenewDialog } from '../../../shared/venta-renew-dialog/venta-renew-dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { VentasList } from './ventas-list';
 import { VentasApi } from '../ventas-api';
@@ -218,20 +219,35 @@ describe('VentasList', () => {
     expect(text).toContain('(20.00 USD)');
   });
 
-  it('renueva una venta y muestra la nueva fecha de fin en el snackbar', async () => {
+  it('abre el diálogo de renovación y, si cierra con la venta renovada, muestra la nueva fecha de fin y refresca', async () => {
     await fixture.whenStable();
-    dialog.open.mockReturnValue({ afterClosed: () => of(true) });
+    const renovada = { ...venta, fechaFin: '2026-03-01' };
+    dialog.open.mockReturnValue({ afterClosed: () => of(renovada) });
 
-    component.confirmRenew(venta);
+    component.openRenew(venta);
     await Promise.resolve();
     await Promise.resolve();
 
-    expect(api.renew).toHaveBeenCalledWith('v-1');
+    expect(dialog.open).toHaveBeenCalledWith(
+      VentaRenewDialog,
+      expect.objectContaining({ data: { venta } }),
+    );
     expect(snackBar.open).toHaveBeenCalledWith(
-      expect.stringContaining('2026-03-01'),
+      expect.stringContaining('01/03/2026'),
       'Cerrar',
       expect.anything(),
     );
+  });
+
+  it('si el diálogo de renovación se cancela (cierra sin resultado), no muestra snackbar ni refresca', async () => {
+    await fixture.whenStable();
+    dialog.open.mockReturnValue({ afterClosed: () => of(undefined) });
+    snackBar.open.mockClear();
+
+    component.openRenew(venta);
+    await Promise.resolve();
+
+    expect(snackBar.open).not.toHaveBeenCalled();
   });
 
   it('desactiva una venta tras confirmar', async () => {
@@ -543,15 +559,16 @@ describe('VentasList', () => {
       );
     });
 
-    it('Renovar pide confirmación y renueva la venta', async () => {
+    it('Renovar abre el diálogo de renovación con la venta', async () => {
       await render(true);
-      dialog.open.mockReturnValue({ afterClosed: () => of(true) });
+      dialog.open.mockReturnValue({ afterClosed: () => of(undefined) });
 
       button(cards()[0], 'Renovar')!.click();
-      await Promise.resolve();
-      await Promise.resolve();
 
-      expect(api.renew).toHaveBeenCalledWith('v-1');
+      expect(dialog.open).toHaveBeenCalledWith(
+        VentaRenewDialog,
+        expect.objectContaining({ data: { venta } }),
+      );
     });
 
     it('Desactivar pide confirmación y desactiva la venta', async () => {

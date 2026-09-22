@@ -4,6 +4,7 @@ import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import type {
   CreateVentaPayload,
+  RenewVentaPayload,
   SalesSummary,
   UpdateVentaPayload,
   Venta,
@@ -70,9 +71,9 @@ export class VentasApi {
     );
   }
 
-  renew(id: string): Promise<Venta> {
+  renew(id: string, payload: RenewVentaPayload = {}): Promise<Venta> {
     return firstValueFrom(
-      this.http.post<Venta>(`${BASE_URL}/${id}/renew`, {}),
+      this.http.post<Venta>(`${BASE_URL}/${id}/renew`, payload),
     );
   }
 }

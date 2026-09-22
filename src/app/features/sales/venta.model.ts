@@ -67,6 +67,16 @@ export interface UpdateVentaPayload {
   renovacionAutomatica?: boolean;
 }
 
+// Body opcional de POST /sales/:id/renew: nunca fechaFin — la calcula el
+// backend a partir de duracionMeses (ver VentaRenewDialog, que por eso no
+// hace ninguna cuenta de fechas en el frontend).
+export interface RenewVentaPayload {
+  precio?: number;
+  moneda?: Moneda;
+  tasaCambio?: number;
+  metodoPago?: string;
+}
+
 export interface VentaFilters {
   clienteId?: string;
   servicioId?: string;
