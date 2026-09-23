@@ -67,6 +67,10 @@ export class CuentaDetail implements OnInit {
   readonly cuenta = signal<Cuenta | null>(null);
   readonly servicio = signal<Servicio | null>(null);
   readonly proveedor = signal<Contacto | null>(null);
+  // Todos los contactos del usuario, para resolver el cliente de cada
+  // perfil vendido (Perfil.clienteId, que el backend llena al vender y
+  // limpia al finalizar la venta).
+  readonly contactos = signal<Contacto[]>([]);
   readonly perfiles = signal<Perfil[]>([]);
   readonly rentabilidad = signal<CuentaRentabilidad | null>(null);
   readonly loading = signal(false);
@@ -95,18 +99,19 @@ export class CuentaDetail implements OnInit {
   async refresh(): Promise<void> {
     this.loading.set(true);
     try {
-      const [cuenta, servicios, proveedores] = await Promise.all([
+      const [cuenta, servicios, contactos] = await Promise.all([
         this.api.findOne(this.accountId),
         this.serviciosApi.list(),
         this.contactosApi.list(),
       ]);
       this.cuenta.set(cuenta);
+      this.contactos.set(contactos);
       this.servicio.set(
         servicios.find((s) => s.id === cuenta.servicioId) ?? null,
       );
       this.proveedor.set(
         cuenta.proveedorId
-          ? (proveedores.find((p) => p.id === cuenta.proveedorId) ?? null)
+          ? (contactos.find((p) => p.id === cuenta.proveedorId) ?? null)
           : null,
       );
     } catch {
@@ -207,6 +212,13 @@ export class CuentaDetail implements OnInit {
     }
     const activeCount = this.perfiles().filter((p) => p.activo).length;
     return activeCount < servicio.pantallasMax;
+  }
+
+  protected clienteNombre(clienteId: string | null): string {
+    if (!clienteId) {
+      return '—';
+    }
+    return this.contactos().find((c) => c.id === clienteId)?.nombre ?? '—';
   }
 
   addPerfilDisabledReason(): string | null {

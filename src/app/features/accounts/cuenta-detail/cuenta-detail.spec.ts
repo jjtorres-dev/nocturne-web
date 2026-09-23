@@ -177,6 +177,29 @@ describe('CuentaDetail', () => {
     expect(revealedText).toContain('1234');
   });
 
+  // Regresión: la columna tenía "—" fijo en el template; el backend sí
+  // manda Perfil.clienteId (lo llena al vender, lo limpia al finalizar).
+  it('muestra el nombre del cliente de cada perfil vendido y "—" en los libres', async () => {
+    const cliente: Contacto = {
+      ...proveedor,
+      id: 'cli-1',
+      nombre: 'Cliente Uno',
+      tipo: ContactType.CLIENTE_FINAL,
+    };
+    await setup([
+      { ...perfilActivo, clienteId: 'cli-1' },
+      { ...perfilActivo, id: 'p2', nombre: 'Perfil 2', clienteId: null },
+    ]);
+    contactosApi.list.mockResolvedValue([proveedor, cliente]);
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const celdas: string[] = Array.from(
+      fixture.nativeElement.querySelectorAll('.profiles-table td.mat-column-cliente'),
+    ).map((el) => (el as HTMLElement).textContent!.trim());
+    expect(celdas).toEqual(['Cliente Uno', '—']);
+  });
+
   it('deshabilita "Agregar perfil" cuando se alcanza pantallasMax', async () => {
     const perfilActivo2: Perfil = { ...perfilActivo, id: 'p2' };
     await setup([perfilActivo, perfilActivo2]);
