@@ -155,7 +155,14 @@ export class CuentaFormDialog implements OnInit {
     return (userId && this.ultimoMetodoPago.get(userId)) || '';
   }
 
+  // Mismo criterio que Ventas y Ventas de combos: si el usuario ya editó el
+  // vencimiento a mano (`dirty`), cambiar el servicio o la fecha de inicio
+  // no lo pisa — `setValue()` programático no marca dirty, solo la
+  // interacción real con el input.
   private recalcularFechaFin(): void {
+    if (this.form.controls.fechaFin.dirty) {
+      return;
+    }
     const { servicioId, fechaInicio } = this.form.getRawValue();
     const servicio = this.servicios().find((s) => s.id === servicioId);
     if (!servicio || !fechaInicio) {

@@ -390,6 +390,28 @@ describe('CuentaFormDialog', () => {
     expect(component.form.controls.costo.value).toBe(99);
   });
 
+  it('no pisa un fechaFin editado a mano al cambiar el servicio o la fecha de inicio', async () => {
+    await setup();
+    await fixture.whenStable();
+    component.form.patchValue({ fechaInicio: '2026-01-01' });
+    component.form.patchValue({ servicioId: 'srv-1' });
+    fixture.detectChanges();
+
+    const escribirEnInput = (control: string, valor: string): void => {
+      const input: HTMLInputElement = fixture.nativeElement.querySelector(
+        `input[formcontrolname="${control}"]`,
+      );
+      input.value = valor;
+      input.dispatchEvent(new Event('input'));
+    };
+    escribirEnInput('fechaFin', '2026-06-01');
+
+    escribirEnInput('fechaInicio', '2026-03-10');
+    component.form.controls.servicioId.setValue('srv-1');
+
+    expect(component.form.controls.fechaFin.value).toBe('2026-06-01');
+  });
+
   it('precarga los datos de la cuenta en modo edición', async () => {
     const cuenta = {
       id: 'cta-1',
