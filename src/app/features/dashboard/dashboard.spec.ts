@@ -4,31 +4,86 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { Dashboard } from './dashboard';
 import { VentasApi } from '../sales/ventas-api';
 import { VencimientoFiltro, type SalesSummary } from '../sales/venta.model';
+import { provideRouter } from '@angular/router';
+import { DashboardApi } from './dashboard-api';
+import type { InventarioItem } from './inventario.model';
+import { CuentasApi } from '../accounts/cuentas-api';
+import type { CuentaPorRenovar } from '../accounts/cuenta.model';
+import { AccountingApi } from '../accounting/accounting-api';
+import type { AccountingSummary } from '../accounting/accounting.model';
 
 describe('Dashboard', () => {
   const summary: SalesSummary = { vencidas: 2, porVencer: 5, alDia: 30 };
 
+  const ganancia: AccountingSummary = {
+    ingresos: 500,
+    inversion: 120,
+    gastos: 30,
+    ganancia: 350,
+  };
+  const inventario: InventarioItem[] = [
+    { servicioId: 's1', nombre: 'Netflix', usaPerfiles: true, libres: 3 },
+    { servicioId: 's2', nombre: 'Crunchyroll', usaPerfiles: false, libres: 0 },
+  ];
+  const porRenovar: CuentaPorRenovar[] = [
+    {
+      id: 'cta-vencida',
+      correo: 'vencida@proveedor.com',
+      servicioId: 's1',
+      servicioNombre: 'Netflix',
+      fechaFin: '2026-09-19',
+      diasRestantes: -3,
+      clientesActivos: 4,
+    },
+    {
+      id: 'cta-pronto',
+      correo: 'pronto@proveedor.com',
+      servicioId: 's2',
+      servicioNombre: 'Crunchyroll',
+      fechaFin: '2026-09-24',
+      diasRestantes: 2,
+      clientesActivos: 1,
+    },
+  ];
+
   let component: Dashboard;
   let fixture: ComponentFixture<Dashboard>;
   let ventasApi: { summary: ReturnType<typeof vi.fn> };
-  let router: { navigate: ReturnType<typeof vi.fn> };
+  let dashboardApi: { inventario: ReturnType<typeof vi.fn> };
+  let cuentasApi: { porRenovar: ReturnType<typeof vi.fn> };
+  let accountingApi: { summary: ReturnType<typeof vi.fn> };
+  let router: Router;
 
   beforeEach(async () => {
     ventasApi = { summary: vi.fn().mockResolvedValue(summary) };
-    router = { navigate: vi.fn() };
+    dashboardApi = { inventario: vi.fn().mockResolvedValue(inventario) };
+    cuentasApi = { porRenovar: vi.fn().mockResolvedValue(porRenovar) };
+    accountingApi = { summary: vi.fn().mockResolvedValue(ganancia) };
 
     await TestBed.configureTestingModule({
       imports: [Dashboard],
       providers: [
+        // Router real (no mock): las tarjetas nuevas usan routerLink.
+        provideRouter([]),
         { provide: VentasApi, useValue: ventasApi },
-        { provide: Router, useValue: router },
+        { provide: DashboardApi, useValue: dashboardApi },
+        { provide: CuentasApi, useValue: cuentasApi },
+        { provide: AccountingApi, useValue: accountingApi },
         { provide: MatSnackBar, useValue: { open: vi.fn() } },
       ],
     }).compileComponents();
 
+    router = TestBed.inject(Router);
+    vi.spyOn(router, 'navigate').mockResolvedValue(true);
     fixture = TestBed.createComponent(Dashboard);
     component = fixture.componentInstance;
   });
+
+  async function render(): Promise<HTMLElement> {
+    await fixture.whenStable();
+    fixture.detectChanges();
+    return fixture.nativeElement as HTMLElement;
+  }
 
   it('carga el resumen de ventas al iniciar', async () => {
     await fixture.whenStable();
@@ -75,6 +130,90 @@ describe('Dashboard', () => {
 
     expect(router.navigate).toHaveBeenCalledWith(['/vencimientos'], {
       queryParams: { estado: VencimientoFiltro.POR_VENCER },
+    });
+  });
+
+  describe('Ganancia del mes', () => {
+    it('pide /accounting/summary sin filtros (mes actual, "lo mío") y muestra la ganancia', async () => {
+      const el = await render();
+
+      expect(accountingApi.summary).toHaveBeenCalledWith();
+      const card = el.querySelector('.ganancia-card')!;
+      expect(card.textContent).toContain('S/ 350.00');
+      expect(card.querySelector('.ganancia-value.negativa')).toBeNull();
+    });
+
+    it('en negativo la marca como tal', async () => {
+      accountingApi.summary.mockResolvedValue({ ...ganancia, ganancia: -20 });
+      const el = await render();
+
+      expect(el.querySelector('.ganancia-card .ganancia-value.negativa')).not.toBeNull();
+    });
+  });
+
+  describe('Disponible para vender', () => {
+    it('lista cada servicio con su ícono y libres, y atenúa los que tienen 0', async () => {
+      const el = await render();
+
+      const items = Array.from(el.querySelectorAll<HTMLElement>('.inventario-item'));
+      expect(items).toHaveLength(2);
+      expect(items[0].querySelector('app-service-icon')).not.toBeNull();
+      expect(items[0].textContent).toContain('Netflix');
+      expect(items[0].textContent).toContain('3');
+      expect(items[0].textContent).toContain('perfiles');
+      expect(items[0].classList).not.toContain('agotado');
+      expect(items[1].textContent).toContain('cuentas');
+      expect(items[1].classList).toContain('agotado');
+    });
+
+    it('si falla, muestra el error solo en esa tarjeta', async () => {
+      dashboardApi.inventario.mockRejectedValue(new Error('boom'));
+      const el = await render();
+
+      expect(el.querySelector('.inventario-card')!.textContent).toContain(
+        'No se pudo cargar el inventario.',
+      );
+      expect(el.querySelector('.ganancia-card')!.textContent).toContain('S/ 350.00');
+      expect(el.querySelectorAll('.renovar-item')).toHaveLength(2);
+    });
+  });
+
+  describe('Cuentas por renovar con el proveedor', () => {
+    it('muestra servicio, correo, días restantes y clientes activos, con link al detalle de la cuenta', async () => {
+      const el = await render();
+
+      expect(cuentasApi.porRenovar).toHaveBeenCalledWith();
+      const items = Array.from(el.querySelectorAll<HTMLAnchorElement>('.renovar-item'));
+      expect(items).toHaveLength(2);
+
+      expect(items[0].getAttribute('href')).toBe('/accounts/cta-vencida');
+      expect(items[0].textContent).toContain('Netflix');
+      expect(items[0].textContent).toContain('vencida@proveedor.com');
+      expect(items[0].textContent).toContain('Venció hace 3 días');
+      expect(items[0].textContent).toContain('4 clientes activos');
+      expect(items[0].classList).toContain('vencida');
+
+      expect(items[1].getAttribute('href')).toBe('/accounts/cta-pronto');
+      expect(items[1].textContent).toContain('Vence en 2 días');
+      expect(items[1].textContent).toContain('1 cliente activo');
+      expect(items[1].classList).not.toContain('vencida');
+    });
+
+    it('sin cuentas por renovar muestra un estado vacío', async () => {
+      cuentasApi.porRenovar.mockResolvedValue([]);
+      const el = await render();
+
+      expect(el.querySelector('.renovar-card')!.textContent).toContain(
+        'Ninguna cuenta vence en los próximos 7 días.',
+      );
+    });
+
+    it('diasLabel cubre hoy, mañana, ayer y plurales', () => {
+      expect(component.diasLabel(0)).toBe('Vence hoy');
+      expect(component.diasLabel(1)).toBe('Vence mañana');
+      expect(component.diasLabel(5)).toBe('Vence en 5 días');
+      expect(component.diasLabel(-1)).toBe('Venció ayer');
+      expect(component.diasLabel(-4)).toBe('Venció hace 4 días');
     });
   });
 });

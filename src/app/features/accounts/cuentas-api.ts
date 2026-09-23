@@ -7,6 +7,7 @@ import type {
   CuentaFilters,
   CuentaListItem,
   CuentaPayload,
+  CuentaPorRenovar,
   CuentaRentabilidad,
 } from './cuenta.model';
 
@@ -28,6 +29,17 @@ export class CuentasApi {
       params = params.set('activo', String(filters.activo));
     }
     return firstValueFrom(this.http.get<CuentaListItem[]>(BASE_URL, { params }));
+  }
+
+  // Sin `dias` no se manda el param: el backend usa su default (7).
+  porRenovar(dias?: number): Promise<CuentaPorRenovar[]> {
+    let params = new HttpParams();
+    if (dias !== undefined) {
+      params = params.set('dias', String(dias));
+    }
+    return firstValueFrom(
+      this.http.get<CuentaPorRenovar[]>(`${BASE_URL}/por-renovar`, { params }),
+    );
   }
 
   rentabilidad(id: string): Promise<CuentaRentabilidad> {

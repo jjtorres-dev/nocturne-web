@@ -108,4 +108,24 @@ describe('CuentasApi', () => {
     req.flush({});
     await promise;
   });
+
+  it('pide las cuentas por renovar sin `dias` (default del backend)', async () => {
+    const promise = api.porRenovar();
+    const req = httpMock.expectOne(
+      (r) => r.url === `${baseUrl}/por-renovar` && !r.params.has('dias'),
+    );
+    expect(req.request.method).toBe('GET');
+    req.flush([]);
+    await promise;
+  });
+
+  it('pide las cuentas por renovar con `dias` explícito', async () => {
+    const promise = api.porRenovar(14);
+    const req = httpMock.expectOne(
+      (r) =>
+        r.url === `${baseUrl}/por-renovar` && r.params.get('dias') === '14',
+    );
+    req.flush([]);
+    await promise;
+  });
 });

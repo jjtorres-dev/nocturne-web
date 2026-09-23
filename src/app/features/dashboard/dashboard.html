@@ -48,3 +48,117 @@
     </mat-card>
   </div>
 }
+
+<div class="info-cards">
+  <mat-card class="info-card ganancia-card">
+    <mat-card-header>
+      <mat-card-title>Ganancia del mes</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      @if (ganancia(); as g) {
+        @if (g.loading) {
+          <mat-spinner diameter="24" />
+        } @else if (g.data; as d) {
+          <span class="ganancia-value" [class.negativa]="d.ganancia < 0">
+            {{ d.ganancia | soles }}
+          </span>
+          <span class="ganancia-detalle">
+            Ingresos {{ d.ingresos | soles }} · Inversión {{ d.inversion | soles }} · Gastos
+            {{ d.gastos | soles }}
+          </span>
+          <a routerLink="/accounting" class="card-link">Ver contabilidad</a>
+        } @else {
+          <p class="card-error">No se pudo cargar la ganancia del mes.</p>
+        }
+      }
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card class="info-card inventario-card">
+    <mat-card-header>
+      <mat-card-title>Disponible para vender</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      @if (inventario(); as inv) {
+        @if (inv.loading) {
+          <mat-spinner diameter="24" />
+        } @else if (inv.data; as items) {
+          @if (items.length === 0) {
+            <p class="card-empty">Todavía no hay servicios activos.</p>
+          } @else {
+            <ul class="inventario-list">
+              @for (item of items; track item.servicioId) {
+                <li class="inventario-item" [class.agotado]="item.libres === 0">
+                  <app-service-icon [nombre]="item.nombre" [size]="28" />
+                  <span class="inventario-nombre">
+                    {{ item.nombre }}
+                    @if (item.ownerName) {
+                      <small class="owner">{{ item.ownerName }}</small>
+                    }
+                  </span>
+                  <span
+                    class="inventario-libres"
+                    [attr.aria-label]="
+                      item.libres + (item.usaPerfiles ? ' perfiles libres' : ' cuentas libres')
+                    "
+                  >
+                    {{ item.libres }}
+                    <small>{{ item.usaPerfiles ? 'perfiles' : 'cuentas' }}</small>
+                  </span>
+                </li>
+              }
+            </ul>
+          }
+        } @else {
+          <p class="card-error">No se pudo cargar el inventario.</p>
+        }
+      }
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card class="info-card renovar-card">
+    <mat-card-header>
+      <mat-card-title>Cuentas por renovar con el proveedor</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      @if (porRenovar(); as pr) {
+        @if (pr.loading) {
+          <mat-spinner diameter="24" />
+        } @else if (pr.data; as cuentas) {
+          @if (cuentas.length === 0) {
+            <p class="card-empty">Ninguna cuenta vence en los próximos 7 días.</p>
+          } @else {
+            <ul class="renovar-list">
+              @for (c of cuentas; track c.id) {
+                <li>
+                  <a
+                    class="renovar-item"
+                    [routerLink]="['/accounts', c.id]"
+                    [class.vencida]="c.diasRestantes < 0"
+                  >
+                    <app-service-icon [nombre]="c.servicioNombre" [size]="28" />
+                    <span class="renovar-info">
+                      <span class="renovar-servicio">
+                        {{ c.servicioNombre }}
+                        @if (c.ownerName) {
+                          <small class="owner">{{ c.ownerName }}</small>
+                        }
+                      </span>
+                      <span class="renovar-correo">{{ c.correo }}</span>
+                    </span>
+                    <span class="renovar-meta">
+                      <span class="renovar-dias">{{ diasLabel(c.diasRestantes) }}</span>
+                      <span class="renovar-clientes">{{ clientesLabel(c.clientesActivos) }}</span>
+                    </span>
+                  </a>
+                </li>
+              }
+            </ul>
+          }
+        } @else {
+          <p class="card-error">No se pudieron cargar las cuentas por renovar.</p>
+        }
+      }
+    </mat-card-content>
+  </mat-card>
+</div>

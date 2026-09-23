@@ -87,3 +87,18 @@ export interface CuentaRentabilidad {
   potencial: number;
   ventasCombo: number;
 }
+
+// GET /accounts/por-renovar: cuentas activas cuya suscripción con el
+// proveedor ya venció o vence dentro de N días (días calculados con la
+// fecha del servidor, negativos si ya venció).
+export interface CuentaPorRenovar {
+  id: string;
+  correo: string;
+  servicioId: string;
+  servicioNombre: string;
+  fechaFin: string;
+  diasRestantes: number;
+  clientesActivos: number;
+  // Solo llega para ADMIN.
+  ownerName?: string;
+}
