@@ -4,7 +4,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { CuentaDetail } from './cuenta-detail';
 import { CuentasApi } from '../cuentas-api';
-import { type Cuenta } from '../cuenta.model';
+import { type Cuenta, type CuentaRentabilidad } from '../cuenta.model';
 import { ServiciosApi } from '../../services/servicios-api';
 import { ServiceType, type Servicio } from '../../services/servicio.model';
 import { ContactosApi } from '../../contacts/contactos-api';
@@ -67,9 +67,25 @@ describe('CuentaDetail', () => {
     updatedAt: '',
   };
 
+  const rentabilidadBase: CuentaRentabilidad = {
+    costo: 10,
+    perfilesTotal: 2,
+    perfilesVendidos: 1,
+    usaPerfiles: true,
+    ingresos: 6,
+    ganancia: -4,
+    potencial: 20,
+    ventasCombo: 0,
+  };
+
   let fixture: ComponentFixture<CuentaDetail>;
   let component: CuentaDetail;
-  let api: { findOne: ReturnType<typeof vi.fn>; deactivate: ReturnType<typeof vi.fn>; reactivate: ReturnType<typeof vi.fn> };
+  let api: {
+    findOne: ReturnType<typeof vi.fn>;
+    rentabilidad: ReturnType<typeof vi.fn>;
+    deactivate: ReturnType<typeof vi.fn>;
+    reactivate: ReturnType<typeof vi.fn>;
+  };
   let serviciosApi: { list: ReturnType<typeof vi.fn> };
   let contactosApi: { list: ReturnType<typeof vi.fn> };
   let perfilesApi: { list: ReturnType<typeof vi.fn> };
@@ -78,9 +94,14 @@ describe('CuentaDetail', () => {
   async function setup(
     perfiles: Perfil[] = [perfilActivo],
     role: UserRole = UserRole.ADMIN,
+    rentabilidad: CuentaRentabilidad | Error = rentabilidadBase,
   ) {
     api = {
       findOne: vi.fn().mockResolvedValue(cuenta),
+      rentabilidad:
+        rentabilidad instanceof Error
+          ? vi.fn().mockRejectedValue(rentabilidad)
+          : vi.fn().mockResolvedValue(rentabilidad),
       deactivate: vi.fn().mockResolvedValue({ ...cuenta, activo: false }),
       reactivate: vi.fn().mockResolvedValue({ ...cuenta, activo: true }),
     };
@@ -201,5 +222,64 @@ describe('CuentaDetail', () => {
     fixture.detectChanges();
 
     expect(fixture.nativeElement.textContent).not.toContain('Dueño');
+  });
+
+  describe('tarjeta de rentabilidad', () => {
+    async function render(r: CuentaRentabilidad | Error) {
+      await setup([perfilActivo], UserRole.ADMIN, r);
+      await fixture.whenStable();
+      fixture.detectChanges();
+      return fixture.nativeElement.querySelector('.rentabilidad-card') as HTMLElement | null;
+    }
+
+    it('pide la rentabilidad de la cuenta y muestra recuperado, perfiles vendidos y lo que falta', async () => {
+      const card = await render(rentabilidadBase);
+
+      expect(api.rentabilidad).toHaveBeenCalledWith('cta-1');
+      const text = card!.textContent!.replace(/\s+/g, ' ');
+      expect(text).toContain('Recuperado S/ 6.00 de S/ 10.00');
+      expect(text).toContain('Perfiles vendidos 1/2');
+      expect(text).toContain('Faltan S/ 4.00 para cubrir el costo');
+      expect(card!.querySelector('.ganancia.positiva')).toBeNull();
+      expect(component['porcentajeRecuperado']()).toBe(60);
+    });
+
+    it('con ganancia positiva la muestra en verde y la barra topa en 100%', async () => {
+      const card = await render({ ...rentabilidadBase, ingresos: 25, ganancia: 15 });
+
+      const ganancia = card!.querySelector('.ganancia.positiva');
+      expect(ganancia?.textContent).toContain('Ganancia S/ 15.00');
+      expect(card!.textContent).not.toContain('Faltan');
+      expect(component['porcentajeRecuperado']()).toBe(100);
+    });
+
+    it('avisa que las ventas por combo no se reparten solo si la cuenta tiene alguna', async () => {
+      let card = await render(rentabilidadBase);
+      expect(card!.textContent).not.toContain('Las ventas por combo no se reparten por cuenta');
+
+      TestBed.resetTestingModule();
+      card = await render({ ...rentabilidadBase, ventasCombo: 2 });
+      expect(card!.textContent).toContain('Las ventas por combo no se reparten por cuenta');
+    });
+
+    it('en un servicio sin perfiles muestra el estado de la cuenta completa en vez de N/M perfiles', async () => {
+      const card = await render({
+        ...rentabilidadBase,
+        usaPerfiles: false,
+        perfilesTotal: 0,
+        perfilesVendidos: 0,
+      });
+
+      expect(card!.textContent).not.toContain('Perfiles vendidos');
+      expect(card!.textContent).toContain('Cuenta completa');
+      expect(card!.textContent).toContain('libre');
+    });
+
+    it('si la rentabilidad falla, no muestra la tarjeta pero el resto del detalle carga', async () => {
+      const card = await render(new Error('boom'));
+
+      expect(card).toBeNull();
+      expect(fixture.nativeElement.textContent).toContain('cuenta@correo.com');
+    });
   });
 });

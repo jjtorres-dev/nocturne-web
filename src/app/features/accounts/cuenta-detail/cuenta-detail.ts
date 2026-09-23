@@ -7,11 +7,12 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatTableModule } from '@angular/material/table';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { CuentasApi } from '../cuentas-api';
-import { type Cuenta } from '../cuenta.model';
+import { type Cuenta, type CuentaRentabilidad } from '../cuenta.model';
 import { ServiciosApi } from '../../services/servicios-api';
 import { type Servicio } from '../../services/servicio.model';
 import { ContactosApi } from '../../contacts/contactos-api';
@@ -34,6 +35,7 @@ import { Auth, UserRole } from '../../../core/auth/auth';
     MatChipsModule,
     MatTableModule,
     MatProgressSpinnerModule,
+    MatProgressBarModule,
     MatTooltipModule,
     SecretValue,
   ],
@@ -66,8 +68,22 @@ export class CuentaDetail implements OnInit {
   readonly servicio = signal<Servicio | null>(null);
   readonly proveedor = signal<Contacto | null>(null);
   readonly perfiles = signal<Perfil[]>([]);
+  readonly rentabilidad = signal<CuentaRentabilidad | null>(null);
   readonly loading = signal(false);
   readonly loadingPerfiles = signal(false);
+
+  // % del costo ya recuperado con ventas, tope 100 (la barra no pasa del
+  // total). Costo 0: no hay nada que recuperar, la barra va llena.
+  protected readonly porcentajeRecuperado = computed(() => {
+    const r = this.rentabilidad();
+    if (!r) {
+      return 0;
+    }
+    if (r.costo <= 0) {
+      return 100;
+    }
+    return Math.min(100, (r.ingresos / r.costo) * 100);
+  });
 
   private accountId = '';
 
@@ -114,6 +130,19 @@ export class CuentaDetail implements OnInit {
       });
     } finally {
       this.loadingPerfiles.set(false);
+    }
+    // Perfiles activos/vendidos cambian la rentabilidad: se recarga junto
+    // con la lista (también al crear/desactivar/reactivar un perfil).
+    void this.refreshRentabilidad();
+  }
+
+  // Si falla, la tarjeta simplemente no se muestra: no bloquea el resto
+  // del detalle ni amerita un snackbar propio.
+  async refreshRentabilidad(): Promise<void> {
+    try {
+      this.rentabilidad.set(await this.api.rentabilidad(this.accountId));
+    } catch {
+      this.rentabilidad.set(null);
     }
   }
 

@@ -88,6 +88,42 @@
     </div>
   </section>
 
+  @if (rentabilidad(); as r) {
+    <section class="rentabilidad-card" aria-label="Rentabilidad de la cuenta">
+      <h2>Rentabilidad</h2>
+      <div class="recuperado">
+        <span>Recuperado {{ r.ingresos | soles }} de {{ r.costo | soles }}</span>
+        <mat-progress-bar
+          mode="determinate"
+          [value]="porcentajeRecuperado()"
+          [attr.aria-label]="'Recuperado ' + porcentajeRecuperado().toFixed(0) + '% del costo'"
+        />
+      </div>
+      <div class="rentabilidad-stats">
+        @if (r.usaPerfiles) {
+          <span class="perfiles-vendidos">
+            Perfiles vendidos <strong>{{ r.perfilesVendidos }}/{{ r.perfilesTotal }}</strong>
+          </span>
+        } @else {
+          <span class="perfiles-vendidos">
+            Cuenta completa: <strong>{{ c.clienteId ? 'vendida' : 'libre' }}</strong>
+          </span>
+        }
+        <span class="potencial">Potencial {{ r.potencial | soles }}</span>
+      </div>
+      @if (r.ganancia > 0) {
+        <p class="ganancia positiva">Ganancia {{ r.ganancia | soles }}</p>
+      } @else if (r.ganancia === 0) {
+        <p class="ganancia cubierto">Costo cubierto</p>
+      } @else {
+        <p class="ganancia faltante">Faltan {{ -r.ganancia | soles }} para cubrir el costo</p>
+      }
+      @if (r.ventasCombo > 0) {
+        <p class="nota-combo">Las ventas por combo no se reparten por cuenta.</p>
+      }
+    </section>
+  }
+
   <section class="profiles-section">
     <div class="page-header">
       <h2>Perfiles</h2>

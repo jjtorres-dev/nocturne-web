@@ -7,6 +7,7 @@ import type {
   CuentaFilters,
   CuentaListItem,
   CuentaPayload,
+  CuentaRentabilidad,
 } from './cuenta.model';
 
 const BASE_URL = `${environment.apiUrl}/accounts`;
@@ -27,6 +28,12 @@ export class CuentasApi {
       params = params.set('activo', String(filters.activo));
     }
     return firstValueFrom(this.http.get<CuentaListItem[]>(BASE_URL, { params }));
+  }
+
+  rentabilidad(id: string): Promise<CuentaRentabilidad> {
+    return firstValueFrom(
+      this.http.get<CuentaRentabilidad>(`${BASE_URL}/${id}/rentabilidad`),
+    );
   }
 
   findOne(id: string): Promise<Cuenta> {

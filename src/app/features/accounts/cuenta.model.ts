@@ -70,3 +70,20 @@ export interface CuentaFilters {
   proveedorId?: string;
   activo?: boolean;
 }
+
+// GET /accounts/:id/rentabilidad (todo en PEN). Los ingresos son solo de
+// ventas sueltas de la cuenta (inicial + renovaciones): las ventas hijas de
+// combo no se reparten por cuenta — `ventasCombo` dice cuántas hay para
+// avisarlo.
+export interface CuentaRentabilidad {
+  costo: number;
+  perfilesTotal: number;
+  perfilesVendidos: number;
+  // false en servicios SIN_PERFILES/IPTV: ahí perfilesTotal/Vendidos
+  // siempre son 0 y se vende la cuenta completa.
+  usaPerfiles: boolean;
+  ingresos: number;
+  ganancia: number;
+  potencial: number;
+  ventasCombo: number;
+}

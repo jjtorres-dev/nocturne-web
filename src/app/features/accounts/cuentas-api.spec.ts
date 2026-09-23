@@ -100,4 +100,12 @@ describe('CuentasApi', () => {
     req.flush({});
     await promise;
   });
+
+  it('pide la rentabilidad con GET /:id/rentabilidad', async () => {
+    const promise = api.rentabilidad('abc');
+    const req = httpMock.expectOne(`${baseUrl}/abc/rentabilidad`);
+    expect(req.request.method).toBe('GET');
+    req.flush({});
+    await promise;
+  });
 });
