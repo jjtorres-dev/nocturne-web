@@ -12,12 +12,20 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { CuentasApi } from '../cuentas-api';
-import { type Cuenta, type CuentaRentabilidad } from '../cuenta.model';
+import {
+  PAGO_PROVEEDOR_TIPO_LABELS,
+  type Cuenta,
+  type CuentaRentabilidad,
+  type PagoProveedor,
+} from '../cuenta.model';
+import { Moneda } from '../../sales/venta.model';
 import { ServiciosApi } from '../../services/servicios-api';
 import { type Servicio } from '../../services/servicio.model';
 import { ContactosApi } from '../../contacts/contactos-api';
 import { type Contacto } from '../../contacts/contacto.model';
 import { CuentaFormDialog } from '../cuenta-form-dialog/cuenta-form-dialog';
+import { CuentaRenovarProveedorDialog } from '../cuenta-renovar-proveedor-dialog/cuenta-renovar-proveedor-dialog';
+import { formatFechaCorta } from '../../../shared/fecha.util';
 import { ConfirmDialog } from '../../../shared/confirm-dialog/confirm-dialog';
 import { SecretValue } from '../../../shared/secret-value/secret-value';
 import { PerfilesApi } from '../profiles/perfiles-api';
@@ -73,6 +81,11 @@ export class CuentaDetail implements OnInit {
   readonly contactos = signal<Contacto[]>([]);
   readonly perfiles = signal<Perfil[]>([]);
   readonly rentabilidad = signal<CuentaRentabilidad | null>(null);
+  // Compra inicial + renovaciones con el proveedor, del más reciente al más
+  // antiguo. null = no se pudo cargar (la sección muestra su propio error).
+  readonly pagosProveedor = signal<PagoProveedor[] | null>([]);
+  protected readonly Moneda = Moneda;
+  protected readonly displayedPagoColumns = ['fecha', 'tipo', 'monto', 'metodoPago'];
   readonly loading = signal(false);
   readonly loadingPerfiles = signal(false);
 
@@ -122,6 +135,19 @@ export class CuentaDetail implements OnInit {
       this.loading.set(false);
     }
     void this.refreshPerfiles();
+    void this.refreshPagosProveedor();
+  }
+
+  protected pagoTipoLabel(pago: PagoProveedor): string {
+    return PAGO_PROVEEDOR_TIPO_LABELS[pago.tipo];
+  }
+
+  async refreshPagosProveedor(): Promise<void> {
+    try {
+      this.pagosProveedor.set(await this.api.pagosProveedor(this.accountId));
+    } catch {
+      this.pagosProveedor.set(null);
+    }
   }
 
   async refreshPerfiles(): Promise<void> {
@@ -162,6 +188,33 @@ export class CuentaDetail implements OnInit {
         this.snackBar.open('Cuenta actualizada.', 'Cerrar', {
           duration: 3000,
         });
+        void this.refresh();
+      }
+    });
+  }
+
+  // Al renovar cambian la fecha de vencimiento, el historial de pagos y el
+  // costo de la rentabilidad: se recarga todo el detalle.
+  openRenovarProveedor(): void {
+    const cuenta = this.cuenta();
+    if (!cuenta) {
+      return;
+    }
+    const ref = this.dialog.open(CuentaRenovarProveedorDialog, {
+      data: {
+        cuentaId: cuenta.id,
+        correo: cuenta.correo,
+        servicioNombre: this.servicio()?.nombre ?? 'Cuenta',
+        fechaFin: cuenta.fechaFin,
+      },
+    });
+    ref.afterClosed().subscribe((result?: Cuenta) => {
+      if (result) {
+        this.snackBar.open(
+          `Cuenta renovada. Ahora vence con el proveedor el ${formatFechaCorta(result.fechaFin)}.`,
+          'Cerrar',
+          { duration: 4000 },
+        );
         void this.refresh();
       }
     });

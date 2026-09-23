@@ -26,9 +26,11 @@ export interface PaymentMethodBreakdown {
   neto: number;
 }
 
+// ganancia = ingresos - inversion - gastos, igual que en el resumen.
 export interface TimelinePoint {
   periodo: string;
   ingresos: number;
+  inversion: number;
   gastos: number;
   ganancia: number;
 }

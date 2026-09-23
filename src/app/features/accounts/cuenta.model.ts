@@ -1,4 +1,5 @@
 import type { Owner } from '../../shared/owner.model';
+import type { Moneda } from '../sales/venta.model';
 
 export interface Cuenta {
   id: string;
@@ -76,7 +77,14 @@ export interface CuentaFilters {
 // combo no se reparten por cuenta — `ventasCombo` dice cuántas hay para
 // avisarlo.
 export interface CuentaRentabilidad {
+  // Todo lo pagado al proveedor por la cuenta: compra inicial +
+  // renovaciones (suma de sus pagos al proveedor), con el desglose.
   costo: number;
+  desgloseCosto: {
+    compraInicial: number;
+    renovaciones: number;
+    cantidadRenovaciones: number;
+  };
   perfilesTotal: number;
   perfilesVendidos: number;
   // false en servicios SIN_PERFILES/IPTV: ahí perfilesTotal/Vendidos
@@ -101,4 +109,41 @@ export interface CuentaPorRenovar {
   clientesActivos: number;
   // Solo llega para ADMIN.
   ownerName?: string;
+}
+
+export enum PagoProveedorTipo {
+  COMPRA_INICIAL = 'compra_inicial',
+  RENOVACION = 'renovacion',
+}
+
+export const PAGO_PROVEEDOR_TIPO_LABELS: Record<PagoProveedorTipo, string> = {
+  [PagoProveedorTipo.COMPRA_INICIAL]: 'Compra',
+  [PagoProveedorTipo.RENOVACION]: 'Renovación',
+};
+
+// GET /accounts/:id/provider-payments: lo pagado al proveedor por la
+// cuenta (la compra inicial y cada renovación), del más reciente al más
+// antiguo. Contabilidad lo cuenta como "Pagado a proveedores" según `fecha`.
+export interface PagoProveedor {
+  id: string;
+  cuentaId: string;
+  fecha: string;
+  monto: number;
+  moneda: Moneda;
+  tasaCambio: number;
+  montoPEN: number;
+  metodoPago: string;
+  tipo: PagoProveedorTipo;
+  createdAt: string;
+}
+
+// POST /accounts/:id/renew-provider. nuevaFechaFin tiene que ser posterior
+// a la fecha de vencimiento actual de la cuenta (si no, 400).
+export interface RenovarProveedorPayload {
+  monto: number;
+  moneda: Moneda;
+  tasaCambio: number;
+  metodoPago: string;
+  fechaPago: string;
+  nuevaFechaFin: string;
 }

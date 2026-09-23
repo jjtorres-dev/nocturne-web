@@ -1,4 +1,4 @@
-import { formatFechaCorta, hoyIso, sumarMeses } from './fecha.util';
+import { formatFechaCorta, hoyIso, sumarMeses, sumarMesesSinDesbordar } from './fecha.util';
 
 describe('sumarMeses', () => {
   it('suma meses simples', () => {
@@ -11,6 +11,22 @@ describe('sumarMeses', () => {
 
   it('con 0 meses devuelve la misma fecha', () => {
     expect(sumarMeses('2026-03-10', 0)).toBe('2026-03-10');
+  });
+});
+
+describe('sumarMesesSinDesbordar', () => {
+  it('suma meses simples igual que sumarMeses', () => {
+    expect(sumarMesesSinDesbordar('2026-01-15', 1)).toBe('2026-02-15');
+  });
+
+  it('si el día no existe en el mes de destino, se queda en el último día', () => {
+    expect(sumarMesesSinDesbordar('2026-01-31', 1)).toBe('2026-02-28');
+    expect(sumarMesesSinDesbordar('2028-01-31', 1)).toBe('2028-02-29');
+    expect(sumarMesesSinDesbordar('2026-03-31', 1)).toBe('2026-04-30');
+  });
+
+  it('cruza de año', () => {
+    expect(sumarMesesSinDesbordar('2026-12-31', 2)).toBe('2027-02-28');
   });
 });
 

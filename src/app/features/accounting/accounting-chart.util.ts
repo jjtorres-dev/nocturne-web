@@ -15,6 +15,11 @@ export function buildTimelineChartData(
         backgroundColor: '#10b981', // --nc-accent-green
       },
       {
+        label: 'Pagado a proveedores',
+        data: points.map((p) => p.inversion),
+        backgroundColor: '#f59e0b',
+      },
+      {
         label: 'Gastos',
         data: points.map((p) => p.gastos),
         backgroundColor: '#ef4444',

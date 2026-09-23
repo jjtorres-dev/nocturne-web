@@ -9,6 +9,8 @@ import type {
   CuentaPayload,
   CuentaPorRenovar,
   CuentaRentabilidad,
+  PagoProveedor,
+  RenovarProveedorPayload,
 } from './cuenta.model';
 
 const BASE_URL = `${environment.apiUrl}/accounts`;
@@ -45,6 +47,20 @@ export class CuentasApi {
   rentabilidad(id: string): Promise<CuentaRentabilidad> {
     return firstValueFrom(
       this.http.get<CuentaRentabilidad>(`${BASE_URL}/${id}/rentabilidad`),
+    );
+  }
+
+  pagosProveedor(id: string): Promise<PagoProveedor[]> {
+    return firstValueFrom(
+      this.http.get<PagoProveedor[]>(`${BASE_URL}/${id}/provider-payments`),
+    );
+  }
+
+  // Crea el pago de renovación y mueve la fecha de vencimiento (atómico en
+  // el backend). Devuelve la cuenta ya con la nueva fechaFin.
+  renovarProveedor(id: string, payload: RenovarProveedorPayload): Promise<Cuenta> {
+    return firstValueFrom(
+      this.http.post<Cuenta>(`${BASE_URL}/${id}/renew-provider`, payload),
     );
   }
 

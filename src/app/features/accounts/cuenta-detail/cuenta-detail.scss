@@ -32,6 +32,7 @@
 
 .header-actions {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
 }
 
@@ -89,8 +90,13 @@
   font-size: 0.875rem;
 }
 
-.potencial {
+.potencial,
+.desglose-costo {
   color: var(--mat-sys-on-surface-variant);
+}
+
+.desglose-costo {
+  font-size: 0.8125rem;
 }
 
 .ganancia {
@@ -115,8 +121,26 @@
   margin-top: 8px;
 }
 
-.profiles-table {
+.pagos-section {
+  margin-bottom: 24px;
+
+  h2 {
+    font-size: 1.125rem;
+  }
+
+  .empty-state {
+    padding: 8px 0;
+    text-align: start;
+  }
+}
+
+.profiles-table,
+.pagos-table {
   width: 100%;
+}
+
+.monto-original {
+  color: var(--mat-sys-on-surface-variant);
 }
 
 .loading {

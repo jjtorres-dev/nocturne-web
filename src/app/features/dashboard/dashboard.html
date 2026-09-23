@@ -130,7 +130,7 @@
           } @else {
             <ul class="renovar-list">
               @for (c of cuentas; track c.id) {
-                <li>
+                <li class="renovar-row">
                   <a
                     class="renovar-item"
                     [routerLink]="['/accounts', c.id]"
@@ -151,6 +151,15 @@
                       <span class="renovar-clientes">{{ clientesLabel(c.clientesActivos) }}</span>
                     </span>
                   </a>
+                  <button
+                    mat-button
+                    type="button"
+                    class="renovar-accion"
+                    (click)="openRenovarProveedor(c)"
+                  >
+                    <mat-icon>autorenew</mat-icon>
+                    Renovar con el proveedor
+                  </button>
                 </li>
               }
             </ul>

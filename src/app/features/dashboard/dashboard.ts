@@ -10,12 +10,16 @@ import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatButtonModule } from '@angular/material/button';
+import { MatDialog } from '@angular/material/dialog';
 import { VentasApi } from '../sales/ventas-api';
 import { VencimientoFiltro, type SalesSummary } from '../sales/venta.model';
 import { DashboardApi } from './dashboard-api';
 import type { InventarioItem } from './inventario.model';
 import { CuentasApi } from '../accounts/cuentas-api';
-import type { CuentaPorRenovar } from '../accounts/cuenta.model';
+import type { Cuenta, CuentaPorRenovar } from '../accounts/cuenta.model';
+import { CuentaRenovarProveedorDialog } from '../accounts/cuenta-renovar-proveedor-dialog/cuenta-renovar-proveedor-dialog';
+import { formatFechaCorta } from '../../shared/fecha.util';
 import { AccountingApi } from '../accounting/accounting-api';
 import type { AccountingSummary } from '../accounting/accounting.model';
 import { ServiceIcon } from '../../shared/service-icon/service-icon';
@@ -36,6 +40,7 @@ function initialState<T>(): CardState<T> {
 @Component({
   imports: [
     RouterLink,
+    MatButtonModule,
     MatCardModule,
     MatIconModule,
     MatProgressSpinnerModule,
@@ -53,6 +58,7 @@ export class Dashboard implements OnInit {
   private readonly accountingApi = inject(AccountingApi);
   private readonly router = inject(Router);
   private readonly snackBar = inject(MatSnackBar);
+  private readonly dialog = inject(MatDialog);
 
   protected readonly VencimientoFiltro = VencimientoFiltro;
 
@@ -87,6 +93,31 @@ export class Dashboard implements OnInit {
   goToVencimientos(estado: VencimientoFiltro): void {
     void this.router.navigate(['/vencimientos'], {
       queryParams: { estado },
+    });
+  }
+
+  // Al renovar, la cuenta sale de la lista (su nueva fecha ya no vence
+  // pronto) y cambia lo pagado a proveedores del mes: se recargan las dos
+  // tarjetas.
+  openRenovarProveedor(cuenta: CuentaPorRenovar): void {
+    const ref = this.dialog.open(CuentaRenovarProveedorDialog, {
+      data: {
+        cuentaId: cuenta.id,
+        correo: cuenta.correo,
+        servicioNombre: cuenta.servicioNombre,
+        fechaFin: cuenta.fechaFin,
+      },
+    });
+    ref.afterClosed().subscribe((result?: Cuenta) => {
+      if (result) {
+        this.snackBar.open(
+          `Cuenta renovada. Ahora vence con el proveedor el ${formatFechaCorta(result.fechaFin)}.`,
+          'Cerrar',
+          { duration: 4000 },
+        );
+        void this.load(this.porRenovar, () => this.cuentasApi.porRenovar());
+        void this.load(this.ganancia, () => this.accountingApi.summary());
+      }
     });
   }
 

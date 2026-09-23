@@ -147,6 +147,16 @@
   }
 }
 
+.renovar-row {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.renovar-accion {
+  align-self: flex-end;
+}
+
 .renovar-item {
   display: flex;
   align-items: center;

@@ -1,10 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, convertToParamMap } from '@angular/router';
+import { of } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { CuentaDetail } from './cuenta-detail';
 import { CuentasApi } from '../cuentas-api';
-import { type Cuenta, type CuentaRentabilidad } from '../cuenta.model';
+import {
+  PagoProveedorTipo,
+  type Cuenta,
+  type CuentaRentabilidad,
+  type PagoProveedor,
+} from '../cuenta.model';
+import { Moneda } from '../../sales/venta.model';
+import { CuentaRenovarProveedorDialog } from '../cuenta-renovar-proveedor-dialog/cuenta-renovar-proveedor-dialog';
 import { ServiciosApi } from '../../services/servicios-api';
 import { ServiceType, type Servicio } from '../../services/servicio.model';
 import { ContactosApi } from '../../contacts/contactos-api';
@@ -69,6 +77,7 @@ describe('CuentaDetail', () => {
 
   const rentabilidadBase: CuentaRentabilidad = {
     costo: 10,
+    desgloseCosto: { compraInicial: 10, renovaciones: 0, cantidadRenovaciones: 0 },
     perfilesTotal: 2,
     perfilesVendidos: 1,
     usaPerfiles: true,
@@ -78,11 +87,41 @@ describe('CuentaDetail', () => {
     ventasCombo: 0,
   };
 
+  const pagos: PagoProveedor[] = [
+    {
+      id: 'pp-2',
+      cuentaId: 'cta-1',
+      fecha: '2026-02-01',
+      monto: 5,
+      moneda: Moneda.USD,
+      tasaCambio: 3.8,
+      montoPEN: 19,
+      metodoPago: 'Binance',
+      tipo: PagoProveedorTipo.RENOVACION,
+      createdAt: '',
+    },
+    {
+      id: 'pp-1',
+      cuentaId: 'cta-1',
+      fecha: '2026-01-01',
+      monto: 10,
+      moneda: Moneda.PEN,
+      tasaCambio: 1,
+      montoPEN: 10,
+      metodoPago: 'Yape',
+      tipo: PagoProveedorTipo.COMPRA_INICIAL,
+      createdAt: '',
+    },
+  ];
+
   let fixture: ComponentFixture<CuentaDetail>;
   let component: CuentaDetail;
+  let dialog: { open: ReturnType<typeof vi.fn> };
+  let snackBar: { open: ReturnType<typeof vi.fn> };
   let api: {
     findOne: ReturnType<typeof vi.fn>;
     rentabilidad: ReturnType<typeof vi.fn>;
+    pagosProveedor: ReturnType<typeof vi.fn>;
     deactivate: ReturnType<typeof vi.fn>;
     reactivate: ReturnType<typeof vi.fn>;
   };
@@ -95,9 +134,13 @@ describe('CuentaDetail', () => {
     perfiles: Perfil[] = [perfilActivo],
     role: UserRole = UserRole.ADMIN,
     rentabilidad: CuentaRentabilidad | Error = rentabilidadBase,
+    cuentaActual: Cuenta = cuenta,
   ) {
+    dialog = { open: vi.fn() };
+    snackBar = { open: vi.fn() };
     api = {
-      findOne: vi.fn().mockResolvedValue(cuenta),
+      findOne: vi.fn().mockResolvedValue(cuentaActual),
+      pagosProveedor: vi.fn().mockResolvedValue(pagos),
       rentabilidad:
         rentabilidad instanceof Error
           ? vi.fn().mockRejectedValue(rentabilidad)
@@ -118,8 +161,8 @@ describe('CuentaDetail', () => {
         { provide: ContactosApi, useValue: contactosApi },
         { provide: PerfilesApi, useValue: perfilesApi },
         { provide: Auth, useValue: auth },
-        { provide: MatDialog, useValue: { open: vi.fn() } },
-        { provide: MatSnackBar, useValue: { open: vi.fn() } },
+        { provide: MatDialog, useValue: dialog },
+        { provide: MatSnackBar, useValue: snackBar },
         {
           provide: ActivatedRoute,
           useValue: {
@@ -303,6 +346,114 @@ describe('CuentaDetail', () => {
 
       expect(card).toBeNull();
       expect(fixture.nativeElement.textContent).toContain('cuenta@correo.com');
+    });
+  });
+
+  describe('pagos al proveedor', () => {
+    async function render() {
+      await setup();
+      await fixture.whenStable();
+      fixture.detectChanges();
+    }
+
+    it('lista compra y renovaciones con fecha, tipo, lo pagado en soles (y en su moneda) y método', async () => {
+      await render();
+
+      expect(api.pagosProveedor).toHaveBeenCalledWith('cta-1');
+      const filas = Array.from(
+        fixture.nativeElement.querySelectorAll('.pagos-table tr.mat-mdc-row') as NodeListOf<HTMLElement>,
+      ).map((tr) =>
+        Array.from(tr.querySelectorAll('td')).map((td) => td.textContent!.replace(/\s+/g, ' ').trim()),
+      );
+      expect(filas).toEqual([
+        ['01/02/2026', 'Renovación', 'S/ 19.00 (5.00 USD)', 'Binance'],
+        ['01/01/2026', 'Compra', 'S/ 10.00', 'Yape'],
+      ]);
+    });
+
+    it('si no se pueden cargar, lo avisa en la sección sin tapar el resto del detalle', async () => {
+      await setup();
+      api.pagosProveedor.mockRejectedValue(new Error('500'));
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      expect(fixture.nativeElement.textContent).toContain('No se pudieron cargar los pagos al proveedor.');
+      expect(fixture.nativeElement.textContent).toContain('cuenta@correo.com');
+    });
+
+    it('la rentabilidad muestra el desglose: compra + renovaciones', async () => {
+      await setup([perfilActivo], UserRole.ADMIN, {
+        ...rentabilidadBase,
+        costo: 84,
+        desgloseCosto: { compraInicial: 40, renovaciones: 44, cantidadRenovaciones: 2 },
+      });
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      const card: HTMLElement = fixture.nativeElement.querySelector('.rentabilidad-card');
+      expect(card.textContent!.replace(/\s+/g, ' ')).toContain('Compra: S/ 40.00 · 2 renovaciones: S/ 44.00');
+    });
+
+    it('sin renovaciones, el desglose lo dice', async () => {
+      await render();
+
+      const card: HTMLElement = fixture.nativeElement.querySelector('.rentabilidad-card');
+      expect(card.textContent!.replace(/\s+/g, ' ')).toContain('Compra: S/ 10.00 · Sin renovaciones todavía');
+    });
+  });
+
+  describe('renovar con el proveedor', () => {
+    function botonRenovar(): HTMLButtonElement | undefined {
+      return Array.from<HTMLButtonElement>(fixture.nativeElement.querySelectorAll('button')).find((b) =>
+        b.textContent?.includes('Renovar con el proveedor'),
+      );
+    }
+
+    it('abre el diálogo con la cuenta y, al renovar, avisa la nueva fecha y recarga el detalle', async () => {
+      await setup();
+      await fixture.whenStable();
+      fixture.detectChanges();
+      dialog.open.mockReturnValue({ afterClosed: () => of({ ...cuenta, fechaFin: '2026-03-01' }) });
+
+      botonRenovar()!.click();
+
+      expect(dialog.open).toHaveBeenCalledWith(CuentaRenovarProveedorDialog, {
+        data: {
+          cuentaId: 'cta-1',
+          correo: 'cuenta@correo.com',
+          servicioNombre: 'Netflix',
+          fechaFin: '2026-02-01',
+        },
+      });
+      expect(snackBar.open).toHaveBeenCalledWith(
+        'Cuenta renovada. Ahora vence con el proveedor el 01/03/2026.',
+        'Cerrar',
+        expect.anything(),
+      );
+      await fixture.whenStable();
+      expect(api.findOne).toHaveBeenCalledTimes(2);
+      expect(api.pagosProveedor).toHaveBeenCalledTimes(2);
+      expect(api.rentabilidad).toHaveBeenCalledTimes(2);
+    });
+
+    it('si se cancela, no recarga nada', async () => {
+      await setup();
+      await fixture.whenStable();
+      fixture.detectChanges();
+      dialog.open.mockReturnValue({ afterClosed: () => of(undefined) });
+
+      botonRenovar()!.click();
+
+      expect(snackBar.open).not.toHaveBeenCalled();
+      expect(api.findOne).toHaveBeenCalledTimes(1);
+    });
+
+    it('una cuenta desactivada no ofrece renovar', async () => {
+      await setup([perfilActivo], UserRole.ADMIN, rentabilidadBase, { ...cuenta, activo: false });
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      expect(botonRenovar()).toBeUndefined();
     });
   });
 });

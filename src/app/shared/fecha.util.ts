@@ -14,6 +14,21 @@ export function sumarMeses(fechaIso: string, meses: number): string {
   return `${yyyy}-${mm}-${dd}`;
 }
 
+// Como sumarMeses, pero si el día no existe en el mes de destino se queda
+// en el último día de ese mes (31/01 + 1 mes = 28/02, no 03/03). Lo usa
+// "Vence ahora el" al renovar con el proveedor: ahí un desborde deja la
+// cuenta venciendo días después de la fecha real sin que se note.
+export function sumarMesesSinDesbordar(fechaIso: string, meses: number): string {
+  const [anio, mes, dia] = fechaIso.split('-').map(Number);
+  const ultimoDiaDestino = new Date(anio, mes - 1 + meses + 1, 0).getDate();
+  const fecha = new Date(anio, mes - 1 + meses, Math.min(dia, ultimoDiaDestino));
+
+  const yyyy = fecha.getFullYear();
+  const mm = String(fecha.getMonth() + 1).padStart(2, '0');
+  const dd = String(fecha.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
+}
+
 // Fecha de hoy en 'YYYY-MM-DD', hora local (no UTC): `toISOString()` puede
 // devolver el día siguiente en las horas de la tarde/noche en husos
 // negativos (Perú, UTC-5) — sirve p. ej. para nombres de archivo de export.

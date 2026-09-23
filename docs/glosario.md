@@ -33,7 +33,9 @@ Esto aplica solo a textos visibles. Los nombres de variables, campos de la API y
 |---|---|---|
 | **Precio de venta** | Lo que **cobras a tu cliente** (por perfil, por cupo, por la cuenta o por el combo). | "precio base" |
 | **Precio cobrado** / **Cobrado** | Lo que efectivamente te pagó el cliente en una venta o renovación. | "precio", "ingreso" |
-| **Costo de la cuenta** | Lo que **pagaste al proveedor** por la cuenta completa (no por perfil). | "costo" solo, "inversión" |
+| **Costo de la cuenta** | Lo que **pagaste al proveedor** por la cuenta completa (no por perfil) al comprarla. | "costo" solo, "inversión" |
+| **Costo de la renovación** | Lo que le pagaste al proveedor por un nuevo periodo de la cuenta. Puede ser distinto del costo de la cuenta. | "precio de renovación" (eso es lo que cobras al cliente) |
+| **Pagos al proveedor** | Todo lo que pagaste al proveedor por una cuenta: la **Compra** y cada **Renovación**. | "inversiones" |
 | **Otros gastos** | Lo que anotas en Gastos (publicidad, comisiones…). El costo de las cuentas no va ahí. | "gastos operativos" |
 | **Tipo de cambio a soles** | Cuántos soles vale 1 unidad de otra moneda (ej.: 1 dólar = 3.75). | "tasa de cambio" |
 | **Moneda** | Se muestra con código y nombre: "USD – Dólares". | solo el código |
@@ -44,7 +46,7 @@ Esto aplica solo a textos visibles. Los nombres de variables, campos de la API y
 | Término | Significa | No usar |
 |---|---|---|
 | **Cobrado a clientes** | Todo lo que te pagaron los clientes (ventas y renovaciones) en el rango, en soles. | "ingresos" |
-| **Pagado a proveedores** | El costo de las cuentas registradas en el rango (según el día en que se registró la cuenta). | "inversión" |
+| **Pagado a proveedores** | Lo que les pagaste a tus proveedores en el rango, por comprar cuentas y por renovarlas (según el día en que pagaste, no el día en que registraste la cuenta). | "inversión" |
 | **Ganancia** | Cobrado − pagado a proveedores − otros gastos. | "utilidad" |
 | **Ganancia (sin otros gastos)** | En la tabla por servicio, porque los otros gastos no son de un servicio en particular. | "ganancia" a secas en esa tabla |
 | **Te quedó** | Por método de pago: cobrado − otros gastos. No incluye lo pagado a proveedores. | "neto" |
@@ -57,6 +59,9 @@ Esto aplica solo a textos visibles. Los nombres de variables, campos de la API y
 | **Desde** | Cuándo empieza una venta. | "fecha de inicio" (en ventas) |
 | **Fecha de compra** | Cuándo empezó la cuenta con el proveedor. | "fecha de inicio" (en cuentas) |
 | **Vence con el proveedor** | Cuándo tienes que renovar o volver a pagar la cuenta. Se usa para no confundirlo con el vencimiento del cliente. | "fecha de fin" |
+| **Renovar con el proveedor** | Registrar que le pagaste al proveedor otro periodo de la cuenta: guarda el pago y la nueva fecha en que vence. No confundir con **Renovar** una venta (eso es cobrarle al cliente). | "renovar" solo, en Cuentas |
+| **Fecha de pago** | Cuándo le pagaste al proveedor. Es la fecha que usa Contabilidad. | — |
+| **Vence ahora el** | La nueva fecha en que vence la cuenta con el proveedor después de renovarla. | "nueva fecha de fin" |
 | **Vigente / Finalizada** | Estado de una venta (o venta de combo). | "activo/inactivo" en ventas |
 | **Finalizar venta** | Deja libre el perfil o la cuenta para otro cliente. Lo cobrado sigue contando en Contabilidad. | "desactivar", "anular" |
 | **Activo / Inactivo, Desactivar / Reactivar** | Solo en catálogos y registros (servicios, cuentas, perfiles, contactos, combos, gastos, usuarios). No se borra nada: deja de aparecer para usar. | "eliminar", "borrar" |

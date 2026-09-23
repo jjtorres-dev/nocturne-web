@@ -11,6 +11,12 @@
   <div class="page-header">
     <h1>{{ servicio()?.nombre ?? 'Cuenta' }}</h1>
     <div class="header-actions">
+      @if (c.activo) {
+        <button mat-flat-button color="primary" (click)="openRenovarProveedor()">
+          <mat-icon>autorenew</mat-icon>
+          Renovar con el proveedor
+        </button>
+      }
       <button mat-stroked-button (click)="openEdit()">
         <mat-icon>edit</mat-icon>
         Editar
@@ -93,6 +99,16 @@
       <h2>¿Cuánto te deja esta cuenta?</h2>
       <div class="recuperado">
         <span>Cobraste {{ r.ingresos | soles }} de los {{ r.costo | soles }} que pagaste</span>
+        <span class="desglose-costo">
+          Compra: {{ r.desgloseCosto.compraInicial | soles }}
+          @if (r.desgloseCosto.cantidadRenovaciones > 0) {
+            · {{ r.desgloseCosto.cantidadRenovaciones }}
+            {{ r.desgloseCosto.cantidadRenovaciones === 1 ? 'renovación' : 'renovaciones' }}:
+            {{ r.desgloseCosto.renovaciones | soles }}
+          } @else {
+            · Sin renovaciones todavía
+          }
+        </span>
         <mat-progress-bar
           mode="determinate"
           [value]="porcentajeRecuperado()"
@@ -123,6 +139,49 @@
       }
     </section>
   }
+
+  <section class="pagos-section" aria-label="Pagos al proveedor">
+    <h2>Pagos al proveedor</h2>
+    @if (pagosProveedor(); as pagos) {
+      @if (pagos.length === 0) {
+        <p class="empty-state">Todavía no hay pagos al proveedor de esta cuenta.</p>
+      } @else {
+        <div class="table-scroll">
+          <table mat-table [dataSource]="pagos" class="pagos-table">
+            <ng-container matColumnDef="fecha">
+              <th mat-header-cell *matHeaderCellDef>Fecha de pago</th>
+              <td mat-cell *matCellDef="let p">{{ p.fecha | date: 'dd/MM/yyyy' }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="tipo">
+              <th mat-header-cell *matHeaderCellDef>Tipo</th>
+              <td mat-cell *matCellDef="let p">{{ pagoTipoLabel(p) }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="monto">
+              <th mat-header-cell *matHeaderCellDef>Pagaste</th>
+              <td mat-cell *matCellDef="let p">
+                {{ p.montoPEN | soles }}
+                @if (p.moneda !== Moneda.PEN) {
+                  <small class="monto-original">({{ p.monto.toFixed(2) }} {{ p.moneda }})</small>
+                }
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="metodoPago">
+              <th mat-header-cell *matHeaderCellDef>Método de pago</th>
+              <td mat-cell *matCellDef="let p">{{ p.metodoPago }}</td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedPagoColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedPagoColumns"></tr>
+          </table>
+        </div>
+      }
+    } @else {
+      <p class="empty-state">No se pudieron cargar los pagos al proveedor.</p>
+    }
+  </section>
 
   <section class="profiles-section">
     <div class="page-header">

@@ -1,6 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
+import { of } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatDialog } from '@angular/material/dialog';
 import { Dashboard } from './dashboard';
 import { VentasApi } from '../sales/ventas-api';
 import { VencimientoFiltro, type SalesSummary } from '../sales/venta.model';
@@ -9,6 +11,7 @@ import { DashboardApi } from './dashboard-api';
 import type { InventarioItem } from './inventario.model';
 import { CuentasApi } from '../accounts/cuentas-api';
 import type { CuentaPorRenovar } from '../accounts/cuenta.model';
+import { CuentaRenovarProveedorDialog } from '../accounts/cuenta-renovar-proveedor-dialog/cuenta-renovar-proveedor-dialog';
 import { AccountingApi } from '../accounting/accounting-api';
 import type { AccountingSummary } from '../accounting/accounting.model';
 
@@ -52,6 +55,8 @@ describe('Dashboard', () => {
   let dashboardApi: { inventario: ReturnType<typeof vi.fn> };
   let cuentasApi: { porRenovar: ReturnType<typeof vi.fn> };
   let accountingApi: { summary: ReturnType<typeof vi.fn> };
+  let dialog: { open: ReturnType<typeof vi.fn> };
+  let snackBar: { open: ReturnType<typeof vi.fn> };
   let router: Router;
 
   beforeEach(async () => {
@@ -59,6 +64,8 @@ describe('Dashboard', () => {
     dashboardApi = { inventario: vi.fn().mockResolvedValue(inventario) };
     cuentasApi = { porRenovar: vi.fn().mockResolvedValue(porRenovar) };
     accountingApi = { summary: vi.fn().mockResolvedValue(ganancia) };
+    dialog = { open: vi.fn() };
+    snackBar = { open: vi.fn() };
 
     await TestBed.configureTestingModule({
       imports: [Dashboard],
@@ -69,7 +76,8 @@ describe('Dashboard', () => {
         { provide: DashboardApi, useValue: dashboardApi },
         { provide: CuentasApi, useValue: cuentasApi },
         { provide: AccountingApi, useValue: accountingApi },
-        { provide: MatSnackBar, useValue: { open: vi.fn() } },
+        { provide: MatSnackBar, useValue: snackBar },
+        { provide: MatDialog, useValue: dialog },
       ],
     }).compileComponents();
 
@@ -206,6 +214,58 @@ describe('Dashboard', () => {
       expect(el.querySelector('.renovar-card')!.textContent).toContain(
         'Ninguna cuenta vence en los próximos 7 días.',
       );
+    });
+
+    function botonesRenovar(el: HTMLElement): HTMLButtonElement[] {
+      return Array.from(el.querySelectorAll<HTMLButtonElement>('.renovar-accion'));
+    }
+
+    it('cada fila tiene "Renovar con el proveedor", fuera del link a la cuenta', async () => {
+      const el = await render();
+
+      const botones = botonesRenovar(el);
+      expect(botones).toHaveLength(2);
+      expect(botones[0].textContent).toContain('Renovar con el proveedor');
+      expect(botones[0].closest('a')).toBeNull();
+    });
+
+    it('abre el diálogo con esa cuenta; al renovar, la saca de la lista y recarga la ganancia del mes', async () => {
+      const el = await render();
+      dialog.open.mockReturnValue({
+        afterClosed: () => of({ id: 'cta-vencida', fechaFin: '2026-10-19' }),
+      });
+      cuentasApi.porRenovar.mockResolvedValue([porRenovar[1]]);
+
+      botonesRenovar(el)[0].click();
+      await render();
+
+      expect(dialog.open).toHaveBeenCalledWith(CuentaRenovarProveedorDialog, {
+        data: {
+          cuentaId: 'cta-vencida',
+          correo: 'vencida@proveedor.com',
+          servicioNombre: 'Netflix',
+          fechaFin: '2026-09-19',
+        },
+      });
+      expect(snackBar.open).toHaveBeenCalledWith(
+        'Cuenta renovada. Ahora vence con el proveedor el 19/10/2026.',
+        'Cerrar',
+        expect.anything(),
+      );
+      expect(cuentasApi.porRenovar).toHaveBeenCalledTimes(2);
+      expect(accountingApi.summary).toHaveBeenCalledTimes(2);
+      const items = Array.from(el.querySelectorAll('.renovar-item'));
+      expect(items.map((a) => a.getAttribute('href'))).toEqual(['/accounts/cta-pronto']);
+    });
+
+    it('si se cancela el diálogo, no recarga nada', async () => {
+      const el = await render();
+      dialog.open.mockReturnValue({ afterClosed: () => of(undefined) });
+
+      botonesRenovar(el)[1].click();
+
+      expect(cuentasApi.porRenovar).toHaveBeenCalledTimes(1);
+      expect(snackBar.open).not.toHaveBeenCalled();
     });
 
     it('diasLabel cubre hoy, mañana, ayer y plurales', () => {

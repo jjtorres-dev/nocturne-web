@@ -35,7 +35,7 @@ describe('Accounting', () => {
     { metodoPago: 'Yape', ingresos: 300, gastos: 20, neto: 280 },
   ];
   const timeline: TimelinePoint[] = [
-    { periodo: '2026-01-01', ingresos: 100, gastos: 10, ganancia: 90 },
+    { periodo: '2026-01-01', ingresos: 100, inversion: 0, gastos: 10, ganancia: 90 },
   ];
   const otroUsuario: Usuario = {
     id: 'user-2',
@@ -148,6 +148,21 @@ describe('Accounting', () => {
       desde: '2026-01-01',
       hasta: '2026-01-31',
     });
+  });
+
+  it('el ⓘ de "Pagado a proveedores" explica que son compras y renovaciones según el día en que se pagó', async () => {
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const toggle = fixture.nativeElement.querySelector(
+      'app-info-toggle[etiqueta="Qué es pagado a proveedores"] button',
+    ) as HTMLButtonElement;
+    toggle.click();
+    fixture.detectChanges();
+
+    const hint = fixture.nativeElement.querySelector('.info-hint') as HTMLElement;
+    expect(hint.textContent).toContain('por comprar cuentas y por renovarlas');
+    expect(hint.textContent).toContain('el día en que pagaste, no el día en que registraste la cuenta');
   });
 
   it('muestra los valores del resumen en las tarjetas', async () => {

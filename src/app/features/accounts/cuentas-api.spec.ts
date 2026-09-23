@@ -6,6 +6,7 @@ import {
 } from '@angular/common/http/testing';
 import { environment } from '../../../environments/environment';
 import { CuentasApi } from './cuentas-api';
+import { Moneda } from '../sales/venta.model';
 
 describe('CuentasApi', () => {
   const baseUrl = `${environment.apiUrl}/accounts`;
@@ -116,6 +117,31 @@ describe('CuentasApi', () => {
     );
     expect(req.request.method).toBe('GET');
     req.flush([]);
+    await promise;
+  });
+
+  it('pide los pagos al proveedor con GET /:id/provider-payments', async () => {
+    const promise = api.pagosProveedor('abc');
+    const req = httpMock.expectOne(`${baseUrl}/abc/provider-payments`);
+    expect(req.request.method).toBe('GET');
+    req.flush([]);
+    await promise;
+  });
+
+  it('renueva con el proveedor con POST /:id/renew-provider', async () => {
+    const payload = {
+      monto: 40,
+      moneda: Moneda.PEN,
+      tasaCambio: 1,
+      metodoPago: 'Yape',
+      fechaPago: '2026-09-23',
+      nuevaFechaFin: '2026-10-30',
+    };
+    const promise = api.renovarProveedor('abc', payload);
+    const req = httpMock.expectOne(`${baseUrl}/abc/renew-provider`);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual(payload);
+    req.flush({});
     await promise;
   });
 
