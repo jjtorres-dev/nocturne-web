@@ -193,6 +193,15 @@ html {
   opacity: 0.8;
 }
 
+// Venta activa con la fecha de vencimiento ya pasada (shared/estado-venta):
+// mismo rojo (mat-sys-error) y mismo fondo translúcido que el badge
+// "Vencida" de Vencimientos, para que ambas pantallas digan lo mismo.
+.chip-vencida {
+  --mat-chip-label-text-color: var(--mat-sys-error);
+  --mat-chip-outline-color: var(--mat-sys-error);
+  --mat-chip-elevated-container-color: color-mix(in srgb, var(--mat-sys-error) 14%, transparent);
+}
+
 // ---------------------------------------------------------------------------
 // Responsive — pantallas angostas (< 768px)
 //

@@ -3,7 +3,6 @@ import { DatePipe, DecimalPipe } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatChipsModule } from '@angular/material/chips';
 import { MatTableModule } from '@angular/material/table';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -28,9 +27,11 @@ import {
   type DatosParaCliente,
 } from '../../sales/copiar-datos.util';
 import { formatFechaCorta } from '../../../shared/fecha.util';
+import { EstadoVentaChip } from '../../../shared/estado-venta/estado-venta';
 
 @Component({
   imports: [
+    EstadoVentaChip,
     ServiceIconStack,
     DatePipe,
     DecimalPipe,
@@ -38,7 +39,6 @@ import { formatFechaCorta } from '../../../shared/fecha.util';
     SolesPipe,
     MatButtonModule,
     MatIconModule,
-    MatChipsModule,
     MatTableModule,
     MatProgressSpinnerModule,
     MatTooltipModule,

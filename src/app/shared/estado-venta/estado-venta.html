@@ -1,0 +1,7 @@
+<mat-chip
+  [highlighted]="estado() === 'vigente'"
+  [class.chip-inactive]="estado() === 'finalizada'"
+  [class.chip-vencida]="estado() === 'vencida'"
+>
+  {{ label() }}
+</mat-chip>

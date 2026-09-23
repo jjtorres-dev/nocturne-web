@@ -90,9 +90,7 @@
     </div>
     <div class="detail-row">
       <span class="detail-label">Estado</span>
-      <mat-chip [highlighted]="vc.activo" [class.chip-inactive]="!vc.activo">
-        {{ vc.activo ? 'Vigente' : 'Finalizada' }}
-      </mat-chip>
+      <app-estado-venta [venta]="vc" />
     </div>
   </section>
 

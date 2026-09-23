@@ -7,7 +7,6 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialog } from '@angular/material/dialog';
@@ -24,11 +23,13 @@ import { SolesPipe } from '../../../shared/soles.pipe';
 import { Auth, UserRole } from '../../../core/auth/auth';
 import { EmptyState } from '../../../shared/empty-state/empty-state';
 import { formatFechaCorta } from '../../../shared/fecha.util';
+import { EstadoVentaChip } from '../../../shared/estado-venta/estado-venta';
 
 type ActivoFilter = 'todos' | 'activos' | 'inactivos';
 
 @Component({
   imports: [
+    EstadoVentaChip,
     EmptyState,
     FormsModule,
     DatePipe,
@@ -40,7 +41,6 @@ type ActivoFilter = 'todos' | 'activos' | 'inactivos';
     MatSelectModule,
     MatButtonModule,
     MatIconModule,
-    MatChipsModule,
     MatProgressSpinnerModule,
     MatTooltipModule,
   ],

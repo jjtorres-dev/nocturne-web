@@ -9,7 +9,6 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
-import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialog } from '@angular/material/dialog';
@@ -35,11 +34,14 @@ import { formatFechaCorta, hoyIso } from '../../../shared/fecha.util';
 import { Auth, UserRole } from '../../../core/auth/auth';
 import { EmptyState } from '../../../shared/empty-state/empty-state';
 import { formatearDatosParaCliente } from '../copiar-datos.util';
+import { EstadoVentaChip } from '../../../shared/estado-venta/estado-venta';
+import { ESTADO_VENTA_LABELS, estadoVenta } from '../../../shared/estado-venta/estado-venta.util';
 
 type ActivoFilter = 'todos' | 'activos' | 'inactivos';
 
 @Component({
   imports: [
+    EstadoVentaChip,
     EmptyState,
     FormsModule,
     DatePipe,
@@ -52,7 +54,6 @@ type ActivoFilter = 'todos' | 'activos' | 'inactivos';
     MatSelectModule,
     MatButtonModule,
     MatIconModule,
-    MatChipsModule,
     MatProgressSpinnerModule,
     MatTooltipModule,
   ],
@@ -349,7 +350,7 @@ export class VentasList implements OnInit {
       { header: 'Cobrado', value: (v) => v.precio.toFixed(2) },
       { header: 'Moneda', value: (v) => v.moneda },
       { header: 'Método de pago', value: (v) => v.metodoPago },
-      { header: 'Estado', value: (v) => (v.activo ? 'Vigente' : 'Finalizada') },
+      { header: 'Estado', value: (v) => ESTADO_VENTA_LABELS[estadoVenta(v)] },
     ];
     if (this.isAdmin()) {
       columns.push({ header: 'Dueño', value: (v) => v.owner.name });

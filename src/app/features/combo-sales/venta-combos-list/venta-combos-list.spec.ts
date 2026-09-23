@@ -119,6 +119,35 @@ describe('VentaCombosList', () => {
     await setup();
   });
 
+  describe('estado mostrado (Vigente / Vencida / Finalizada)', () => {
+    // Fecha fija: el estado depende de hoy. Solo se falsea Date.
+    beforeEach(() => {
+      vi.useFakeTimers({ toFake: ['Date'] });
+      vi.setSystemTime(new Date(2026, 0, 15, 12, 0));
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it('vigente si vence hoy o después, vencida (en rojo) si ya pasó, finalizada si no está activa', async () => {
+      api.list.mockResolvedValue([
+        { ...ventaCombo, id: 'vc-vig', fechaFin: '2026-01-15' },
+        { ...ventaCombo, id: 'vc-ven', fechaFin: '2026-01-14' },
+        { ...ventaCombo, id: 'vc-fin', fechaFin: '2026-01-14', activo: false },
+      ]);
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      const chips = Array.from(
+        fixture.nativeElement.querySelectorAll('app-estado-venta mat-chip') as NodeListOf<HTMLElement>,
+      );
+      expect(chips.map((c) => c.textContent!.trim())).toEqual(['Vigente', 'Vencida', 'Finalizada']);
+      expect(chips[1].classList).toContain('chip-vencida');
+      expect(chips[2].classList).toContain('chip-inactive');
+    });
+  });
+
   it('carga ventas de combo, combos y clientes al iniciar', async () => {
     await fixture.whenStable();
 

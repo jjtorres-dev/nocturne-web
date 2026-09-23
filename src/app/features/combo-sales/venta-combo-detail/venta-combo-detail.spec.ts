@@ -155,6 +155,32 @@ describe('VentaComboDetail', () => {
     await setup();
   });
 
+  describe('estado mostrado (Vigente / Vencida / Finalizada)', () => {
+    // Fecha fija: el estado depende de hoy. Solo se falsea Date.
+    beforeEach(() => {
+      vi.useFakeTimers({ toFake: ['Date'] });
+      vi.setSystemTime(new Date(2026, 0, 15, 12, 0));
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it.each([
+      ['2026-01-15', true, 'Vigente'],
+      ['2026-01-14', true, 'Vencida'],
+      ['2026-01-14', false, 'Finalizada'],
+    ])('vence %s, activo=%s → %s', async (fechaFin, activo, esperado) => {
+      api.findOne.mockResolvedValue({ ...ventaCombo, fechaFin, activo });
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      const chip: HTMLElement = fixture.nativeElement.querySelector('app-estado-venta mat-chip');
+      expect(chip.textContent!.trim()).toBe(esperado);
+      expect(chip.classList.contains('chip-vencida')).toBe(esperado === 'Vencida');
+    });
+  });
+
   it('carga la venta de combo, el combo y el cliente al iniciar', async () => {
     await fixture.whenStable();
 

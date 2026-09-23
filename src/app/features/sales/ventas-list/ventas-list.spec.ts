@@ -177,8 +177,71 @@ describe('VentasList', () => {
     component = fixture.componentInstance;
   }
 
+  // El estado mostrado (Vigente/Vencida) depende de la fecha de hoy: se fija
+  // en 2026-01-15, así `venta` (vence 2026-02-01) queda vigente sin importar
+  // cuándo se corran los tests. Solo se falsea Date; los timers siguen siendo
+  // reales para whenStable() y los harnesses.
+  beforeEach(() => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(new Date(2026, 0, 15, 12, 0));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   beforeEach(async () => {
     await setup();
+  });
+
+  describe('estado mostrado (Vigente / Vencida / Finalizada)', () => {
+    const vigente: Venta = { ...venta, id: 'v-vig', codigoVenta: 'V-VIG', fechaFin: '2026-01-15' };
+    const vencida: Venta = { ...venta, id: 'v-ven', codigoVenta: 'V-VEN', fechaFin: '2026-01-14' };
+    const finalizada: Venta = {
+      ...venta,
+      id: 'v-fin',
+      codigoVenta: 'V-FIN',
+      fechaFin: '2026-01-14',
+      activo: false,
+    };
+
+    function chips(): { texto: string; vencida: boolean; inactiva: boolean }[] {
+      return Array.from(
+        fixture.nativeElement.querySelectorAll('app-estado-venta mat-chip') as NodeListOf<HTMLElement>,
+      ).map((el) => ({
+        texto: el.textContent!.trim(),
+        vencida: el.classList.contains('chip-vencida'),
+        inactiva: el.classList.contains('chip-inactive'),
+      }));
+    }
+
+    it('en la tabla: vigente si vence hoy o después, vencida (en rojo) si ya pasó, finalizada si no está activa', async () => {
+      api.list.mockResolvedValue([vigente, vencida, finalizada]);
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      expect(chips()).toEqual([
+        { texto: 'Vigente', vencida: false, inactiva: false },
+        { texto: 'Vencida', vencida: true, inactiva: false },
+        { texto: 'Finalizada', vencida: false, inactiva: true },
+      ]);
+    });
+
+    it('en las tarjetas de celular muestra lo mismo', async () => {
+      await setup(UserRole.ADMIN, { mobile: true });
+      api.list.mockResolvedValue([vigente, vencida, finalizada]);
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      expect(chips().map((c) => c.texto)).toEqual(['Vigente', 'Vencida', 'Finalizada']);
+    });
+
+    it('el filtro de Estado sigue siendo por activo: "Sin finalizar" pide activo=true (incluye las vencidas)', async () => {
+      await fixture.whenStable();
+
+      expect(component.activoFilter).toBe('activos');
+      expect(api.list).toHaveBeenLastCalledWith(expect.objectContaining({ activo: true }));
+    });
   });
 
   it('carga ventas, servicios, clientes y cuentas al iniciar', async () => {
@@ -467,6 +530,22 @@ describe('VentasList', () => {
       vi.unstubAllGlobals();
       return text;
     }
+
+    it('exporta el mismo estado que se ve (Vigente / Vencida / Finalizada)', async () => {
+      api.list.mockResolvedValue([
+        { ...venta, id: 'v-vig', fechaFin: '2026-01-15' },
+        { ...venta, id: 'v-ven', fechaFin: '2026-01-14' },
+        { ...venta, id: 'v-fin', fechaFin: '2026-01-14', activo: false },
+      ]);
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      const csv = await exportar();
+
+      expect(csv).toContain(';Vigente;');
+      expect(csv).toContain(';Vencida;');
+      expect(csv).toContain(';Finalizada;');
+    });
 
     it('exporta código, cliente, servicio, cuenta, perfil, fechas, precio, moneda, método de pago, estado y dueño (admin)', async () => {
       await fixture.whenStable();
