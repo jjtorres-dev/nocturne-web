@@ -215,6 +215,29 @@ describe('VentaCreateDialog', () => {
     expect(component.form.controls.fechaFin.value).toBe('2026-05-01');
   });
 
+  it('no pisa un fechaFin editado a mano al cambiar la cuenta o la fecha de inicio', async () => {
+    await setup();
+    await fixture.whenStable();
+    await component.onServicioChange('srv-1');
+    component.form.patchValue({ fechaInicio: '2026-01-15' });
+    await component.onCuentaChange('cta-1');
+    fixture.detectChanges();
+
+    const escribirEnInput = (control: string, valor: string): void => {
+      const input: HTMLInputElement = fixture.nativeElement.querySelector(
+        `input[formcontrolname="${control}"]`,
+      );
+      input.value = valor;
+      input.dispatchEvent(new Event('input'));
+    };
+    escribirEnInput('fechaFin', '2026-05-01');
+
+    escribirEnInput('fechaInicio', '2026-03-01');
+    await component.onCuentaChange('cta-1');
+
+    expect(component.form.controls.fechaFin.value).toBe('2026-05-01');
+  });
+
   it('fechaInicio arranca en el día de hoy por defecto', async () => {
     await setup();
     await fixture.whenStable();

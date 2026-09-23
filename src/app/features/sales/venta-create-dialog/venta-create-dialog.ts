@@ -166,7 +166,13 @@ export class VentaCreateDialog implements OnInit {
     return cuenta && this.servicios().find((s) => s.id === cuenta.servicioId);
   }
 
+  // Mismo criterio que el precio sugerido (ver aplicarSugerenciaDePrecio):
+  // si el usuario ya editó el vencimiento a mano (`dirty`), cambiar la
+  // cuenta o la fecha de inicio no lo pisa.
   private recalcularFechaFin(): void {
+    if (this.form.controls.fechaFin.dirty) {
+      return;
+    }
     const fechaInicio = this.form.controls.fechaInicio.value;
     const servicio = this.servicioDeCuentaActual();
     if (!servicio || !fechaInicio) {
