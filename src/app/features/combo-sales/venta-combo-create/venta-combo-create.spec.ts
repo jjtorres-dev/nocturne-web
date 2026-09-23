@@ -192,6 +192,74 @@ describe('VentaComboCreate', () => {
     ).toBeNull();
   });
 
+  describe('autocompletado de "Vence"', () => {
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    function escribirEnInput(control: string, valor: string): void {
+      const input: HTMLInputElement = fixture.nativeElement.querySelector(
+        `input[formcontrolname="${control}"]`,
+      );
+      input.value = valor;
+      input.dispatchEvent(new Event('input'));
+    }
+
+    it('arranca con fecha de inicio = hoy y vence = hoy + la duración (1 mes)', async () => {
+      vi.useFakeTimers({ toFake: ['Date'] });
+      vi.setSystemTime(new Date(2026, 0, 31, 10, 0));
+      await setup();
+
+      expect(component.form.controls.fechaInicio.value).toBe('2026-01-31');
+      expect(component.form.controls.fechaFin.value).toBe('2026-02-28');
+    });
+
+    it('recalcula si cambia la fecha de inicio', async () => {
+      await setup();
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      escribirEnInput('fechaInicio', '2026-03-31');
+
+      expect(component.form.controls.fechaFin.value).toBe('2026-04-30');
+    });
+
+    it('recalcula si cambia la duración, incluida la parte fraccionaria', async () => {
+      await setup();
+      await fixture.whenStable();
+      fixture.detectChanges();
+      escribirEnInput('fechaInicio', '2026-01-31');
+
+      escribirEnInput('duracionMeses', '2.5');
+
+      expect(component.form.controls.fechaFin.value).toBe('2026-04-15');
+    });
+
+    it('no pisa un vencimiento que el usuario ya editó a mano', async () => {
+      await setup();
+      await fixture.whenStable();
+      fixture.detectChanges();
+      escribirEnInput('fechaInicio', '2026-01-15');
+      escribirEnInput('fechaFin', '2026-03-01');
+
+      escribirEnInput('fechaInicio', '2026-01-20');
+      escribirEnInput('duracionMeses', '3');
+
+      expect(component.form.controls.fechaFin.value).toBe('2026-03-01');
+    });
+
+    it('no calcula nada mientras la duración esté vacía', async () => {
+      await setup();
+      await fixture.whenStable();
+      fixture.detectChanges();
+      escribirEnInput('fechaInicio', '2026-01-15');
+
+      escribirEnInput('duracionMeses', '');
+
+      expect(component.form.controls.fechaFin.value).toBe('2026-02-15');
+    });
+  });
+
   it('carga combos y solo clientes tipo CLIENTE_FINAL al iniciar', async () => {
     await setup();
     await fixture.whenStable();

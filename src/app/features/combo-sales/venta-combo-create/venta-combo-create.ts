@@ -29,6 +29,7 @@ import { PerfilesApi } from '../../accounts/profiles/perfiles-api';
 import { type Perfil } from '../../accounts/profiles/perfil.model';
 import { ClienteQuickCreateDialog } from '../../../shared/cliente-quick-create-dialog/cliente-quick-create-dialog';
 import { extractErrorMessage, injectFormError } from '../../../shared/form-error';
+import { hoyIso, sumarMeses } from '../../../shared/fecha.util';
 import { MetodoPagoSelect } from '../../../shared/metodo-pago/metodo-pago-select/metodo-pago-select';
 import { UltimoMetodoPago } from '../../../shared/metodo-pago/ultimo-metodo-pago';
 import { Auth } from '../../../core/auth/auth';
@@ -114,7 +115,7 @@ export class VentaComboCreate implements OnInit {
       clienteId: ['', Validators.required],
       comboId: ['', Validators.required],
       duracionMeses: [1, [Validators.required, Validators.min(0.1)]],
-      fechaInicio: ['', Validators.required],
+      fechaInicio: [hoyIso(), Validators.required],
       fechaFin: ['', Validators.required],
       precio: [0, [Validators.required, Validators.min(0.01)]],
       moneda: [Moneda.PEN, Validators.required],
@@ -129,6 +130,16 @@ export class VentaComboCreate implements OnInit {
   );
 
   constructor() {
+    // fechaFin se sugiere como fechaInicio + duracionMeses y se recalcula
+    // cuando cambia cualquiera de las dos; se queda editable, y una vez que
+    // el usuario la tocó a mano no se pisa (ver recalcularFechaFin).
+    this.form.controls.fechaInicio.valueChanges.subscribe(() => {
+      this.recalcularFechaFin();
+    });
+    this.form.controls.duracionMeses.valueChanges.subscribe(() => {
+      this.recalcularFechaFin();
+    });
+    this.recalcularFechaFin();
     // En PEN no tiene sentido pedir una tasa de cambio contra sí misma: el
     // campo se fuerza a 1 y se oculta en el template. Con cualquier otra
     // moneda se muestra y queda editable a mano.
@@ -137,6 +148,23 @@ export class VentaComboCreate implements OnInit {
         this.form.controls.tasaCambio.setValue(1);
       }
     });
+  }
+
+  // Mismo criterio que el precio sugerido en Ventas: `dirty` (no un flag
+  // propio) detecta si el usuario ya editó el vencimiento a mano —
+  // `setValue()` programático no marca dirty, solo la interacción real con
+  // el input.
+  private recalcularFechaFin(): void {
+    if (this.form.controls.fechaFin.dirty) {
+      return;
+    }
+    const { fechaInicio, duracionMeses } = this.form.controls;
+    if (!fechaInicio.value || !(duracionMeses.value > 0)) {
+      return;
+    }
+    this.form.controls.fechaFin.setValue(
+      sumarMeses(fechaInicio.value, duracionMeses.value),
+    );
   }
 
   async ngOnInit(): Promise<void> {
