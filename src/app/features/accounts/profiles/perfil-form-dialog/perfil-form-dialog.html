@@ -3,15 +3,16 @@
 <form [formGroup]="form" (ngSubmit)="submit()">
   <mat-dialog-content class="form-grid">
     <mat-form-field appearance="outline">
-      <mat-label>Nombre</mat-label>
+      <mat-label>Nombre del perfil</mat-label>
       <input matInput formControlName="nombre" />
+      <mat-hint>Como aparece en la plataforma. Ej.: Perfil 3</mat-hint>
       @if (form.controls.nombre.hasError('required')) {
         <mat-error>El nombre es obligatorio.</mat-error>
       }
     </mat-form-field>
 
     <mat-form-field appearance="outline">
-      <mat-label>PIN (opcional)</mat-label>
+      <mat-label>PIN del perfil (opcional)</mat-label>
       <input
         matInput
         [type]="showPin() ? 'text' : 'password'"
@@ -26,6 +27,7 @@
       >
         <mat-icon>{{ showPin() ? 'visibility_off' : 'visibility' }}</mat-icon>
       </button>
+      <mat-hint>El código que protege el perfil, si tiene.</mat-hint>
     </mat-form-field>
 
     @if (errorMessage()) {

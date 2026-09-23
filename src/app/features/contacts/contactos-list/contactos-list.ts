@@ -115,7 +115,7 @@ export class ContactosList implements OnInit {
     const ref = this.dialog.open(ConfirmDialog, {
       data: {
         title: 'Desactivar contacto',
-        message: `¿Desactivar a "${contacto.nombre}"? No se borra el historial, solo deja de estar disponible para nuevas ventas.`,
+        message: `¿Desactivar a ${contacto.nombre}? Ya no aparecerá en las listas. Sus ventas anteriores no se borran.`,
         confirmLabel: 'Desactivar',
       },
     });
@@ -130,7 +130,7 @@ export class ContactosList implements OnInit {
     const ref = this.dialog.open(ConfirmDialog, {
       data: {
         title: 'Reactivar contacto',
-        message: `¿Reactivar a "${contacto.nombre}"? Vuelve a estar disponible para nuevas ventas.`,
+        message: `¿Reactivar a ${contacto.nombre}? Volverá a aparecer en las listas.`,
         confirmLabel: 'Reactivar',
       },
     });

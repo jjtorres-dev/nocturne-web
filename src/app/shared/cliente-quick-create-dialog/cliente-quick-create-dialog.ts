@@ -58,7 +58,7 @@ export class ClienteQuickCreateDialog {
       this.dialogRef.close(result);
     } catch (error) {
       this.formError.show(
-        extractErrorMessage(error, 'No se pudo crear el cliente. Intenta de nuevo.'),
+        extractErrorMessage(error, 'No se pudo crear el cliente. Inténtalo de nuevo.'),
       );
     } finally {
       this.saving.set(false);

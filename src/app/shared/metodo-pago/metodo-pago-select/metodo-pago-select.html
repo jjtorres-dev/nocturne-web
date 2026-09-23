@@ -11,6 +11,9 @@
     }
     <mat-option [value]="OTRO">Otro</mat-option>
   </mat-select>
+  @if (hint()) {
+    <mat-hint>{{ hint() }}</mat-hint>
+  }
 </mat-form-field>
 
 @if (showRequiredError()) {
@@ -27,7 +30,7 @@
 
 @if (selected() === OTRO) {
   <mat-form-field appearance="outline">
-    <mat-label>Especifica el método de pago</mat-label>
+    <mat-label>Escribe el método de pago</mat-label>
     <input
       matInput
       [value]="customText()"

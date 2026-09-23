@@ -1,4 +1,4 @@
-import { Component, DestroyRef, computed, inject, signal, type OnInit } from '@angular/core';
+import { Component, DestroyRef, computed, inject, input, signal, type OnInit } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import type { ControlValueAccessor } from '@angular/forms';
 import { NgControl } from '@angular/forms';
@@ -25,6 +25,9 @@ import { METODO_PAGO_OPTIONS, METODO_PAGO_OTRO } from '../metodo-pago.data';
 export class MetodoPagoSelect implements ControlValueAccessor, OnInit {
   protected readonly options = METODO_PAGO_OPTIONS;
   protected readonly OTRO = METODO_PAGO_OTRO;
+  // Aclara quién paga a quién: en Cuentas es un pago al proveedor, en
+  // Ventas/Gastos un cobro o un gasto.
+  readonly hint = input<string>();
 
   private readonly ngControl = inject(NgControl, { optional: true, self: true });
   private readonly destroyRef = inject(DestroyRef);

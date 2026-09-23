@@ -175,7 +175,7 @@ export class CuentaDetail implements OnInit {
     const ref = this.dialog.open(ConfirmDialog, {
       data: {
         title: 'Desactivar cuenta',
-        message: `¿Desactivar la cuenta de "${cuenta.correo}"? No se borra el historial, solo deja de estar disponible.`,
+        message: `¿Desactivar la cuenta "${cuenta.correo}"? Ya no aparecerá para vender. Sus ventas anteriores no se borran.`,
         confirmLabel: 'Desactivar',
       },
     });
@@ -194,7 +194,7 @@ export class CuentaDetail implements OnInit {
     const ref = this.dialog.open(ConfirmDialog, {
       data: {
         title: 'Reactivar cuenta',
-        message: `¿Reactivar la cuenta de "${cuenta.correo}"?`,
+        message: `¿Reactivar la cuenta "${cuenta.correo}"? Volverá a aparecer para vender.`,
         confirmLabel: 'Reactivar',
       },
     });
@@ -226,7 +226,7 @@ export class CuentaDetail implements OnInit {
       return null;
     }
     const servicio = this.servicio();
-    return `Se alcanzó el máximo de pantallas (${servicio?.pantallasMax}) para "${servicio?.nombre}".`;
+    return `Esta cuenta ya tiene sus ${servicio?.pantallasMax} perfiles (el máximo de ${servicio?.nombre}).`;
   }
 
   openCreatePerfil(): void {
@@ -331,7 +331,7 @@ export class CuentaDetail implements OnInit {
       void this.refreshPerfiles();
     } catch {
       this.snackBar.open(
-        'No se pudo reactivar el perfil (¿se alcanzó el máximo de pantallas?).',
+        'No se pudo reactivar el perfil. Puede que la cuenta ya tenga todos sus perfiles.',
         'Cerrar',
         { duration: 5000 },
       );

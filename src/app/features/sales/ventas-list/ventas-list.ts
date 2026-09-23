@@ -197,7 +197,7 @@ export class VentasList implements OnInit {
         // que el fetch de la cuenta (con las credenciales) es perezoso.
         const snackRef = this.snackBar.open(
           `Venta ${result.codigoVenta} creada.`,
-          'Copiar datos',
+          'Copiar datos para el cliente',
           { duration: 6000 },
         );
         snackRef.onAction().subscribe(() => {
@@ -223,7 +223,7 @@ export class VentasList implements OnInit {
     ref.afterClosed().subscribe((result?: Venta) => {
       if (result) {
         this.snackBar.open(
-          `Venta renovada. Nueva fecha de fin: ${formatFechaCorta(result.fechaFin)}.`,
+          `Venta renovada. Ahora vence el ${formatFechaCorta(result.fechaFin)}.`,
           'Cerrar',
           { duration: 4000 },
         );
@@ -259,7 +259,7 @@ export class VentasList implements OnInit {
         fechaFin: venta.fechaFin,
       });
       await navigator.clipboard.writeText(mensaje);
-      this.snackBar.open('Datos copiados al portapapeles.', 'Cerrar', {
+      this.snackBar.open('Datos copiados. Ya puedes pegarlos en WhatsApp.', 'Cerrar', {
         duration: 3000,
       });
     } catch {
@@ -272,9 +272,12 @@ export class VentasList implements OnInit {
   confirmDeactivate(venta: Venta): void {
     const ref = this.dialog.open(ConfirmDialog, {
       data: {
-        title: 'Desactivar venta',
-        message: `¿Desactivar la venta "${venta.codigoVenta}"? Libera el perfil o la cuenta para una nueva venta.`,
-        confirmLabel: 'Desactivar',
+        title: 'Finalizar venta',
+        // Lo cobrado se mantiene: finalizar solo marca la venta como no
+        // vigente y libera el perfil/cuenta; los pagos (Payment) no se
+        // tocan y Contabilidad los sigue sumando.
+        message: `¿Finalizar la venta ${venta.codigoVenta}? ${venta.perfilId ? 'El perfil queda libre' : 'La cuenta queda libre'} para otro cliente. Lo que ya cobraste sigue contando en Contabilidad.`,
+        confirmLabel: 'Finalizar venta',
       },
     });
     ref.afterClosed().subscribe((confirmed) => {
@@ -288,7 +291,7 @@ export class VentasList implements OnInit {
     const ref = this.dialog.open(ConfirmDialog, {
       data: {
         title: 'Reactivar venta',
-        message: `¿Reactivar la venta "${venta.codigoVenta}"?`,
+        message: `¿Reactivar la venta ${venta.codigoVenta}? Vuelve a estar vigente y ${venta.perfilId ? 'ocupa otra vez el perfil' : 'ocupa otra vez la cuenta'}.`,
         confirmLabel: 'Reactivar',
       },
     });
@@ -339,14 +342,14 @@ export class VentasList implements OnInit {
       { header: 'Código', value: (v) => v.codigoVenta },
       { header: 'Cliente', value: (v) => this.clienteNombre(v.clienteId) },
       { header: 'Servicio', value: (v) => this.servicioNombre(v.servicioId) },
-      { header: 'Cuenta (correo)', value: (v) => this.cuentaCorreo(v) },
+      { header: 'Correo de la cuenta', value: (v) => this.cuentaCorreo(v) },
       { header: 'Perfil', value: (v) => this.perfilLabel(v) },
-      { header: 'Fecha Inicio', value: (v) => formatFechaCorta(v.fechaInicio) },
-      { header: 'Fecha Fin', value: (v) => formatFechaCorta(v.fechaFin) },
-      { header: 'Precio', value: (v) => v.precio.toFixed(2) },
+      { header: 'Desde', value: (v) => formatFechaCorta(v.fechaInicio) },
+      { header: 'Vence', value: (v) => formatFechaCorta(v.fechaFin) },
+      { header: 'Cobrado', value: (v) => v.precio.toFixed(2) },
       { header: 'Moneda', value: (v) => v.moneda },
-      { header: 'Método de Pago', value: (v) => v.metodoPago },
-      { header: 'Estado', value: (v) => (v.activo ? 'Activo' : 'Inactivo') },
+      { header: 'Método de pago', value: (v) => v.metodoPago },
+      { header: 'Estado', value: (v) => (v.activo ? 'Vigente' : 'Finalizada') },
     ];
     if (this.isAdmin()) {
       columns.push({ header: 'Dueño', value: (v) => v.owner.name });
@@ -359,10 +362,10 @@ export class VentasList implements OnInit {
   private async deactivate(venta: Venta): Promise<void> {
     try {
       await this.api.deactivate(venta.id);
-      this.snackBar.open('Venta desactivada.', 'Cerrar', { duration: 3000 });
+      this.snackBar.open('Venta finalizada.', 'Cerrar', { duration: 3000 });
       void this.refresh();
     } catch {
-      this.snackBar.open('No se pudo desactivar la venta.', 'Cerrar', {
+      this.snackBar.open('No se pudo finalizar la venta.', 'Cerrar', {
         duration: 4000,
       });
     }

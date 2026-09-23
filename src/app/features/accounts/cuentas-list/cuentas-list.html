@@ -1,5 +1,5 @@
 <div class="page-header">
-  <h1>Cuentas</h1>
+  <h1>Cuentas compradas</h1>
   <button mat-flat-button color="primary" (click)="openCreate()">
     <mat-icon>add</mat-icon>
     Nueva cuenta
@@ -55,7 +55,7 @@
       </ng-container>
 
       <ng-container matColumnDef="correo">
-        <th mat-header-cell *matHeaderCellDef>Correo</th>
+        <th mat-header-cell *matHeaderCellDef>Correo de la cuenta</th>
         <td mat-cell *matCellDef="let c">{{ c.correo }}</td>
       </ng-container>
 
@@ -65,17 +65,17 @@
       </ng-container>
 
       <ng-container matColumnDef="fechaInicio">
-        <th mat-header-cell *matHeaderCellDef>Inicio</th>
+        <th mat-header-cell *matHeaderCellDef>Comprada</th>
         <td mat-cell *matCellDef="let c">{{ c.fechaInicio | date: 'dd/MM/yyyy' }}</td>
       </ng-container>
 
       <ng-container matColumnDef="fechaFin">
-        <th mat-header-cell *matHeaderCellDef>Fin</th>
+        <th mat-header-cell *matHeaderCellDef>Vence (proveedor)</th>
         <td mat-cell *matCellDef="let c">{{ c.fechaFin | date: 'dd/MM/yyyy' }}</td>
       </ng-container>
 
       <ng-container matColumnDef="perfiles">
-        <th mat-header-cell *matHeaderCellDef>Perfiles</th>
+        <th mat-header-cell *matHeaderCellDef>Perfiles creados</th>
         <td mat-cell *matCellDef="let c">{{ perfilesLabel(c) }}</td>
       </ng-container>
 

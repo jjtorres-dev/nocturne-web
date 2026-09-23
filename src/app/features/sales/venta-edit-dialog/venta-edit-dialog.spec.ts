@@ -165,6 +165,6 @@ describe('VentaEditDialog', () => {
     component.form.patchValue({ precio: 20 });
     await component.submit();
 
-    expect(component.errorMessage()).toBe('No se pudo guardar la venta. Intenta de nuevo.');
+    expect(component.errorMessage()).toBe('No se pudo guardar la venta. Inténtalo de nuevo.');
   });
 });

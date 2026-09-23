@@ -5,7 +5,7 @@
 <div class="filters">
   @if (isAdmin()) {
     <mat-form-field appearance="outline">
-      <mat-label>Viendo</mat-label>
+      <mat-label>Ver números de</mat-label>
       <mat-select [(ngModel)]="viewOwnerId" (selectionChange)="onViewOwnerChange()">
         <mat-option [value]="VIEW_MINE">Mi negocio</mat-option>
         <mat-option [value]="VIEW_ALL">Todo el negocio</mat-option>
@@ -26,7 +26,7 @@
     <input matInput type="date" [(ngModel)]="hasta" />
   </mat-form-field>
 
-  <button mat-flat-button color="primary" (click)="refresh()">Aplicar</button>
+  <button mat-flat-button color="primary" (click)="refresh()">Ver</button>
 </div>
 
 @if (loading()) {
@@ -40,28 +40,44 @@
     <mat-card class="summary-card ingresos">
       <mat-card-content>
         <span class="summary-value">{{ s.ingresos | soles }}</span>
-        <span class="summary-label">Ingresos</span>
+        <span class="summary-label">
+          Cobrado a clientes
+          <app-info-toggle [for]="ingresosInfo" etiqueta="Qué es cobrado a clientes" />
+        </span>
+        <app-info-hint #ingresosInfo texto="Todo lo que te pagaron tus clientes (ventas y renovaciones) entre estas fechas, en soles." />
       </mat-card-content>
     </mat-card>
 
     <mat-card class="summary-card inversion">
       <mat-card-content>
         <span class="summary-value">{{ s.inversion | soles }}</span>
-        <span class="summary-label">Inversión</span>
+        <span class="summary-label">
+          Pagado a proveedores
+          <app-info-toggle [for]="inversionInfo" etiqueta="Qué es pagado a proveedores" />
+        </span>
+        <app-info-hint #inversionInfo texto="Lo que pagaste por las cuentas que registraste entre estas fechas (se usa el día en que registraste la cuenta)." />
       </mat-card-content>
     </mat-card>
 
     <mat-card class="summary-card gastos">
       <mat-card-content>
         <span class="summary-value">{{ s.gastos | soles }}</span>
-        <span class="summary-label">Gastos</span>
+        <span class="summary-label">
+          Otros gastos
+          <app-info-toggle [for]="gastosInfo" etiqueta="Qué es otros gastos" />
+        </span>
+        <app-info-hint #gastosInfo texto="Lo que anotaste en Gastos (publicidad, comisiones, etc.)." />
       </mat-card-content>
     </mat-card>
 
     <mat-card class="summary-card ganancia" [class.negativa]="s.ganancia < 0">
       <mat-card-content>
         <span class="summary-value">{{ s.ganancia | soles }}</span>
-        <span class="summary-label">Ganancia</span>
+        <span class="summary-label">
+          Ganancia
+          <app-info-toggle [for]="gananciaInfo" etiqueta="Qué es ganancia" />
+        </span>
+        <app-info-hint #gananciaInfo texto="Cobrado − pagado a proveedores − otros gastos." />
       </mat-card-content>
     </mat-card>
   </div>
@@ -76,7 +92,7 @@
           [disabled]="byService().length === 0"
         >
           <mat-icon>file_download</mat-icon>
-          Exportar CSV
+          Descargar Excel (CSV)
         </button>
       </div>
       <div class="table-scroll">
@@ -87,17 +103,22 @@
           </ng-container>
 
           <ng-container matColumnDef="inversion">
-            <th mat-header-cell *matHeaderCellDef>Inversión</th>
+            <th mat-header-cell *matHeaderCellDef>Pagado a proveedores</th>
             <td mat-cell *matCellDef="let r">{{ r.inversion | soles }}</td>
           </ng-container>
 
           <ng-container matColumnDef="ingresos">
-            <th mat-header-cell *matHeaderCellDef>Ingresos</th>
+            <th mat-header-cell *matHeaderCellDef>Cobrado</th>
             <td mat-cell *matCellDef="let r">{{ r.ingresos | soles }}</td>
           </ng-container>
 
           <ng-container matColumnDef="ganancia">
-            <th mat-header-cell *matHeaderCellDef>Ganancia</th>
+            <th mat-header-cell *matHeaderCellDef>
+              <span class="th-with-info">
+                Ganancia (sin otros gastos)
+                <app-info-toggle [for]="gananciaServicioInfo" etiqueta="Qué es ganancia sin otros gastos" />
+              </span>
+            </th>
             <td mat-cell *matCellDef="let r">{{ r.ganancia | soles }}</td>
           </ng-container>
 
@@ -105,8 +126,9 @@
           <tr mat-row *matRowDef="let row; columns: byServiceColumns"></tr>
         </table>
       </div>
+      <app-info-hint #gananciaServicioInfo texto="Aquí no se restan los otros gastos porque no son de un servicio en particular." />
       @if (byService().length === 0) {
-        <p class="empty-state">Sin datos en este rango.</p>
+        <p class="empty-state">No hay movimientos entre estas fechas.</p>
       }
     </div>
 
@@ -119,28 +141,33 @@
           [disabled]="byPaymentMethod().length === 0"
         >
           <mat-icon>file_download</mat-icon>
-          Exportar CSV
+          Descargar Excel (CSV)
         </button>
       </div>
       <div class="table-scroll">
         <table mat-table [dataSource]="byPaymentMethod()" class="breakdown-table">
           <ng-container matColumnDef="metodoPago">
-            <th mat-header-cell *matHeaderCellDef>Método</th>
+            <th mat-header-cell *matHeaderCellDef>Método de pago</th>
             <td mat-cell *matCellDef="let r">{{ r.metodoPago }}</td>
           </ng-container>
 
           <ng-container matColumnDef="ingresos">
-            <th mat-header-cell *matHeaderCellDef>Ingresos</th>
+            <th mat-header-cell *matHeaderCellDef>Cobrado</th>
             <td mat-cell *matCellDef="let r">{{ r.ingresos | soles }}</td>
           </ng-container>
 
           <ng-container matColumnDef="gastos">
-            <th mat-header-cell *matHeaderCellDef>Gastos</th>
+            <th mat-header-cell *matHeaderCellDef>Otros gastos</th>
             <td mat-cell *matCellDef="let r">{{ r.gastos | soles }}</td>
           </ng-container>
 
           <ng-container matColumnDef="neto">
-            <th mat-header-cell *matHeaderCellDef>Neto</th>
+            <th mat-header-cell *matHeaderCellDef>
+              <span class="th-with-info">
+                Te quedó
+                <app-info-toggle [for]="netoInfo" etiqueta="Qué es te quedó" />
+              </span>
+            </th>
             <td mat-cell *matCellDef="let r">{{ r.neto | soles }}</td>
           </ng-container>
 
@@ -148,8 +175,9 @@
           <tr mat-row *matRowDef="let row; columns: byPaymentMethodColumns"></tr>
         </table>
       </div>
+      <app-info-hint #netoInfo texto="Cobrado − otros gastos con ese método. No incluye lo que pagaste a proveedores." />
       @if (byPaymentMethod().length === 0) {
-        <p class="empty-state">Sin datos en este rango.</p>
+        <p class="empty-state">No hay movimientos entre estas fechas.</p>
       }
     </div>
   </div>
@@ -157,9 +185,9 @@
 
 <div class="timeline-section">
   <div class="timeline-header">
-    <h2>Línea de tiempo</h2>
+    <h2>Cómo te fue en el tiempo</h2>
     <mat-form-field appearance="outline">
-      <mat-label>Agrupar por</mat-label>
+      <mat-label>Ver por</mat-label>
       <mat-select [(ngModel)]="groupBy" (selectionChange)="refresh()">
         @for (opt of groupByOptions; track opt) {
           <mat-option [value]="opt">{{ groupByLabels[opt] }}</mat-option>
@@ -173,6 +201,6 @@
   </div>
 
   @if (!loading() && timeline().length === 0) {
-    <p class="empty-state">Sin datos en este rango.</p>
+    <p class="empty-state">No hay movimientos entre estas fechas.</p>
   }
 </div>

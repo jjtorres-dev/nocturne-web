@@ -36,7 +36,7 @@ describe('rutas: /configuracion', () => {
   afterEach(() => localStorage.clear());
 
   it.each([
-    ['admin', 'Admin'],
+    ['admin', 'Administrador'],
     ['revendedor', 'Revendedor'],
   ])('carga para un usuario logueado con rol %s', async (role, label) => {
     const harness = await setup({ name: 'Usuario Demo', role });

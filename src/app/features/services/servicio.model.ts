@@ -8,11 +8,23 @@ export enum ServiceType {
 }
 
 export const SERVICE_TYPE_LABELS: Record<ServiceType, string> = {
-  [ServiceType.CON_PERFILES]: 'Con perfiles',
-  [ServiceType.SIN_PERFILES]: 'Sin perfiles',
-  [ServiceType.FAMILIAR]: 'Familiar',
-  [ServiceType.IPTV]: 'IPTV',
+  [ServiceType.CON_PERFILES]: 'Por perfiles (una cuenta, varios clientes)',
+  [ServiceType.SIN_PERFILES]: 'Cuenta completa (un cliente por cuenta)',
+  [ServiceType.FAMILIAR]: 'Plan familiar (por cupos)',
+  [ServiceType.IPTV]: 'IPTV (cuenta completa)',
 };
+
+// Tipos que se venden por perfil (en FAMILIAR cada cupo del plan es un
+// perfil): son los únicos con pantallasMax — mismo criterio que el backend
+// para `usaPerfiles`.
+export const TIPOS_CON_PERFILES: readonly ServiceType[] = [
+  ServiceType.CON_PERFILES,
+  ServiceType.FAMILIAR,
+];
+
+export function usaPerfiles(tipo: ServiceType): boolean {
+  return TIPOS_CON_PERFILES.includes(tipo);
+}
 
 export interface Servicio {
   id: string;

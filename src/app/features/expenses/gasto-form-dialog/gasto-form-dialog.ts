@@ -12,11 +12,13 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { GastosApi } from '../gastos-api';
 import type { Gasto } from '../expense.model';
-import { Moneda } from '../../sales/venta.model';
+import { MONEDA_LABELS, Moneda } from '../../sales/venta.model';
 import { extractErrorMessage, injectFormError } from '../../../shared/form-error';
 import { MetodoPagoSelect } from '../../../shared/metodo-pago/metodo-pago-select/metodo-pago-select';
 import { UltimoMetodoPago } from '../../../shared/metodo-pago/ultimo-metodo-pago';
 import { Auth } from '../../../core/auth/auth';
+import { InfoHint } from '../../../shared/info-hint/info-hint';
+import { InfoToggle } from '../../../shared/info-hint/info-toggle';
 
 export interface GastoFormDialogData {
   gasto?: Gasto;
@@ -24,6 +26,8 @@ export interface GastoFormDialogData {
 
 @Component({
   imports: [
+    InfoHint,
+    InfoToggle,
     ReactiveFormsModule,
     MatDialogModule,
     MatFormFieldModule,
@@ -48,6 +52,7 @@ export class GastoFormDialog {
   protected readonly data = inject<GastoFormDialogData>(MAT_DIALOG_DATA);
 
   protected readonly monedas = Object.values(Moneda);
+  protected readonly monedaLabels = MONEDA_LABELS;
   protected readonly Moneda = Moneda;
   readonly isEdit = !!this.data.gasto;
 
@@ -105,7 +110,7 @@ export class GastoFormDialog {
       this.dialogRef.close(result);
     } catch (error) {
       this.formError.show(
-        extractErrorMessage(error, 'No se pudo guardar el gasto. Intenta de nuevo.'),
+        extractErrorMessage(error, 'No se pudo guardar el gasto. Inténtalo de nuevo.'),
       );
     } finally {
       this.saving.set(false);

@@ -53,7 +53,7 @@ describe('ClienteQuickCreateDialog', () => {
 
     await component.submit();
 
-    expect(component.errorMessage()).toBe('No se pudo crear el cliente. Intenta de nuevo.');
+    expect(component.errorMessage()).toBe('No se pudo crear el cliente. Inténtalo de nuevo.');
     expect(dialogRef.close).not.toHaveBeenCalled();
   });
 

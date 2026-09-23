@@ -1,0 +1,11 @@
+<button
+  mat-icon-button
+  type="button"
+  class="info-toggle"
+  [attr.aria-label]="etiqueta()"
+  [attr.aria-expanded]="for().abierto()"
+  [attr.aria-controls]="for().id"
+  (click)="toggle($event)"
+>
+  <mat-icon>{{ for().abierto() ? 'info' : 'info_outline' }}</mat-icon>
+</button>

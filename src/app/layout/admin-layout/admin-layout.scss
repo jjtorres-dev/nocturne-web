@@ -5,7 +5,7 @@
 }
 
 .sidenav {
-  width: 240px;
+  width: 256px;
   display: flex;
   flex-direction: column;
   border-inline-end: 1px solid var(--nc-border);
@@ -20,8 +20,16 @@
   min-height: 100%;
 }
 
+// Con los 16px por defecto de Material (entre ícono y texto, y a la derecha)
+// "Clientes y proveedores" no entra en 256px y se corta con "…"; con 12px
+// entra en una sola línea sin ensanchar más el menú.
 .nav-list {
   flex: 1 1 auto;
+  --mat-list-list-item-leading-icon-end-space: 12px;
+
+  .mat-mdc-list-item {
+    padding-inline-end: 12px;
+  }
 }
 
 .brand {

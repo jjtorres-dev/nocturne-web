@@ -154,7 +154,7 @@ describe('VentaComboEditDialog', () => {
     await component.submit();
 
     expect(component.errorMessage()).toBe(
-      'No se pudo guardar la venta de combo. Intenta de nuevo.',
+      'No se pudo guardar la venta de combo. Inténtalo de nuevo.',
     );
   });
 });

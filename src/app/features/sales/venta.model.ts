@@ -15,6 +15,24 @@ export enum Moneda {
   UYU = 'UYU',
 }
 
+// Un revendedor no siempre conoce los códigos ISO: el select muestra el
+// código + el nombre en español. El valor que viaja a la API sigue siendo
+// el código.
+export const MONEDA_LABELS: Record<Moneda, string> = {
+  [Moneda.PEN]: 'PEN – Soles',
+  [Moneda.USD]: 'USD – Dólares',
+  [Moneda.ARS]: 'ARS – Pesos argentinos',
+  [Moneda.BS]: 'BS – Bolívares',
+  [Moneda.CLP]: 'CLP – Pesos chilenos',
+  [Moneda.COP]: 'COP – Pesos colombianos',
+  [Moneda.CRC]: 'CRC – Colones',
+  [Moneda.CUP]: 'CUP – Pesos cubanos',
+  [Moneda.DOP]: 'DOP – Pesos dominicanos',
+  [Moneda.MXN]: 'MXN – Pesos mexicanos',
+  [Moneda.PYG]: 'PYG – Guaraníes',
+  [Moneda.UYU]: 'UYU – Pesos uruguayos',
+};
+
 export interface Venta {
   id: string;
   clienteId: string;

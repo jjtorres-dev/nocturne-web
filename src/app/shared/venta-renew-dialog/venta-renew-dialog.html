@@ -3,42 +3,47 @@
 <form [formGroup]="form" (ngSubmit)="submit()">
   <mat-dialog-content class="form-grid">
     <p class="renew-info">
-      Fecha de fin actual: <strong>{{ data.venta.fechaFin | date: 'dd/MM/yyyy' }}</strong>.
-      Se extenderá {{ data.venta.duracionMeses }}
-      {{ data.venta.duracionMeses === 1 ? 'mes' : 'meses' }}.
+      Hoy vence el <strong>{{ data.venta.fechaFin | date: 'dd/MM/yyyy' }}</strong>.
+      Con la renovación, vencerá {{ data.venta.duracionMeses }}
+      {{ data.venta.duracionMeses === 1 ? 'mes' : 'meses' }} después.
     </p>
 
     <mat-form-field appearance="outline">
-      <mat-label>Precio</mat-label>
+      <mat-label>Precio de la renovación</mat-label>
       <input matInput type="number" step="0.01" formControlName="precio" />
+      <app-info-toggle matSuffix [for]="precioInfo" />
       @if (form.controls.precio.hasError('required')) {
-        <mat-error>El precio es obligatorio.</mat-error>
+        <mat-error>Escribe cuánto te pagó el cliente.</mat-error>
       }
       @if (form.controls.precio.hasError('min')) {
         <mat-error>Debe ser un número positivo.</mat-error>
       }
     </mat-form-field>
+    <app-info-hint #precioInfo texto="Lo que te paga el cliente por este nuevo periodo." />
 
     <mat-form-field appearance="outline">
       <mat-label>Moneda</mat-label>
       <mat-select formControlName="moneda">
         @for (m of monedas; track m) {
-          <mat-option [value]="m">{{ m }}</mat-option>
+          <mat-option [value]="m">{{ monedaLabels[m] }}</mat-option>
         }
       </mat-select>
+      <mat-hint>En qué moneda te pagaron.</mat-hint>
     </mat-form-field>
 
     @if (form.controls.moneda.value !== Moneda.PEN) {
       <mat-form-field appearance="outline">
-        <mat-label>Tasa de cambio</mat-label>
+        <mat-label>Tipo de cambio a soles</mat-label>
         <input matInput type="number" step="0.0001" formControlName="tasaCambio" />
+        <app-info-toggle matSuffix [for]="tasaInfo" />
         @if (form.controls.tasaCambio.hasError('min')) {
           <mat-error>Debe ser un número positivo.</mat-error>
         }
       </mat-form-field>
+      <app-info-hint #tasaInfo texto="Cuántos soles vale 1 unidad de esa moneda. Ej.: si 1 dólar = S/ 3.75, pon 3.75." />
     }
 
-    <app-metodo-pago-select formControlName="metodoPago" />
+    <app-metodo-pago-select formControlName="metodoPago" hint="Con qué te pagó el cliente." />
 
     @if (errorMessage()) {
       <p class="error-message" role="alert">{{ errorMessage() }}</p>

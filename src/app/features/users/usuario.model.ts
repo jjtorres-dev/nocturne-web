@@ -3,7 +3,7 @@ import { UserRole } from '../../core/auth/auth';
 export { UserRole };
 
 export const USER_ROLE_LABELS: Record<UserRole, string> = {
-  [UserRole.ADMIN]: 'Admin',
+  [UserRole.ADMIN]: 'Administrador',
   [UserRole.REVENDEDOR]: 'Revendedor',
 };
 

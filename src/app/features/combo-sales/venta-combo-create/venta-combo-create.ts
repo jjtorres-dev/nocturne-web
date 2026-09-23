@@ -17,7 +17,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { VentaCombosApi } from '../venta-combos-api';
 import { type CreateVentaComboPayload } from '../venta-combo.model';
-import { Moneda } from '../../sales/venta.model';
+import { MONEDA_LABELS, Moneda } from '../../sales/venta.model';
 import { CombosApi } from '../../combos/combos-api';
 import { type Combo } from '../../combos/combo.model';
 import { ServiceType, type Servicio } from '../../services/servicio.model';
@@ -32,6 +32,8 @@ import { extractErrorMessage, injectFormError } from '../../../shared/form-error
 import { MetodoPagoSelect } from '../../../shared/metodo-pago/metodo-pago-select/metodo-pago-select';
 import { UltimoMetodoPago } from '../../../shared/metodo-pago/ultimo-metodo-pago';
 import { Auth } from '../../../core/auth/auth';
+import { InfoHint } from '../../../shared/info-hint/info-hint';
+import { InfoToggle } from '../../../shared/info-hint/info-toggle';
 
 // Sentinel para la opción "+ Nuevo cliente" del selector — nunca un id real.
 const NUEVO_CLIENTE = '__nuevo_cliente__';
@@ -60,6 +62,8 @@ function fechaFinPosteriorValidator(
 
 @Component({
   imports: [
+    InfoHint,
+    InfoToggle,
     ReactiveFormsModule,
     RouterLink,
     MatFormFieldModule,
@@ -88,6 +92,7 @@ export class VentaComboCreate implements OnInit {
   private readonly ultimoMetodoPago = inject(UltimoMetodoPago);
 
   protected readonly monedas = Object.values(Moneda);
+  protected readonly monedaLabels = MONEDA_LABELS;
   protected readonly Moneda = Moneda;
   protected readonly ServiceType = ServiceType;
   readonly NUEVO_CLIENTE = NUEVO_CLIENTE;
@@ -293,7 +298,7 @@ export class VentaComboCreate implements OnInit {
       // (ver ComboSalesService.validarAsignacion): se muestra tal cual, no un
       // error genérico.
       this.formError.show(
-        extractErrorMessage(error, 'No se pudo crear la venta de combo. Intenta de nuevo.'),
+        extractErrorMessage(error, 'No se pudo crear la venta de combo. Inténtalo de nuevo.'),
       );
     } finally {
       this.saving.set(false);
@@ -317,15 +322,15 @@ export class VentaComboCreate implements OnInit {
   private validateAsignaciones(): string | null {
     for (const section of this.asignaciones()) {
       if (!section.cuentaId) {
-        return `Selecciona una cuenta para el servicio "${section.servicio.nombre}".`;
+        return `Elige una cuenta de ${section.servicio.nombre}.`;
       }
       if (section.requierePerfil && !section.perfilId) {
-        return `El servicio "${section.servicio.nombre}" requiere seleccionar un perfil.`;
+        return `Elige un perfil de ${section.servicio.nombre}.`;
       }
       if (!section.requierePerfil) {
         const cuenta = section.cuentas.find((c) => c.id === section.cuentaId);
         if (cuenta?.clienteId) {
-          return `El servicio "${section.servicio.nombre}": esa cuenta ya tiene un cliente asignado.`;
+          return `Esa cuenta de ${section.servicio.nombre} ya se vendió completa a otro cliente.`;
         }
       }
     }

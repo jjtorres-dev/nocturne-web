@@ -49,6 +49,6 @@ describe('PerfilFormDialog', () => {
 
     await component.submit();
 
-    expect(component.errorMessage()).toBe('No se pudo guardar el perfil. Intenta de nuevo.');
+    expect(component.errorMessage()).toBe('No se pudo guardar el perfil. Inténtalo de nuevo.');
   });
 });

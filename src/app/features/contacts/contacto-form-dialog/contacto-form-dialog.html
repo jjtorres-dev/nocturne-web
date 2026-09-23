@@ -13,19 +13,20 @@
     <mat-form-field appearance="outline">
       <mat-label>WhatsApp</mat-label>
       <input matInput formControlName="whatsapp" />
-      <mat-hint>Formato: +51999999999</mat-hint>
+      <mat-hint>Con código de país, sin espacios. Ej.: +51987654321</mat-hint>
       @if (form.controls.whatsapp.hasError('required')) {
         <mat-error>El WhatsApp es obligatorio.</mat-error>
       }
     </mat-form-field>
 
     <mat-form-field appearance="outline">
-      <mat-label>Tipo</mat-label>
+      <mat-label>¿Quién es?</mat-label>
       <mat-select formControlName="tipo">
         @for (type of contactTypes; track type) {
           <mat-option [value]="type">{{ typeLabels[type] }}</mat-option>
         }
       </mat-select>
+      <mat-hint>Cliente: te compra. Proveedor: te vende las cuentas.</mat-hint>
     </mat-form-field>
 
     @if (errorMessage()) {

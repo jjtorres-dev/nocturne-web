@@ -78,7 +78,7 @@ export class PerfilFormDialog {
       this.dialogRef.close(result);
     } catch (error) {
       this.formError.show(
-        extractErrorMessage(error, 'No se pudo guardar el perfil. Intenta de nuevo.'),
+        extractErrorMessage(error, 'No se pudo guardar el perfil. Inténtalo de nuevo.'),
       );
     } finally {
       this.saving.set(false);

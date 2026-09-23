@@ -226,14 +226,14 @@ describe('AdminLayout', () => {
       expect(el.querySelector('.header button[aria-label="Cerrar sesión"]')).toBeNull();
     });
 
-    it('la tarjeta muestra avatar con iniciales, nombre y rol (Admin)', async () => {
+    it('la tarjeta muestra avatar con iniciales, nombre y rol (Administrador)', async () => {
       await setup(admin);
       fixture.detectChanges();
 
       const card = userCard();
       expect(card.querySelector('app-avatar-inicial')?.textContent?.trim()).toBe('JT');
       expect(card.querySelector('.user-name')?.textContent?.trim()).toBe('Juan Torres');
-      expect(card.querySelector('.user-role')?.textContent?.trim()).toBe('Admin');
+      expect(card.querySelector('.user-role')?.textContent?.trim()).toBe('Administrador');
     });
 
     it('la tarjeta muestra el rol "Revendedor" para un REVENDEDOR', async () => {

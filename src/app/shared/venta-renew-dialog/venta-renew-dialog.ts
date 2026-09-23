@@ -12,11 +12,13 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { DatePipe } from '@angular/common';
 import { VentasApi } from '../../features/sales/ventas-api';
-import { Moneda, type Venta } from '../../features/sales/venta.model';
+import { MONEDA_LABELS, Moneda, type Venta } from '../../features/sales/venta.model';
 import { extractErrorMessage, injectFormError } from '../form-error';
 import { MetodoPagoSelect } from '../metodo-pago/metodo-pago-select/metodo-pago-select';
 import { UltimoMetodoPago } from '../metodo-pago/ultimo-metodo-pago';
 import { Auth } from '../../core/auth/auth';
+import { InfoHint } from '../info-hint/info-hint';
+import { InfoToggle } from '../info-hint/info-toggle';
 
 export interface VentaRenewDialogData {
   venta: Venta;
@@ -29,6 +31,8 @@ export interface VentaRenewDialogData {
 // acá solo se informa cuánto se va a extender.
 @Component({
   imports: [
+    InfoHint,
+    InfoToggle,
     ReactiveFormsModule,
     DatePipe,
     MatDialogModule,
@@ -54,6 +58,7 @@ export class VentaRenewDialog {
   protected readonly data = inject<VentaRenewDialogData>(MAT_DIALOG_DATA);
 
   protected readonly monedas = Object.values(Moneda);
+  protected readonly monedaLabels = MONEDA_LABELS;
   protected readonly Moneda = Moneda;
 
   readonly saving = signal(false);
@@ -113,7 +118,7 @@ export class VentaRenewDialog {
       this.dialogRef.close(result);
     } catch (error) {
       this.formError.show(
-        extractErrorMessage(error, 'No se pudo renovar la venta. Intenta de nuevo.'),
+        extractErrorMessage(error, 'No se pudo renovar la venta. Inténtalo de nuevo.'),
       );
     } finally {
       this.saving.set(false);

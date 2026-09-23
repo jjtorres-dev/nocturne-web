@@ -137,7 +137,7 @@ export class ServiciosList implements OnInit {
     const ref = this.dialog.open(ConfirmDialog, {
       data: {
         title: 'Desactivar servicio',
-        message: `¿Desactivar "${servicio.nombre}"? No se borra el historial, solo deja de estar disponible para nuevas ventas.`,
+        message: `¿Desactivar "${servicio.nombre}"? Ya no aparecerá al registrar ventas. Tus ventas y cuentas anteriores no se borran.`,
         confirmLabel: 'Desactivar',
       },
     });
@@ -152,7 +152,7 @@ export class ServiciosList implements OnInit {
     const ref = this.dialog.open(ConfirmDialog, {
       data: {
         title: 'Reactivar servicio',
-        message: `¿Reactivar "${servicio.nombre}"? Vuelve a estar disponible para nuevas ventas.`,
+        message: `¿Reactivar "${servicio.nombre}"? Volverá a aparecer al registrar ventas.`,
         confirmLabel: 'Reactivar',
       },
     });

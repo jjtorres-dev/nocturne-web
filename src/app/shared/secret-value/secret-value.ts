@@ -14,6 +14,9 @@ export class SecretValue {
 
   readonly value = input<string | null>(null);
   readonly label = input('Valor');
+  // Confirmación al copiar. Por defecto "<label> copiado.", que no concuerda
+  // con etiquetas femeninas ("Contraseña") — ahí se pasa explícito.
+  readonly mensajeCopiado = input<string>();
 
   readonly revealed = signal(false);
 
@@ -28,11 +31,11 @@ export class SecretValue {
     }
     try {
       await navigator.clipboard.writeText(current);
-      this.snackBar.open(`${this.label()} copiado al portapapeles.`, 'Cerrar', {
+      this.snackBar.open(this.mensajeCopiado() ?? `${this.label()} copiado.`, 'Cerrar', {
         duration: 2000,
       });
     } catch {
-      this.snackBar.open('No se pudo copiar al portapapeles.', 'Cerrar', {
+      this.snackBar.open('No se pudo copiar. Inténtalo de nuevo.', 'Cerrar', {
         duration: 3000,
       });
     }

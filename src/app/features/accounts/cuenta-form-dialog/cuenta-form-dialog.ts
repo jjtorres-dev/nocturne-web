@@ -29,6 +29,8 @@ import { extractErrorMessage, injectFormError } from '../../../shared/form-error
 import { MetodoPagoSelect } from '../../../shared/metodo-pago/metodo-pago-select/metodo-pago-select';
 import { UltimoMetodoPago } from '../../../shared/metodo-pago/ultimo-metodo-pago';
 import { Auth } from '../../../core/auth/auth';
+import { InfoHint } from '../../../shared/info-hint/info-hint';
+import { InfoToggle } from '../../../shared/info-hint/info-toggle';
 
 export interface CuentaFormDialogData {
   cuenta?: Cuenta;
@@ -57,6 +59,8 @@ function fechaFinPosteriorValidator(
     MatIconModule,
     MatProgressSpinnerModule,
     MetodoPagoSelect,
+    InfoHint,
+    InfoToggle,
   ],
   selector: 'app-cuenta-form-dialog',
   styleUrl: './cuenta-form-dialog.scss',
@@ -228,7 +232,7 @@ export class CuentaFormDialog implements OnInit {
       this.dialogRef.close(result);
     } catch (error) {
       this.formError.show(
-        extractErrorMessage(error, 'No se pudo guardar la cuenta. Intenta de nuevo.'),
+        extractErrorMessage(error, 'No se pudo guardar la cuenta. Inténtalo de nuevo.'),
       );
     } finally {
       this.saving.set(false);

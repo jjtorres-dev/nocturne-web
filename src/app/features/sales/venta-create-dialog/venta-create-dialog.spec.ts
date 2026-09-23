@@ -406,7 +406,7 @@ describe('VentaCreateDialog', () => {
 
     await component.submit();
 
-    expect(component.errorMessage()).toContain('ya tiene un cliente asignado');
+    expect(component.errorMessage()).toContain('ya se vendió completa');
     expect(api.create).not.toHaveBeenCalled();
   });
 
@@ -429,7 +429,7 @@ describe('VentaCreateDialog', () => {
 
     await component.submit();
 
-    expect(component.errorMessage()).toContain('Selecciona un perfil');
+    expect(component.errorMessage()).toContain('Elige qué perfil');
     expect(api.create).not.toHaveBeenCalled();
   });
 
@@ -543,9 +543,9 @@ describe('VentaCreateDialog', () => {
 
       await component.submit();
 
-      expect(component.errorMessage()).toBe('No se pudo crear la venta. Intenta de nuevo.');
+      expect(component.errorMessage()).toBe('No se pudo crear la venta. Inténtalo de nuevo.');
       expect(openSpy).toHaveBeenCalledWith(
-        'No se pudo crear la venta. Intenta de nuevo.',
+        'No se pudo crear la venta. Inténtalo de nuevo.',
         'Cerrar',
         expect.anything(),
       );
@@ -559,7 +559,7 @@ describe('VentaCreateDialog', () => {
 
       expect(api.create).not.toHaveBeenCalled();
       expect(openSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Selecciona un perfil'),
+        expect.stringContaining('Elige qué perfil'),
         'Cerrar',
         expect.anything(),
       );

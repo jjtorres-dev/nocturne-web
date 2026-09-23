@@ -170,6 +170,6 @@ describe('ComboFormDialog', () => {
     });
     await component.submit();
 
-    expect(component.errorMessage()).toBe('No se pudo guardar el combo. Intenta de nuevo.');
+    expect(component.errorMessage()).toBe('No se pudo guardar el combo. Inténtalo de nuevo.');
   });
 });

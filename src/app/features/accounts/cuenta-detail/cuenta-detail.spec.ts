@@ -213,7 +213,7 @@ describe('CuentaDetail', () => {
     ).find((b) => b.textContent?.includes('Agregar perfil'))!;
 
     expect(addButton.disabled).toBe(true);
-    expect(fixture.nativeElement.textContent).toContain('máximo de pantallas');
+    expect(fixture.nativeElement.textContent).toContain('ya tiene sus');
   });
 
   it('permite agregar perfil cuando hay cupo disponible', async () => {
@@ -260,9 +260,9 @@ describe('CuentaDetail', () => {
 
       expect(api.rentabilidad).toHaveBeenCalledWith('cta-1');
       const text = card!.textContent!.replace(/\s+/g, ' ');
-      expect(text).toContain('Recuperado S/ 6.00 de S/ 10.00');
-      expect(text).toContain('Perfiles vendidos 1/2');
-      expect(text).toContain('Faltan S/ 4.00 para cubrir el costo');
+      expect(text).toContain('Cobraste S/ 6.00 de los S/ 10.00 que pagaste');
+      expect(text).toContain('Perfiles vendidos: 1 de 2');
+      expect(text).toContain('Te faltan S/ 4.00 para recuperar lo que pagaste');
       expect(card!.querySelector('.ganancia.positiva')).toBeNull();
       expect(component['porcentajeRecuperado']()).toBe(60);
     });
@@ -271,18 +271,18 @@ describe('CuentaDetail', () => {
       const card = await render({ ...rentabilidadBase, ingresos: 25, ganancia: 15 });
 
       const ganancia = card!.querySelector('.ganancia.positiva');
-      expect(ganancia?.textContent).toContain('Ganancia S/ 15.00');
-      expect(card!.textContent).not.toContain('Faltan');
+      expect(ganancia?.textContent).toContain('Ya ganaste S/ 15.00');
+      expect(card!.textContent).not.toContain('Te faltan');
       expect(component['porcentajeRecuperado']()).toBe(100);
     });
 
     it('avisa que las ventas por combo no se reparten solo si la cuenta tiene alguna', async () => {
       let card = await render(rentabilidadBase);
-      expect(card!.textContent).not.toContain('Las ventas por combo no se reparten por cuenta');
+      expect(card!.textContent).not.toContain('Aquí no se cuentan las ventas de combos');
 
       TestBed.resetTestingModule();
       card = await render({ ...rentabilidadBase, ventasCombo: 2 });
-      expect(card!.textContent).toContain('Las ventas por combo no se reparten por cuenta');
+      expect(card!.textContent).toContain('Aquí no se cuentan las ventas de combos');
     });
 
     it('en un servicio sin perfiles muestra el estado de la cuenta completa en vez de N/M perfiles', async () => {
@@ -295,7 +295,7 @@ describe('CuentaDetail', () => {
 
       expect(card!.textContent).not.toContain('Perfiles vendidos');
       expect(card!.textContent).toContain('Cuenta completa');
-      expect(card!.textContent).toContain('libre');
+      expect(card!.textContent).toContain('sin vender');
     });
 
     it('si la rentabilidad falla, no muestra la tarjeta pero el resto del detalle carga', async () => {

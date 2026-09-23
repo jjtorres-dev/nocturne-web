@@ -5,23 +5,30 @@
     <mat-form-field appearance="outline">
       <mat-label>Nombre</mat-label>
       <input matInput formControlName="nombre" />
+      <mat-hint>Ej.: Netflix, Disney+, Spotify</mat-hint>
       @if (form.controls.nombre.hasError('required')) {
         <mat-error>El nombre es obligatorio.</mat-error>
       }
     </mat-form-field>
 
     <mat-form-field appearance="outline">
-      <mat-label>Tipo</mat-label>
+      <mat-label>Cómo lo vendes</mat-label>
       <mat-select formControlName="tipo">
         @for (type of serviceTypes; track type) {
           <mat-option [value]="type">{{ typeLabels[type] }}</mat-option>
         }
       </mat-select>
+      <app-info-toggle matSuffix [for]="tipoInfo" />
     </mat-form-field>
+    <app-info-hint
+      #tipoInfo
+      texto="Por perfiles: vendes cada perfil a un cliente distinto. Plan familiar: vendes cada cupo del plan a un cliente distinto. Cuenta completa e IPTV: toda la cuenta es para un solo cliente."
+    />
 
     <mat-form-field appearance="outline">
-      <mat-label>Duración (meses)</mat-label>
+      <mat-label>Duración de cada venta (meses)</mat-label>
       <input matInput type="number" step="0.1" formControlName="duracionMeses" />
+      <app-info-toggle matSuffix [for]="duracionInfo" />
       @if (form.controls.duracionMeses.hasError('required')) {
         <mat-error>La duración es obligatoria.</mat-error>
       }
@@ -29,22 +36,50 @@
         <mat-error>Debe ser un número positivo.</mat-error>
       }
     </mat-form-field>
+    <app-info-hint
+      #duracionInfo
+      texto="Cuánto tiempo recibe tu cliente cuando le vendes. Ej.: 1 = un mes. Con este dato se calcula cuándo vence."
+    />
+
+    @if (usaPerfiles()) {
+      <mat-form-field appearance="outline">
+        <mat-label>{{ esFamiliar() ? 'Cupos del plan' : 'Perfiles por cuenta' }}</mat-label>
+        <input matInput type="number" step="1" formControlName="pantallasMax" />
+        <app-info-toggle matSuffix [for]="pantallasInfo" />
+        @if (form.controls.pantallasMax.hasError('required')) {
+          <mat-error>
+            {{ esFamiliar() ? 'Escribe cuántos cupos tiene el plan.' : 'Escribe cuántos perfiles tiene cada cuenta.' }}
+          </mat-error>
+        }
+        @if (form.controls.pantallasMax.hasError('min')) {
+          <mat-error>Debe ser al menos 1.</mat-error>
+        }
+      </mat-form-field>
+      <app-info-hint
+        #pantallasInfo
+        [texto]="
+          esFamiliar()
+            ? 'Cuántos cupos (miembros) tiene el plan familiar. Cada cupo se lo vendes a un cliente distinto.'
+            : 'Cuántos perfiles puedes vender de una sola cuenta. Cada perfil se lo vendes a un cliente distinto.'
+        "
+      />
+    }
 
     <mat-form-field appearance="outline">
-      <mat-label>Pantallas máx. (opcional)</mat-label>
-      <input matInput type="number" step="1" formControlName="pantallasMax" />
-    </mat-form-field>
-
-    <mat-form-field appearance="outline">
-      <mat-label>Precio base</mat-label>
+      <mat-label>{{ precioLabel() }}</mat-label>
       <input matInput type="number" step="0.01" formControlName="precioBase" />
+      <app-info-toggle matSuffix [for]="precioInfo" />
       @if (form.controls.precioBase.hasError('required')) {
-        <mat-error>El precio es obligatorio.</mat-error>
+        <mat-error>Escribe tu precio de venta.</mat-error>
       }
       @if (form.controls.precioBase.hasError('min')) {
         <mat-error>Debe ser un número positivo.</mat-error>
       }
     </mat-form-field>
+    <app-info-hint
+      #precioInfo
+      texto="Lo que cobras a tu cliente por un perfil (o por la cuenta, si la vendes completa). No es lo que pagas al proveedor: eso va en Cuentas."
+    />
 
     @if (errorMessage()) {
       <p class="error-message" role="alert">{{ errorMessage() }}</p>

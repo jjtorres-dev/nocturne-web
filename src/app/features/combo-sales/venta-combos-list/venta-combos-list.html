@@ -1,5 +1,5 @@
 <div class="page-header">
-  <h1>Ventas Combo</h1>
+  <h1>Ventas de combos</h1>
   <button mat-flat-button color="primary" (click)="openCreate()">
     <mat-icon>add</mat-icon>
     Nueva venta de combo
@@ -31,8 +31,8 @@
     <mat-label>Estado</mat-label>
     <mat-select [(ngModel)]="activoFilter" (selectionChange)="refresh()">
       <mat-option value="todos">Todos</mat-option>
-      <mat-option value="activos">Activos</mat-option>
-      <mat-option value="inactivos">Inactivos</mat-option>
+      <mat-option value="activos">Vigentes</mat-option>
+      <mat-option value="inactivos">Finalizadas</mat-option>
     </mat-select>
   </mat-form-field>
 </div>
@@ -62,17 +62,17 @@
       </ng-container>
 
       <ng-container matColumnDef="fechaInicio">
-        <th mat-header-cell *matHeaderCellDef>Inicio</th>
+        <th mat-header-cell *matHeaderCellDef>Desde</th>
         <td mat-cell *matCellDef="let v">{{ v.fechaInicio | date: 'dd/MM/yyyy' }}</td>
       </ng-container>
 
       <ng-container matColumnDef="fechaFin">
-        <th mat-header-cell *matHeaderCellDef>Fin</th>
+        <th mat-header-cell *matHeaderCellDef>Vence</th>
         <td mat-cell *matCellDef="let v">{{ v.fechaFin | date: 'dd/MM/yyyy' }}</td>
       </ng-container>
 
       <ng-container matColumnDef="precio">
-        <th mat-header-cell *matHeaderCellDef>Precio</th>
+        <th mat-header-cell *matHeaderCellDef>Cobrado</th>
         <td mat-cell *matCellDef="let v">
           {{ v.precioPEN | soles }}
           @if (v.moneda !== Moneda.PEN) {
@@ -90,7 +90,7 @@
         <th mat-header-cell *matHeaderCellDef>Estado</th>
         <td mat-cell *matCellDef="let v">
           <mat-chip [highlighted]="v.activo" [class.chip-inactive]="!v.activo">
-            {{ v.activo ? 'Activo' : 'Inactivo' }}
+            {{ v.activo ? 'Vigente' : 'Finalizada' }}
           </mat-chip>
         </td>
       </ng-container>
@@ -105,7 +105,7 @@
             <button mat-icon-button matTooltip="Renovar" (click)="confirmRenew(v)">
               <mat-icon>autorenew</mat-icon>
             </button>
-            <button mat-icon-button matTooltip="Desactivar" (click)="confirmDeactivate(v)">
+            <button mat-icon-button matTooltip="Finalizar venta" (click)="confirmDeactivate(v)">
               <mat-icon>block</mat-icon>
             </button>
           } @else {

@@ -155,9 +155,9 @@ describe('Accounting', () => {
     fixture.detectChanges();
 
     const text = fixture.nativeElement.textContent;
-    expect(text).toContain('Ingresos');
-    expect(text).toContain('Inversión');
-    expect(text).toContain('Gastos');
+    expect(text).toContain('Cobrado a clientes');
+    expect(text).toContain('Pagado a proveedores');
+    expect(text).toContain('Otros gastos');
     expect(text).toContain('Ganancia');
     expect(text).toContain('500.00');
     expect(text).toContain('200.00');
@@ -226,7 +226,7 @@ describe('Accounting', () => {
     expect(usuariosApi.list).toHaveBeenCalled();
     expect(component.usuarios()).toEqual([otroUsuario]);
     const text = fixture.nativeElement.textContent;
-    expect(text).toContain('Viendo');
+    expect(text).toContain('Ver números de');
     expect(text).toContain('Mi negocio');
     expect(fixture.nativeElement.querySelector('mat-select')).not.toBeNull();
   });
@@ -344,7 +344,7 @@ describe('Accounting', () => {
       const csv = await exportarViaBlob(() => component.exportByServiceCsv());
 
       expect(serviciosApi.list).toHaveBeenCalled();
-      expect(csv).toContain('Servicio;Inversión;Ingresos;Ganancia;Dueño');
+      expect(csv).toContain('Servicio;Pagado a proveedores;Cobrado;Ganancia (sin otros gastos);Dueño');
       expect(csv).toContain('Netflix;100.00;300.00;200.00;Otro Revendedor');
     });
 
@@ -355,7 +355,7 @@ describe('Accounting', () => {
       const csv = await exportarViaBlob(() => component.exportByServiceCsv());
 
       expect(serviciosApi.list).not.toHaveBeenCalled();
-      expect(csv).toContain('Servicio;Inversión;Ingresos;Ganancia');
+      expect(csv).toContain('Servicio;Pagado a proveedores;Cobrado;Ganancia (sin otros gastos)');
       expect(csv).not.toContain('Dueño');
     });
 
@@ -391,7 +391,7 @@ describe('Accounting', () => {
 
       const csv = await exportarViaBlob(() => component.exportByPaymentMethodCsv());
 
-      expect(csv).toContain('Método de Pago;Ingresos;Gastos;Neto');
+      expect(csv).toContain('Método de pago;Cobrado;Otros gastos;Te quedó');
       expect(csv).toContain('Yape;300.00;20.00;280.00');
       expect(csv).not.toContain('Dueño');
     });

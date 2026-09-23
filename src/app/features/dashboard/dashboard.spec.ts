@@ -100,9 +100,9 @@ describe('Dashboard', () => {
     expect(text).toContain('2');
     expect(text).toContain('5');
     expect(text).toContain('30');
-    expect(text).toContain('Vencidas');
-    expect(text).toContain('Por vencer');
-    expect(text).toContain('Al día');
+    expect(text).toContain('Ventas vencidas');
+    expect(text).toContain('Ventas por vencer');
+    expect(text).toContain('Ventas al día');
   });
 
   it('navega a /vencimientos con el estado correspondiente al hacer click', async () => {
@@ -190,12 +190,12 @@ describe('Dashboard', () => {
       expect(items[0].textContent).toContain('Netflix');
       expect(items[0].textContent).toContain('vencida@proveedor.com');
       expect(items[0].textContent).toContain('Venció hace 3 días');
-      expect(items[0].textContent).toContain('4 clientes activos');
+      expect(items[0].textContent).toContain('4 clientes la usan');
       expect(items[0].classList).toContain('vencida');
 
       expect(items[1].getAttribute('href')).toBe('/accounts/cta-pronto');
       expect(items[1].textContent).toContain('Vence en 2 días');
-      expect(items[1].textContent).toContain('1 cliente activo');
+      expect(items[1].textContent).toContain('1 cliente la usa');
       expect(items[1].classList).not.toContain('vencida');
     });
 

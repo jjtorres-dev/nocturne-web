@@ -45,27 +45,27 @@
       <span>{{ proveedor()?.nombre ?? '—' }}</span>
     </div>
     <div class="detail-row">
-      <span class="detail-label">Correo</span>
+      <span class="detail-label">Correo de la cuenta</span>
       <span>{{ c.correo }}</span>
     </div>
     <div class="detail-row">
-      <span class="detail-label">Clave del servicio</span>
-      <app-secret-value [value]="c.claveServicio" label="Clave del servicio" />
+      <span class="detail-label">Contraseña de la cuenta</span>
+      <app-secret-value [value]="c.claveServicio" label="Contraseña" mensajeCopiado="Contraseña copiada." />
     </div>
     <div class="detail-row">
-      <span class="detail-label">Clave del correo</span>
-      <app-secret-value [value]="c.claveCorreo" label="Clave del correo" />
+      <span class="detail-label">Contraseña del correo</span>
+      <app-secret-value [value]="c.claveCorreo" label="Contraseña" mensajeCopiado="Contraseña copiada." />
     </div>
     <div class="detail-row">
-      <span class="detail-label">Fecha de inicio</span>
+      <span class="detail-label">Fecha de compra</span>
       <span>{{ c.fechaInicio | date: 'dd/MM/yyyy' }}</span>
     </div>
     <div class="detail-row">
-      <span class="detail-label">Fecha de fin</span>
+      <span class="detail-label">Vence con el proveedor</span>
       <span>{{ c.fechaFin | date: 'dd/MM/yyyy' }}</span>
     </div>
     <div class="detail-row">
-      <span class="detail-label">Costo</span>
+      <span class="detail-label">Costo de la cuenta</span>
       <span>{{ c.costo | soles }}</span>
     </div>
     <div class="detail-row">
@@ -73,11 +73,11 @@
       <span>{{ c.metodoPago }}</span>
     </div>
     <div class="detail-row">
-      <span class="detail-label">URL</span>
+      <span class="detail-label">Enlace de acceso</span>
       <span>{{ c.url ?? '—' }}</span>
     </div>
     <div class="detail-row">
-      <span class="detail-label">Renovación automática</span>
+      <span class="detail-label">El proveedor la renueva solo</span>
       <span>{{ c.renovacionAutomatica ? 'Sí' : 'No' }}</span>
     </div>
     <div class="detail-row">
@@ -89,37 +89,37 @@
   </section>
 
   @if (rentabilidad(); as r) {
-    <section class="rentabilidad-card" aria-label="Rentabilidad de la cuenta">
-      <h2>Rentabilidad</h2>
+    <section class="rentabilidad-card" aria-label="Cuánto te deja esta cuenta">
+      <h2>¿Cuánto te deja esta cuenta?</h2>
       <div class="recuperado">
-        <span>Recuperado {{ r.ingresos | soles }} de {{ r.costo | soles }}</span>
+        <span>Cobraste {{ r.ingresos | soles }} de los {{ r.costo | soles }} que pagaste</span>
         <mat-progress-bar
           mode="determinate"
           [value]="porcentajeRecuperado()"
-          [attr.aria-label]="'Recuperado ' + porcentajeRecuperado().toFixed(0) + '% del costo'"
+          [attr.aria-label]="'Recuperaste el ' + porcentajeRecuperado().toFixed(0) + '% de lo que pagaste'"
         />
       </div>
       <div class="rentabilidad-stats">
         @if (r.usaPerfiles) {
           <span class="perfiles-vendidos">
-            Perfiles vendidos <strong>{{ r.perfilesVendidos }}/{{ r.perfilesTotal }}</strong>
+            Perfiles vendidos: <strong>{{ r.perfilesVendidos }} de {{ r.perfilesTotal }}</strong>
           </span>
         } @else {
           <span class="perfiles-vendidos">
-            Cuenta completa: <strong>{{ c.clienteId ? 'vendida' : 'libre' }}</strong>
+            Cuenta completa: <strong>{{ c.clienteId ? 'vendida' : 'sin vender' }}</strong>
           </span>
         }
-        <span class="potencial">Potencial {{ r.potencial | soles }}</span>
+        <span class="potencial">Si vendes todo: {{ r.potencial | soles }}</span>
       </div>
       @if (r.ganancia > 0) {
-        <p class="ganancia positiva">Ganancia {{ r.ganancia | soles }}</p>
+        <p class="ganancia positiva">Ya ganaste {{ r.ganancia | soles }}</p>
       } @else if (r.ganancia === 0) {
-        <p class="ganancia cubierto">Costo cubierto</p>
+        <p class="ganancia cubierto">Ya recuperaste lo que pagaste</p>
       } @else {
-        <p class="ganancia faltante">Faltan {{ -r.ganancia | soles }} para cubrir el costo</p>
+        <p class="ganancia faltante">Te faltan {{ -r.ganancia | soles }} para recuperar lo que pagaste</p>
       }
       @if (r.ventasCombo > 0) {
-        <p class="nota-combo">Las ventas por combo no se reparten por cuenta.</p>
+        <p class="nota-combo">Aquí no se cuentan las ventas de combos.</p>
       }
     </section>
   }
@@ -201,7 +201,7 @@
       </div>
 
       @if (perfiles().length === 0) {
-        <p class="empty-state">Esta cuenta todavía no tiene perfiles.</p>
+        <p class="empty-state">Esta cuenta todavía no tiene perfiles. Agrégalos para poder venderlos.</p>
       }
     }
   </section>

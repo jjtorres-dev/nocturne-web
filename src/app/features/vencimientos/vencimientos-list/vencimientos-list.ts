@@ -34,11 +34,15 @@ import { injectIsMobile } from '../../../shared/breakpoints';
 import { SolesPipe } from '../../../shared/soles.pipe';
 import { formatFechaCorta } from '../../../shared/fecha.util';
 import { EmptyState } from '../../../shared/empty-state/empty-state';
+import { InfoHint } from '../../../shared/info-hint/info-hint';
+import { InfoToggle } from '../../../shared/info-hint/info-toggle';
 
 const ESTADOS_VALIDOS = new Set<string>(Object.values(VencimientoFiltro));
 
 @Component({
   imports: [
+    InfoHint,
+    InfoToggle,
     EmptyState,
     FormsModule,
     RouterLink,
@@ -205,7 +209,7 @@ export class VencimientosList implements OnInit {
     const cliente = this.clientes().find((c) => c.id === venta.clienteId);
     const servicio = this.servicios().find((s) => s.id === venta.servicioId);
     if (!cliente || !servicio) {
-      this.snackBar.open('No se pudo armar el mensaje de WhatsApp.', 'Cerrar', {
+      this.snackBar.open('No se pudo preparar el mensaje de WhatsApp.', 'Cerrar', {
         duration: 4000,
       });
       return;
@@ -236,7 +240,7 @@ export class VencimientosList implements OnInit {
     ref.afterClosed().subscribe((result?: Venta) => {
       if (result) {
         this.snackBar.open(
-          `Venta renovada. Nueva fecha de fin: ${formatFechaCorta(result.fechaFin)}.`,
+          `Venta renovada. Ahora vence el ${formatFechaCorta(result.fechaFin)}.`,
           'Cerrar',
           { duration: 4000 },
         );

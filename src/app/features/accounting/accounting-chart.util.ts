@@ -10,7 +10,7 @@ export function buildTimelineChartData(
     labels: points.map((p) => p.periodo),
     datasets: [
       {
-        label: 'Ingresos',
+        label: 'Cobrado',
         data: points.map((p) => p.ingresos),
         backgroundColor: '#10b981', // --nc-accent-green
       },

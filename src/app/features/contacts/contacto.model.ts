@@ -7,9 +7,9 @@ export enum ContactType {
 }
 
 export const CONTACT_TYPE_LABELS: Record<ContactType, string> = {
-  [ContactType.CLIENTE_FINAL]: 'Cliente final',
+  [ContactType.CLIENTE_FINAL]: 'Cliente',
   [ContactType.PROVEEDOR]: 'Proveedor',
-  [ContactType.REVENDEDOR]: 'Revendedor',
+  [ContactType.REVENDEDOR]: 'Revendedor (te compra para revender)',
 };
 
 export interface Contacto {

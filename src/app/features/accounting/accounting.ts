@@ -37,6 +37,8 @@ import type { Usuario } from '../users/usuario.model';
 import { ServiciosApi } from '../services/servicios-api';
 import { exportToCsv, type CsvColumn } from '../../shared/csv-export';
 import { hoyIso } from '../../shared/fecha.util';
+import { InfoHint } from '../../shared/info-hint/info-hint';
+import { InfoToggle } from '../../shared/info-hint/info-toggle';
 
 // Sentinel para "sin filtro de dueño" en el backend (ver
 // AccountingService.VIEW_ALL en nocturne-api) — nunca un id real.
@@ -59,6 +61,8 @@ Chart.register(...registerables);
     MatButtonModule,
     MatIconModule,
     MatProgressSpinnerModule,
+    InfoHint,
+    InfoToggle,
   ],
   selector: 'app-accounting',
   styleUrl: './accounting.scss',
@@ -206,9 +210,9 @@ export class Accounting implements OnInit, AfterViewInit, OnDestroy {
   async exportByServiceCsv(): Promise<void> {
     const columns: CsvColumn<ServiceBreakdown>[] = [
       { header: 'Servicio', value: (r) => r.nombre },
-      { header: 'Inversión', value: (r) => r.inversion.toFixed(2) },
-      { header: 'Ingresos', value: (r) => r.ingresos.toFixed(2) },
-      { header: 'Ganancia', value: (r) => r.ganancia.toFixed(2) },
+      { header: 'Pagado a proveedores', value: (r) => r.inversion.toFixed(2) },
+      { header: 'Cobrado', value: (r) => r.ingresos.toFixed(2) },
+      { header: 'Ganancia (sin otros gastos)', value: (r) => r.ganancia.toFixed(2) },
     ];
 
     if (this.verTodoElNegocio()) {
@@ -237,10 +241,10 @@ export class Accounting implements OnInit, AfterViewInit, OnDestroy {
   // que nunca lleva columna Dueño.
   exportByPaymentMethodCsv(): void {
     const columns: CsvColumn<PaymentMethodBreakdown>[] = [
-      { header: 'Método de Pago', value: (r) => r.metodoPago },
-      { header: 'Ingresos', value: (r) => r.ingresos.toFixed(2) },
-      { header: 'Gastos', value: (r) => r.gastos.toFixed(2) },
-      { header: 'Neto', value: (r) => r.neto.toFixed(2) },
+      { header: 'Método de pago', value: (r) => r.metodoPago },
+      { header: 'Cobrado', value: (r) => r.ingresos.toFixed(2) },
+      { header: 'Otros gastos', value: (r) => r.gastos.toFixed(2) },
+      { header: 'Te quedó', value: (r) => r.neto.toFixed(2) },
     ];
     exportToCsv(
       `contabilidad-por-metodo-pago-${hoyIso()}.csv`,

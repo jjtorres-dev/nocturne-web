@@ -75,7 +75,7 @@ export class ContactoFormDialog {
       this.dialogRef.close(result);
     } catch (error) {
       this.formError.show(
-        extractErrorMessage(error, 'No se pudo guardar el contacto. Intenta de nuevo.'),
+        extractErrorMessage(error, 'No se pudo guardar el contacto. Inténtalo de nuevo.'),
       );
     } finally {
       this.saving.set(false);

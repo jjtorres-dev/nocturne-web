@@ -284,6 +284,6 @@ describe('GastoFormDialog', () => {
     });
     await component.submit();
 
-    expect(component.errorMessage()).toBe('No se pudo guardar el gasto. Intenta de nuevo.');
+    expect(component.errorMessage()).toBe('No se pudo guardar el gasto. Inténtalo de nuevo.');
   });
 });

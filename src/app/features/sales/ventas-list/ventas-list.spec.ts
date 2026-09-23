@@ -7,6 +7,7 @@ import { of } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { VentaEditDialog } from '../venta-edit-dialog/venta-edit-dialog';
 import { VentaRenewDialog } from '../../../shared/venta-renew-dialog/venta-renew-dialog';
+import { ConfirmDialog } from '../../../shared/confirm-dialog/confirm-dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { VentasList } from './ventas-list';
 import { VentasApi } from '../ventas-api';
@@ -323,7 +324,7 @@ describe('VentasList', () => {
     logSpy.mockRestore();
   });
 
-  it('el snackbar de "Venta creada" ofrece la acción "Copiar datos"', async () => {
+  it('el snackbar de "Venta creada" ofrece la acción "Copiar datos para el cliente"', async () => {
     await fixture.whenStable();
     const onAction = vi.fn().mockReturnValue({ subscribe: vi.fn() });
     snackBar.open.mockReturnValue({ onAction });
@@ -336,7 +337,7 @@ describe('VentasList', () => {
 
     expect(snackBar.open).toHaveBeenCalledWith(
       'Venta V-00009 creada.',
-      'Copiar datos',
+      'Copiar datos para el cliente',
       expect.anything(),
     );
     expect(onAction).toHaveBeenCalled();
@@ -474,12 +475,12 @@ describe('VentasList', () => {
       const csv = await exportar();
 
       expect(csv).toContain(
-        'Código;Cliente;Servicio;Cuenta (correo);Perfil;Fecha Inicio;Fecha Fin;' +
-          'Precio;Moneda;Método de Pago;Estado;Dueño',
+        'Código;Cliente;Servicio;Correo de la cuenta;Perfil;Desde;Vence;' +
+          'Cobrado;Moneda;Método de pago;Estado;Dueño',
       );
       expect(csv).toContain(
         'V-00001;Cliente Uno;Netflix;cuenta@correo.com;Perfil 1;01/01/2026;01/02/2026;' +
-          '15.00;PEN;Yape;Activo;Admin',
+          '15.00;PEN;Yape;Vigente;Admin',
       );
     });
 
@@ -494,8 +495,8 @@ describe('VentasList', () => {
       // BOM inicial (eso ya se verifica en csv-export.spec.ts sobre el
       // string crudo de buildCsv, antes de pasar por el Blob).
       expect(csv.split('\r\n')[0]).toBe(
-        'Código;Cliente;Servicio;Cuenta (correo);Perfil;Fecha Inicio;Fecha Fin;' +
-          'Precio;Moneda;Método de Pago;Estado',
+        'Código;Cliente;Servicio;Correo de la cuenta;Perfil;Desde;Vence;' +
+          'Cobrado;Moneda;Método de pago;Estado',
       );
       expect(csv).not.toContain('Admin');
     });
@@ -586,7 +587,7 @@ describe('VentasList', () => {
 
       const card = cards()[0];
       expect(card.querySelector('.nc-card-title')!.textContent).toContain('Cliente Uno');
-      expect(card.querySelector('mat-chip')!.textContent).toContain('Activo');
+      expect(card.querySelector('mat-chip')!.textContent).toContain('Vigente');
       const text = card.textContent!;
       expect(text).toContain('V-00001');
       expect(text).toContain('Netflix');
@@ -620,25 +621,25 @@ describe('VentasList', () => {
       expect(cards()[0].textContent).not.toContain('Dueño');
     });
 
-    it('una venta activa ofrece Editar, Renovar y Desactivar (no Reactivar)', async () => {
+    it('una venta vigente ofrece Editar, Renovar y Finalizar (no Reactivar)', async () => {
       await render(true);
 
       const card = cards()[0];
       expect(button(card, 'Editar')).toBeDefined();
       expect(button(card, 'Renovar')).toBeDefined();
-      expect(button(card, 'Desactivar')).toBeDefined();
+      expect(button(card, 'Finalizar')).toBeDefined();
       expect(button(card, 'Reactivar')).toBeUndefined();
     });
 
-    it('una venta inactiva ofrece Editar y Reactivar (no Renovar ni Desactivar)', async () => {
+    it('una venta finalizada ofrece Editar y Reactivar (no Renovar ni Finalizar)', async () => {
       await render(true, { ventas: [ventaInactiva] });
 
       const card = cards()[0];
-      expect(card.querySelector('mat-chip')!.textContent).toContain('Inactivo');
+      expect(card.querySelector('mat-chip')!.textContent).toContain('Finalizada');
       expect(button(card, 'Editar')).toBeDefined();
       expect(button(card, 'Reactivar')).toBeDefined();
       expect(button(card, 'Renovar')).toBeUndefined();
-      expect(button(card, 'Desactivar')).toBeUndefined();
+      expect(button(card, 'Finalizar')).toBeUndefined();
     });
 
     it('Editar abre el modal de edición con la venta', async () => {
@@ -665,22 +666,45 @@ describe('VentasList', () => {
       );
     });
 
-    it('Desactivar pide confirmación y desactiva la venta', async () => {
+    it('Finalizar pide confirmación y finaliza la venta', async () => {
       await render(true);
       dialog.open.mockReturnValue({ afterClosed: () => of(true) });
 
-      button(cards()[0], 'Desactivar')!.click();
+      button(cards()[0], 'Finalizar')!.click();
       await Promise.resolve();
       await Promise.resolve();
 
+      expect(dialog.open).toHaveBeenCalledWith(
+        ConfirmDialog,
+        expect.objectContaining({
+          data: expect.objectContaining({
+            title: 'Finalizar venta',
+            confirmLabel: 'Finalizar venta',
+            message: expect.stringContaining(
+              'El perfil queda libre para otro cliente. Lo que ya cobraste sigue contando en Contabilidad.',
+            ),
+          }),
+        }),
+      );
       expect(api.deactivate).toHaveBeenCalledWith('v-1');
     });
 
-    it('Desactivar no hace nada si se cancela la confirmación', async () => {
+    it('Finalizar una venta de cuenta completa avisa que queda libre la cuenta, no un perfil', async () => {
       await render(true);
       dialog.open.mockReturnValue({ afterClosed: () => of(false) });
 
-      button(cards()[0], 'Desactivar')!.click();
+      component.confirmDeactivate({ ...venta, perfilId: null });
+
+      const data = dialog.open.mock.calls[0][1].data;
+      expect(data.message).toContain('La cuenta queda libre para otro cliente.');
+      expect(data.message).not.toContain('El perfil');
+    });
+
+    it('Finalizar no hace nada si se cancela la confirmación', async () => {
+      await render(true);
+      dialog.open.mockReturnValue({ afterClosed: () => of(false) });
+
+      button(cards()[0], 'Finalizar')!.click();
       await Promise.resolve();
 
       expect(api.deactivate).not.toHaveBeenCalled();

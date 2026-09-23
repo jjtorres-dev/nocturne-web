@@ -115,7 +115,7 @@ export class UsuarioFormDialog {
       this.dialogRef.close(result);
     } catch (error) {
       this.formError.show(
-        extractErrorMessage(error, 'No se pudo guardar el usuario. Intenta de nuevo.'),
+        extractErrorMessage(error, 'No se pudo guardar el usuario. Inténtalo de nuevo.'),
       );
     } finally {
       this.saving.set(false);

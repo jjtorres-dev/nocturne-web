@@ -101,7 +101,7 @@ export class Dashboard implements OnInit {
   }
 
   clientesLabel(n: number): string {
-    return n === 1 ? '1 cliente activo' : `${n} clientes activos`;
+    return n === 1 ? '1 cliente la usa' : `${n} clientes la usan`;
   }
 
   private async load<T>(

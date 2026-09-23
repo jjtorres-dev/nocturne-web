@@ -13,7 +13,7 @@ describe('buildTimelineChartData', () => {
     expect(result.labels).toEqual(['2026-01-01', '2026-01-02']);
     expect(result.datasets).toHaveLength(3);
     expect(result.datasets[0]).toMatchObject({
-      label: 'Ingresos',
+      label: 'Cobrado',
       data: [100, 50],
     });
     expect(result.datasets[1]).toMatchObject({

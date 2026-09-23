@@ -78,12 +78,12 @@ describe('VentaRenewDialog', () => {
     expect(component.form.controls.metodoPago.value).toBe('');
   });
 
-  it('muestra la fecha de fin actual y "se extenderá N meses", sin calcular la nueva fecha', async () => {
+  it('muestra el vencimiento actual y "vencerá N meses después", sin calcular la nueva fecha', async () => {
     await setup();
 
     const texto: string = fixture.nativeElement.querySelector('.renew-info').textContent;
     expect(texto).toContain('01/02/2026');
-    expect(texto).toContain('Se extenderá 1 mes');
+    expect(texto.replace(/\s+/g, ' ')).toContain('vencerá 1 mes después');
     // Nada en el DOM del diálogo debería mostrar una fecha nueva calculada
     // (esa solo la sabe el backend, y se muestra en el snackbar del caller).
     expect(fixture.nativeElement.textContent).not.toContain('01/03/2026');

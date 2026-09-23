@@ -56,13 +56,13 @@ export class AdminLayout {
 
   // Se irán sumando secciones a medida que avancen las fases del roadmap.
   private readonly allNavItems: NavItem[] = [
-    { label: 'Dashboard', icon: 'dashboard', route: '/dashboard' },
+    { label: 'Inicio', icon: 'dashboard', route: '/dashboard' },
     { label: 'Servicios', icon: 'subscriptions', route: '/services' },
-    { label: 'Contactos', icon: 'contacts', route: '/contacts' },
+    { label: 'Clientes y proveedores', icon: 'contacts', route: '/contacts' },
     { label: 'Cuentas', icon: 'account_circle', route: '/accounts' },
     { label: 'Ventas', icon: 'point_of_sale', route: '/sales' },
     { label: 'Combos', icon: 'inventory_2', route: '/combos' },
-    { label: 'Ventas Combo', icon: 'shopping_cart', route: '/combo-sales' },
+    { label: 'Ventas de combos', icon: 'shopping_cart', route: '/combo-sales' },
     { label: 'Vencimientos', icon: 'event_busy', route: '/vencimientos' },
     { label: 'Gastos', icon: 'payments', route: '/expenses' },
     { label: 'Contabilidad', icon: 'account_balance', route: '/accounting' },

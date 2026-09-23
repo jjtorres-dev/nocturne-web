@@ -183,6 +183,6 @@ describe('UsuarioFormDialog', () => {
     });
     await component.submit();
 
-    expect(component.errorMessage()).toBe('No se pudo guardar el usuario. Intenta de nuevo.');
+    expect(component.errorMessage()).toBe('No se pudo guardar el usuario. Inténtalo de nuevo.');
   });
 });

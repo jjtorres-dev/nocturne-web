@@ -14,6 +14,7 @@
             <mat-option [value]="s.id">{{ s.nombre }}</mat-option>
           }
         </mat-select>
+        <mat-hint>¿De qué plataforma es esta cuenta?</mat-hint>
         @if (form.controls.servicioId.hasError('required')) {
           <mat-error>El servicio es obligatorio.</mat-error>
         }
@@ -27,21 +28,23 @@
             <mat-option [value]="p.id">{{ p.nombre }}</mat-option>
           }
         </mat-select>
+        <mat-hint>A quién le compraste la cuenta.</mat-hint>
       </mat-form-field>
 
       <mat-form-field appearance="outline">
-        <mat-label>Correo</mat-label>
+        <mat-label>Correo de la cuenta</mat-label>
         <input matInput type="email" formControlName="correo" />
+        <mat-hint>El correo con el que entras a la plataforma.</mat-hint>
         @if (form.controls.correo.hasError('required')) {
-          <mat-error>El correo es obligatorio.</mat-error>
+          <mat-error>Escribe el correo de la cuenta.</mat-error>
         }
         @if (form.controls.correo.hasError('email')) {
-          <mat-error>Correo inválido.</mat-error>
+          <mat-error>Ese correo no es válido.</mat-error>
         }
       </mat-form-field>
 
       <mat-form-field appearance="outline">
-        <mat-label>Clave del servicio (opcional)</mat-label>
+        <mat-label>Contraseña de la cuenta (opcional)</mat-label>
         <input
           matInput
           [type]="showClaveServicio() ? 'text' : 'password'"
@@ -52,19 +55,22 @@
           matSuffix
           type="button"
           (click)="toggleClaveServicio()"
-          [attr.aria-label]="showClaveServicio() ? 'Ocultar clave del servicio' : 'Mostrar clave del servicio'"
+          [attr.aria-label]="showClaveServicio() ? 'Ocultar contraseña de la cuenta' : 'Mostrar contraseña de la cuenta'"
         >
           <mat-icon>{{ showClaveServicio() ? 'visibility_off' : 'visibility' }}</mat-icon>
         </button>
+        <app-info-toggle matSuffix [for]="claveServicioInfo" />
         @if (isEdit) {
-          <mat-hint>Déjala vacía si no cambió.</mat-hint>
-        } @else {
-          <mat-hint>Déjala vacía si el proveedor solo te dio un código.</mat-hint>
+          <mat-hint>Déjala vacía para mantener la actual.</mat-hint>
         }
       </mat-form-field>
+      <app-info-hint
+        #claveServicioInfo
+        texto="La contraseña para entrar a Netflix, Disney+, etc. Es la que le pasas a tu cliente. Déjala vacía si el proveedor solo te dio un código."
+      />
 
       <mat-form-field appearance="outline">
-        <mat-label>Clave del correo (opcional)</mat-label>
+        <mat-label>Contraseña del correo (opcional)</mat-label>
         <input
           matInput
           [type]="showClaveCorreo() ? 'text' : 'password'"
@@ -75,55 +81,78 @@
           matSuffix
           type="button"
           (click)="toggleClaveCorreo()"
-          [attr.aria-label]="showClaveCorreo() ? 'Ocultar clave del correo' : 'Mostrar clave del correo'"
+          [attr.aria-label]="showClaveCorreo() ? 'Ocultar contraseña del correo' : 'Mostrar contraseña del correo'"
         >
           <mat-icon>{{ showClaveCorreo() ? 'visibility_off' : 'visibility' }}</mat-icon>
         </button>
+        <app-info-toggle matSuffix [for]="claveCorreoInfo" />
       </mat-form-field>
+      <app-info-hint
+        #claveCorreoInfo
+        texto="Para entrar al correo (Gmail, Outlook…) y recibir códigos de acceso. No se la pases a tu cliente."
+      />
 
       <mat-form-field appearance="outline">
-        <mat-label>Fecha de inicio</mat-label>
+        <mat-label>Fecha de compra</mat-label>
         <input matInput type="date" formControlName="fechaInicio" />
         @if (form.controls.fechaInicio.hasError('required')) {
-          <mat-error>La fecha de inicio es obligatoria.</mat-error>
+          <mat-error>La fecha de compra es obligatoria.</mat-error>
         }
       </mat-form-field>
 
       <mat-form-field appearance="outline">
-        <mat-label>Fecha de fin</mat-label>
+        <mat-label>Vence con el proveedor</mat-label>
         <input matInput type="date" formControlName="fechaFin" />
+        <app-info-toggle matSuffix [for]="fechaFinInfo" />
         @if (form.controls.fechaFin.hasError('required')) {
-          <mat-error>La fecha de fin es obligatoria.</mat-error>
+          <mat-error>La fecha de vencimiento es obligatoria.</mat-error>
         }
       </mat-form-field>
+      <app-info-hint
+        #fechaFinInfo
+        texto="Cuándo tienes que renovar o volver a pagar esta cuenta. Se calcula solo según el servicio."
+      />
 
       @if (form.hasError('fechaFinInvalida') && !form.controls.fechaFin.hasError('required') && !form.controls.fechaInicio.hasError('required')) {
-        <p class="error-message">La fecha de fin debe ser posterior a la fecha de inicio.</p>
+        <p class="error-message">El vencimiento tiene que ser después de la fecha de compra.</p>
       }
 
       <mat-form-field appearance="outline">
-        <mat-label>Costo</mat-label>
+        <mat-label>Costo de la cuenta</mat-label>
         <input matInput type="number" step="0.01" formControlName="costo" />
+        <app-info-toggle matSuffix [for]="costoInfo" />
         @if (form.controls.costo.hasError('required')) {
-          <mat-error>El costo es obligatorio.</mat-error>
+          <mat-error>Escribe cuánto pagaste por la cuenta.</mat-error>
         }
         @if (form.controls.costo.hasError('min')) {
           <mat-error>Debe ser un número positivo.</mat-error>
         }
       </mat-form-field>
+      <app-info-hint
+        #costoInfo
+        texto="Lo que pagaste al proveedor por la cuenta completa (no por perfil)."
+      />
 
-      <app-metodo-pago-select formControlName="metodoPago" />
+      <app-metodo-pago-select formControlName="metodoPago" hint="Con qué le pagaste al proveedor." />
 
       <mat-form-field appearance="outline">
-        <mat-label>URL (opcional)</mat-label>
+        <mat-label>Enlace de acceso (opcional)</mat-label>
         <input matInput formControlName="url" />
+        <mat-hint>Página para entrar, si el proveedor te dio una.</mat-hint>
       </mat-form-field>
 
-      <mat-checkbox formControlName="renovacionAutomatica">Renovación automática</mat-checkbox>
+      <div class="nc-checkbox-row">
+        <mat-checkbox formControlName="renovacionAutomatica">El proveedor la renueva solo</mat-checkbox>
+        <app-info-toggle [for]="renovacionInfo" />
+      </div>
+      <app-info-hint
+        #renovacionInfo
+        texto="Solo es un recordatorio: no paga ni renueva nada por ti."
+      />
 
       @if (crearPerfilesVisible()) {
         <mat-checkbox formControlName="crearPerfiles">
-          Crear {{ pantallasMaxDeServicioElegido() }} perfiles automáticamente
+          Crear los {{ pantallasMaxDeServicioElegido() }} perfiles de una vez (Perfil 1, Perfil 2…)
         </mat-checkbox>
       }
 

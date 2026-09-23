@@ -167,6 +167,13 @@ body {
   gap: 10px;
 }
 
+// Checkbox con su botón ⓘ (InfoToggle) al lado, en los formularios.
+.nc-checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
 // Diálogos: superficie elevada (no la misma que el fondo/sidebar) + borde
 // sutil, igual que las tarjetas.
 html {

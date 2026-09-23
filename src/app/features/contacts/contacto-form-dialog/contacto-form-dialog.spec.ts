@@ -56,6 +56,6 @@ describe('ContactoFormDialog', () => {
 
     await component.submit();
 
-    expect(component.errorMessage()).toBe('No se pudo guardar el contacto. Intenta de nuevo.');
+    expect(component.errorMessage()).toBe('No se pudo guardar el contacto. Inténtalo de nuevo.');
   });
 });

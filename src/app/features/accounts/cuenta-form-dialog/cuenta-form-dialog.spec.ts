@@ -467,9 +467,9 @@ describe('CuentaFormDialog', () => {
 
     await component.submit();
 
-    expect(component.errorMessage()).toBe('No se pudo guardar la cuenta. Intenta de nuevo.');
+    expect(component.errorMessage()).toBe('No se pudo guardar la cuenta. Inténtalo de nuevo.');
     expect(openSpy).toHaveBeenCalledWith(
-      'No se pudo guardar la cuenta. Intenta de nuevo.',
+      'No se pudo guardar la cuenta. Inténtalo de nuevo.',
       'Cerrar',
       expect.anything(),
     );

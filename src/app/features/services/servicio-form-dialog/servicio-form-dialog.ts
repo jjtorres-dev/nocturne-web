@@ -1,4 +1,5 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import {
   MAT_DIALOG_DATA,
@@ -14,9 +15,12 @@ import { ServiciosApi } from '../servicios-api';
 import {
   SERVICE_TYPE_LABELS,
   ServiceType,
+  usaPerfiles,
   type Servicio,
 } from '../servicio.model';
 import { extractErrorMessage, injectFormError } from '../../../shared/form-error';
+import { InfoHint } from '../../../shared/info-hint/info-hint';
+import { InfoToggle } from '../../../shared/info-hint/info-toggle';
 
 export interface ServicioFormDialogData {
   servicio?: Servicio;
@@ -31,6 +35,8 @@ export interface ServicioFormDialogData {
     MatSelectModule,
     MatButtonModule,
     MatProgressSpinnerModule,
+    InfoHint,
+    InfoToggle,
   ],
   selector: 'app-servicio-form-dialog',
   styleUrl: './servicio-form-dialog.scss',
@@ -59,12 +65,52 @@ export class ServicioFormDialog {
       this.data.servicio?.duracionMeses ?? 1,
       [Validators.required, Validators.min(0.1)],
     ],
+    // Validadores según el tipo: ver syncPantallasMax.
     pantallasMax: [this.data.servicio?.pantallasMax ?? null],
     precioBase: [
       this.data.servicio?.precioBase ?? 0,
       [Validators.required, Validators.min(0.01)],
     ],
   });
+
+  private readonly tipo = toSignal(this.form.controls.tipo.valueChanges, {
+    initialValue: this.form.controls.tipo.value,
+  });
+  protected readonly usaPerfiles = computed(() => usaPerfiles(this.tipo()));
+  protected readonly esFamiliar = computed(
+    () => this.tipo() === ServiceType.FAMILIAR,
+  );
+  protected readonly precioLabel = computed(() => {
+    switch (this.tipo()) {
+      case ServiceType.CON_PERFILES:
+        return 'Precio de venta por perfil';
+      case ServiceType.FAMILIAR:
+        return 'Precio de venta por cupo';
+      default:
+        return 'Precio de venta de la cuenta';
+    }
+  });
+
+  constructor() {
+    this.syncPantallasMax();
+    this.form.controls.tipo.valueChanges.subscribe(() => this.syncPantallasMax());
+  }
+
+  // "Perfiles por cuenta" (o cupos del plan) solo existe en los tipos que
+  // se venden por perfil, y ahí es obligatorio (sin él no se pueden crear
+  // los perfiles de la cuenta). En cuenta completa/IPTV el campo se oculta
+  // y se deshabilita para que no bloquee el form; submit manda null.
+  private syncPantallasMax(): void {
+    const control = this.form.controls.pantallasMax;
+    if (usaPerfiles(this.form.controls.tipo.value)) {
+      control.setValidators([Validators.required, Validators.min(1)]);
+      control.enable({ emitEvent: false });
+    } else {
+      control.clearValidators();
+      control.disable({ emitEvent: false });
+    }
+    control.updateValueAndValidity({ emitEvent: false });
+  }
 
   async submit(): Promise<void> {
     if (this.form.invalid || this.saving()) {
@@ -77,7 +123,7 @@ export class ServicioFormDialog {
     const raw = this.form.getRawValue();
     const payload = {
       ...raw,
-      pantallasMax: raw.pantallasMax || null,
+      pantallasMax: usaPerfiles(raw.tipo) ? raw.pantallasMax || null : null,
     };
 
     try {
@@ -87,7 +133,7 @@ export class ServicioFormDialog {
       this.dialogRef.close(result);
     } catch (error) {
       this.formError.show(
-        extractErrorMessage(error, 'No se pudo guardar el servicio. Intenta de nuevo.'),
+        extractErrorMessage(error, 'No se pudo guardar el servicio. Inténtalo de nuevo.'),
       );
     } finally {
       this.saving.set(false);

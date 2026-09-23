@@ -66,7 +66,7 @@ export class Login {
       await this.auth.login(email, password);
       await this.router.navigateByUrl('/dashboard');
     } catch {
-      this.errorMessage.set('Email o contraseña incorrectos.');
+      this.errorMessage.set('Correo o contraseña incorrectos.');
     } finally {
       this.loading.set(false);
     }

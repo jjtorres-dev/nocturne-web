@@ -18,7 +18,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { VentasApi } from '../ventas-api';
-import { Moneda, type Venta } from '../venta.model';
+import { MONEDA_LABELS, Moneda, type Venta } from '../venta.model';
 import { ServiciosApi } from '../../services/servicios-api';
 import { ServiceType, type Servicio } from '../../services/servicio.model';
 import { ContactosApi } from '../../contacts/contactos-api';
@@ -33,6 +33,8 @@ import { extractErrorMessage, injectFormError } from '../../../shared/form-error
 import { MetodoPagoSelect } from '../../../shared/metodo-pago/metodo-pago-select/metodo-pago-select';
 import { UltimoMetodoPago } from '../../../shared/metodo-pago/ultimo-metodo-pago';
 import { Auth } from '../../../core/auth/auth';
+import { InfoHint } from '../../../shared/info-hint/info-hint';
+import { InfoToggle } from '../../../shared/info-hint/info-toggle';
 
 // Sentinel para la opción "+ Nuevo cliente" del selector — nunca un id real.
 const NUEVO_CLIENTE = '__nuevo_cliente__';
@@ -50,6 +52,8 @@ function fechaFinPosteriorValidator(
 
 @Component({
   imports: [
+    InfoHint,
+    InfoToggle,
     ReactiveFormsModule,
     MatDialogModule,
     MatFormFieldModule,
@@ -79,6 +83,7 @@ export class VentaCreateDialog implements OnInit {
   );
 
   protected readonly monedas = Object.values(Moneda);
+  protected readonly monedaLabels = MONEDA_LABELS;
   protected readonly Moneda = Moneda;
   readonly NUEVO_CLIENTE = NUEVO_CLIENTE;
   private clienteIdPrevio = '';
@@ -280,13 +285,13 @@ export class VentaCreateDialog implements OnInit {
 
     if (this.requierePerfil()) {
       if (!raw.perfilId) {
-        this.formError.show('Selecciona un perfil para esta cuenta.');
+        this.formError.show('Elige qué perfil le vendes.');
         return;
       }
     } else {
       const cuenta = this.cuentas().find((c) => c.id === raw.cuentaId);
       if (cuenta?.clienteId) {
-        this.formError.show('Esta cuenta ya tiene un cliente asignado.');
+        this.formError.show('Esta cuenta ya se vendió completa a otro cliente.');
         return;
       }
     }
@@ -311,7 +316,7 @@ export class VentaCreateDialog implements OnInit {
       this.dialogRef.close(result);
     } catch (error) {
       this.formError.show(
-        extractErrorMessage(error, 'No se pudo crear la venta. Intenta de nuevo.'),
+        extractErrorMessage(error, 'No se pudo crear la venta. Inténtalo de nuevo.'),
       );
     } finally {
       this.saving.set(false);

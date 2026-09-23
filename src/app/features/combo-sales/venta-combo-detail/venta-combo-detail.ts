@@ -27,6 +27,7 @@ import {
   formatearDatosParaClienteCombo,
   type DatosParaCliente,
 } from '../../sales/copiar-datos.util';
+import { formatFechaCorta } from '../../../shared/fecha.util';
 
 @Component({
   imports: [
@@ -123,7 +124,7 @@ export class VentaComboDetail implements OnInit {
       data: {
         title: 'Renovar venta de combo',
         message:
-          '¿Renovar esta venta de combo? Se extenderá la fecha de fin de todas las cuentas/perfiles del combo.',
+          '¿Renovar esta venta de combo? Todos los servicios del combo pasarán a vencer 1 periodo después.',
         confirmLabel: 'Renovar',
       },
     });
@@ -141,9 +142,10 @@ export class VentaComboDetail implements OnInit {
     }
     const ref = this.dialog.open(ConfirmDialog, {
       data: {
-        title: 'Desactivar venta de combo',
-        message: `¿Desactivar la venta de combo "${ventaCombo.codigoVenta}"? Libera las cuentas/perfiles de todos los servicios del combo.`,
-        confirmLabel: 'Desactivar',
+        title: 'Finalizar venta de combo',
+        // Igual que en Ventas: los pagos del combo no se tocan.
+        message: `¿Finalizar la venta de combo ${ventaCombo.codigoVenta}? Los perfiles y cuentas del combo quedan libres para otro cliente. Lo que ya cobraste sigue contando en Contabilidad.`,
+        confirmLabel: 'Finalizar venta',
       },
     });
     ref.afterClosed().subscribe((confirmed) => {
@@ -161,7 +163,7 @@ export class VentaComboDetail implements OnInit {
     const ref = this.dialog.open(ConfirmDialog, {
       data: {
         title: 'Reactivar venta de combo',
-        message: `¿Reactivar la venta de combo "${ventaCombo.codigoVenta}"? Vuelve a ocupar las cuentas/perfiles de todos los servicios del combo.`,
+        message: `¿Reactivar la venta de combo ${ventaCombo.codigoVenta}? Vuelve a estar vigente y ocupa otra vez los perfiles y cuentas del combo.`,
         confirmLabel: 'Reactivar',
       },
     });
@@ -207,7 +209,7 @@ export class VentaComboDetail implements OnInit {
       );
       const mensaje = formatearDatosParaClienteCombo(items);
       await navigator.clipboard.writeText(mensaje);
-      this.snackBar.open('Datos copiados al portapapeles.', 'Cerrar', {
+      this.snackBar.open('Datos copiados. Ya puedes pegarlos en WhatsApp.', 'Cerrar', {
         duration: 3000,
       });
     } catch {
@@ -221,7 +223,7 @@ export class VentaComboDetail implements OnInit {
     try {
       const result = await this.api.renew(this.ventaComboId);
       this.snackBar.open(
-        `Venta de combo renovada. Nueva fecha de fin: ${result.fechaFin}.`,
+        `Venta de combo renovada. Ahora vence el ${formatFechaCorta(result.fechaFin)}.`,
         'Cerrar',
         { duration: 4000 },
       );
@@ -236,12 +238,12 @@ export class VentaComboDetail implements OnInit {
   private async deactivate(): Promise<void> {
     try {
       await this.api.deactivate(this.ventaComboId);
-      this.snackBar.open('Venta de combo desactivada.', 'Cerrar', {
+      this.snackBar.open('Venta de combo finalizada.', 'Cerrar', {
         duration: 3000,
       });
       void this.refresh();
     } catch {
-      this.snackBar.open('No se pudo desactivar la venta de combo.', 'Cerrar', {
+      this.snackBar.open('No se pudo finalizar la venta de combo.', 'Cerrar', {
         duration: 4000,
       });
     }

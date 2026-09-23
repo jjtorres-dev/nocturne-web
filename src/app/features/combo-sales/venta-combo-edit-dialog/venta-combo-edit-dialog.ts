@@ -13,11 +13,13 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { VentaCombosApi } from '../venta-combos-api';
 import { type VentaCombo } from '../venta-combo.model';
-import { Moneda } from '../../sales/venta.model';
+import { MONEDA_LABELS, Moneda } from '../../sales/venta.model';
 import { extractErrorMessage, injectFormError } from '../../../shared/form-error';
 import { MetodoPagoSelect } from '../../../shared/metodo-pago/metodo-pago-select/metodo-pago-select';
 import { UltimoMetodoPago } from '../../../shared/metodo-pago/ultimo-metodo-pago';
 import { Auth } from '../../../core/auth/auth';
+import { InfoHint } from '../../../shared/info-hint/info-hint';
+import { InfoToggle } from '../../../shared/info-hint/info-toggle';
 
 export interface VentaComboEditDialogData {
   ventaCombo: VentaCombo;
@@ -25,6 +27,8 @@ export interface VentaComboEditDialogData {
 
 @Component({
   imports: [
+    InfoHint,
+    InfoToggle,
     ReactiveFormsModule,
     MatDialogModule,
     MatFormFieldModule,
@@ -50,6 +54,7 @@ export class VentaComboEditDialog {
   protected readonly data = inject<VentaComboEditDialogData>(MAT_DIALOG_DATA);
 
   protected readonly monedas = Object.values(Moneda);
+  protected readonly monedaLabels = MONEDA_LABELS;
   protected readonly Moneda = Moneda;
 
   readonly saving = signal(false);
@@ -101,7 +106,7 @@ export class VentaComboEditDialog {
       this.dialogRef.close(result);
     } catch (error) {
       this.formError.show(
-        extractErrorMessage(error, 'No se pudo guardar la venta de combo. Intenta de nuevo.'),
+        extractErrorMessage(error, 'No se pudo guardar la venta de combo. Inténtalo de nuevo.'),
       );
     } finally {
       this.saving.set(false);

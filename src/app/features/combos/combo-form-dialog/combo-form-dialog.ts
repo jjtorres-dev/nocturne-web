@@ -125,7 +125,7 @@ export class ComboFormDialog implements OnInit {
       this.dialogRef.close(result);
     } catch (error) {
       this.formError.show(
-        extractErrorMessage(error, 'No se pudo guardar el combo. Intenta de nuevo.'),
+        extractErrorMessage(error, 'No se pudo guardar el combo. Inténtalo de nuevo.'),
       );
     } finally {
       this.saving.set(false);

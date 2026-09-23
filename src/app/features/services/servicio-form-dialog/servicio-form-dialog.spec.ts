@@ -8,11 +8,11 @@ import { ServiceType } from '../servicio.model';
 describe('ServicioFormDialog', () => {
   let fixture: ComponentFixture<ServicioFormDialog>;
   let component: ServicioFormDialog;
-  let api: { create: ReturnType<typeof vi.fn> };
+  let api: { create: ReturnType<typeof vi.fn>; update: ReturnType<typeof vi.fn> };
   let dialogRef: { close: ReturnType<typeof vi.fn> };
 
   beforeEach(async () => {
-    api = { create: vi.fn() };
+    api = { create: vi.fn(), update: vi.fn() };
     dialogRef = { close: vi.fn() };
 
     await TestBed.configureTestingModule({
@@ -39,7 +39,7 @@ describe('ServicioFormDialog', () => {
       nombre: 'Netflix',
       tipo: ServiceType.CON_PERFILES,
       duracionMeses: 1,
-      pantallasMax: null,
+      pantallasMax: 4,
       precioBase: 10,
     });
 
@@ -54,12 +54,81 @@ describe('ServicioFormDialog', () => {
       nombre: 'Netflix',
       tipo: ServiceType.CON_PERFILES,
       duracionMeses: 1,
-      pantallasMax: null,
+      pantallasMax: 4,
       precioBase: 10,
     });
 
     await component.submit();
 
-    expect(component.errorMessage()).toBe('No se pudo guardar el servicio. Intenta de nuevo.');
+    expect(component.errorMessage()).toBe('No se pudo guardar el servicio. Inténtalo de nuevo.');
+  });
+
+  function label(): string {
+    fixture.detectChanges();
+    return Array.from(fixture.nativeElement.querySelectorAll('mat-label'))
+      .map((el) => (el as HTMLElement).textContent?.trim())
+      .join('|');
+  }
+
+  it('"Por perfiles": muestra "Perfiles por cuenta" y lo exige', () => {
+    component.form.patchValue({ tipo: ServiceType.CON_PERFILES, pantallasMax: null });
+
+    expect(label()).toContain('Perfiles por cuenta');
+    expect(label()).toContain('Precio de venta por perfil');
+    expect(component.form.controls.pantallasMax.hasError('required')).toBe(true);
+    expect(component.form.invalid).toBe(true);
+  });
+
+  it('"Plan familiar": el campo pasa a ser "Cupos del plan" y también es obligatorio', () => {
+    component.form.patchValue({ tipo: ServiceType.FAMILIAR, pantallasMax: null });
+
+    expect(label()).toContain('Cupos del plan');
+    expect(label()).not.toContain('Perfiles por cuenta');
+    expect(label()).toContain('Precio de venta por cupo');
+    expect(component.form.controls.pantallasMax.hasError('required')).toBe(true);
+  });
+
+  it.each([ServiceType.SIN_PERFILES, ServiceType.IPTV])(
+    '%s: oculta el campo, no lo exige y manda pantallasMax vacío',
+    async (tipo) => {
+      api.create.mockResolvedValue({});
+      component.form.patchValue({
+        nombre: 'Servicio',
+        tipo,
+        duracionMeses: 1,
+        pantallasMax: 4,
+        precioBase: 10,
+      });
+
+      expect(label()).not.toContain('Perfiles por cuenta');
+      expect(label()).not.toContain('Cupos del plan');
+      expect(label()).toContain('Precio de venta de la cuenta');
+      expect(component.form.valid).toBe(true);
+
+      await component.submit();
+
+      expect(api.create).toHaveBeenCalledWith(
+        expect.objectContaining({ tipo, pantallasMax: null }),
+      );
+    },
+  );
+
+  it('el ícono ⓘ muestra y oculta la explicación del precio con un click', () => {
+    fixture.detectChanges();
+    const precioToggle = (): HTMLButtonElement =>
+      Array.from(
+        fixture.nativeElement.querySelectorAll('app-info-toggle button'),
+      ).at(-1) as HTMLButtonElement;
+
+    expect(fixture.nativeElement.textContent).not.toContain('No es lo que pagas al proveedor');
+
+    precioToggle().click();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('No es lo que pagas al proveedor');
+    expect(precioToggle().getAttribute('aria-expanded')).toBe('true');
+
+    precioToggle().click();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).not.toContain('No es lo que pagas al proveedor');
   });
 });

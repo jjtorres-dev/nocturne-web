@@ -33,7 +33,7 @@ export interface SearchCategory {
 export const SEARCH_CATEGORIES: SearchCategory[] = [
   {
     key: 'contactos',
-    label: 'Contactos',
+    label: 'Clientes y proveedores',
     icon: 'contacts',
     route: () => ['/contacts'],
   },
@@ -63,7 +63,7 @@ export const SEARCH_CATEGORIES: SearchCategory[] = [
   },
   {
     key: 'ventasCombo',
-    label: 'Ventas Combo',
+    label: 'Ventas de combos',
     icon: 'shopping_cart',
     route: (id) => ['/combo-sales', id],
   },

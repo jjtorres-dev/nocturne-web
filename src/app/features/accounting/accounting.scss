@@ -48,6 +48,9 @@
 }
 
 .summary-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
   color: var(--mat-sys-on-surface-variant);
 }
 
@@ -127,4 +130,16 @@
   color: var(--mat-sys-on-surface-variant);
   padding: 16px 0;
   text-align: center;
+}
+
+// Encabezado de tabla + botón ⓘ (InfoToggle).
+.th-with-info {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.summary-card app-info-hint {
+  align-self: stretch;
+  text-align: left;
 }
