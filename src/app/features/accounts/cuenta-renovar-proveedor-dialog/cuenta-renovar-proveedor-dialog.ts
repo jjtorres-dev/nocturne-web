@@ -25,7 +25,7 @@ import { extractErrorMessage, injectFormError } from '../../../shared/form-error
 import { MetodoPagoSelect } from '../../../shared/metodo-pago/metodo-pago-select/metodo-pago-select';
 import { InfoHint } from '../../../shared/info-hint/info-hint';
 import { InfoToggle } from '../../../shared/info-hint/info-toggle';
-import { formatFechaCorta, hoyIso, sumarMesesSinDesbordar } from '../../../shared/fecha.util';
+import { formatFechaCorta, hoyIso, sumarMeses } from '../../../shared/fecha.util';
 
 export interface CuentaRenovarProveedorDialogData {
   cuentaId: string;
@@ -101,7 +101,7 @@ export class CuentaRenovarProveedorDialog implements OnInit {
     ]),
     fechaPago: this.fb.nonNullable.control(hoyIso(), Validators.required),
     // + 1 mes, sin desbordar: 31/01 → 28/02 (no 03/03).
-    nuevaFechaFin: this.fb.nonNullable.control(sumarMesesSinDesbordar(this.data.fechaFin, 1), [
+    nuevaFechaFin: this.fb.nonNullable.control(sumarMeses(this.data.fechaFin, 1), [
       Validators.required,
       posteriorA(this.data.fechaFin),
     ]),
