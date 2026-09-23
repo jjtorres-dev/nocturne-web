@@ -144,6 +144,13 @@ describe('VentaCreateDialog', () => {
     dialog = fixture.debugElement.injector.get(MatDialog);
   }
 
+  // Timeout propio (15 s en vez de 5 s): es el primer test del archivo, así
+  // que paga el arranque en frío (TestBed + primer render del diálogo, ~300
+  // ms) y además abre un overlay real con MatSelectHarness (~200 ms en
+  // caliente). Solo tarda ~450 ms, pero con la suite completa corriendo en
+  // paralelo la contención de CPU llegó a pasar los 5 s una vez. Medido: con
+  // y sin animaciones de Material da lo mismo, y en main tardaba igual — no
+  // hay timers reales ni render de más que optimizar.
   it('el método de pago usa el selector reusable: elegir una opción fija guarda su etiqueta', async () => {
     await setup();
     await fixture.whenStable();
@@ -159,7 +166,7 @@ describe('VentaCreateDialog', () => {
     await select.clickOptions({ text: 'Zelle' });
 
     expect(component.form.controls.metodoPago.value).toBe('Zelle');
-  });
+  }, 15_000);
 
   it('carga servicios y solo clientes tipo CLIENTE_FINAL al iniciar', async () => {
     await setup();
