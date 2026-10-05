@@ -60,6 +60,7 @@ describe('VentasList', () => {
     url: null,
     renovacionAutomatica: false,
     activo: true,
+    fechaCaida: null,
     perfilesCount: 1,
     owner,
     createdAt: '',
@@ -893,6 +894,40 @@ describe('VentasList', () => {
 
       expect(filters()).toBeNull();
       expect(component.servicioFilter).toBe('srv-1');
+    });
+  });
+
+
+  describe('chip "Cuenta caída"', () => {
+    const caida: Venta = { ...venta, id: 'v-caida', cuentaCaida: true };
+    const sana: Venta = { ...venta, id: 'v-sana', cuentaCaida: false };
+    // Finalizada: el cliente ya no usa la cuenta, el chip no aplica.
+    const finalizada: Venta = { ...venta, id: 'v-fin', cuentaCaida: true, activo: false };
+
+    async function chipsPorFila(mobile: boolean): Promise<boolean[]> {
+      await setup(UserRole.ADMIN, { mobile });
+      api.list.mockResolvedValue([caida, sana, finalizada]);
+      await fixture.whenStable();
+      fixture.detectChanges();
+      await fixture.whenStable();
+      fixture.detectChanges();
+      const filas = fixture.nativeElement.querySelectorAll(
+        mobile ? 'mat-card.nc-card' : 'tr[mat-row]',
+      );
+      return Array.from<HTMLElement>(filas).map(
+        (fila) => fila.querySelector('app-cuenta-caida-chip') !== null,
+      );
+    }
+
+    it('en la tabla, solo en las ventas vigentes con la cuenta caída', async () => {
+      expect(await chipsPorFila(false)).toEqual([true, false, false]);
+      expect(fixture.nativeElement.querySelector('app-cuenta-caida-chip').textContent).toContain(
+        'Cuenta caída',
+      );
+    });
+
+    it('en las tarjetas de celular también', async () => {
+      expect(await chipsPorFila(true)).toEqual([true, false, false]);
     });
   });
 });

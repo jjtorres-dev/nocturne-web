@@ -160,3 +160,43 @@
   font-size: 0.875rem;
   margin: 0 0 8px;
 }
+
+// Aviso de cuenta caída: arriba de todo, en ámbar (mismo color que el chip
+// "Cuenta caída", ver .chip-caida en styles.scss).
+.caida-banner {
+  --nc-caida: #f59e0b;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  border: 1px solid var(--nc-caida);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--nc-caida) 12%, transparent);
+
+  > mat-icon {
+    color: var(--nc-caida);
+    flex-shrink: 0;
+  }
+}
+
+.caida-texto {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1 1 220px;
+  min-width: 0;
+}
+
+.caida-nota {
+  font-size: 0.8125rem;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.caida-acciones {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}

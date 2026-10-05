@@ -4,13 +4,16 @@ import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import type {
   Cuenta,
+  CuentaCaida,
   CuentaFilters,
   CuentaListItem,
   CuentaPayload,
   CuentaPorRenovar,
   CuentaRentabilidad,
+  CuentaRepuesta,
   PagoProveedor,
   RenovarProveedorPayload,
+  ReponerCuentaPayload,
 } from './cuenta.model';
 
 const BASE_URL = `${environment.apiUrl}/accounts`;
@@ -61,6 +64,32 @@ export class CuentasApi {
   renovarProveedor(id: string, payload: RenovarProveedorPayload): Promise<Cuenta> {
     return firstValueFrom(
       this.http.post<Cuenta>(`${BASE_URL}/${id}/renew-provider`, payload),
+    );
+  }
+
+  caidas(): Promise<CuentaCaida[]> {
+    return firstValueFrom(this.http.get<CuentaCaida[]>(`${BASE_URL}/caidas`));
+  }
+
+  // Marca la cuenta como caída desde ese día ('YYYY-MM-DD', no futuro).
+  marcarCaida(id: string, fechaCaida: string): Promise<Cuenta> {
+    return firstValueFrom(
+      this.http.post<Cuenta>(`${BASE_URL}/${id}/mark-down`, { fechaCaida }),
+    );
+  }
+
+  // Se marcó por error: quita la marca sin sumar días a nadie.
+  quitarMarcaCaida(id: string): Promise<Cuenta> {
+    return firstValueFrom(
+      this.http.post<Cuenta>(`${BASE_URL}/${id}/unmark-down`, {}),
+    );
+  }
+
+  // El proveedor repuso la cuenta: guarda las credenciales nuevas y les suma
+  // los días a sus clientes (atómico en el backend). No registra ningún pago.
+  reponer(id: string, payload: ReponerCuentaPayload): Promise<CuentaRepuesta> {
+    return firstValueFrom(
+      this.http.post<CuentaRepuesta>(`${BASE_URL}/${id}/restore`, payload),
     );
   }
 

@@ -89,6 +89,7 @@ describe('VentaComboDetail', () => {
   let component: VentaComboDetail;
   let api: {
     findOne: ReturnType<typeof vi.fn>;
+    ajustes: ReturnType<typeof vi.fn>;
     deactivate: ReturnType<typeof vi.fn>;
     reactivate: ReturnType<typeof vi.fn>;
     renew: ReturnType<typeof vi.fn>;
@@ -105,6 +106,7 @@ describe('VentaComboDetail', () => {
     TestBed.resetTestingModule();
     api = {
       findOne: vi.fn().mockResolvedValue(ventaCombo),
+      ajustes: vi.fn().mockResolvedValue([]),
       deactivate: vi.fn().mockResolvedValue({ ...ventaCombo, activo: false }),
       reactivate: vi.fn().mockResolvedValue({ ...ventaCombo, activo: true }),
       renew: vi.fn().mockResolvedValue({ ...ventaCombo, fechaFin: '2026-03-01' }),
@@ -312,5 +314,42 @@ describe('VentaComboDetail', () => {
       'Cerrar',
       expect.anything(),
     );
+  });
+
+  describe('cuenta caída e historial de ajustes', () => {
+    async function render(): Promise<HTMLElement> {
+      await setup();
+      await fixture.whenStable();
+      fixture.detectChanges();
+      await fixture.whenStable();
+      fixture.detectChanges();
+      return fixture.nativeElement as HTMLElement;
+    }
+
+    it('sin cuenta caída ni ajustes no muestra el chip ni el historial', async () => {
+      const el = await render();
+
+      expect(api.ajustes).toHaveBeenCalledWith(ventaCombo.id);
+      expect(el.querySelector('app-cuenta-caida-chip')).toBeNull();
+      expect(el.querySelector('app-ajustes-venta section')).toBeNull();
+    });
+
+    it('con una cuenta caída muestra el chip, y el historial "+N días por cuenta caída del DD/MM"', async () => {
+      await setup();
+      api.findOne.mockResolvedValue({ ...ventaCombo, cuentaCaida: true });
+      api.ajustes.mockResolvedValue([{ id: 'a-1', dias: 4, fechaCaida: '2026-02-10' }]);
+      await fixture.whenStable();
+      fixture.detectChanges();
+      await fixture.whenStable();
+      fixture.detectChanges();
+      const el = fixture.nativeElement as HTMLElement;
+
+      expect(el.querySelector('.details-card app-cuenta-caida-chip')?.textContent).toContain(
+        'Cuenta caída',
+      );
+      expect(el.querySelector('app-ajustes-venta li')?.textContent?.trim()).toBe(
+        '+4 días por cuenta caída del 10/02',
+      );
+    });
   });
 });

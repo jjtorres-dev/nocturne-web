@@ -78,3 +78,10 @@
   padding: 24px 0;
   text-align: center;
 }
+
+.estado-chips {
+  display: inline-flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 4px;
+}

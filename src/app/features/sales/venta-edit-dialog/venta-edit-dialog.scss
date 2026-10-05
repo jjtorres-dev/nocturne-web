@@ -11,3 +11,9 @@
   margin: 0 0 8px;
   font-size: 0.875rem;
 }
+
+// Historial de días sumados, pegado al campo "Vence" al que explica.
+.ajustes:not(:empty) {
+  display: block;
+  margin: 0 0 12px;
+}

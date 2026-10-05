@@ -1,6 +1,7 @@
 import {
   formatearDatosParaCliente,
   formatearDatosParaClienteCombo,
+  formatearDatosReposicion,
 } from './copiar-datos.util';
 
 describe('formatearDatosParaCliente', () => {
@@ -116,5 +117,48 @@ describe('formatearDatosParaClienteCombo', () => {
         'Vence: 15/03/2026',
       ].join('\n'),
     );
+  });
+});
+
+describe('formatearDatosReposicion', () => {
+  it('arma el aviso con el correo y la contraseña nuevos y los días sumados', () => {
+    expect(
+      formatearDatosReposicion({
+        servicioNombre: 'Netflix',
+        correo: 'nueva@correo.com',
+        claveServicio: 'clave-nueva',
+        diasCompensados: 5,
+      }),
+    ).toBe(
+      [
+        'Tu cuenta de Netflix cambió. Estos son los datos nuevos:',
+        'Correo: nueva@correo.com',
+        'Contraseña: clave-nueva',
+        'Te sumé 5 días por el tiempo que estuviste sin servicio.',
+      ].join('\n'),
+    );
+  });
+
+  it('omite la contraseña si no hay y los días si no se compensó nada; 1 día en singular', () => {
+    expect(
+      formatearDatosReposicion({
+        servicioNombre: 'IPTV',
+        correo: 'iptv@correo.com',
+        claveServicio: null,
+        diasCompensados: 0,
+      }),
+    ).toBe(
+      ['Tu cuenta de IPTV cambió. Estos son los datos nuevos:', 'Correo: iptv@correo.com'].join(
+        '\n',
+      ),
+    );
+    expect(
+      formatearDatosReposicion({
+        servicioNombre: 'IPTV',
+        correo: 'iptv@correo.com',
+        claveServicio: null,
+        diasCompensados: 1,
+      }),
+    ).toContain('Te sumé 1 día por');
   });
 });

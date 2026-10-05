@@ -1,0 +1,19 @@
+.form-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 320px;
+  padding-top: 4px;
+}
+
+.caida-info {
+  margin: 0 0 8px;
+  color: var(--nc-text-secondary);
+  font-size: 0.875rem;
+}
+
+.error-message {
+  color: var(--mat-sys-error);
+  margin: 0 0 8px;
+  font-size: 0.875rem;
+}

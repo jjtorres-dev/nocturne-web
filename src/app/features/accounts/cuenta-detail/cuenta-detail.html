@@ -21,6 +21,12 @@
         <mat-icon>edit</mat-icon>
         Editar
       </button>
+      @if (!c.fechaCaida) {
+        <button mat-stroked-button color="warn" (click)="openMarcarCaida()">
+          <mat-icon>report</mat-icon>
+          Marcar como caída
+        </button>
+      }
       @if (c.activo) {
         <button mat-stroked-button color="warn" (click)="confirmDeactivate()">
           <mat-icon>block</mat-icon>
@@ -34,6 +40,29 @@
       }
     </div>
   </div>
+
+  @if (avisoCaida(); as aviso) {
+    <section class="caida-banner" role="status" aria-label="Cuenta caída">
+      <mat-icon aria-hidden="true">report</mat-icon>
+      <div class="caida-texto">
+        <strong>Cuenta caída desde el {{ aviso.desde }}</strong>
+        <span>
+          {{ aviso.dias }}@if (aviso.clientes) { · {{ aviso.clientes }}}
+        </span>
+        <span class="caida-nota">
+          Sus ventas no aparecen para cobrar. Cuando el proveedor te dé la cuenta nueva, reponla
+          para sumarles a tus clientes los días sin servicio.
+        </span>
+      </div>
+      <div class="caida-acciones">
+        <button mat-button (click)="confirmQuitarMarcaCaida()">Quitar marca de caída</button>
+        <button mat-flat-button color="primary" (click)="openReponer()">
+          <mat-icon>published_with_changes</mat-icon>
+          Reponer cuenta
+        </button>
+      </div>
+    </section>
+  }
 
   <section class="details-card">
     @if (isAdmin()) {

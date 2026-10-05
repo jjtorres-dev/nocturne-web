@@ -16,6 +16,7 @@ import {
   PAGO_PROVEEDOR_TIPO_LABELS,
   type Cuenta,
   type CuentaRentabilidad,
+  type CuentaRepuesta,
   type PagoProveedor,
 } from '../cuenta.model';
 import { Moneda } from '../../sales/venta.model';
@@ -25,7 +26,15 @@ import { ContactosApi } from '../../contacts/contactos-api';
 import { type Contacto } from '../../contacts/contacto.model';
 import { CuentaFormDialog } from '../cuenta-form-dialog/cuenta-form-dialog';
 import { CuentaRenovarProveedorDialog } from '../cuenta-renovar-proveedor-dialog/cuenta-renovar-proveedor-dialog';
-import { formatFechaCorta } from '../../../shared/fecha.util';
+import { CuentaMarcarCaidaDialog } from '../cuenta-marcar-caida-dialog/cuenta-marcar-caida-dialog';
+import { CuentaReponerDialog } from '../cuenta-reponer-dialog/cuenta-reponer-dialog';
+import {
+  clientesTexto,
+  diasEntre,
+  diasTexto,
+  formatFechaCorta,
+  hoyIso,
+} from '../../../shared/fecha.util';
 import { ConfirmDialog } from '../../../shared/confirm-dialog/confirm-dialog';
 import { SecretValue } from '../../../shared/secret-value/secret-value';
 import { PerfilesApi } from '../profiles/perfiles-api';
@@ -88,6 +97,30 @@ export class CuentaDetail implements OnInit {
   protected readonly displayedPagoColumns = ['fecha', 'tipo', 'monto', 'metodoPago'];
   readonly loading = signal(false);
   readonly loadingPerfiles = signal(false);
+  // Solo con la cuenta caída: clientes con una venta vigente en ella (los
+  // que están sin servicio). null = no se pudo saber, el aviso no lo dice.
+  readonly clientesAfectados = signal<number | null>(null);
+
+  // Texto del aviso de cuenta caída: desde cuándo, cuántos días lleva y a
+  // cuántos clientes afecta.
+  protected readonly avisoCaida = computed(() => {
+    const fechaCaida = this.cuenta()?.fechaCaida;
+    if (!fechaCaida) {
+      return null;
+    }
+    const dias = Math.max(0, diasEntre(fechaCaida, hoyIso()));
+    const clientes = this.clientesAfectados();
+    return {
+      desde: formatFechaCorta(fechaCaida),
+      dias: dias === 0 ? 'Se cayó hoy' : `Lleva ${diasTexto(dias)} caída`,
+      clientes:
+        clientes === null
+          ? null
+          : clientes === 0
+            ? 'Ningún cliente sin servicio'
+            : `${clientesTexto(clientes)} sin servicio`,
+    };
+  });
 
   // % del costo ya recuperado con ventas, tope 100 (la barra no pasa del
   // total). Costo 0: no hay nada que recuperar, la barra va llena.
@@ -136,6 +169,24 @@ export class CuentaDetail implements OnInit {
     }
     void this.refreshPerfiles();
     void this.refreshPagosProveedor();
+    void this.refreshClientesAfectados();
+  }
+
+  // Si falla, el aviso de cuenta caída sale igual, sin la cantidad de
+  // clientes.
+  async refreshClientesAfectados(): Promise<void> {
+    if (!this.cuenta()?.fechaCaida) {
+      this.clientesAfectados.set(null);
+      return;
+    }
+    try {
+      const caidas = await this.api.caidas();
+      this.clientesAfectados.set(
+        caidas.find((c) => c.id === this.accountId)?.clientesAfectados ?? null,
+      );
+    } catch {
+      this.clientesAfectados.set(null);
+    }
   }
 
   protected pagoTipoLabel(pago: PagoProveedor): string {
@@ -216,6 +267,70 @@ export class CuentaDetail implements OnInit {
           { duration: 4000 },
         );
         void this.refresh();
+      }
+    });
+  }
+
+  openMarcarCaida(): void {
+    const cuenta = this.cuenta();
+    if (!cuenta) {
+      return;
+    }
+    const ref = this.dialog.open(CuentaMarcarCaidaDialog, {
+      data: {
+        cuentaId: cuenta.id,
+        correo: cuenta.correo,
+        servicioNombre: this.servicio()?.nombre ?? 'Cuenta',
+      },
+    });
+    ref.afterClosed().subscribe((result?: Cuenta) => {
+      if (result) {
+        this.snackBar.open('Cuenta marcada como caída.', 'Cerrar', {
+          duration: 3000,
+        });
+        void this.refresh();
+      }
+    });
+  }
+
+  // Al reponer cambian las credenciales, los perfiles y el aviso de arriba:
+  // se recarga todo el detalle. El resumen de lo que pasó lo muestra el
+  // propio diálogo antes de cerrarse.
+  openReponer(): void {
+    const cuenta = this.cuenta();
+    if (!cuenta?.fechaCaida) {
+      return;
+    }
+    const ref = this.dialog.open(CuentaReponerDialog, {
+      data: {
+        cuenta,
+        servicioNombre: this.servicio()?.nombre ?? 'Cuenta',
+        perfiles: this.perfiles().filter((p) => p.activo),
+        clientesAfectados: this.clientesAfectados(),
+      },
+    });
+    ref.afterClosed().subscribe((result?: CuentaRepuesta) => {
+      if (result) {
+        void this.refresh();
+      }
+    });
+  }
+
+  confirmQuitarMarcaCaida(): void {
+    const cuenta = this.cuenta();
+    if (!cuenta?.fechaCaida) {
+      return;
+    }
+    const ref = this.dialog.open(ConfirmDialog, {
+      data: {
+        title: 'Quitar marca de caída',
+        message: `¿Quitar la marca de caída de la cuenta "${cuenta.correo}"? No se le suman días a ningún cliente. Usa esto solo si la marcaste por error; si la cuenta se repuso, usa «Reponer cuenta».`,
+        confirmLabel: 'Quitar marca',
+      },
+    });
+    ref.afterClosed().subscribe((confirmed) => {
+      if (confirmed) {
+        void this.quitarMarcaCaida();
       }
     });
   }
@@ -339,6 +454,20 @@ export class CuentaDetail implements OnInit {
         void this.reactivatePerfil(perfil);
       }
     });
+  }
+
+  private async quitarMarcaCaida(): Promise<void> {
+    try {
+      await this.api.quitarMarcaCaida(this.accountId);
+      this.snackBar.open('Marca de caída quitada.', 'Cerrar', { duration: 3000 });
+      void this.refresh();
+    } catch {
+      this.snackBar.open(
+        'No se pudo quitar la marca de caída. Inténtalo de nuevo.',
+        'Cerrar',
+        { duration: 4000 },
+      );
+    }
   }
 
   private async deactivate(): Promise<void> {

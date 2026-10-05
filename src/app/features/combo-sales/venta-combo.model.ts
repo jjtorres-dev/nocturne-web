@@ -37,6 +37,8 @@ export interface VentaCombo {
   activo: boolean;
   // Solo presente en GET /combo-sales/:id, no en el listado.
   ventas?: VentaComboSaleItem[];
+  // true si alguno de sus servicios está en una cuenta caída.
+  cuentaCaida?: boolean;
   owner: Owner;
   createdAt: string;
   updatedAt: string;

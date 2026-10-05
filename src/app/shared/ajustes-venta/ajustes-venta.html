@@ -1,0 +1,10 @@
+@if (ajustes().length > 0) {
+  <section class="ajustes" aria-label="Días sumados al vencimiento">
+    <h3>Días sumados al vencimiento</h3>
+    <ul>
+      @for (a of ajustes(); track a.id) {
+        <li>{{ label(a) }}</li>
+      }
+    </ul>
+  </section>
+}

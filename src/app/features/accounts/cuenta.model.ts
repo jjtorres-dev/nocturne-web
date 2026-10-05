@@ -18,6 +18,8 @@ export interface Cuenta {
   url: string | null;
   renovacionAutomatica: boolean;
   activo: boolean;
+  // Desde qué día está caída ('YYYY-MM-DD'); null = funciona.
+  fechaCaida: string | null;
   owner: Owner;
   createdAt: string;
   updatedAt: string;
@@ -39,6 +41,7 @@ export interface CuentaListItem {
   url: string | null;
   renovacionAutomatica: boolean;
   activo: boolean;
+  fechaCaida: string | null;
   perfilesCount: number;
   owner: Owner;
   createdAt: string;
@@ -146,4 +149,50 @@ export interface RenovarProveedorPayload {
   metodoPago: string;
   fechaPago: string;
   nuevaFechaFin: string;
+}
+
+// GET /accounts/caidas: cuentas marcadas como caídas que el proveedor
+// todavía no repuso (la que lleva más días primero).
+export interface CuentaCaida {
+  id: string;
+  correo: string;
+  servicioId: string;
+  servicioNombre: string;
+  fechaCaida: string;
+  diasCaida: number;
+  // Clientes distintos con una venta vigente en la cuenta: los que hoy
+  // están sin servicio.
+  clientesAfectados: number;
+  // Solo llega para ADMIN.
+  ownerName?: string;
+}
+
+// POST /accounts/:id/restore. Lo que no se manda queda como estaba; un
+// `pin` en null borra el PIN del perfil.
+export interface ReponerCuentaPayload {
+  correo: string;
+  claveServicio?: string;
+  claveCorreo?: string;
+  perfiles?: { id: string; nombre?: string; pin?: string | null }[];
+  fechaReposicion: string;
+  diasCompensacion: number;
+}
+
+// Lo que hizo la reposición: a cuántas ventas, ventas de combo y clientes
+// se les sumaron los días.
+export interface CuentaCompensacion {
+  dias: number;
+  fechaCaida: string;
+  fechaReposicion: string;
+  ventas: number;
+  combos: number;
+  clientes: number;
+}
+
+export type CuentaRepuesta = Cuenta & { compensacion: CuentaCompensacion };
+
+// Cuentas que se pueden ofrecer para vender: una cuenta caída no se vende
+// hasta que el proveedor la reponga (el backend también lo rechaza con 400).
+export function cuentasVendibles<T extends { fechaCaida: string | null }>(cuentas: T[]): T[] {
+  return cuentas.filter((cuenta) => !cuenta.fechaCaida);
 }

@@ -1,0 +1,64 @@
+.form-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 320px;
+  padding-top: 4px;
+}
+
+.reponer-info {
+  margin: 0 0 8px;
+  color: var(--nc-text-secondary);
+  font-size: 0.875rem;
+}
+
+.perfiles {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0 0 12px;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+
+  legend {
+    padding: 0;
+    margin-bottom: 8px;
+    font-size: 0.75rem;
+    color: var(--mat-sys-on-surface-variant);
+  }
+}
+
+.perfil-row {
+  display: flex;
+  gap: 8px;
+
+  mat-form-field {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  .pin {
+    flex: 0 1 140px;
+  }
+}
+
+// Lo que va a pasar al guardar: tiene que leerse antes de tocar el botón.
+.resumen,
+.listo {
+  margin: 0 0 8px;
+  padding: 12px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--mat-sys-primary) 12%, transparent);
+  font-weight: 500;
+}
+
+.listo strong {
+  font-weight: 600;
+}
+
+.error-message {
+  color: var(--mat-sys-error);
+  margin: 0 0 8px;
+  font-size: 0.875rem;
+}

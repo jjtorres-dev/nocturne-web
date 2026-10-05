@@ -154,4 +154,47 @@ describe('CuentasApi', () => {
     req.flush([]);
     await promise;
   });
+
+
+  it('pide las cuentas caídas con GET /caidas', async () => {
+    const promise = api.caidas();
+    const req = httpMock.expectOne(`${baseUrl}/caidas`);
+    expect(req.request.method).toBe('GET');
+    req.flush([]);
+    await promise;
+  });
+
+  it('marca una cuenta como caída con POST /:id/mark-down', async () => {
+    const promise = api.marcarCaida('abc', '2026-09-20');
+    const req = httpMock.expectOne(`${baseUrl}/abc/mark-down`);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({ fechaCaida: '2026-09-20' });
+    req.flush({});
+    await promise;
+  });
+
+  it('repone una cuenta con POST /:id/restore', async () => {
+    const payload = {
+      correo: 'nueva@proveedor.com',
+      claveServicio: 'nueva',
+      perfiles: [{ id: 'p1', nombre: 'Sala', pin: null }],
+      fechaReposicion: '2026-09-25',
+      diasCompensacion: 5,
+    };
+    const promise = api.reponer('abc', payload);
+    const req = httpMock.expectOne(`${baseUrl}/abc/restore`);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual(payload);
+    req.flush({});
+    await promise;
+  });
+
+
+  it('quita la marca de caída con POST /:id/unmark-down', async () => {
+    const promise = api.quitarMarcaCaida('abc');
+    const req = httpMock.expectOne(`${baseUrl}/abc/unmark-down`);
+    expect(req.request.method).toBe('POST');
+    req.flush({});
+    await promise;
+  });
 });

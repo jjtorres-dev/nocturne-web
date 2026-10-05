@@ -24,11 +24,13 @@ import { Auth, UserRole } from '../../../core/auth/auth';
 import { EmptyState } from '../../../shared/empty-state/empty-state';
 import { formatFechaCorta } from '../../../shared/fecha.util';
 import { EstadoVentaChip } from '../../../shared/estado-venta/estado-venta';
+import { CuentaCaidaChip } from '../../../shared/cuenta-caida-chip/cuenta-caida-chip';
 
 type ActivoFilter = 'todos' | 'activos' | 'inactivos';
 
 @Component({
   imports: [
+    CuentaCaidaChip,
     EstadoVentaChip,
     EmptyState,
     FormsModule,

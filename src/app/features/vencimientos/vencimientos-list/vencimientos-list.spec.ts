@@ -54,6 +54,7 @@ describe('VencimientosList', () => {
     url: null,
     renovacionAutomatica: false,
     activo: true,
+    fechaCaida: null,
     perfilesCount: 0,
     owner,
     createdAt: '',
@@ -433,6 +434,64 @@ describe('VencimientosList', () => {
       await render({}, true, [venta, { ...venta, id: 'v-2' }, { ...venta, id: 'v-3' }]);
 
       expect(cards().length).toBe(3);
+    });
+  });
+
+
+  describe('ventas con la cuenta caída', () => {
+    const ventaCaida: Venta = { ...venta, id: 'v-caida', cuentaCaida: true };
+    const ventaSana: Venta = { ...venta, id: 'v-sana', cuentaCaida: false };
+
+    async function render(mobile: boolean): Promise<HTMLElement> {
+      await setup({}, { mobile });
+      api.list.mockResolvedValue([ventaCaida, ventaSana]);
+      await fixture.whenStable();
+      fixture.detectChanges();
+      await fixture.whenStable();
+      fixture.detectChanges();
+      return fixture.nativeElement as HTMLElement;
+    }
+
+    it('en la tabla: muestra el chip "Cuenta caída" y oculta WhatsApp y Renovar solo en esas ventas', async () => {
+      const el = await render(false);
+      const [filaCaida, filaSana] = Array.from(el.querySelectorAll('tr[mat-row]'));
+
+      expect(filaCaida.querySelector('app-cuenta-caida-chip')?.textContent).toContain('Cuenta caída');
+      expect(filaCaida.querySelector('button[mattooltip="Renovar"]')).toBeNull();
+      expect(
+        filaCaida.querySelector('button[mattooltip="Enviar recordatorio por WhatsApp"]'),
+      ).toBeNull();
+
+      expect(filaSana.querySelector('app-cuenta-caida-chip')).toBeNull();
+      expect(filaSana.querySelector('button[mattooltip="Renovar"]')).not.toBeNull();
+      expect(
+        filaSana.querySelector('button[mattooltip="Enviar recordatorio por WhatsApp"]'),
+      ).not.toBeNull();
+    });
+
+    it('en las tarjetas de celular: chip en vez de los botones de WhatsApp y Renovar', async () => {
+      const el = await render(true);
+      const [cardCaida, cardSana] = Array.from(el.querySelectorAll('mat-card.nc-card'));
+
+      expect(cardCaida.querySelector('app-cuenta-caida-chip')?.textContent).toContain('Cuenta caída');
+      expect(cardCaida.querySelector('.whatsapp-button')).toBeNull();
+      expect(cardCaida.textContent).not.toContain('Renovar');
+
+      expect(cardSana.querySelector('app-cuenta-caida-chip')).toBeNull();
+      expect(cardSana.querySelector('.whatsapp-button')).not.toBeNull();
+      expect(cardSana.textContent).toContain('Renovar');
+    });
+
+    it('abrirWhatsapp no abre nada para una venta con la cuenta caída', async () => {
+      await render(false);
+      const open = vi.spyOn(window, 'open').mockReturnValue(null);
+
+      component.abrirWhatsapp(ventaCaida);
+      expect(open).not.toHaveBeenCalled();
+
+      component.abrirWhatsapp(ventaSana);
+      expect(open).toHaveBeenCalledTimes(1);
+      open.mockRestore();
     });
   });
 });

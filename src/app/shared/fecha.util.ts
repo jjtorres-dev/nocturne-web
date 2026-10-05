@@ -42,3 +42,24 @@ export function formatFechaCorta(fechaIso: string): string {
   const [yyyy, mm, dd] = fechaIso.split('-');
   return `${dd}/${mm}/${yyyy}`;
 }
+
+// Días calendario entre dos fechas 'YYYY-MM-DD' (hasta - desde; negativo si
+// `hasta` es anterior). Misma cuenta que `daysBetween` en nocturne-api: en
+// UTC, para que un cambio de hora no corra el resultado.
+export function diasEntre(desdeIso: string, hastaIso: string): number {
+  const utc = (fechaIso: string) => {
+    const [anio, mes, dia] = fechaIso.slice(0, 10).split('-').map(Number);
+    return Date.UTC(anio, mes - 1, dia);
+  };
+  return Math.round((utc(hastaIso) - utc(desdeIso)) / 86_400_000);
+}
+
+// "1 día" / "5 días".
+export function diasTexto(dias: number): string {
+  return dias === 1 ? '1 día' : `${dias} días`;
+}
+
+// "1 cliente" / "5 clientes".
+export function clientesTexto(clientes: number): string {
+  return clientes === 1 ? '1 cliente' : `${clientes} clientes`;
+}

@@ -34,6 +34,7 @@ import { injectIsMobile } from '../../../shared/breakpoints';
 import { SolesPipe } from '../../../shared/soles.pipe';
 import { formatFechaCorta } from '../../../shared/fecha.util';
 import { EmptyState } from '../../../shared/empty-state/empty-state';
+import { CuentaCaidaChip } from '../../../shared/cuenta-caida-chip/cuenta-caida-chip';
 import { InfoHint } from '../../../shared/info-hint/info-hint';
 import { InfoToggle } from '../../../shared/info-hint/info-toggle';
 
@@ -41,6 +42,7 @@ const ESTADOS_VALIDOS = new Set<string>(Object.values(VencimientoFiltro));
 
 @Component({
   imports: [
+    CuentaCaidaChip,
     InfoHint,
     InfoToggle,
     EmptyState,
@@ -202,8 +204,15 @@ export class VencimientosList implements OnInit {
     return this.estado !== VencimientoFiltro.AL_DIA;
   }
 
+  // Con la cuenta caída el cliente está sin servicio: no se le cobra ni se
+  // le renueva hasta que el proveedor la reponga (ahí se le suman los días).
+  // En vez de WhatsApp y Renovar va el chip "Cuenta caída".
+  protected puedeCobrar(venta: Venta): boolean {
+    return this.mostrarWhatsapp() && !venta.cuentaCaida;
+  }
+
   abrirWhatsapp(venta: Venta): void {
-    if (this.estado === VencimientoFiltro.AL_DIA) {
+    if (this.estado === VencimientoFiltro.AL_DIA || venta.cuentaCaida) {
       return;
     }
     const cliente = this.clientes().find((c) => c.id === venta.clienteId);

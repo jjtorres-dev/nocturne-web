@@ -1,4 +1,11 @@
-import { formatFechaCorta, hoyIso, sumarMeses } from './fecha.util';
+import {
+  clientesTexto,
+  diasEntre,
+  diasTexto,
+  formatFechaCorta,
+  hoyIso,
+  sumarMeses,
+} from './fecha.util';
 
 describe('sumarMeses', () => {
   // Misma tabla que `addMonthsToDate` en nocturne-api (src/sales/
@@ -37,5 +44,26 @@ describe('hoyIso', () => {
 describe('formatFechaCorta', () => {
   it('convierte YYYY-MM-DD a DD/MM/YYYY', () => {
     expect(formatFechaCorta('2026-01-05')).toBe('05/01/2026');
+  });
+});
+
+describe('diasEntre', () => {
+  // Misma tabla que `daysBetween` en nocturne-api (sales/date.util.spec.ts).
+  it.each([
+    ['2026-10-01', '2026-10-01', 0],
+    ['2026-10-01', '2026-10-05', 4],
+    ['2026-02-27', '2026-03-02', 3],
+    ['2028-02-27', '2028-03-02', 4],
+    ['2026-12-30', '2027-01-02', 3],
+    ['2026-10-05', '2026-10-01', -4],
+  ])('de %s a %s = %i días', (desde, hasta, esperado) => {
+    expect(diasEntre(desde, hasta)).toBe(esperado);
+  });
+});
+
+describe('diasTexto y clientesTexto', () => {
+  it('usan singular solo con 1', () => {
+    expect([0, 1, 2].map(diasTexto)).toEqual(['0 días', '1 día', '2 días']);
+    expect([0, 1, 2].map(clientesTexto)).toEqual(['0 clientes', '1 cliente', '2 clientes']);
   });
 });

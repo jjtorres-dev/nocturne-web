@@ -24,7 +24,7 @@ import { ServiceType, type Servicio } from '../../services/servicio.model';
 import { ContactosApi } from '../../contacts/contactos-api';
 import { ContactType, type Contacto } from '../../contacts/contacto.model';
 import { CuentasApi } from '../../accounts/cuentas-api';
-import { type CuentaListItem } from '../../accounts/cuenta.model';
+import { cuentasVendibles, type CuentaListItem } from '../../accounts/cuenta.model';
 import { PerfilesApi } from '../../accounts/profiles/perfiles-api';
 import { type Perfil } from '../../accounts/profiles/perfil.model';
 import { ClienteQuickCreateDialog } from '../../../shared/cliente-quick-create-dialog/cliente-quick-create-dialog';
@@ -249,8 +249,9 @@ export class VentaCreateDialog implements OnInit {
 
     this.loadingCuentas.set(true);
     try {
+      // Sin las cuentas caídas: no se venden hasta que se repongan.
       this.cuentas.set(
-        await this.cuentasApi.list({ servicioId, activo: true }),
+        cuentasVendibles(await this.cuentasApi.list({ servicioId, activo: true })),
       );
     } finally {
       this.loadingCuentas.set(false);

@@ -10,7 +10,7 @@ import { provideRouter } from '@angular/router';
 import { DashboardApi } from './dashboard-api';
 import type { InventarioItem } from './inventario.model';
 import { CuentasApi } from '../accounts/cuentas-api';
-import type { CuentaPorRenovar } from '../accounts/cuenta.model';
+import type { CuentaCaida, CuentaPorRenovar } from '../accounts/cuenta.model';
 import { CuentaRenovarProveedorDialog } from '../accounts/cuenta-renovar-proveedor-dialog/cuenta-renovar-proveedor-dialog';
 import { AccountingApi } from '../accounting/accounting-api';
 import type { AccountingSummary } from '../accounting/accounting.model';
@@ -49,11 +49,35 @@ describe('Dashboard', () => {
     },
   ];
 
+  const caidas: CuentaCaida[] = [
+    {
+      id: 'cta-caida-1',
+      correo: 'caida1@proveedor.com',
+      servicioId: 's1',
+      servicioNombre: 'Netflix',
+      fechaCaida: '2026-09-17',
+      diasCaida: 6,
+      clientesAfectados: 3,
+    },
+    {
+      id: 'cta-caida-2',
+      correo: 'caida2@proveedor.com',
+      servicioId: 's2',
+      servicioNombre: 'Crunchyroll',
+      fechaCaida: '2026-09-22',
+      diasCaida: 1,
+      clientesAfectados: 1,
+    },
+  ];
+
   let component: Dashboard;
   let fixture: ComponentFixture<Dashboard>;
   let ventasApi: { summary: ReturnType<typeof vi.fn> };
   let dashboardApi: { inventario: ReturnType<typeof vi.fn> };
-  let cuentasApi: { porRenovar: ReturnType<typeof vi.fn> };
+  let cuentasApi: {
+    porRenovar: ReturnType<typeof vi.fn>;
+    caidas: ReturnType<typeof vi.fn>;
+  };
   let accountingApi: { summary: ReturnType<typeof vi.fn> };
   let dialog: { open: ReturnType<typeof vi.fn> };
   let snackBar: { open: ReturnType<typeof vi.fn> };
@@ -62,7 +86,10 @@ describe('Dashboard', () => {
   beforeEach(async () => {
     ventasApi = { summary: vi.fn().mockResolvedValue(summary) };
     dashboardApi = { inventario: vi.fn().mockResolvedValue(inventario) };
-    cuentasApi = { porRenovar: vi.fn().mockResolvedValue(porRenovar) };
+    cuentasApi = {
+      porRenovar: vi.fn().mockResolvedValue(porRenovar),
+      caidas: vi.fn().mockResolvedValue(caidas),
+    };
     accountingApi = { summary: vi.fn().mockResolvedValue(ganancia) };
     dialog = { open: vi.fn() };
     snackBar = { open: vi.fn() };
@@ -274,6 +301,58 @@ describe('Dashboard', () => {
       expect(component.diasLabel(5)).toBe('Vence en 5 días');
       expect(component.diasLabel(-1)).toBe('Venció ayer');
       expect(component.diasLabel(-4)).toBe('Venció hace 4 días');
+    });
+  });
+
+
+  describe('tarjeta "Cuentas caídas"', () => {
+    // Los días se cuentan contra la fecha local de hoy (22/09 de noche: en
+    // UTC ya es 23/09), no con el `diasCaida` del backend.
+    beforeEach(() => {
+      vi.useFakeTimers({ toFake: ['Date'] });
+      vi.setSystemTime(new Date(2026, 8, 22, 21, 0));
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it('muestra cuántos clientes están sin servicio y cada fila lleva al detalle de su cuenta', async () => {
+      const el = await render();
+      const card = el.querySelector('.caidas-card')!;
+
+      expect(cuentasApi.caidas).toHaveBeenCalled();
+      expect(card.textContent).toContain('Cuentas caídas');
+      expect(card.querySelector('.caidas-total')?.textContent).toContain('4 clientes sin servicio');
+
+      const filas = Array.from(card.querySelectorAll<HTMLAnchorElement>('a.caida-item'));
+      expect(filas.map((a) => a.getAttribute('href'))).toEqual([
+        '/accounts/cta-caida-1',
+        '/accounts/cta-caida-2',
+      ]);
+      expect(filas[0].textContent).toContain('caida1@proveedor.com');
+      expect(filas[0].textContent).toContain('Caída hace 5 días');
+      expect(filas[0].textContent).toContain('3 clientes sin servicio');
+      expect(filas[1].textContent).toContain('Se cayó hoy');
+      expect(filas[1].textContent).toContain('1 cliente sin servicio');
+    });
+
+    it('sin cuentas caídas lo dice, sin total', async () => {
+      cuentasApi.caidas.mockResolvedValue([]);
+      const card = (await render()).querySelector('.caidas-card')!;
+
+      expect(card.textContent).toContain('No tienes cuentas caídas.');
+      expect(card.querySelector('.caidas-total')).toBeNull();
+    });
+
+    it('si falla la carga muestra su propio error sin tapar las demás tarjetas', async () => {
+      cuentasApi.caidas.mockRejectedValue(new Error('500'));
+      const el = await render();
+
+      expect(el.querySelector('.caidas-card')!.textContent).toContain(
+        'No se pudieron cargar las cuentas caídas.',
+      );
+      expect(el.querySelector('.renovar-card')!.textContent).toContain('vencida@proveedor.com');
     });
   });
 });

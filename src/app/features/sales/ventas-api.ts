@@ -3,6 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import type {
+  AjusteVenta,
   CreateVentaPayload,
   RenewVentaPayload,
   SalesSummary,
@@ -44,6 +45,13 @@ export class VentasApi {
     }
     return firstValueFrom(
       this.http.get<SalesSummary>(`${BASE_URL}/summary`, { params }),
+    );
+  }
+
+  // De una venta que es parte de un combo devuelve los ajustes del combo.
+  ajustes(id: string): Promise<AjusteVenta[]> {
+    return firstValueFrom(
+      this.http.get<AjusteVenta[]>(`${BASE_URL}/${id}/adjustments`),
     );
   }
 

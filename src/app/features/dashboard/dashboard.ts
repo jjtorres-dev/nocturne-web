@@ -2,6 +2,7 @@ import {
   Component,
   OnInit,
   type WritableSignal,
+  computed,
   inject,
   signal,
 } from '@angular/core';
@@ -17,9 +18,15 @@ import { VencimientoFiltro, type SalesSummary } from '../sales/venta.model';
 import { DashboardApi } from './dashboard-api';
 import type { InventarioItem } from './inventario.model';
 import { CuentasApi } from '../accounts/cuentas-api';
-import type { Cuenta, CuentaPorRenovar } from '../accounts/cuenta.model';
+import type { Cuenta, CuentaCaida, CuentaPorRenovar } from '../accounts/cuenta.model';
 import { CuentaRenovarProveedorDialog } from '../accounts/cuenta-renovar-proveedor-dialog/cuenta-renovar-proveedor-dialog';
-import { formatFechaCorta } from '../../shared/fecha.util';
+import {
+  clientesTexto,
+  diasEntre,
+  diasTexto,
+  formatFechaCorta,
+  hoyIso,
+} from '../../shared/fecha.util';
 import { AccountingApi } from '../accounting/accounting-api';
 import type { AccountingSummary } from '../accounting/accounting.model';
 import { ServiceIcon } from '../../shared/service-icon/service-icon';
@@ -67,6 +74,16 @@ export class Dashboard implements OnInit {
   readonly ganancia = signal(initialState<AccountingSummary>());
   readonly inventario = signal(initialState<InventarioItem[]>());
   readonly porRenovar = signal(initialState<CuentaPorRenovar[]>());
+  readonly caidas = signal(initialState<CuentaCaida[]>());
+
+  // "3 clientes sin servicio": suma de los clientes de cada cuenta caída.
+  protected readonly clientesSinServicio = computed(() => {
+    const total = (this.caidas().data ?? []).reduce(
+      (suma, cuenta) => suma + cuenta.clientesAfectados,
+      0,
+    );
+    return `${clientesTexto(total)} sin servicio`;
+  });
 
   ngOnInit(): void {
     void this.refresh();
@@ -75,6 +92,7 @@ export class Dashboard implements OnInit {
     void this.load(this.ganancia, () => this.accountingApi.summary());
     void this.load(this.inventario, () => this.dashboardApi.inventario());
     void this.load(this.porRenovar, () => this.cuentasApi.porRenovar());
+    void this.load(this.caidas, () => this.cuentasApi.caidas());
   }
 
   async refresh(): Promise<void> {
@@ -129,6 +147,19 @@ export class Dashboard implements OnInit {
       return 'Vence hoy';
     }
     return dias === 1 ? 'Vence mañana' : `Vence en ${dias} días`;
+  }
+
+  // Con la fecha local de hoy, igual que el aviso del detalle y "Días a
+  // compensar" de Reponer cuenta: los tres tienen que decir el mismo número
+  // (el `diasCaida` del backend usa el reloj del servidor, que de noche en
+  // Perú ya va un día adelante).
+  diasCaidaLabel(fechaCaida: string): string {
+    const dias = Math.max(0, diasEntre(fechaCaida, hoyIso()));
+    return dias === 0 ? 'Se cayó hoy' : `Caída hace ${diasTexto(dias)}`;
+  }
+
+  clientesAfectadosLabel(n: number): string {
+    return n === 0 ? 'Sin clientes' : `${clientesTexto(n)} sin servicio`;
   }
 
   clientesLabel(n: number): string {

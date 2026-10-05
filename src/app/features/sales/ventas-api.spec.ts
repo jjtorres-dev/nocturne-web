@@ -142,4 +142,12 @@ describe('VentasApi', () => {
     req.flush({ vencidas: 0, porVencer: 0, alDia: 0 });
     await promise;
   });
+
+  it('pide el historial de ajustes con GET /:id/adjustments', async () => {
+    const promise = api.ajustes('abc');
+    const req = httpMock.expectOne(`${baseUrl}/abc/adjustments`);
+    expect(req.request.method).toBe('GET');
+    req.flush([]);
+    await promise;
+  });
 });

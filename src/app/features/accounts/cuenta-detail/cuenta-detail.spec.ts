@@ -13,6 +13,8 @@ import {
 } from '../cuenta.model';
 import { Moneda } from '../../sales/venta.model';
 import { CuentaRenovarProveedorDialog } from '../cuenta-renovar-proveedor-dialog/cuenta-renovar-proveedor-dialog';
+import { CuentaMarcarCaidaDialog } from '../cuenta-marcar-caida-dialog/cuenta-marcar-caida-dialog';
+import { CuentaReponerDialog } from '../cuenta-reponer-dialog/cuenta-reponer-dialog';
 import { ServiciosApi } from '../../services/servicios-api';
 import { ServiceType, type Servicio } from '../../services/servicio.model';
 import { ContactosApi } from '../../contacts/contactos-api';
@@ -38,6 +40,7 @@ describe('CuentaDetail', () => {
     url: null,
     renovacionAutomatica: false,
     activo: true,
+    fechaCaida: null,
     owner,
     createdAt: '',
     updatedAt: '',
@@ -122,6 +125,8 @@ describe('CuentaDetail', () => {
     findOne: ReturnType<typeof vi.fn>;
     rentabilidad: ReturnType<typeof vi.fn>;
     pagosProveedor: ReturnType<typeof vi.fn>;
+    caidas: ReturnType<typeof vi.fn>;
+    quitarMarcaCaida: ReturnType<typeof vi.fn>;
     deactivate: ReturnType<typeof vi.fn>;
     reactivate: ReturnType<typeof vi.fn>;
   };
@@ -141,10 +146,22 @@ describe('CuentaDetail', () => {
     api = {
       findOne: vi.fn().mockResolvedValue(cuentaActual),
       pagosProveedor: vi.fn().mockResolvedValue(pagos),
+      caidas: vi.fn().mockResolvedValue([
+        {
+          id: 'cta-1',
+          correo: cuenta.correo,
+          servicioId: 'srv-1',
+          servicioNombre: 'Netflix',
+          fechaCaida: '2026-01-10',
+          diasCaida: 5,
+          clientesAfectados: 3,
+        },
+      ]),
       rentabilidad:
         rentabilidad instanceof Error
           ? vi.fn().mockRejectedValue(rentabilidad)
           : vi.fn().mockResolvedValue(rentabilidad),
+      quitarMarcaCaida: vi.fn().mockResolvedValue({ ...cuenta, fechaCaida: null }),
       deactivate: vi.fn().mockResolvedValue({ ...cuenta, activo: false }),
       reactivate: vi.fn().mockResolvedValue({ ...cuenta, activo: true }),
     };
@@ -454,6 +471,163 @@ describe('CuentaDetail', () => {
       fixture.detectChanges();
 
       expect(botonRenovar()).toBeUndefined();
+    });
+  });
+
+
+  describe('cuenta caída', () => {
+    const cuentaCaida: Cuenta = { ...cuenta, fechaCaida: '2026-01-10' };
+
+    // Los días caída se cuentan contra la fecha local de hoy.
+    beforeEach(() => {
+      vi.useFakeTimers({ toFake: ['Date'] });
+      vi.setSystemTime(new Date(2026, 0, 15, 21, 0));
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    async function render(cuentaActual: Cuenta): Promise<HTMLElement> {
+      await setup([perfilActivo], UserRole.ADMIN, rentabilidadBase, cuentaActual);
+      await fixture.whenStable();
+      fixture.detectChanges();
+      await fixture.whenStable();
+      fixture.detectChanges();
+      return fixture.nativeElement as HTMLElement;
+    }
+
+    function boton(el: HTMLElement, texto: string): HTMLButtonElement | undefined {
+      return Array.from(el.querySelectorAll<HTMLButtonElement>('button')).find((b) =>
+        b.textContent?.includes(texto),
+      );
+    }
+
+    it('una cuenta que funciona muestra "Marcar como caída" y ningún aviso', async () => {
+      const el = await render(cuenta);
+
+      expect(el.querySelector('.caida-banner')).toBeNull();
+      expect(boton(el, 'Reponer cuenta')).toBeUndefined();
+      expect(api.caidas).not.toHaveBeenCalled();
+
+      dialog.open.mockReturnValue({ afterClosed: () => of(cuentaCaida) });
+      boton(el, 'Marcar como caída')!.click();
+
+      expect(dialog.open).toHaveBeenCalledWith(CuentaMarcarCaidaDialog, {
+        data: { cuentaId: 'cta-1', correo: 'cuenta@correo.com', servicioNombre: 'Netflix' },
+      });
+      expect(snackBar.open).toHaveBeenCalledWith(
+        'Cuenta marcada como caída.',
+        'Cerrar',
+        expect.anything(),
+      );
+      // Se recarga el detalle.
+      expect(api.findOne).toHaveBeenCalledTimes(2);
+    });
+
+    it('una cuenta caída muestra arriba desde cuándo, los días que lleva y los clientes afectados', async () => {
+      const el = await render(cuentaCaida);
+
+      const banner = el.querySelector('.caida-banner')!;
+      expect(banner.textContent).toContain('Cuenta caída desde el 10/01/2026');
+      expect(banner.textContent).toContain('Lleva 5 días caída');
+      expect(banner.textContent).toContain('3 clientes sin servicio');
+      // El aviso va antes que los datos de la cuenta.
+      expect(
+        banner.compareDocumentPosition(el.querySelector('.details-card')!) &
+          Node.DOCUMENT_POSITION_FOLLOWING,
+      ).toBeTruthy();
+      expect(boton(el, 'Marcar como caída')).toBeUndefined();
+    });
+
+    it('si no se pueden cargar los clientes afectados, el aviso sale igual sin esa parte', async () => {
+      await setup([perfilActivo], UserRole.ADMIN, rentabilidadBase, cuentaCaida);
+      api.caidas.mockRejectedValue(new Error('500'));
+      await fixture.whenStable();
+      fixture.detectChanges();
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      const banner = fixture.nativeElement.querySelector('.caida-banner');
+      expect(banner.textContent).toContain('Lleva 5 días caída');
+      expect(banner.textContent).not.toContain('clientes sin servicio');
+    });
+
+    it('"Reponer cuenta" abre el diálogo con la cuenta, sus perfiles activos y los clientes afectados, y al terminar recarga', async () => {
+      const inactivo: Perfil = { ...perfilActivo, id: 'p2', nombre: 'Perfil 2', activo: false };
+      await setup([perfilActivo, inactivo], UserRole.ADMIN, rentabilidadBase, cuentaCaida);
+      await fixture.whenStable();
+      fixture.detectChanges();
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      dialog.open.mockReturnValue({
+        afterClosed: () => of({ ...cuenta, compensacion: { dias: 5, clientes: 3 } }),
+      });
+      boton(fixture.nativeElement, 'Reponer cuenta')!.click();
+
+      expect(dialog.open).toHaveBeenCalledWith(CuentaReponerDialog, {
+        data: {
+          cuenta: cuentaCaida,
+          servicioNombre: 'Netflix',
+          perfiles: [perfilActivo],
+          clientesAfectados: 3,
+        },
+      });
+      expect(api.findOne).toHaveBeenCalledTimes(2);
+    });
+
+    it('"Quitar marca de caída" pide confirmación explicando cuándo usarlo; al confirmar quita la marca y recarga', async () => {
+      const el = await render(cuentaCaida);
+      dialog.open.mockReturnValue({ afterClosed: () => of(true) });
+
+      boton(el, 'Quitar marca de caída')!.click();
+      await fixture.whenStable();
+
+      const [, config] = dialog.open.mock.calls[0];
+      expect(config.data.title).toBe('Quitar marca de caída');
+      expect(config.data.message).toContain(
+        'Usa esto solo si la marcaste por error; si la cuenta se repuso, usa «Reponer cuenta».',
+      );
+      expect(api.quitarMarcaCaida).toHaveBeenCalledWith('cta-1');
+      expect(snackBar.open).toHaveBeenCalledWith(
+        'Marca de caída quitada.',
+        'Cerrar',
+        expect.anything(),
+      );
+      expect(api.findOne).toHaveBeenCalledTimes(2);
+    });
+
+    it('sin confirmar no quita la marca; si el backend falla, avisa y no recarga', async () => {
+      const el = await render(cuentaCaida);
+      dialog.open.mockReturnValue({ afterClosed: () => of(false) });
+      boton(el, 'Quitar marca de caída')!.click();
+      await fixture.whenStable();
+      expect(api.quitarMarcaCaida).not.toHaveBeenCalled();
+
+      api.quitarMarcaCaida.mockRejectedValue(new Error('500'));
+      dialog.open.mockReturnValue({ afterClosed: () => of(true) });
+      boton(el, 'Quitar marca de caída')!.click();
+      await fixture.whenStable();
+      expect(snackBar.open).toHaveBeenCalledWith(
+        'No se pudo quitar la marca de caída. Inténtalo de nuevo.',
+        'Cerrar',
+        expect.anything(),
+      );
+      expect(api.findOne).toHaveBeenCalledTimes(1);
+    });
+
+    it('una cuenta que funciona no ofrece "Quitar marca de caída"', async () => {
+      expect(boton(await render(cuenta), 'Quitar marca de caída')).toBeUndefined();
+    });
+
+    it('cancelar "Reponer cuenta" no recarga nada', async () => {
+      const el = await render(cuentaCaida);
+      dialog.open.mockReturnValue({ afterClosed: () => of(undefined) });
+
+      boton(el, 'Reponer cuenta')!.click();
+
+      expect(api.findOne).toHaveBeenCalledTimes(1);
     });
   });
 });

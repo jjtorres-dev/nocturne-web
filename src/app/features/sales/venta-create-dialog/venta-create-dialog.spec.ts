@@ -62,6 +62,7 @@ describe('VentaCreateDialog', () => {
     url: null,
     renovacionAutomatica: false,
     activo: true,
+    fechaCaida: null,
     perfilesCount: 0,
     owner,
     createdAt: '',
@@ -603,5 +604,19 @@ describe('VentaCreateDialog', () => {
       expect(dialogRef.close).toHaveBeenCalled();
       expect(openSpy).not.toHaveBeenCalled();
     });
+  });
+
+
+  it('no ofrece las cuentas caídas del servicio', async () => {
+    await setup();
+    cuentasApi.list.mockResolvedValue([
+      cuenta,
+      { ...cuenta, id: 'cta-caida', correo: 'caida@correo.com', fechaCaida: '2026-01-10' },
+    ]);
+    await fixture.whenStable();
+
+    await component.onServicioChange('srv-1');
+
+    expect(component.cuentas().map((c) => c.id)).toEqual(['cta-1']);
   });
 });

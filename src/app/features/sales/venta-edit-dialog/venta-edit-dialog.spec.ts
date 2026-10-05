@@ -35,13 +35,16 @@ describe('VentaEditDialog', () => {
 
   let fixture: ComponentFixture<VentaEditDialog>;
   let component: VentaEditDialog;
-  let api: { update: ReturnType<typeof vi.fn> };
+  let api: { update: ReturnType<typeof vi.fn>; ajustes: ReturnType<typeof vi.fn> };
   let dialogRef: { close: ReturnType<typeof vi.fn> };
   let auth: { currentUser: ReturnType<typeof vi.fn> };
   let ultimoMetodoPago: { get: ReturnType<typeof vi.fn>; set: ReturnType<typeof vi.fn> };
 
   beforeEach(async () => {
-    api = { update: vi.fn().mockResolvedValue({ ...venta, precio: 20 }) };
+    api = {
+      update: vi.fn().mockResolvedValue({ ...venta, precio: 20 }),
+      ajustes: vi.fn().mockResolvedValue([]),
+    };
     dialogRef = { close: vi.fn() };
     auth = { currentUser: vi.fn().mockReturnValue({ id: 'admin-0', role: UserRole.ADMIN }) };
     ultimoMetodoPago = { get: vi.fn().mockReturnValue(null), set: vi.fn() };
@@ -166,5 +169,44 @@ describe('VentaEditDialog', () => {
     await component.submit();
 
     expect(component.errorMessage()).toBe('No se pudo guardar la venta. Inténtalo de nuevo.');
+  });
+
+
+  describe('historial de ajustes', () => {
+    it('sin ajustes no muestra la sección', async () => {
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      expect(api.ajustes).toHaveBeenCalledWith('v-1');
+      expect(fixture.nativeElement.querySelector('app-ajustes-venta section')).toBeNull();
+    });
+
+    it('muestra "+N días por cuenta caída del DD/MM" por cada ajuste', async () => {
+      api.ajustes.mockResolvedValue([
+        { id: 'a-2', dias: 1, fechaCaida: '2026-03-02' },
+        { id: 'a-1', dias: 5, fechaCaida: '2026-01-10' },
+      ]);
+      await component.ngOnInit();
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      const items = Array.from<HTMLElement>(
+        fixture.nativeElement.querySelectorAll('app-ajustes-venta li'),
+      ).map((li) => li.textContent?.trim());
+      expect(items).toEqual([
+        '+1 día por cuenta caída del 02/03',
+        '+5 días por cuenta caída del 10/01',
+      ]);
+    });
+
+    it('si falla la carga, el formulario sigue funcionando sin la sección', async () => {
+      api.ajustes.mockRejectedValue(new Error('500'));
+      await component.ngOnInit();
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      expect(fixture.nativeElement.querySelector('app-ajustes-venta section')).toBeNull();
+      expect(component.form.valid).toBe(true);
+    });
   });
 });

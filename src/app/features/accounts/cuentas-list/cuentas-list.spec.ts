@@ -48,6 +48,7 @@ describe('CuentasList', () => {
     url: null,
     renovacionAutomatica: false,
     activo: true,
+    fechaCaida: null,
     perfilesCount: 2,
     owner,
     createdAt: '',

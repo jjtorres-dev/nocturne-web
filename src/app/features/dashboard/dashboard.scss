@@ -109,7 +109,8 @@
 }
 
 .inventario-list,
-.renovar-list {
+.renovar-list,
+.caida-list {
   list-style: none;
   margin: 0;
   padding: 0;
@@ -147,7 +148,8 @@
   }
 }
 
-.renovar-row {
+.renovar-row,
+.caida-row {
   display: flex;
   flex-direction: column;
   align-items: stretch;
@@ -157,7 +159,8 @@
   align-self: flex-end;
 }
 
-.renovar-item {
+.renovar-item,
+.caida-item {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -177,14 +180,16 @@
   }
 }
 
-.renovar-info {
+.renovar-info,
+.caida-info {
   display: flex;
   flex-direction: column;
   flex: 1;
   min-width: 0;
 }
 
-.renovar-correo {
+.renovar-correo,
+.caida-correo {
   font-size: 0.8125rem;
   color: var(--mat-sys-on-surface-variant);
   overflow: hidden;
@@ -192,7 +197,8 @@
   white-space: nowrap;
 }
 
-.renovar-meta {
+.renovar-meta,
+.caida-meta {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
@@ -205,6 +211,20 @@
   color: #b8860b;
 }
 
-.renovar-clientes {
+.renovar-clientes,
+.caida-clientes {
   color: var(--mat-sys-on-surface-variant);
+}
+
+// Tarjeta "Cuentas caídas": mismas filas que "Cuentas que debes pagar al
+// proveedor", con el total de clientes sin servicio arriba. Ámbar, el del
+// chip "Cuenta caída" (ver .chip-caida en styles.scss).
+.caidas-total,
+.caida-dias {
+  font-weight: 600;
+  color: #f59e0b;
+}
+
+.caidas-total {
+  font-size: 1.25rem;
 }

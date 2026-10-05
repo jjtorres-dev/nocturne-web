@@ -10,7 +10,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { VentaCombosApi } from '../venta-combos-api';
 import { type VentaCombo } from '../venta-combo.model';
-import { Moneda } from '../../sales/venta.model';
+import { Moneda, type AjusteVenta } from '../../sales/venta.model';
 import { CombosApi } from '../../combos/combos-api';
 import { type Combo } from '../../combos/combo.model';
 import { ContactosApi } from '../../contacts/contactos-api';
@@ -28,9 +28,13 @@ import {
 } from '../../sales/copiar-datos.util';
 import { formatFechaCorta } from '../../../shared/fecha.util';
 import { EstadoVentaChip } from '../../../shared/estado-venta/estado-venta';
+import { CuentaCaidaChip } from '../../../shared/cuenta-caida-chip/cuenta-caida-chip';
+import { AjustesVenta } from '../../../shared/ajustes-venta/ajustes-venta';
 
 @Component({
   imports: [
+    AjustesVenta,
+    CuentaCaidaChip,
     EstadoVentaChip,
     ServiceIconStack,
     DatePipe,
@@ -73,6 +77,9 @@ export class VentaComboDetail implements OnInit {
   readonly combo = signal<Combo | null>(null);
   readonly cliente = signal<Contacto | null>(null);
   readonly loading = signal(false);
+  // Días sumados al vencimiento por cuentas caídas. Si falla la carga, la
+  // sección simplemente no se muestra.
+  readonly ajustes = signal<AjusteVenta[]>([]);
 
   private ventaComboId = '';
 
@@ -100,6 +107,15 @@ export class VentaComboDetail implements OnInit {
       });
     } finally {
       this.loading.set(false);
+    }
+    void this.refreshAjustes();
+  }
+
+  async refreshAjustes(): Promise<void> {
+    try {
+      this.ajustes.set(await this.api.ajustes(this.ventaComboId));
+    } catch {
+      this.ajustes.set([]);
     }
   }
 

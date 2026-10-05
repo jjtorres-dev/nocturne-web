@@ -2,6 +2,7 @@ import { Service, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import type { AjusteVenta } from '../sales/venta.model';
 import type {
   CreateVentaComboPayload,
   UpdateVentaComboPayload,
@@ -27,6 +28,12 @@ export class VentaCombosApi {
       params = params.set('activo', String(filters.activo));
     }
     return firstValueFrom(this.http.get<VentaCombo[]>(BASE_URL, { params }));
+  }
+
+  ajustes(id: string): Promise<AjusteVenta[]> {
+    return firstValueFrom(
+      this.http.get<AjusteVenta[]>(`${BASE_URL}/${id}/adjustments`),
+    );
   }
 
   findOne(id: string): Promise<VentaCombo> {

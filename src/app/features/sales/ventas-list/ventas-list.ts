@@ -35,12 +35,14 @@ import { Auth, UserRole } from '../../../core/auth/auth';
 import { EmptyState } from '../../../shared/empty-state/empty-state';
 import { formatearDatosParaCliente } from '../copiar-datos.util';
 import { EstadoVentaChip } from '../../../shared/estado-venta/estado-venta';
+import { CuentaCaidaChip } from '../../../shared/cuenta-caida-chip/cuenta-caida-chip';
 import { ESTADO_VENTA_LABELS, estadoVenta } from '../../../shared/estado-venta/estado-venta.util';
 
 type ActivoFilter = 'todos' | 'activos' | 'inactivos';
 
 @Component({
   imports: [
+    CuentaCaidaChip,
     EstadoVentaChip,
     EmptyState,
     FormsModule,

@@ -202,6 +202,16 @@ html {
   --mat-chip-elevated-container-color: color-mix(in srgb, var(--mat-sys-error) 14%, transparent);
 }
 
+// Venta cuya cuenta está caída (shared/cuenta-caida-chip): ámbar y no el
+// rojo de "Vencida" — no es un cobro atrasado, es un cliente esperando
+// a que el proveedor reponga la cuenta.
+.chip-caida {
+  --nc-chip-caida: #f59e0b;
+  --mat-chip-label-text-color: var(--nc-chip-caida);
+  --mat-chip-outline-color: var(--nc-chip-caida);
+  --mat-chip-elevated-container-color: color-mix(in srgb, var(--nc-chip-caida) 14%, transparent);
+}
+
 // ---------------------------------------------------------------------------
 // Responsive — pantallas angostas (< 768px)
 //

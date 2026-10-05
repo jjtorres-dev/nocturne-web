@@ -1,0 +1,140 @@
+<h2 mat-dialog-title>{{ repuesta() ? 'Cuenta repuesta' : 'Reponer cuenta' }}</h2>
+
+@if (repuesta(); as r) {
+  <mat-dialog-content class="form-grid">
+    <p class="listo" role="status">
+      <strong>{{ data.servicioNombre }}</strong> · {{ r.correo }}<br />
+      {{ resultado() }}
+    </p>
+    <p class="reponer-info">
+      Avísales a tus clientes los datos nuevos. El perfil, el PIN y la nueva fecha de cada uno
+      los copias desde Ventas.
+    </p>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button type="button" (click)="copiarDatos()">
+      <mat-icon>content_copy</mat-icon>
+      Copiar datos
+    </button>
+    <button mat-flat-button color="primary" type="button" (click)="cerrar()">Listo</button>
+  </mat-dialog-actions>
+} @else {
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    <mat-dialog-content class="form-grid">
+      <p class="reponer-info">
+        <strong>{{ data.servicioNombre }}</strong> · {{ data.cuenta.correo }}<br />
+        Caída desde el <strong>{{ fechaCaidaCorta }}</strong> (lleva {{ diasCaidaTexto() }}).
+        Escribe los datos de la cuenta que te dio el proveedor: reemplazan a los de esta, y tus
+        clientes, pagos y costo siguen aquí. No se registra ningún pago al proveedor.
+      </p>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Correo de la cuenta</mat-label>
+        <input matInput type="email" formControlName="correo" autocomplete="off" />
+        <mat-hint>El correo de la cuenta nueva.</mat-hint>
+        @if (form.controls.correo.hasError('required')) {
+          <mat-error>Escribe el correo de la cuenta nueva.</mat-error>
+        }
+        @if (form.controls.correo.hasError('email')) {
+          <mat-error>Escribe un correo válido.</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Contraseña de la cuenta</mat-label>
+        <input matInput type="text" formControlName="claveServicio" autocomplete="off" />
+        <mat-hint>Si la dejas vacía, queda la de antes.</mat-hint>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Contraseña del correo</mat-label>
+        <input matInput type="text" formControlName="claveCorreo" autocomplete="off" />
+        <mat-hint>Si la dejas vacía, queda la de antes.</mat-hint>
+      </mat-form-field>
+
+      @if (form.controls.perfiles.length > 0) {
+        <fieldset class="perfiles" formArrayName="perfiles">
+          <legend>Perfiles</legend>
+          @for (perfil of form.controls.perfiles.controls; track perfil.controls.id.value) {
+            <div class="perfil-row" [formGroupName]="$index">
+              <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                <mat-label>Nombre del perfil {{ $index + 1 }}</mat-label>
+                <input matInput type="text" formControlName="nombre" autocomplete="off" />
+                @if (perfil.controls.nombre.hasError('required')) {
+                  <mat-error>Escribe el nombre del perfil.</mat-error>
+                }
+              </mat-form-field>
+              <mat-form-field appearance="outline" subscriptSizing="dynamic" class="pin">
+                <mat-label>PIN</mat-label>
+                <input
+                  matInput
+                  type="text"
+                  formControlName="pin"
+                  autocomplete="off"
+                  [attr.aria-label]="'PIN del perfil ' + ($index + 1)"
+                />
+              </mat-form-field>
+            </div>
+          }
+        </fieldset>
+      }
+
+      <mat-form-field appearance="outline">
+        <mat-label>Fecha de reposición</mat-label>
+        <input
+          matInput
+          type="date"
+          formControlName="fechaReposicion"
+          [min]="fechaCaida"
+          [max]="hoy"
+        />
+        <mat-hint>El día en que el proveedor te dio la cuenta nueva.</mat-hint>
+        @if (form.controls.fechaReposicion.hasError('required')) {
+          <mat-error>Elige cuándo te repusieron la cuenta.</mat-error>
+        }
+        @if (form.controls.fechaReposicion.hasError('antesDeCaida')) {
+          <mat-error>No puede ser antes del {{ fechaCaidaCorta }}.</mat-error>
+        }
+        @if (form.controls.fechaReposicion.hasError('futura')) {
+          <mat-error>No puede ser una fecha futura.</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Días a compensar</mat-label>
+        <input matInput type="number" min="0" step="1" formControlName="diasCompensacion" />
+        <app-info-toggle matSuffix [for]="diasInfo" />
+        @if (form.controls.diasCompensacion.hasError('required')) {
+          <mat-error>Escribe cuántos días vas a compensar (puede ser 0).</mat-error>
+        } @else if (
+          form.controls.diasCompensacion.hasError('min') ||
+          form.controls.diasCompensacion.hasError('pattern')
+        ) {
+          <mat-error>Debe ser un número entero, 0 o más.</mat-error>
+        }
+      </mat-form-field>
+      <app-info-hint
+        #diasInfo
+        texto="Los días que tus clientes estuvieron sin servicio. Se calculan solos (de la caída a la reposición), pero puedes cambiarlos. Se suman a la misma fecha de vencimiento de cada cliente."
+      />
+
+      <p class="resumen" role="status">{{ resumen() }}</p>
+
+      @if (errorMessage()) {
+        <p class="error-message" role="alert">{{ errorMessage() }}</p>
+      }
+    </mat-dialog-content>
+
+    <mat-dialog-actions align="end">
+      <button mat-button type="button" (click)="cancel()">Cancelar</button>
+      <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid || saving()">
+        @if (saving()) {
+          <mat-spinner diameter="20" />
+        } @else {
+          Reponer cuenta
+        }
+      </button>
+    </mat-dialog-actions>
+  </form>
+}

@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import {
   MAT_DIALOG_DATA,
@@ -12,13 +12,14 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { VentasApi } from '../ventas-api';
-import { MONEDA_LABELS, Moneda, type Venta } from '../venta.model';
+import { MONEDA_LABELS, Moneda, type AjusteVenta, type Venta } from '../venta.model';
 import { extractErrorMessage, injectFormError } from '../../../shared/form-error';
 import { MetodoPagoSelect } from '../../../shared/metodo-pago/metodo-pago-select/metodo-pago-select';
 import { UltimoMetodoPago } from '../../../shared/metodo-pago/ultimo-metodo-pago';
 import { Auth } from '../../../core/auth/auth';
 import { InfoHint } from '../../../shared/info-hint/info-hint';
 import { InfoToggle } from '../../../shared/info-hint/info-toggle';
+import { AjustesVenta } from '../../../shared/ajustes-venta/ajustes-venta';
 
 export interface VentaEditDialogData {
   venta: Venta;
@@ -26,6 +27,7 @@ export interface VentaEditDialogData {
 
 @Component({
   imports: [
+    AjustesVenta,
     InfoHint,
     InfoToggle,
     ReactiveFormsModule,
@@ -42,7 +44,7 @@ export interface VentaEditDialogData {
   styleUrl: './venta-edit-dialog.scss',
   templateUrl: './venta-edit-dialog.html',
 })
-export class VentaEditDialog {
+export class VentaEditDialog implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly api = inject(VentasApi);
   private readonly auth = inject(Auth);
@@ -57,6 +59,10 @@ export class VentaEditDialog {
   protected readonly Moneda = Moneda;
 
   readonly saving = signal(false);
+  // Días sumados al vencimiento por cuentas caídas: explican por qué
+  // "Vence" no coincide con lo que pagó el cliente. Si falla la carga, no se
+  // muestran (no bloquea editar).
+  readonly ajustes = signal<AjusteVenta[]>([]);
   private readonly formError = injectFormError();
   readonly errorMessage = this.formError.message;
 
@@ -87,6 +93,18 @@ export class VentaEditDialog {
         this.form.controls.tasaCambio.setValue(1);
       }
     });
+  }
+
+  ngOnInit(): void {
+    void this.cargarAjustes();
+  }
+
+  private async cargarAjustes(): Promise<void> {
+    try {
+      this.ajustes.set(await this.api.ajustes(this.data.venta.id));
+    } catch {
+      this.ajustes.set([]);
+    }
   }
 
   async submit(): Promise<void> {

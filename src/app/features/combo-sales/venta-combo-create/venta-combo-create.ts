@@ -24,7 +24,7 @@ import { ServiceType, type Servicio } from '../../services/servicio.model';
 import { ContactosApi } from '../../contacts/contactos-api';
 import { ContactType, type Contacto } from '../../contacts/contacto.model';
 import { CuentasApi } from '../../accounts/cuentas-api';
-import { type CuentaListItem } from '../../accounts/cuenta.model';
+import { cuentasVendibles, type CuentaListItem } from '../../accounts/cuenta.model';
 import { PerfilesApi } from '../../accounts/profiles/perfiles-api';
 import { type Perfil } from '../../accounts/profiles/perfil.model';
 import { ClienteQuickCreateDialog } from '../../../shared/cliente-quick-create-dialog/cliente-quick-create-dialog';
@@ -236,10 +236,13 @@ export class VentaComboCreate implements OnInit {
     try {
       await Promise.all(
         sections.map(async (section, index) => {
-          const cuentas = await this.cuentasApi.list({
-            servicioId: section.servicio.id,
-            activo: true,
-          });
+          // Sin las cuentas caídas: no se venden hasta que se repongan.
+          const cuentas = cuentasVendibles(
+            await this.cuentasApi.list({
+              servicioId: section.servicio.id,
+              activo: true,
+            }),
+          );
           this.updateSection(index, { cuentas, loadingCuentas: false });
         }),
       );

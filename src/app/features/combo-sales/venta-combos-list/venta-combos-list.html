@@ -90,6 +90,9 @@
         <th mat-header-cell *matHeaderCellDef>Estado</th>
         <td mat-cell *matCellDef="let v">
           <app-estado-venta [venta]="v" />
+          @if (v.cuentaCaida && v.activo) {
+            <app-cuenta-caida-chip />
+          }
         </td>
       </ng-container>
 

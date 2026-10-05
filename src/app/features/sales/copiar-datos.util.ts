@@ -39,3 +39,30 @@ export function formatearDatosParaClienteCombo(
 ): string {
   return items.map(formatearDatosParaCliente).join('\n\n');
 }
+
+// Aviso para los clientes de una cuenta que el proveedor repuso (Bloque —
+// Cuentas caídas): los datos nuevos que son iguales para todos. El perfil,
+// el PIN y el vencimiento de cada cliente se copian desde su venta.
+export interface DatosReposicion {
+  servicioNombre: string;
+  correo: string;
+  // null: la cuenta no tiene contraseña cargada — se omite la línea.
+  claveServicio: string | null;
+  // 0: no se compensaron días — se omite la línea.
+  diasCompensados: number;
+}
+
+export function formatearDatosReposicion(datos: DatosReposicion): string {
+  const lineas = [
+    `Tu cuenta de ${datos.servicioNombre} cambió. Estos son los datos nuevos:`,
+    `Correo: ${datos.correo}`,
+  ];
+  if (datos.claveServicio) {
+    lineas.push(`Contraseña: ${datos.claveServicio}`);
+  }
+  if (datos.diasCompensados > 0) {
+    const dias = datos.diasCompensados === 1 ? '1 día' : `${datos.diasCompensados} días`;
+    lineas.push(`Te sumé ${dias} por el tiempo que estuviste sin servicio.`);
+  }
+  return lineas.join('\n');
+}

@@ -116,6 +116,51 @@
     </mat-card-content>
   </mat-card>
 
+  <mat-card class="info-card caidas-card">
+    <mat-card-header>
+      <mat-card-title>Cuentas caídas</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      @if (caidas(); as ca) {
+        @if (ca.loading) {
+          <mat-spinner diameter="24" />
+        } @else if (ca.data; as cuentas) {
+          @if (cuentas.length === 0) {
+            <p class="card-empty">No tienes cuentas caídas.</p>
+          } @else {
+            <span class="caidas-total">{{ clientesSinServicio() }}</span>
+            <ul class="caida-list">
+              @for (c of cuentas; track c.id) {
+                <li class="caida-row">
+                  <a class="caida-item" [routerLink]="['/accounts', c.id]">
+                    <app-service-icon [nombre]="c.servicioNombre" [size]="28" />
+                    <span class="caida-info">
+                      <span class="caida-servicio">
+                        {{ c.servicioNombre }}
+                        @if (c.ownerName) {
+                          <small class="owner">{{ c.ownerName }}</small>
+                        }
+                      </span>
+                      <span class="caida-correo">{{ c.correo }}</span>
+                    </span>
+                    <span class="caida-meta">
+                      <span class="caida-dias">{{ diasCaidaLabel(c.fechaCaida) }}</span>
+                      <span class="caida-clientes">
+                        {{ clientesAfectadosLabel(c.clientesAfectados) }}
+                      </span>
+                    </span>
+                  </a>
+                </li>
+              }
+            </ul>
+          }
+        } @else {
+          <p class="card-error">No se pudieron cargar las cuentas caídas.</p>
+        }
+      }
+    </mat-card-content>
+  </mat-card>
+
   <mat-card class="info-card renovar-card">
     <mat-card-header>
       <mat-card-title>Cuentas que debes pagar al proveedor</mat-card-title>

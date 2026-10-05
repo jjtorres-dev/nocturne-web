@@ -66,6 +66,20 @@ Esto aplica solo a textos visibles. Los nombres de variables, campos de la API y
 | **Finalizar venta** | Deja libre el perfil o la cuenta para otro cliente. Lo cobrado sigue contando en Contabilidad. | "desactivar", "anular" |
 | **Activo / Inactivo, Desactivar / Reactivar** | Solo en catálogos y registros (servicios, cuentas, perfiles, contactos, combos, gastos, usuarios). No se borra nada: deja de aparecer para usar. | "eliminar", "borrar" |
 
+### Cuentas caídas
+
+| Término | Significa | No usar |
+|---|---|---|
+| **Cuenta caída** | Una cuenta que dejó de funcionar y que el proveedor todavía no repuso. Sus clientes están sin servicio: sus ventas llevan el chip «Cuenta caída», no se les cobra ni se les renueva mientras tanto, y la cuenta no se puede vender. No es lo mismo que **Inactivo** (eso es que tú la dejaste de usar). | "bloqueada", "suspendida", "baneada", "dada de baja" |
+| **Marcar como caída** | Avisarle al sistema que la cuenta dejó de funcionar y desde qué día. | "reportar", "dar de baja" |
+| **Quitar marca de caída** | Deshacer «Marcar como caída» cuando la marcaste por error. No suma días a nadie. Si el proveedor la repuso, eso es **Reponer cuenta**. | "desmarcar", "restaurar" |
+| **Caída desde** | El día en que la cuenta dejó de funcionar. Desde ahí se cuentan los días a compensar. | "fecha de caída" |
+| **Reponer cuenta** | Guardar los datos de la cuenta nueva que te dio el proveedor en lugar de la caída. Es la misma cuenta en el sistema: tus clientes, pagos y costo siguen ahí, y no se registra ningún pago al proveedor. | "reemplazar", "restaurar", "cambiar cuenta" |
+| **Fecha de reposición** | El día en que el proveedor te dio la cuenta nueva. | "fecha de restauración" |
+| **Días a compensar** | Los días que tus clientes estuvieron sin servicio. Se suman a la misma fecha de vencimiento de cada cliente. Se calculan solos (de la caída a la reposición) y se pueden cambiar. | "días de gracia", "compensación" |
+| **Clientes sin servicio** | Los clientes con una venta vigente en una cuenta caída. | "clientes afectados" |
+| **Días sumados al vencimiento** | Historial de una venta: «+5 días por cuenta caída del 30/09» (el día en que se cayó). | "ajustes", "compensaciones" |
+
 ## Acceso y datos del cliente
 
 | Término | Significa | No usar |

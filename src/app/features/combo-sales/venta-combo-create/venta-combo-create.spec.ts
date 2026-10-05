@@ -75,6 +75,7 @@ describe('VentaComboCreate', () => {
     url: null,
     renovacionAutomatica: false,
     activo: true,
+    fechaCaida: null,
     perfilesCount: 1,
     owner,
     createdAt: '',
@@ -502,5 +503,25 @@ describe('VentaComboCreate', () => {
       'Cerrar',
       expect.anything(),
     );
+  });
+
+
+  it('no ofrece las cuentas caídas en ningún servicio del combo', async () => {
+    await setup();
+    cuentasApi.list.mockImplementation(({ servicioId }: { servicioId: string }) =>
+      Promise.resolve(
+        servicioId === 'srv-1'
+          ? [cuentaNetflix, { ...cuentaNetflix, id: 'cta-caida', fechaCaida: '2026-01-10' }]
+          : [{ ...cuentaIptv, fechaCaida: '2026-01-10' }],
+      ),
+    );
+    await fixture.whenStable();
+
+    await component.onComboChange(combo.id);
+
+    expect(component.asignaciones().map((s) => s.cuentas.map((c) => c.id))).toEqual([
+      [cuentaNetflix.id],
+      [],
+    ]);
   });
 });

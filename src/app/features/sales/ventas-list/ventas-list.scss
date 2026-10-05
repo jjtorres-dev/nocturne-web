@@ -67,3 +67,15 @@
     height: 16px;
   }
 }
+
+// Estado + "Cuenta caída": uno al lado del otro, o apilados si no entran.
+.estado-chips {
+  display: inline-flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 4px;
+}
+
+td .estado-chips {
+  justify-content: flex-start;
+}
