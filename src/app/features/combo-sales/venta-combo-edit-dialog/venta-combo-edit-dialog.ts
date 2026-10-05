@@ -20,6 +20,7 @@ import { UltimoMetodoPago } from '../../../shared/metodo-pago/ultimo-metodo-pago
 import { Auth } from '../../../core/auth/auth';
 import { InfoHint } from '../../../shared/info-hint/info-hint';
 import { InfoToggle } from '../../../shared/info-hint/info-toggle';
+import { FechaField } from '../../../shared/fecha-field/fecha-field';
 
 export interface VentaComboEditDialogData {
   ventaCombo: VentaCombo;
@@ -27,6 +28,7 @@ export interface VentaComboEditDialogData {
 
 @Component({
   imports: [
+    FechaField,
     InfoHint,
     InfoToggle,
     ReactiveFormsModule,

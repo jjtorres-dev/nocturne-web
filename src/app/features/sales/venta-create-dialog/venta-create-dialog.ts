@@ -35,6 +35,7 @@ import { UltimoMetodoPago } from '../../../shared/metodo-pago/ultimo-metodo-pago
 import { Auth } from '../../../core/auth/auth';
 import { InfoHint } from '../../../shared/info-hint/info-hint';
 import { InfoToggle } from '../../../shared/info-hint/info-toggle';
+import { FechaField } from '../../../shared/fecha-field/fecha-field';
 
 // Sentinel para la opción "+ Nuevo cliente" del selector — nunca un id real.
 const NUEVO_CLIENTE = '__nuevo_cliente__';
@@ -52,6 +53,7 @@ function fechaFinPosteriorValidator(
 
 @Component({
   imports: [
+    FechaField,
     InfoHint,
     InfoToggle,
     ReactiveFormsModule,

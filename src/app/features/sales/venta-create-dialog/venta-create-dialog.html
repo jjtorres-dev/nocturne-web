@@ -76,22 +76,18 @@
         }
       </mat-form-field>
 
-      <mat-form-field appearance="outline">
-        <mat-label>Desde</mat-label>
-        <input matInput type="date" formControlName="fechaInicio" />
-        @if (form.controls.fechaInicio.hasError('required')) {
-          <mat-error>Elige desde cuándo.</mat-error>
-        }
-      </mat-form-field>
+      <app-fecha-field
+        formControlName="fechaInicio"
+        label="Desde"
+        requiredError="Elige desde cuándo."
+      />
 
-      <mat-form-field appearance="outline">
-        <mat-label>Vence</mat-label>
-        <input matInput type="date" formControlName="fechaFin" />
-        <mat-hint>Se calcula sola con la duración del servicio.</mat-hint>
-        @if (form.controls.fechaFin.hasError('required')) {
-          <mat-error>Elige cuándo vence.</mat-error>
-        }
-      </mat-form-field>
+      <app-fecha-field
+        formControlName="fechaFin"
+        label="Vence"
+        hint="Se calcula sola con la duración del servicio."
+        requiredError="Elige cuándo vence."
+      />
 
       @if (form.hasError('fechaFinInvalida') && !form.controls.fechaFin.hasError('required') && !form.controls.fechaInicio.hasError('required')) {
         <p class="error-message">El vencimiento tiene que ser después de la fecha de inicio.</p>

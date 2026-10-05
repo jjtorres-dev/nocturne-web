@@ -19,6 +19,7 @@ import { UltimoMetodoPago } from '../../../shared/metodo-pago/ultimo-metodo-pago
 import { Auth } from '../../../core/auth/auth';
 import { InfoHint } from '../../../shared/info-hint/info-hint';
 import { InfoToggle } from '../../../shared/info-hint/info-toggle';
+import { FechaField } from '../../../shared/fecha-field/fecha-field';
 
 export interface GastoFormDialogData {
   gasto?: Gasto;
@@ -26,6 +27,7 @@ export interface GastoFormDialogData {
 
 @Component({
   imports: [
+    FechaField,
     InfoHint,
     InfoToggle,
     ReactiveFormsModule,

@@ -8,17 +8,14 @@
       la reponga, usa «Reponer cuenta» para sumarles a tus clientes los días sin servicio.
     </p>
 
-    <mat-form-field appearance="outline">
-      <mat-label>Caída desde</mat-label>
-      <input matInput type="date" formControlName="fechaCaida" [max]="hoy" />
-      <mat-hint>El día en que dejó de funcionar.</mat-hint>
-      @if (form.controls.fechaCaida.hasError('required')) {
-        <mat-error>Elige desde qué día está caída.</mat-error>
-      }
-      @if (form.controls.fechaCaida.hasError('futura')) {
-        <mat-error>No puede ser una fecha futura.</mat-error>
-      }
-    </mat-form-field>
+    <app-fecha-field
+      formControlName="fechaCaida"
+      label="Caída desde"
+      hint="El día en que dejó de funcionar."
+      requiredError="Elige desde qué día está caída."
+      [max]="hoy"
+      [errores]="{ futura: 'No puede ser una fecha futura.' }"
+    />
 
     @if (errorMessage()) {
       <p class="error-message" role="alert">{{ errorMessage() }}</p>

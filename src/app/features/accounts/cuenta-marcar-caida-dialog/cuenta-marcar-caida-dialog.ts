@@ -19,6 +19,7 @@ import { CuentasApi } from '../cuentas-api';
 import type { Cuenta } from '../cuenta.model';
 import { extractErrorMessage, injectFormError } from '../../../shared/form-error';
 import { hoyIso } from '../../../shared/fecha.util';
+import { FechaField } from '../../../shared/fecha-field/fecha-field';
 
 export interface CuentaMarcarCaidaDialogData {
   cuentaId: string;
@@ -36,6 +37,7 @@ function noFutura(control: AbstractControl<string>): ValidationErrors | null {
 // suman a los clientes cuando el proveedor la repone.
 @Component({
   imports: [
+    FechaField,
     ReactiveFormsModule,
     MatDialogModule,
     MatFormFieldModule,

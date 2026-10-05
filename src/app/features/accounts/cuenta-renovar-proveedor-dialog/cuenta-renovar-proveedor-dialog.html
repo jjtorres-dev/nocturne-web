@@ -52,26 +52,20 @@
 
     <app-metodo-pago-select formControlName="metodoPago" hint="Con qué le pagaste al proveedor." />
 
-    <mat-form-field appearance="outline">
-      <mat-label>Fecha de pago</mat-label>
-      <input matInput type="date" formControlName="fechaPago" />
-      <mat-hint>En Contabilidad cuenta en esta fecha.</mat-hint>
-      @if (form.controls.fechaPago.hasError('required')) {
-        <mat-error>Elige cuándo le pagaste.</mat-error>
-      }
-    </mat-form-field>
+    <app-fecha-field
+      formControlName="fechaPago"
+      label="Fecha de pago"
+      hint="En Contabilidad cuenta en esta fecha."
+      requiredError="Elige cuándo le pagaste."
+    />
 
-    <mat-form-field appearance="outline">
-      <mat-label>Vence ahora el</mat-label>
-      <input matInput type="date" formControlName="nuevaFechaFin" />
-      <mat-hint>La nueva fecha en que vence con el proveedor.</mat-hint>
-      @if (form.controls.nuevaFechaFin.hasError('required')) {
-        <mat-error>Elige la nueva fecha de vencimiento.</mat-error>
-      }
-      @if (form.controls.nuevaFechaFin.hasError('noPosterior')) {
-        <mat-error>Tiene que ser después del {{ fechaFinActual }}.</mat-error>
-      }
-    </mat-form-field>
+    <app-fecha-field
+      formControlName="nuevaFechaFin"
+      label="Vence ahora el"
+      hint="La nueva fecha en que vence con el proveedor."
+      requiredError="Elige la nueva fecha de vencimiento."
+      [errores]="{ noPosterior: 'Tiene que ser después del ' + fechaFinActual + '.' }"
+    />
 
     @if (errorMessage()) {
       <p class="error-message" role="alert">{{ errorMessage() }}</p>

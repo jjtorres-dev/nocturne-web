@@ -399,14 +399,14 @@ describe('CuentaFormDialog', () => {
 
     const escribirEnInput = (control: string, valor: string): void => {
       const input: HTMLInputElement = fixture.nativeElement.querySelector(
-        `input[formcontrolname="${control}"]`,
+        `input[formcontrolname="${control}"], [formcontrolname="${control}"] input`,
       );
       input.value = valor;
       input.dispatchEvent(new Event('input'));
     };
-    escribirEnInput('fechaFin', '2026-06-01');
+    escribirEnInput('fechaFin', '01/06/2026');
 
-    escribirEnInput('fechaInicio', '2026-03-10');
+    escribirEnInput('fechaInicio', '10/03/2026');
     component.form.controls.servicioId.setValue('srv-1');
 
     expect(component.form.controls.fechaFin.value).toBe('2026-06-01');

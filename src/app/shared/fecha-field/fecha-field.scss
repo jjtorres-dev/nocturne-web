@@ -1,0 +1,14 @@
+// Reemplaza a un mat-form-field que era hijo directo de un formulario
+// flex/grid: sin esto el host queda `inline` y no ocupa su celda.
+:host {
+  display: block;
+}
+
+mat-form-field {
+  width: 100%;
+}
+
+.sufijo {
+  display: flex;
+  align-items: center;
+}

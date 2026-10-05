@@ -26,6 +26,7 @@ import { MetodoPagoSelect } from '../../../shared/metodo-pago/metodo-pago-select
 import { InfoHint } from '../../../shared/info-hint/info-hint';
 import { InfoToggle } from '../../../shared/info-hint/info-toggle';
 import { formatFechaCorta, hoyIso, sumarMeses } from '../../../shared/fecha.util';
+import { FechaField } from '../../../shared/fecha-field/fecha-field';
 
 export interface CuentaRenovarProveedorDialogData {
   cuentaId: string;
@@ -51,6 +52,7 @@ function posteriorA(fechaActual: string): ValidatorFn {
 // último pago al proveedor de esta cuenta.
 @Component({
   imports: [
+    FechaField,
     InfoHint,
     InfoToggle,
     ReactiveFormsModule,

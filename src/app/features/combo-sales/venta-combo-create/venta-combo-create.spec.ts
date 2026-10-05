@@ -200,7 +200,7 @@ describe('VentaComboCreate', () => {
 
     function escribirEnInput(control: string, valor: string): void {
       const input: HTMLInputElement = fixture.nativeElement.querySelector(
-        `input[formcontrolname="${control}"]`,
+        `input[formcontrolname="${control}"], [formcontrolname="${control}"] input`,
       );
       input.value = valor;
       input.dispatchEvent(new Event('input'));
@@ -220,7 +220,7 @@ describe('VentaComboCreate', () => {
       await fixture.whenStable();
       fixture.detectChanges();
 
-      escribirEnInput('fechaInicio', '2026-03-31');
+      escribirEnInput('fechaInicio', '31/03/2026');
 
       expect(component.form.controls.fechaFin.value).toBe('2026-04-30');
     });
@@ -229,7 +229,7 @@ describe('VentaComboCreate', () => {
       await setup();
       await fixture.whenStable();
       fixture.detectChanges();
-      escribirEnInput('fechaInicio', '2026-01-31');
+      escribirEnInput('fechaInicio', '31/01/2026');
 
       escribirEnInput('duracionMeses', '2.5');
 
@@ -240,10 +240,10 @@ describe('VentaComboCreate', () => {
       await setup();
       await fixture.whenStable();
       fixture.detectChanges();
-      escribirEnInput('fechaInicio', '2026-01-15');
-      escribirEnInput('fechaFin', '2026-03-01');
+      escribirEnInput('fechaInicio', '15/01/2026');
+      escribirEnInput('fechaFin', '01/03/2026');
 
-      escribirEnInput('fechaInicio', '2026-01-20');
+      escribirEnInput('fechaInicio', '20/01/2026');
       escribirEnInput('duracionMeses', '3');
 
       expect(component.form.controls.fechaFin.value).toBe('2026-03-01');
@@ -253,7 +253,7 @@ describe('VentaComboCreate', () => {
       await setup();
       await fixture.whenStable();
       fixture.detectChanges();
-      escribirEnInput('fechaInicio', '2026-01-15');
+      escribirEnInput('fechaInicio', '15/01/2026');
 
       escribirEnInput('duracionMeses', '');
 

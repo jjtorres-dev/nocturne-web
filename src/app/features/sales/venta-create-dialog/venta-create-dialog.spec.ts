@@ -226,14 +226,14 @@ describe('VentaCreateDialog', () => {
 
     const escribirEnInput = (control: string, valor: string): void => {
       const input: HTMLInputElement = fixture.nativeElement.querySelector(
-        `input[formcontrolname="${control}"]`,
+        `input[formcontrolname="${control}"], [formcontrolname="${control}"] input`,
       );
       input.value = valor;
       input.dispatchEvent(new Event('input'));
     };
-    escribirEnInput('fechaFin', '2026-05-01');
+    escribirEnInput('fechaFin', '01/05/2026');
 
-    escribirEnInput('fechaInicio', '2026-03-01');
+    escribirEnInput('fechaInicio', '01/03/2026');
     await component.onCuentaChange('cta-1');
 
     expect(component.form.controls.fechaFin.value).toBe('2026-05-01');

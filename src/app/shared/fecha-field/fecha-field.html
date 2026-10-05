@@ -1,0 +1,26 @@
+<mat-form-field appearance="outline">
+  <mat-label>{{ label() }}</mat-label>
+  <input
+    matInput
+    [matDatepicker]="picker"
+    [formControl]="inner"
+    [min]="minDate()"
+    [max]="maxDate()"
+    [errorStateMatcher]="errorMatcher"
+    placeholder="dd/mm/aaaa"
+    autocomplete="off"
+    (blur)="markTouched()"
+  />
+  <!-- Lo que se proyecte (p. ej. un app-info-toggle) queda junto al botón del calendario. -->
+  <div matIconSuffix class="sufijo">
+    <ng-content />
+    <mat-datepicker-toggle [for]="picker" />
+  </div>
+  <mat-datepicker #picker [touchUi]="isMobile()" (closed)="markTouched()" />
+  @if (hint()) {
+    <mat-hint>{{ hint() }}</mat-hint>
+  }
+  @if (errorText()) {
+    <mat-error>{{ errorText() }}</mat-error>
+  }
+</mat-form-field>

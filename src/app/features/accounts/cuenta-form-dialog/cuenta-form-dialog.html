@@ -92,22 +92,19 @@
         texto="Para entrar al correo (Gmail, Outlook…) y recibir códigos de acceso. No se la pases a tu cliente."
       />
 
-      <mat-form-field appearance="outline">
-        <mat-label>Fecha de compra</mat-label>
-        <input matInput type="date" formControlName="fechaInicio" />
-        @if (form.controls.fechaInicio.hasError('required')) {
-          <mat-error>La fecha de compra es obligatoria.</mat-error>
-        }
-      </mat-form-field>
+      <app-fecha-field
+        formControlName="fechaInicio"
+        label="Fecha de compra"
+        requiredError="La fecha de compra es obligatoria."
+      />
 
-      <mat-form-field appearance="outline">
-        <mat-label>Vence con el proveedor</mat-label>
-        <input matInput type="date" formControlName="fechaFin" />
-        <app-info-toggle matSuffix [for]="fechaFinInfo" />
-        @if (form.controls.fechaFin.hasError('required')) {
-          <mat-error>La fecha de vencimiento es obligatoria.</mat-error>
-        }
-      </mat-form-field>
+      <app-fecha-field
+        formControlName="fechaFin"
+        label="Vence con el proveedor"
+        requiredError="La fecha de vencimiento es obligatoria."
+      >
+        <app-info-toggle [for]="fechaFinInfo" />
+      </app-fecha-field>
       <app-info-hint
         #fechaFinInfo
         texto="Cuándo tienes que renovar o volver a pagar esta cuenta. Se calcula solo según el servicio."

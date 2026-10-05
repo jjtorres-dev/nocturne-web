@@ -39,6 +39,7 @@ import { exportToCsv, type CsvColumn } from '../../shared/csv-export';
 import { hoyIso } from '../../shared/fecha.util';
 import { InfoHint } from '../../shared/info-hint/info-hint';
 import { InfoToggle } from '../../shared/info-hint/info-toggle';
+import { FechaField } from '../../shared/fecha-field/fecha-field';
 
 // Sentinel para "sin filtro de dueño" en el backend (ver
 // AccountingService.VIEW_ALL en nocturne-api) — nunca un id real.
@@ -51,6 +52,7 @@ Chart.register(...registerables);
 
 @Component({
   imports: [
+    FechaField,
     SolesPipe,
     FormsModule,
     MatCardModule,

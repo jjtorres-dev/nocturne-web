@@ -80,26 +80,18 @@
         </fieldset>
       }
 
-      <mat-form-field appearance="outline">
-        <mat-label>Fecha de reposición</mat-label>
-        <input
-          matInput
-          type="date"
-          formControlName="fechaReposicion"
-          [min]="fechaCaida"
-          [max]="hoy"
-        />
-        <mat-hint>El día en que el proveedor te dio la cuenta nueva.</mat-hint>
-        @if (form.controls.fechaReposicion.hasError('required')) {
-          <mat-error>Elige cuándo te repusieron la cuenta.</mat-error>
-        }
-        @if (form.controls.fechaReposicion.hasError('antesDeCaida')) {
-          <mat-error>No puede ser antes del {{ fechaCaidaCorta }}.</mat-error>
-        }
-        @if (form.controls.fechaReposicion.hasError('futura')) {
-          <mat-error>No puede ser una fecha futura.</mat-error>
-        }
-      </mat-form-field>
+      <app-fecha-field
+        formControlName="fechaReposicion"
+        label="Fecha de reposición"
+        hint="El día en que el proveedor te dio la cuenta nueva."
+        requiredError="Elige cuándo te repusieron la cuenta."
+        [min]="fechaCaida"
+        [max]="hoy"
+        [errores]="{
+          antesDeCaida: 'No puede ser antes del ' + fechaCaidaCorta + '.',
+          futura: 'No puede ser una fecha futura.',
+        }"
+      />
 
       <mat-form-field appearance="outline">
         <mat-label>Días a compensar</mat-label>

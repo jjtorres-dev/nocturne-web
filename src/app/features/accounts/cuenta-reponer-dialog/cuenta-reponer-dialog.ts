@@ -37,6 +37,7 @@ import {
   formatFechaCorta,
   hoyIso,
 } from '../../../shared/fecha.util';
+import { FechaField } from '../../../shared/fecha-field/fecha-field';
 
 export interface CuentaReponerDialogData {
   // La cuenta caída (fechaCaida no es null).
@@ -68,6 +69,7 @@ function entre(desde: string, hasta: string): ValidatorFn {
 // el diálogo ofrece copiar los datos nuevos para avisar a los clientes.
 @Component({
   imports: [
+    FechaField,
     InfoHint,
     InfoToggle,
     ReactiveFormsModule,

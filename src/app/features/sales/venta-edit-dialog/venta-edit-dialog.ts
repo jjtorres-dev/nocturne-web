@@ -20,6 +20,7 @@ import { Auth } from '../../../core/auth/auth';
 import { InfoHint } from '../../../shared/info-hint/info-hint';
 import { InfoToggle } from '../../../shared/info-hint/info-toggle';
 import { AjustesVenta } from '../../../shared/ajustes-venta/ajustes-venta';
+import { FechaField } from '../../../shared/fecha-field/fecha-field';
 
 export interface VentaEditDialogData {
   venta: Venta;
@@ -27,6 +28,7 @@ export interface VentaEditDialogData {
 
 @Component({
   imports: [
+    FechaField,
     AjustesVenta,
     InfoHint,
     InfoToggle,
