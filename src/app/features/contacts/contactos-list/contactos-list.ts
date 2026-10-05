@@ -21,6 +21,7 @@ import { ConfirmDialog } from '../../../shared/confirm-dialog/confirm-dialog';
 import { Auth, UserRole } from '../../../core/auth/auth';
 import { EmptyState } from '../../../shared/empty-state/empty-state';
 import { AvatarInicial } from '../../../shared/avatar-inicial/avatar-inicial';
+import { extractErrorMessage } from '../../../shared/form-error';
 
 type ActivoFilter = 'todos' | 'activos' | 'inactivos';
 
@@ -152,10 +153,15 @@ export class ContactosList implements OnInit {
         duration: 3000,
       });
       void this.refresh();
-    } catch {
-      this.snackBar.open('No se pudo desactivar el contacto.', 'Cerrar', {
-        duration: 4000,
-      });
+    } catch (error) {
+      this.snackBar.open(
+        extractErrorMessage(
+          error,
+          'No se pudo desactivar el contacto.',
+        ),
+        'Cerrar',
+        { duration: 5000 },
+      );
     }
   }
 
@@ -166,10 +172,15 @@ export class ContactosList implements OnInit {
         duration: 3000,
       });
       void this.refresh();
-    } catch {
-      this.snackBar.open('No se pudo reactivar el contacto.', 'Cerrar', {
-        duration: 4000,
-      });
+    } catch (error) {
+      this.snackBar.open(
+        extractErrorMessage(
+          error,
+          'No se pudo reactivar el contacto.',
+        ),
+        'Cerrar',
+        { duration: 5000 },
+      );
     }
   }
 }

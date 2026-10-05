@@ -17,6 +17,7 @@ import { USER_ROLE_LABELS, type Usuario, type UserRole } from '../usuario.model'
 import { UsuarioFormDialog } from '../usuario-form-dialog/usuario-form-dialog';
 import { ConfirmDialog } from '../../../shared/confirm-dialog/confirm-dialog';
 import { EmptyState } from '../../../shared/empty-state/empty-state';
+import { extractErrorMessage } from '../../../shared/form-error';
 
 type ActivoFilter = 'todos' | 'activos' | 'inactivos';
 
@@ -157,10 +158,15 @@ export class UsuariosList implements OnInit {
       await this.api.deactivate(usuario.id);
       this.snackBar.open('Usuario desactivado.', 'Cerrar', { duration: 3000 });
       void this.refresh();
-    } catch {
-      this.snackBar.open('No se pudo desactivar el usuario.', 'Cerrar', {
-        duration: 4000,
-      });
+    } catch (error) {
+      this.snackBar.open(
+        extractErrorMessage(
+          error,
+          'No se pudo desactivar el usuario.',
+        ),
+        'Cerrar',
+        { duration: 5000 },
+      );
     }
   }
 
@@ -169,9 +175,9 @@ export class UsuariosList implements OnInit {
       await this.api.reactivate(usuario.id);
       this.snackBar.open('Usuario reactivado.', 'Cerrar', { duration: 3000 });
       void this.refresh();
-    } catch {
-      this.snackBar.open('No se pudo reactivar el usuario.', 'Cerrar', {
-        duration: 4000,
+    } catch (error) {
+      this.snackBar.open(extractErrorMessage(error, 'No se pudo reactivar el usuario.'), 'Cerrar', {
+        duration: 5000,
       });
     }
   }

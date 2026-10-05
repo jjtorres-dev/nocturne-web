@@ -30,6 +30,7 @@ import { formatFechaCorta } from '../../../shared/fecha.util';
 import { EstadoVentaChip } from '../../../shared/estado-venta/estado-venta';
 import { CuentaCaidaChip } from '../../../shared/cuenta-caida-chip/cuenta-caida-chip';
 import { AjustesVenta } from '../../../shared/ajustes-venta/ajustes-venta';
+import { extractErrorMessage } from '../../../shared/form-error';
 
 @Component({
   imports: [
@@ -244,10 +245,15 @@ export class VentaComboDetail implements OnInit {
         { duration: 4000 },
       );
       void this.refresh();
-    } catch {
-      this.snackBar.open('No se pudo renovar la venta de combo.', 'Cerrar', {
-        duration: 4000,
-      });
+    } catch (error) {
+      this.snackBar.open(
+        extractErrorMessage(
+          error,
+          'No se pudo renovar la venta de combo.',
+        ),
+        'Cerrar',
+        { duration: 5000 },
+      );
     }
   }
 
@@ -258,10 +264,15 @@ export class VentaComboDetail implements OnInit {
         duration: 3000,
       });
       void this.refresh();
-    } catch {
-      this.snackBar.open('No se pudo finalizar la venta de combo.', 'Cerrar', {
-        duration: 4000,
-      });
+    } catch (error) {
+      this.snackBar.open(
+        extractErrorMessage(
+          error,
+          'No se pudo finalizar la venta de combo.',
+        ),
+        'Cerrar',
+        { duration: 5000 },
+      );
     }
   }
 
@@ -274,25 +285,10 @@ export class VentaComboDetail implements OnInit {
       void this.refresh();
     } catch (error) {
       this.snackBar.open(
-        this.errorMessage(error, 'No se pudo reactivar la venta de combo.'),
+        extractErrorMessage(error, 'No se pudo reactivar la venta de combo.'),
         'Cerrar',
         { duration: 5000 },
       );
     }
-  }
-
-  private errorMessage(error: unknown, fallback: string): string {
-    if (
-      error &&
-      typeof error === 'object' &&
-      'error' in error &&
-      error.error &&
-      typeof error.error === 'object' &&
-      'message' in error.error &&
-      typeof error.error.message === 'string'
-    ) {
-      return error.error.message;
-    }
-    return fallback;
   }
 }

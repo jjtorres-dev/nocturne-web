@@ -41,6 +41,7 @@ import { PerfilesApi } from '../profiles/perfiles-api';
 import { type Perfil } from '../profiles/perfil.model';
 import { PerfilFormDialog } from '../profiles/perfil-form-dialog/perfil-form-dialog';
 import { Auth, UserRole } from '../../../core/auth/auth';
+import { extractErrorMessage } from '../../../shared/form-error';
 
 @Component({
   imports: [
@@ -461,11 +462,14 @@ export class CuentaDetail implements OnInit {
       await this.api.quitarMarcaCaida(this.accountId);
       this.snackBar.open('Marca de caída quitada.', 'Cerrar', { duration: 3000 });
       void this.refresh();
-    } catch {
+    } catch (error) {
       this.snackBar.open(
-        'No se pudo quitar la marca de caída. Inténtalo de nuevo.',
+        extractErrorMessage(
+          error,
+          'No se pudo quitar la marca de caída. Inténtalo de nuevo.',
+        ),
         'Cerrar',
-        { duration: 4000 },
+        { duration: 5000 },
       );
     }
   }
@@ -475,9 +479,9 @@ export class CuentaDetail implements OnInit {
       await this.api.deactivate(this.accountId);
       this.snackBar.open('Cuenta desactivada.', 'Cerrar', { duration: 3000 });
       void this.refresh();
-    } catch {
-      this.snackBar.open('No se pudo desactivar la cuenta.', 'Cerrar', {
-        duration: 4000,
+    } catch (error) {
+      this.snackBar.open(extractErrorMessage(error, 'No se pudo desactivar la cuenta.'), 'Cerrar', {
+        duration: 5000,
       });
     }
   }
@@ -487,9 +491,9 @@ export class CuentaDetail implements OnInit {
       await this.api.reactivate(this.accountId);
       this.snackBar.open('Cuenta reactivada.', 'Cerrar', { duration: 3000 });
       void this.refresh();
-    } catch {
-      this.snackBar.open('No se pudo reactivar la cuenta.', 'Cerrar', {
-        duration: 4000,
+    } catch (error) {
+      this.snackBar.open(extractErrorMessage(error, 'No se pudo reactivar la cuenta.'), 'Cerrar', {
+        duration: 5000,
       });
     }
   }
@@ -499,9 +503,9 @@ export class CuentaDetail implements OnInit {
       await this.perfilesApi.deactivate(this.accountId, perfil.id);
       this.snackBar.open('Perfil desactivado.', 'Cerrar', { duration: 3000 });
       void this.refreshPerfiles();
-    } catch {
-      this.snackBar.open('No se pudo desactivar el perfil.', 'Cerrar', {
-        duration: 4000,
+    } catch (error) {
+      this.snackBar.open(extractErrorMessage(error, 'No se pudo desactivar el perfil.'), 'Cerrar', {
+        duration: 5000,
       });
     }
   }
@@ -511,9 +515,12 @@ export class CuentaDetail implements OnInit {
       await this.perfilesApi.reactivate(this.accountId, perfil.id);
       this.snackBar.open('Perfil reactivado.', 'Cerrar', { duration: 3000 });
       void this.refreshPerfiles();
-    } catch {
+    } catch (error) {
       this.snackBar.open(
-        'No se pudo reactivar el perfil. Puede que la cuenta ya tenga todos sus perfiles.',
+        extractErrorMessage(
+          error,
+          'No se pudo reactivar el perfil. Puede que la cuenta ya tenga todos sus perfiles.',
+        ),
         'Cerrar',
         { duration: 5000 },
       );

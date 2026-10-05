@@ -18,6 +18,7 @@ import { SolesPipe } from '../../../shared/soles.pipe';
 import { Auth, UserRole } from '../../../core/auth/auth';
 import { EmptyState } from '../../../shared/empty-state/empty-state';
 import { ServiceIconStack } from '../../../shared/service-icon-stack/service-icon-stack';
+import { extractErrorMessage } from '../../../shared/form-error';
 
 type ActivoFilter = 'todos' | 'activos' | 'inactivos';
 
@@ -138,9 +139,9 @@ export class CombosList implements OnInit {
       await this.api.deactivate(combo.id);
       this.snackBar.open('Combo desactivado.', 'Cerrar', { duration: 3000 });
       void this.refresh();
-    } catch {
-      this.snackBar.open('No se pudo desactivar el combo.', 'Cerrar', {
-        duration: 4000,
+    } catch (error) {
+      this.snackBar.open(extractErrorMessage(error, 'No se pudo desactivar el combo.'), 'Cerrar', {
+        duration: 5000,
       });
     }
   }
@@ -150,9 +151,9 @@ export class CombosList implements OnInit {
       await this.api.reactivate(combo.id);
       this.snackBar.open('Combo reactivado.', 'Cerrar', { duration: 3000 });
       void this.refresh();
-    } catch {
-      this.snackBar.open('No se pudo reactivar el combo.', 'Cerrar', {
-        duration: 4000,
+    } catch (error) {
+      this.snackBar.open(extractErrorMessage(error, 'No se pudo reactivar el combo.'), 'Cerrar', {
+        duration: 5000,
       });
     }
   }

@@ -1,6 +1,5 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { DatePipe, DecimalPipe } from '@angular/common';
-import { HttpErrorResponse } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { MatTableModule } from '@angular/material/table';
@@ -37,6 +36,7 @@ import { formatearDatosParaCliente } from '../copiar-datos.util';
 import { EstadoVentaChip } from '../../../shared/estado-venta/estado-venta';
 import { CuentaCaidaChip } from '../../../shared/cuenta-caida-chip/cuenta-caida-chip';
 import { ESTADO_VENTA_LABELS, estadoVenta } from '../../../shared/estado-venta/estado-venta.util';
+import { extractErrorMessage } from '../../../shared/form-error';
 
 type ActivoFilter = 'todos' | 'activos' | 'inactivos';
 
@@ -367,9 +367,9 @@ export class VentasList implements OnInit {
       await this.api.deactivate(venta.id);
       this.snackBar.open('Venta finalizada.', 'Cerrar', { duration: 3000 });
       void this.refresh();
-    } catch {
-      this.snackBar.open('No se pudo finalizar la venta.', 'Cerrar', {
-        duration: 4000,
+    } catch (error) {
+      this.snackBar.open(extractErrorMessage(error, 'No se pudo finalizar la venta.'), 'Cerrar', {
+        duration: 5000,
       });
     }
   }
@@ -380,18 +380,9 @@ export class VentasList implements OnInit {
       this.snackBar.open('Venta reactivada.', 'Cerrar', { duration: 3000 });
       void this.refresh();
     } catch (error) {
-      if (error instanceof HttpErrorResponse && error.status === 409) {
-        this.snackBar.open(
-          (error.error?.message as string | undefined) ??
-            'Ya no está disponible.',
-          'Cerrar',
-          { duration: 5000 },
-        );
-      } else {
-        this.snackBar.open('No se pudo reactivar la venta.', 'Cerrar', {
-          duration: 4000,
-        });
-      }
+      this.snackBar.open(extractErrorMessage(error, 'No se pudo reactivar la venta.'), 'Cerrar', {
+        duration: 5000,
+      });
     }
   }
 }

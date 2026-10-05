@@ -451,6 +451,44 @@ describe('VentasList', () => {
     );
   });
 
+  it('muestra tal cual el 400 de cuenta caída al reactivar', async () => {
+    await fixture.whenStable();
+    dialog.open.mockReturnValue({ afterClosed: () => of(true) });
+    const message = 'La cuenta está caída: no se puede reactivar la venta hasta que el proveedor la reponga.';
+    api.reactivate.mockRejectedValue(new HttpErrorResponse({ status: 400, error: { message } }));
+
+    component.confirmReactivate(ventaInactiva);
+    await Promise.resolve();
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(snackBar.open).toHaveBeenCalledWith(message, 'Cerrar', expect.anything());
+  });
+
+  it('si el backend no manda mensaje (sin conexión), muestra el texto genérico', async () => {
+    await fixture.whenStable();
+    dialog.open.mockReturnValue({ afterClosed: () => of(true) });
+    api.reactivate.mockRejectedValue(new HttpErrorResponse({ status: 0 }));
+    api.deactivate.mockRejectedValue(new HttpErrorResponse({ status: 0 }));
+
+    component.confirmReactivate(ventaInactiva);
+    component.confirmDeactivate(venta);
+    await Promise.resolve();
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(snackBar.open).toHaveBeenCalledWith(
+      'No se pudo reactivar la venta.',
+      'Cerrar',
+      expect.anything(),
+    );
+    expect(snackBar.open).toHaveBeenCalledWith(
+      'No se pudo finalizar la venta.',
+      'Cerrar',
+      expect.anything(),
+    );
+  });
+
   it('abre el modal de editar', async () => {
     await fixture.whenStable();
     dialog.open.mockReturnValue({ afterClosed: () => of(undefined) });

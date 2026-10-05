@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { HttpErrorResponse } from '@angular/common/http';
 import { provideRouter, Router } from '@angular/router';
 import { of } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
@@ -82,6 +83,7 @@ describe('VentaCombosList', () => {
   let contactosApi: { list: ReturnType<typeof vi.fn> };
   let dialog: { open: ReturnType<typeof vi.fn> };
   let router: Router;
+  let snackBar: { open: ReturnType<typeof vi.fn> };
   let auth: { currentUser: ReturnType<typeof vi.fn> };
 
   async function setup(role: UserRole = UserRole.ADMIN) {
@@ -106,7 +108,7 @@ describe('VentaCombosList', () => {
         { provide: ContactosApi, useValue: contactosApi },
         { provide: Auth, useValue: auth },
         { provide: MatDialog, useValue: dialog },
-        { provide: MatSnackBar, useValue: { open: vi.fn() } },
+        { provide: MatSnackBar, useValue: (snackBar = { open: vi.fn() }) },
       ],
     }).compileComponents();
 
@@ -220,6 +222,21 @@ describe('VentaCombosList', () => {
     await Promise.resolve();
 
     expect(api.reactivate).toHaveBeenCalledWith('vc-2');
+  });
+
+  it('muestra tal cual el 400 de cuenta caída al reactivar', async () => {
+    await fixture.whenStable();
+    dialog.open.mockReturnValue({ afterClosed: () => of(true) });
+    const message =
+      'La cuenta está caída: no se puede reactivar la venta de combo hasta que el proveedor reponga todas sus cuentas.';
+    api.reactivate.mockRejectedValue(new HttpErrorResponse({ status: 400, error: { message } }));
+
+    component.confirmReactivate(ventaComboInactiva);
+    await Promise.resolve();
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(snackBar.open).toHaveBeenCalledWith(message, 'Cerrar', expect.anything());
   });
 
   it('muestra la columna Dueño para un ADMIN', async () => {

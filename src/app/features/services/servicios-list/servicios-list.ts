@@ -22,6 +22,7 @@ import { SolesPipe } from '../../../shared/soles.pipe';
 import { Auth, UserRole } from '../../../core/auth/auth';
 import { EmptyState } from '../../../shared/empty-state/empty-state';
 import { ServiceIcon } from '../../../shared/service-icon/service-icon';
+import { extractErrorMessage } from '../../../shared/form-error';
 
 type ActivoFilter = 'todos' | 'activos' | 'inactivos';
 
@@ -174,10 +175,15 @@ export class ServiciosList implements OnInit {
         duration: 3000,
       });
       void this.refresh();
-    } catch {
-      this.snackBar.open('No se pudo desactivar el servicio.', 'Cerrar', {
-        duration: 4000,
-      });
+    } catch (error) {
+      this.snackBar.open(
+        extractErrorMessage(
+          error,
+          'No se pudo desactivar el servicio.',
+        ),
+        'Cerrar',
+        { duration: 5000 },
+      );
     }
   }
 
@@ -188,10 +194,15 @@ export class ServiciosList implements OnInit {
         duration: 3000,
       });
       void this.refresh();
-    } catch {
-      this.snackBar.open('No se pudo reactivar el servicio.', 'Cerrar', {
-        duration: 4000,
-      });
+    } catch (error) {
+      this.snackBar.open(
+        extractErrorMessage(
+          error,
+          'No se pudo reactivar el servicio.',
+        ),
+        'Cerrar',
+        { duration: 5000 },
+      );
     }
   }
 }
