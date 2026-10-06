@@ -718,6 +718,27 @@ describe('VentasList', () => {
       expect(fixture.nativeElement.querySelector('table')).toBeNull();
     });
 
+    it('la fecha de vencimiento de la tarjeta lleva el color de urgencia: vencida, por vencer o ninguno', async () => {
+      vi.useFakeTimers({ toFake: ['Date'] });
+      vi.setSystemTime(new Date(2026, 9, 6, 12, 0));
+      try {
+        await render(true, {
+          ventas: [
+            { ...venta, id: 'pasada', fechaFin: '2026-10-01' },
+            { ...venta, id: 'pronto', fechaFin: '2026-10-08' },
+            { ...venta, id: 'lejos', fechaFin: '2026-11-20' },
+          ],
+        });
+
+        const clases = cards().map((c) => c.querySelector('.tarjeta-vence')!.className);
+        expect(clases[0]).toContain('nc-estado-vencida');
+        expect(clases[1]).toContain('nc-estado-por-vencer');
+        expect(clases[2]).not.toContain('vence-urgente');
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
     it('en desktop sigue saliendo la tabla y no las tarjetas', async () => {
       await render(false);
 

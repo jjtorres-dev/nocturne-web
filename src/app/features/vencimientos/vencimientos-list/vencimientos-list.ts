@@ -145,7 +145,7 @@ export class VencimientosList implements OnInit {
         vencimiento: this.estado,
         diasAlerta: this.diasAlerta,
       });
-      this.ventas.set(data);
+      this.ventas.set(this.ordenar(data));
       await this.loadPerfilNombres(data);
     } catch {
       // El aviso va en el lugar de la lista, con "Reintentar" (sin snackbar:
@@ -154,6 +154,14 @@ export class VencimientosList implements OnInit {
     } finally {
       this.loading.set(false);
     }
+  }
+
+  // Lo más cercano a hoy va primero: en "Por vencer" y "Al día", lo que
+  // vence antes; en "Vencidas", lo que venció más recientemente. Las fechas
+  // son 'YYYY-MM-DD', así que comparar los strings es comparar las fechas.
+  private ordenar(ventas: Venta[]): Venta[] {
+    const sentido = this.estado === VencimientoFiltro.VENCIDA ? -1 : 1;
+    return [...ventas].sort((a, b) => sentido * a.fechaFin.localeCompare(b.fechaFin));
   }
 
   private async loadResumen(): Promise<void> {

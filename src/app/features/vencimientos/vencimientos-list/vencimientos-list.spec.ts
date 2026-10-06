@@ -196,6 +196,33 @@ describe('VencimientosList', () => {
     expect(fila.querySelector('td')?.querySelector('.nc-cuando')).not.toBeNull();
   });
 
+  describe('orden por fecha', () => {
+    const conFecha = (id: string, fechaFin: string) => ({ ...venta, id, fechaFin });
+    const desordenadas = [
+      conFecha('b', '2026-10-09'),
+      conFecha('a', '2026-10-06'),
+      conFecha('c', '2026-10-12'),
+    ];
+
+    it('en "Por vencer" y "Al día", lo que vence antes va primero', async () => {
+      await setup();
+      api.list.mockResolvedValue(desordenadas);
+      for (const estado of [VencimientoFiltro.POR_VENCER, VencimientoFiltro.AL_DIA]) {
+        component.estado = estado;
+        await component.refresh();
+        expect(component.ventas().map((v) => v.id)).toEqual(['a', 'b', 'c']);
+      }
+    });
+
+    it('en "Vencidas", lo que venció más recientemente va primero', async () => {
+      await setup();
+      api.list.mockResolvedValue(desordenadas);
+      component.estado = VencimientoFiltro.VENCIDA;
+      await component.refresh();
+      expect(component.ventas().map((v) => v.id)).toEqual(['c', 'b', 'a']);
+    });
+  });
+
   it('si la carga falla muestra el aviso con "Reintentar"', async () => {
     await setup();
     api.list.mockRejectedValue(new Error('sin red'));

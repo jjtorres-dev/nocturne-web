@@ -70,9 +70,11 @@ td.mat-column-dueno {
   white-space: normal;
 }
 
-// Fecha de vencimiento que pide atención: tinta de su estado.
+// Fecha de vencimiento que pide atención: tinta de su estado (en la tabla
+// y en la tarjeta del celular).
 .vence-urgente {
   color: var(--estado-tinta);
+  font-weight: 600;
 }
 
 // Fechas y código en un renglón; la columna del servicio absorbe lo demás.

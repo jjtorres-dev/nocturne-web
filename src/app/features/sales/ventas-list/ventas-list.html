@@ -110,7 +110,10 @@
               </div>
               <div>
                 <dt>Desde – Vence</dt>
-                <dd>{{ v.fechaInicio | date: 'dd/MM/yyyy' }} → {{ v.fechaFin | date: 'dd/MM/yyyy' }}</dd>
+                <dd>
+                  {{ v.fechaInicio | date: 'dd/MM/yyyy' }} →
+                  <span class="tarjeta-vence" [class]="venceClase(v)">{{ v.fechaFin | date: 'dd/MM/yyyy' }}</span>
+                </dd>
               </div>
               <div>
                 <dt>Cobrado</dt>
