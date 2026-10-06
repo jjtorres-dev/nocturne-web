@@ -6,8 +6,10 @@ import {
   OnInit,
   ViewChild,
   computed,
+  effect,
   inject,
   signal,
+  untracked,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -18,6 +20,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { Chart, registerables } from 'chart.js';
+import { Theme } from '../../core/theme/theme';
 import { AccountingApi } from './accounting-api';
 import {
   TimelineGroupBy,
@@ -79,6 +82,7 @@ export class Accounting implements OnInit, AfterViewInit, OnDestroy {
   private readonly auth = inject(Auth);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly theme = inject(Theme);
 
   @ViewChild('timelineCanvas')
   private readonly canvasRef?: ElementRef<HTMLCanvasElement>;
@@ -173,6 +177,21 @@ export class Accounting implements OnInit, AfterViewInit, OnDestroy {
       queryParamsHandling: 'merge',
     });
     void this.refresh();
+  }
+
+  constructor() {
+    // Al cambiar de tema el gráfico se arma de nuevo: sus colores son tokens
+    // ya resueltos (Regla del Lienzo) y no se enteran solos.
+    effect(() => {
+      this.theme.resolved();
+      untracked(() => {
+        if (this.chart) {
+          this.chart.destroy();
+          this.chart = undefined;
+          this.renderChart();
+        }
+      });
+    });
   }
 
   ngAfterViewInit(): void {

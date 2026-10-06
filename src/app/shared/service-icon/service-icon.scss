@@ -10,6 +10,10 @@
   justify-content: center;
   border-radius: 50%;
   overflow: hidden;
+  // Filo fino por dentro: en oscuro, un logo de fondo negro (Disney+) no se
+  // pierde contra el tablero. En claro el token es transparente.
+  outline: 1px solid var(--nc-tile-edge);
+  outline-offset: -1px;
 
   svg,
   img {

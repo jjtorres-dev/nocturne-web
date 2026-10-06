@@ -18,8 +18,9 @@
 .letrero {
   position: relative;
   overflow: hidden;
-  background: var(--nc-nav);
-  color: var(--nc-on-nav);
+  // La fachada no se apaga: el letrero tiene su rojo propio en los dos temas.
+  background: var(--nc-letrero);
+  color: var(--nc-on-letrero);
 }
 
 // La imagen de marca cubre el letrero entero sin deformarse. Mientras sea
@@ -60,7 +61,7 @@
 .letrero-lema {
   max-width: 28ch;
   margin: 20px 0 0;
-  color: var(--nc-on-nav-muted);
+  color: var(--nc-on-letrero-muted);
   font-size: 1.125rem;
   line-height: 1.4;
   text-wrap: balance;

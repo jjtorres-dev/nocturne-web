@@ -48,7 +48,25 @@
               <mat-icon>settings</mat-icon>
               <span>Configuración</span>
             </a>
-            <button mat-menu-item type="button" (click)="logout()">
+            <!-- Tema: se guarda en este navegador, no en la cuenta. -->
+            <div class="nc-menu-grupo" role="group" aria-labelledby="menu-tema">
+              <span class="nc-menu-titulo" id="menu-tema">Tema</span>
+              @for (option of themeOptions; track option.value) {
+                <button
+                  mat-menu-item
+                  type="button"
+                  role="menuitemradio"
+                  class="nc-menu-opcion"
+                  [class.nc-menu-elegida]="theme.preference() === option.value"
+                  [attr.aria-checked]="theme.preference() === option.value"
+                  (click)="elegirTema($event, option.value)"
+                >
+                  <mat-icon>{{ option.icon }}</mat-icon>
+                  <span>{{ option.label }}</span>
+                </button>
+              }
+            </div>
+            <button mat-menu-item type="button" class="nc-menu-salir" (click)="logout()">
               <mat-icon>logout</mat-icon>
               <span>Cerrar sesión</span>
             </button>

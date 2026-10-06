@@ -297,10 +297,38 @@ describe('AdminLayout', () => {
 
       expect(menuPanel()).not.toBeNull();
       expect(userCard().getAttribute('aria-expanded')).toBe('true');
-      const items = Array.from(menuPanel()!.querySelectorAll('[mat-menu-item]')).map((el) =>
-        el.textContent?.replace('settings', '').replace('logout', '').trim(),
-      );
-      expect(items).toEqual(['Configuración', 'Cerrar sesión']);
+      const items = Array.from(
+        menuPanel()!.querySelectorAll('[mat-menu-item] .mat-mdc-menu-item-text'),
+      ).map((el) => el.textContent?.trim());
+      expect(items).toEqual([
+        'Configuración',
+        'Claro',
+        'Oscuro',
+        'Según el dispositivo',
+        'Cerrar sesión',
+      ]);
+    });
+
+    it('el tema arranca en "Claro" y elegir "Oscuro" lo aplica, lo guarda y deja el menú abierto', async () => {
+      await setup(admin);
+      fixture.detectChanges();
+      await openMenu();
+      expect(menuItem('Claro').getAttribute('role')).toBe('menuitemradio');
+      expect(menuItem('Claro').getAttribute('aria-checked')).toBe('true');
+      expect(menuItem('Oscuro').getAttribute('aria-checked')).toBe('false');
+
+      menuItem('Oscuro').click();
+      await settle();
+
+      expect(menuItem('Oscuro').getAttribute('aria-checked')).toBe('true');
+      expect(menuItem('Claro').getAttribute('aria-checked')).toBe('false');
+      expect(document.documentElement.dataset['theme']).toBe('dark');
+      expect(localStorage.getItem('nocturne_theme')).toBe('dark');
+      expect(userCard().getAttribute('aria-expanded')).toBe('true');
+
+      menuItem('Claro').click();
+      await settle();
+      expect(document.documentElement.dataset['theme']).toBe('light');
     });
 
     it('el menú se cierra con Escape', async () => {

@@ -6,6 +6,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatMenuModule } from '@angular/material/menu';
 import { Auth, UserRole } from '../../core/auth/auth';
+import { Theme, ThemePreference } from '../../core/theme/theme';
 import { AvatarInicial } from '../../shared/avatar-inicial/avatar-inicial';
 import { injectIsMobile } from '../../shared/breakpoints';
 import { GlobalSearch } from '../../shared/global-search/global-search';
@@ -47,6 +48,15 @@ export class AdminLayout {
   protected readonly isMobile = injectIsMobile();
 
   protected readonly roleLabels = USER_ROLE_LABELS;
+
+  protected readonly theme = inject(Theme);
+
+  // Opciones de tema del menú del usuario, en el orden en que se muestran.
+  protected readonly themeOptions: { value: ThemePreference; label: string; icon: string }[] = [
+    { value: 'light', label: 'Claro', icon: 'light_mode' },
+    { value: 'dark', label: 'Oscuro', icon: 'dark_mode' },
+    { value: 'system', label: 'Según el dispositivo', icon: 'devices' },
+  ];
 
   // Mientras el buscador global está expandido en móvil, oculta la marca del
   // header para que ocupe todo el ancho (ver GlobalSearch, que lo maneja con
@@ -118,6 +128,13 @@ export class AdminLayout {
     if (this.isMobile()) {
       void sidenav.close();
     }
+  }
+
+  // El menú queda abierto: se ve el cambio y se puede probar otro tema sin
+  // volver a abrirlo.
+  protected elegirTema(event: Event, preference: ThemePreference): void {
+    event.stopPropagation();
+    this.theme.set(preference);
   }
 
   async logout(): Promise<void> {

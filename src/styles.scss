@@ -10,7 +10,7 @@ html {
     (
       color: (
         primary: mat.$red-palette,
-        theme-type: light,
+        theme-type: color-scheme,
       ),
       typography: Archivo,
       density: -1,
@@ -27,9 +27,11 @@ html {
 //
 // REGLA: ningún componente escribe un color directo. Todo color sale de un
 // token de este bloque (o de un `--mat-sys-*`, que más abajo también apunta
-// acá). El modo oscuro va a redefinir solo este bloque.
+// acá). El modo oscuro redefine solo este bloque (ver más abajo).
 // ---------------------------------------------------------------------------
 :root {
+  color-scheme: light;
+
   // Tablero y superficies
   --nc-ground: #f3f1ee; // fondo de página
   --nc-surface: #ffffff; // paneles, diálogos, menús
@@ -54,6 +56,13 @@ html {
   --nc-nav-rule: #8f3040;
   --nc-on-nav: #fbf1ee;
   --nc-on-nav-muted: #e0bcb8;
+  // Filo del riel contra el tablero. En claro no se ve (es el mismo rojo);
+  // en oscuro es la línea que separa el riel del fondo.
+  --nc-nav-edge: #6e1423;
+  // El letrero del login: la fachada. No cambia con el tema.
+  --nc-letrero: #6e1423;
+  --nc-on-letrero: #fbf1ee;
+  --nc-on-letrero-muted: #e0bcb8;
   --nc-bulb: #ffc83d; // ámbar de bombilla: selección dentro del riel
   --nc-on-bulb: #1c1615;
 
@@ -100,6 +109,10 @@ html {
   --nc-avatar-6: #3d4a8a;
   --nc-on-avatar: #ffffff;
 
+  // Filo de los íconos de servicio (datos de terceros): solo en oscuro,
+  // donde un logo de fondo negro se perdería contra el tablero.
+  --nc-tile-edge: transparent;
+
   // Foco, selección de texto y capas flotantes
   --nc-focus: #1c1615;
   --nc-selection: #ffe08a;
@@ -129,6 +142,94 @@ html {
   --nc-text-primary: var(--nc-ink);
   --nc-text-secondary: var(--nc-ink-muted);
   --nc-accent-solid: var(--nc-brand);
+}
+
+// ---------------------------------------------------------------------------
+// Modo oscuro: "una sala de cine con las luces apagadas".
+//
+// La misma cartelera, de noche: el tablero se apaga a un negro cálido, las
+// letras y los rieles pasan a claro, el riel rojo queda como terciopelo en
+// penumbra y la bombilla ámbar sigue encendida. Solo se redefinen tokens:
+// ningún componente sabe en qué tema está. `data-theme` lo pone el script de
+// index.html antes del primer pintado y lo mantiene core/theme/theme.ts.
+// ---------------------------------------------------------------------------
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  // Tablero y superficies
+  --nc-ground: #140e0f;
+  --nc-surface: #1f1617;
+  --nc-surface-sunken: #2a1e20;
+  --nc-rule: #3a2b2d;
+  --nc-rule-field: #8a7a76;
+  --nc-rail: #f1e6e2;
+
+  // Tinta
+  --nc-ink: #f1e6e2;
+  --nc-ink-muted: #c2b3ae;
+  --nc-ink-faint: #9c8d88;
+  --nc-on-ink: #140e0f;
+
+  // Marca
+  --nc-brand: #ff8a98;
+  --nc-brand-tint: #3a1219;
+  --nc-on-brand: #140e0f;
+  // El riel: más rojo y más claro que el fondo, con un filo que lo separa.
+  --nc-nav: #451019;
+  --nc-nav-hover: #571522;
+  --nc-nav-active: #2a070e;
+  --nc-nav-rule: #6b2a36;
+  --nc-nav-edge: #6b2a36;
+  --nc-on-nav-muted: #c9a3a0;
+
+  // Estados. Los sólidos se aclaran y su texto pasa a oscuro: el blanco no
+  // llega a 4.5:1 sobre ellos.
+  --nc-vencida: #e5502a;
+  --nc-vencida-ink: #ff8a6b;
+  --nc-vencida-tint: #3a1a12;
+  --nc-on-vencida: #140e0f;
+  --nc-por-vencer: #f2b400;
+  --nc-por-vencer-ink: #ffcf4d;
+  --nc-por-vencer-tint: #3a2c08;
+  --nc-on-por-vencer: #140e0f;
+  --nc-al-dia: #2f9e68;
+  --nc-al-dia-ink: #5fd39a;
+  --nc-al-dia-tint: #12301f;
+  --nc-on-al-dia: #140e0f;
+  --nc-caida: #c45cbf;
+  --nc-caida-ink: #e88ae4;
+  --nc-caida-tint: #331531;
+  --nc-on-caida: #140e0f;
+  --nc-butaca-ocupada: #75645f; // 3:1 contra el tablero: se ve, pero apagada
+  --nc-libre: #1a9aad;
+  --nc-libre-ink: #5fd0e0;
+  --nc-libre-tint: #0f2c31;
+  --nc-on-libre: #140e0f;
+
+  // Series de dinero: los mismos papeles que en claro (lo que sale en
+  // neutros, lo que entra en azul, lo que queda en verde), a 3:1 o más
+  // sobre el tablero oscuro.
+  --nc-serie-ingresos: #8f9eea;
+  --nc-serie-inversion: #f1e6e2;
+  --nc-serie-gastos: #7d6f6a;
+  --nc-serie-ganancia: #3fb37a;
+
+  // Avatares: un punto más claros para despegar del tablero, todavía con
+  // iniciales en blanco a 4.5:1.
+  --nc-avatar-1: #b0354a;
+  --nc-avatar-2: #167d8c;
+  --nc-avatar-3: #268254;
+  --nc-avatar-4: #9c3d98;
+  --nc-avatar-5: #9a6a10;
+  --nc-avatar-6: #5563ad;
+
+  --nc-tile-edge: rgb(241 230 226 / 0.26);
+
+  // El foco sigue en tinta (ahora clara): el ámbar queda dentro del riel.
+  --nc-focus: #f1e6e2;
+  --nc-selection: #5a4410;
+  --nc-scrim: rgb(0 0 0 / 0.62);
+  --nc-shadow-overlay: 0 16px 40px -8px rgb(0 0 0 / 0.72), 0 2px 8px rgb(0 0 0 / 0.5);
 }
 
 // Reasigna los tokens M3 a la paleta de Nocturne.
@@ -219,7 +320,6 @@ html {
 }
 
 body {
-  color-scheme: light;
   background-color: var(--nc-ground);
   color: var(--nc-ink);
   font: var(--mat-sys-body-medium);
@@ -725,8 +825,55 @@ html {
     }
   }
 
-  .mat-mdc-menu-item + .mat-mdc-menu-item {
-    border-top: 1px solid var(--nc-rule);
+  // Tema: un grupo con su título y tres opciones; la elegida lleva un visto
+  // a la derecha. Líneas solo entre grupos, no entre las opciones.
+  .nc-menu-grupo {
+    border-block: 1px solid var(--nc-rule);
+    padding-block: 4px;
+    margin-block: 4px;
+  }
+
+  .nc-menu-titulo {
+    display: block;
+    padding: 6px 12px 2px;
+    color: var(--nc-ink-muted);
+    font-stretch: var(--nc-width-condensed);
+    font-size: 0.8125rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    line-height: 1.4;
+    text-transform: uppercase;
+  }
+
+  .nc-menu-opcion {
+    min-height: 36px;
+
+    // El visto ocupa su lugar siempre: el texto no se mueve al elegir.
+    &::after {
+      content: '';
+      flex-shrink: 0;
+      width: 6px;
+      height: 11px;
+      margin-inline: 10px 4px;
+      border: solid transparent;
+      border-width: 0 2px 2px 0;
+      rotate: 45deg;
+      translate: 0 -2px;
+    }
+  }
+
+  .nc-menu-elegida {
+    --mat-menu-item-icon-color: var(--nc-ink);
+
+    font-weight: 600;
+
+    .mat-icon {
+      font-variation-settings: 'FILL' 1;
+    }
+
+    &::after {
+      border-color: var(--nc-ink);
+    }
   }
 
   // La sección en la que ya se está.

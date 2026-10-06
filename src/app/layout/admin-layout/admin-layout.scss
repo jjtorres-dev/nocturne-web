@@ -16,6 +16,8 @@
 
   width: var(--nc-nav-width);
   border: 0;
+  // El filo del riel: en oscuro lo separa del tablero.
+  border-inline-end: 1px solid var(--nc-nav-edge);
 }
 
 // Columna que ocupa todo el alto del drawer: la navegación crece y el pie
@@ -279,6 +281,7 @@
   grid-auto-flow: column;
   height: calc(var(--nc-bottombar-height) + env(safe-area-inset-bottom));
   padding-bottom: env(safe-area-inset-bottom);
+  border-top: 1px solid var(--nc-nav-edge);
   background: var(--nc-nav);
 }
 

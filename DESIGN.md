@@ -21,6 +21,10 @@ colors:
   nav-rule: "#8f3040"
   on-nav: "#fbf1ee"
   on-nav-muted: "#e0bcb8"
+  nav-edge: "#6e1423"
+  letrero: "#6e1423"
+  on-letrero: "#fbf1ee"
+  on-letrero-muted: "#e0bcb8"
   bulb: "#ffc83d"
   on-bulb: "#1c1615"
   vencida: "#c2330f"
@@ -355,7 +359,7 @@ components:
 
 **Creative North Star: "Cartelera"**
 
-Nocturne es la cartelera de un cine de barrio a plena luz: cada cuenta es una sala y cada venta una función con hora de término. El panel se lee como un tablero de letras blanco ópalo con rieles negros bajo cada título, un riel de navegación rojo butaca a la izquierda y el ámbar de una bombilla encendida marcando dónde estás. Rechaza la rejilla de tarjetas iguales con un número grande sobre fondo azul oscuro.
+Nocturne es la cartelera de un cine de barrio a plena luz: cada cuenta es una sala y cada venta una función con hora de término. El panel se lee como un tablero de letras blanco ópalo con rieles negros bajo cada título, un riel de navegación rojo butaca a la izquierda y el ámbar de una bombilla encendida marcando dónde estás. Tiene dos temas: el claro, que es el de siempre y con el que arranca, y el oscuro, la misma sala con las luces apagadas (ver "Modo oscuro"). Rechaza la rejilla de tarjetas iguales con un número grande sobre fondo azul oscuro.
 
 Es una superficie de operación, densa y plana: filas de 36 a 50 px, paneles pegados a 16 px, color plano sin degradados y sin sombras en nada que esté apoyado en el tablero. El color fuerte se reserva para lo que cuesta dinero si se pasa por alto (vencidas, por vencer, caídas); todo lo demás es tinta sobre blanco. Celular y escritorio valen lo mismo: el mismo tablero se pliega a una columna con una barra inferior de cinco destinos.
 
@@ -409,7 +413,7 @@ Blanco ópalo y tinta casi negra de tono cálido, un rojo vino para la marca y c
 
 ### Named Rules
 
-**Regla del Token Único.** Todo color es un token CSS definido en el bloque `:root` de `src/styles.scss`. Ningún componente escribe un color literal (ni hex, ni `rgb()`, ni nombre): usa `var(--nc-*)` o un `--mat-sys-*`, que también apunta a ese bloque. Hay dos excepciones con nombre. **Datos de terceros:** los colores de marca de los servicios de streaming en `src/app/shared/service-icon/service-icons.data.ts`, que no son parte de la paleta. **Archivos de marca:** lo que el navegador lee antes o fuera del CSS no puede usar `var()` y lleva el valor literal de su token: `public/favicon.svg`, `public/favicon.ico`, `public/apple-touch-icon.png` y el `<meta name="theme-color">` de `src/index.html` (rojo butaca del riel `#6e1423`, claro `#fbf1ee` y ámbar de bombilla `#ffc83d`, los valores de `nav`, `on-nav` y `bulb`). Si uno de esos tokens cambia, esos archivos se actualizan a mano.
+**Regla del Token Único.** Todo color es un token CSS definido en el bloque `:root` de `src/styles.scss`. Ningún componente escribe un color literal (ni hex, ni `rgb()`, ni nombre): usa `var(--nc-*)` o un `--mat-sys-*`, que también apunta a ese bloque. Hay dos excepciones con nombre. **Datos de terceros:** los colores de marca de los servicios de streaming en `src/app/shared/service-icon/service-icons.data.ts`, que no son parte de la paleta. **Archivos de marca:** lo que el navegador lee antes o fuera del CSS no puede usar `var()` y lleva el valor literal de su token: `public/favicon.svg`, `public/favicon.ico`, `public/apple-touch-icon.png` y el `<meta name="theme-color">` de `src/index.html`, con su par en `src/app/core/theme/theme.ts` (rojo butaca del riel `#6e1423`, `#451019` en modo oscuro, claro `#fbf1ee` y ámbar de bombilla `#ffc83d`, los valores de `nav`, `on-nav` y `bulb`). Si uno de esos tokens cambia, esos archivos se actualizan a mano.
 
 **Regla del Lienzo.** Lo que pinta en un `<canvas>` (Chart.js) no puede usar `var()`: lee el token ya resuelto con `cssToken('--nc-…')` de `src/app/shared/css-token.ts`. Nunca se copia el valor al TypeScript.
 
@@ -534,7 +538,7 @@ Las líneas tienen tres pesos con papel fijo: 1 px `rule` separa, 1 px `rule-fie
 - El foco en tinta y el autocompletado son globales y se hicieron junto con el login; los revisados en pantalla son el login, los diálogos de venta y "Nueva cuenta". Los formularios de las demás pantallas los heredan sin revisar.
 
 ### Navigation
-- **Menú del usuario:** sale de la tarjeta del usuario, hacia arriba, con su mismo ancho (216 px). Es una capa flotante: blanca, borde `rule`, esquina de 3 px y la sombra de capa. Dos renglones de 40 px (44 px en celular) separados por una línea `rule`: "Configuración" y "Cerrar sesión", con ícono de 20 px en tinta suave y texto en tinta a 0.875rem; si ya se está en Configuración, su renglón va en 600 con el ícono relleno.
+- **Menú del usuario:** sale de la tarjeta del usuario, hacia arriba, con su mismo ancho (216 px). Es una capa flotante: fondo `surface`, borde `rule`, esquina de 3 px y la sombra de capa. Tres zonas separadas por una línea `rule`: "Configuración" (40 px; 44 px en celular; en 600 con el ícono relleno si ya se está ahí), el grupo **Tema** y "Cerrar sesión". Tema lleva su título en el registro Grupo (condensada 700, mayúsculas, tinta suave) y tres opciones de 36 px (44 px en celular) con ícono de 20 px: Claro, Oscuro y Según el dispositivo. Son `menuitemradio`: la elegida va en 600, con el ícono relleno y un visto en tinta a la derecha, cuyo lugar está reservado en las tres para que el texto no se mueva. Elegir un tema no cierra el menú: se ve el cambio y se puede probar otro. Ver "Modo oscuro".
 - **Riel** (232 px, `nav`): arriba la marca en letras de marquesina sobre una fila de bombillas punteada; el menú en grupos (Vender, Inventario, Dinero y, solo para el administrador, Administración) con título de grupo en `on-nav-muted` sobre una línea `nav-rule`; al pie, fijo, el usuario con avatar, nombre y rol.
 - **Ítem:** 36 px (44 px en celular), texto `on-nav` 0.875rem peso 500 sin tracking, ícono de 20 px en `on-nav-muted`. Toda etiqueta se lee completa en un renglón, también en negrita cuando es la sección actual: la más larga ("Clientes y proveedores") es la que fija el margen del ícono y el lugar de la bombilla.
 - **Hover:** capa de estado clara de Material; la tarjeta de usuario pasa a `nav-hover`.
@@ -705,7 +709,7 @@ Cifra del mes en condensada 800 a 1.875rem (bermellón si es negativa), una fran
 ### Login
 La fachada: dos mitades, letrero y taquilla, sin tarjeta.
 
-- **Letrero:** fondo `nav`. La marca en letras de marquesina (`on-nav`) sobre su fila de bombillas y, debajo, una línea que dice qué es Nocturne (1.125rem en `on-nav-muted`, hasta 28 caracteres de ancho; 0.875rem en la banda de celular). Por debajo de 900 px es la banda superior y conserva esa línea.
+- **Letrero:** fondo `letrero`, el mismo rojo en los dos temas (la fachada no se apaga). La marca en letras de marquesina (`on-letrero`) sobre su fila de bombillas y, debajo, una línea que dice qué es Nocturne (1.125rem en `on-letrero-muted`, hasta 28 caracteres de ancho; 0.875rem en la banda de celular). Por debajo de 900 px es la banda superior y conserva esa línea.
 - **Taquilla:** sobre el fondo ópalo, sin panel. Título "Ingresar" en Headline sobre el riel negro de 2 px, el aviso si corresponde, correo, contraseña, el botón a todo el ancho y una línea de ayuda.
 - **Avisos:** un bloque sobre los campos con esquina de 3 px, margen interno `10px 12px`, texto en tinta a 0.875rem y un ícono de 20 px en la `-ink` de su estado. Tinte por vencer con reloj para la sesión expirada; tinte al día con visto para la contraseña cambiada; tinte vencida para los errores (credenciales, sin conexión, servidor). Entra con un fundido de 160 ms que no corre con movimiento reducido.
 - **Botón Ingresar:** relleno en tinta, 48 px de alto, texto de 1rem en 600. Está habilitado en reposo: si falta un dato, al tocarlo se marcan los campos y el foco va al primero con problema. Mientras ingresa conserva el relleno en tinta, muestra un indicador de 18 px junto a "Ingresando…" y solo deja de responder.
@@ -726,7 +730,7 @@ Una N condensada clara (el valor de `on-nav`) sobre rojo butaca del riel, con un
 - **`public/favicon.svg`:** lienzo de 64, cinco bombillas redondas, esquina propia de ícono (10 de 64).
 - **`public/favicon.ico`:** cuadros de 48, 32 y 16 px; el de 16 px está dibujado aparte, con tres bombillas más grandes para que se lean.
 - **`public/apple-touch-icon.png`:** 180×180 px.
-- **`theme-color`:** el rojo del riel, para la barra del navegador en celular.
+- **`theme-color`:** el rojo del riel del tema en uso (`#6e1423` en claro, `#451019` en oscuro), para la barra del navegador en celular. Lo cambian el script de `src/index.html` y `src/app/core/theme/theme.ts`.
 - Estos archivos llevan colores literales: es la excepción "Archivos de marca" de la Regla del Token Único.
 
 ## Do's and Don'ts
@@ -751,7 +755,7 @@ Una N condensada clara (el valor de `on-nav`) sobre rojo butaca del riel, con un
 - **Sí:** agrega cada sección nueva al menú dentro de uno de los grupos existentes.
 - **Sí:** enfoca todo campo de formulario en tinta: contorno, etiqueta y cursor.
 - **Sí:** al reemplazar `public/login-marca.jpg`, usa 1600×2000 px (4:5) y deja el sujeto y las letras en la franja horizontal central.
-- **Sí:** cuando cambie `nav`, `on-nav` o `bulb`, actualiza a mano el favicon (SVG, ICO, PNG) y el `theme-color`.
+- **Sí:** cuando cambie `nav`, `on-nav` o `bulb`, actualiza a mano el favicon (SVG, ICO, PNG) y el `theme-color` (en `src/index.html` y en `src/app/core/theme/theme.ts`, un valor por tema).
 
 ### Don't:
 - **No:** escribas un color literal en un componente, ni copies el valor de un token a TypeScript.
@@ -770,19 +774,23 @@ Una N condensada clara (el valor de `on-nav`) sobre rojo butaca del riel, con un
 - **No:** pintes de verde el ícono de un vacío que no es una buena noticia.
 - **No:** corras las acciones de una fila para tapar el hueco de una que falta.
 
-## Modo oscuro (pendiente, no implementado)
+## Modo oscuro
 
-**Estado: propuesta.** Nada de esta sección existe en el código. El usuario pidió documentarla ahora y construirla después, detrás de un botón. La paleta de abajo **no se ha renderizado ni revisado en pantalla**; los contrastes no están verificados sobre la interfaz real y los valores pueden cambiar al construirla.
+**Estado: construido y revisado en pantalla** (todas las pantallas, a 1440 px y 360 px, con el administrador y con un revendedor; contraste de texto medido sobre la interfaz real).
 
-**Concepto: "una sala de cine con las luces apagadas".** La misma cartelera, de noche: el tablero se apaga a un negro cálido, las letras y los rieles pasan a claro, el riel rojo se oscurece como terciopelo en penumbra y la bombilla ámbar sigue encendida.
+**Concepto: "una sala de cine con las luces apagadas".** La misma cartelera, de noche: el tablero se apaga a un negro cálido, las letras y los rieles pasan a claro, el riel rojo queda como terciopelo en penumbra y la bombilla ámbar sigue encendida.
 
-**Cómo se va a implementar.** Redefiniendo ÚNICAMENTE el bloque de tokens `:root` bajo un selector de tema (por ejemplo `[data-theme='dark']`), con `color-scheme: dark`. Ningún componente cambia: por eso existe la Regla del Token Único. Los gráficos de canvas deben volver a leer `cssToken()` al cambiar de tema.
+**Cómo está hecho.** El bloque `:root[data-theme='dark']` de `src/styles.scss` redefine ÚNICAMENTE tokens, con `color-scheme: dark`; ningún componente sabe en qué tema está (Regla del Token Único). El tema de Material es `theme-type: color-scheme`, así lo poco que no pasa por un `--nc-*` sigue al mismo interruptor.
 
-**Login y favicon (propuesta, sin revisar).** El letrero del login y el favicon conservan el rojo butaca y el ámbar de bombilla también en modo oscuro: la fachada no se apaga. El favicon ya es así porque sus colores son literales. El letrero hoy pinta con `--nc-nav`, que en la tabla de abajo se oscurece; conservar su rojo va a pedir un token propio o una excepción al construirlo. Nada de esto se ha renderizado.
+**El selector.** Vive en el menú del usuario, grupo "Tema": Claro, Oscuro y Según el dispositivo. La app arranca en claro. La elección se guarda en el navegador de cada dispositivo (`localStorage`, clave `nocturne_theme`: `light`, `dark` o `system`), no en la cuenta: sobrevive al cierre de sesión y vale también para el login. La maneja `Theme` (`src/app/core/theme/theme.ts`), que pone `data-theme="light|dark"` en `<html>`, actualiza el `theme-color` y, en "Según el dispositivo", sigue al sistema aunque cambie con la app abierta.
 
-### Paleta propuesta
+**Sin parpadeo.** Un script en el `<head>` de `src/index.html` lee la misma clave y pone `data-theme` antes del primer pintado, antes de que cargue la app. Es la única copia de esa lógica fuera de `Theme`: si cambia la clave o sus valores, cambian los dos.
 
-| Token | Claro (construido) | Oscuro (propuesto) |
+**Gráficos.** Lo que pinta en canvas lee tokens ya resueltos (Regla del Lienzo), así que no se entera solo: Contabilidad observa `Theme.resolved` y arma el gráfico de nuevo al cambiar de tema.
+
+### Paleta
+
+| Token | Claro | Oscuro |
 | --- | --- | --- |
 | `--nc-ground` | `#f3f1ee` | `#140e0f` |
 | `--nc-surface` | `#ffffff` | `#1f1617` |
@@ -797,29 +805,51 @@ Una N condensada clara (el valor de `on-nav`) sobre rojo butaca del riel, con un
 | `--nc-brand` | `#8f1a2c` | `#ff8a98` |
 | `--nc-brand-tint` | `#f6e3e5` | `#3a1219` |
 | `--nc-on-brand` | `#ffffff` | `#140e0f` |
-| `--nc-nav` | `#6e1423` | `#2b0a11` |
-| `--nc-nav-hover` | `#85192b` | `#3d0f19` |
-| `--nc-nav-active` | `#4f0d18` | `#1a0509` |
-| `--nc-nav-rule` | `#8f3040` | `#4a1a24` |
+| `--nc-nav` | `#6e1423` | `#451019` |
+| `--nc-nav-hover` | `#85192b` | `#571522` |
+| `--nc-nav-active` | `#4f0d18` | `#2a070e` |
+| `--nc-nav-rule` | `#8f3040` | `#6b2a36` |
+| `--nc-nav-edge` | `#6e1423` | `#6b2a36` |
 | `--nc-on-nav` | `#fbf1ee` | `#fbf1ee` |
 | `--nc-on-nav-muted` | `#e0bcb8` | `#c9a3a0` |
-| `--nc-bulb` | `#ffc83d` | `#ffc83d` |
-| `--nc-on-bulb` | `#1c1615` | `#1c1615` |
-| `--nc-butaca-ocupada` | `#9a8f87` | `#5a4a47` |
-| `--nc-focus` | `#1c1615` | `#ffc83d` |
+| `--nc-letrero`, `--nc-on-letrero`, `--nc-on-letrero-muted` | `#6e1423`, `#fbf1ee`, `#e0bcb8` | iguales |
+| `--nc-bulb`, `--nc-on-bulb` | `#ffc83d`, `#1c1615` | iguales |
+| `--nc-butaca-ocupada` | `#9a8f87` | `#75645f` |
+| `--nc-serie-ingresos` | `#3d4a8a` | `#8f9eea` |
+| `--nc-serie-inversion` | `#1c1615` | `#f1e6e2` |
+| `--nc-serie-gastos` | `#9a8f87` | `#7d6f6a` |
+| `--nc-serie-ganancia` | `#1f7a4d` | `#3fb37a` |
+| `--nc-avatar-1` … `-6` | `#8f1a2c` `#0a6876` `#1a6941` `#7d2379` `#855600` `#3d4a8a` | `#b0354a` `#167d8c` `#268254` `#9c3d98` `#9a6a10` `#5563ad` |
+| `--nc-on-avatar` | `#ffffff` | `#ffffff` |
+| `--nc-tile-edge` | `transparent` | `rgb(241 230 226 / 0.26)` |
+| `--nc-focus` | `#1c1615` | `#f1e6e2` |
 | `--nc-selection` | `#ffe08a` | `#5a4410` |
+| `--nc-scrim` | `rgb(28 22 21 / 0.45)` | `rgb(0 0 0 / 0.62)` |
+| `--nc-shadow-overlay` | `0 12px 32px -8px rgb(28 22 21 / 0.28), 0 2px 6px rgb(28 22 21 / 0.12)` | `0 16px 40px -8px rgb(0 0 0 / 0.72), 0 2px 8px rgb(0 0 0 / 0.5)` |
 
-Estados (sólido / tinta sobre oscuro `-ink` / tinte `-tint`):
+Estados en oscuro (sólido / texto sobre el sólido `on-` / tinta `-ink` / tinte `-tint`):
 
-| Estado | Sólido | `-ink` | `-tint` |
-| --- | --- | --- | --- |
-| Vencida | `#e5502a` | `#ff8a6b` | `#3a1a12` |
-| Por vencer | `#f2b400` | `#ffcf4d` | `#3a2c08` |
-| Al día | `#2f9e68` | `#5fd39a` | `#12301f` |
-| Caída | `#b548b0` | `#e88ae4` | `#331531` |
-| Libre | `#1a9aad` | `#5fd0e0` | `#0f2c31` |
+| Estado | Sólido | `on-` | `-ink` | `-tint` |
+| --- | --- | --- | --- | --- |
+| Vencida | `#e5502a` | `#140e0f` | `#ff8a6b` | `#3a1a12` |
+| Por vencer | `#f2b400` | `#140e0f` | `#ffcf4d` | `#3a2c08` |
+| Al día | `#2f9e68` | `#140e0f` | `#5fd39a` | `#12301f` |
+| Caída | `#c45cbf` | `#140e0f` | `#e88ae4` | `#331531` |
+| Libre | `#1a9aad` | `#140e0f` | `#5fd0e0` | `#0f2c31` |
 
-Sombra de capa flotante (`--nc-shadow-overlay`): más profunda y más negra que la clara; valor por definir al construir.
+### Lo que se decidió al construirlo
+
+- **Texto oscuro sobre los sólidos de estado.** El blanco no llega a 4.5:1 sobre los sólidos aclarados; el negro cálido sí (5:1 o más). "Caída" se aclaró de la propuesta (`#b548b0` a `#c45cbf`) para pasar con el mismo texto que los demás.
+- **El riel se distingue por tres cosas.** Es más rojo y más claro que la propuesta (`#451019`, no `#2b0a11`, que quedaba a 1.05:1 del fondo), lleva un filo de 1 px hacia el tablero (`--nc-nav-edge`, invisible en claro porque vale lo mismo que `nav`) y la barra inferior del celular lleva ese filo arriba. `nav-active` sigue siendo más hondo que `nav`.
+- **La fachada no se apaga.** El letrero del login tiene tokens propios (`--nc-letrero`, `--nc-on-letrero`, `--nc-on-letrero-muted`) que valen lo mismo en los dos temas; la taquilla sí se oscurece. El favicon no cambia. El `theme-color` sí sigue al tema: es el `nav` de cada uno.
+- **El foco sigue en tinta.** La propuesta lo pasaba a ámbar; se descartó. En oscuro la tinta es clara (más de 13:1 sobre el tablero), la Regla del Foco en Tinta queda igual en los dos temas y el ámbar sigue sin salir del riel, donde se confundiría con "por vencer".
+- **La acción principal se invierte con la tinta.** El relleno pasa a claro con letras oscuras; lo mismo el resultado de la cuenta en Contabilidad (el "negativo de tablero") y la opción resaltada del buscador.
+- **Butaca ocupada** a `#75645f`: 3:1 contra el tablero, apagada pero visible, y lejos del turquesa de la libre.
+- **Series de dinero:** los mismos papeles (lo que sale en neutros, lo que entra en azul, lo que queda en verde), todos a 3:1 o más sobre `surface`.
+- **Avatares:** un punto más claros para despegar del tablero, todavía con iniciales en blanco a 4.5:1 o más.
+- **Íconos de servicios.** Son datos de terceros y no cambian de color. En oscuro cada ícono lleva un filo interior de 1 px (`--nc-tile-edge`, transparente en claro): así un logo de fondo casi negro (Disney+) no se pierde contra el tablero. Los glifos negros ya iban sobre un tile claro.
+- **Capas flotantes:** velo más negro y sombra más honda; conservan su borde `rule`, que en oscuro es lo que más las separa.
+- **Autocompletado del navegador:** la misma regla que en claro (el campo conserva su fondo y su tinta, que salen de tokens), más `color-scheme: dark` para lo que el navegador dibuja por su cuenta (barras de desplazamiento, controles nativos). No se pudo capturar un autocompletado real en el navegador sin cabeza; falta verlo en un navegador con datos guardados.
 
 ### Qué no cambia
 - La esquina de 3 px y las marcas de 1 px.
@@ -827,17 +857,5 @@ Sombra de capa flotante (`--nc-shadow-overlay`): más profunda y más negra que 
 - La tipografía, los dos anchos y las cifras tabulares.
 - La densidad y todas las medidas.
 - El color plano: sin degradados ni brillos.
-- El riel rojo, más oscuro, como terciopelo en la penumbra.
-- La bombilla ámbar y su regla: dentro del riel, en el letrero del login y en el favicon, más el foco.
-- El letrero del login y el favicon: rojo butaca y ámbar, como en claro (propuesta, sin revisar).
-
-### Por resolver al construirlo
-La propuesta no trae valores para estos tokens; se deciden y se revisan en pantalla, no antes:
-- Los `--nc-on-*` de los estados (texto sobre el sólido). Por cálculo, el blanco no alcanza 4.5:1 sobre los sólidos propuestos de vencida, al día y libre; hay que elegir entre texto oscuro o ajustar el sólido.
-- `--nc-nav` propuesto queda casi al mismo valor de luz que `--nc-ground` (cerca de 1.05:1): verificar en pantalla que el riel se siga leyendo como riel.
-- `--nc-butaca-ocupada` propuesto (`#5a4a47`) no se ha visto sobre `--nc-surface` oscuro: verificar en pantalla que la butaca ocupada se distinga del tablero y de la libre.
-- `--nc-serie-*`, `--nc-avatar-*`, `--nc-on-avatar` y `--nc-scrim`.
-- El valor exacto de `--nc-shadow-overlay`.
-- El botón de tema, dónde vive y cómo se recuerda la preferencia.
-- Cómo conserva el letrero del login su rojo si `--nc-nav` se oscurece, y si el `theme-color` cambia con el tema.
-- `--nc-focus` pasa a ámbar en la propuesta: con la Regla del Foco en Tinta, el contorno enfocado de todo campo sería ámbar sobre oscuro; verificarlo en pantalla junto al tinte y la tinta de "por vencer".
+- La bombilla ámbar y su regla: dentro del riel, en el letrero del login y en el favicon.
+- El letrero del login y el favicon.

@@ -7,6 +7,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <!-- Rojo butaca (--nc-nav): la barra del navegador en el celular. -->
     <meta name="theme-color" content="#6e1423" />
+    <!-- Tema: se aplica antes del primer pintado, así el modo oscuro no
+         parpadea en claro al cargar. Misma clave y valores que
+         src/app/core/theme/theme.ts, que toma el control al arrancar la app. -->
+    <script>
+      (function () {
+        var tema = 'light';
+        try {
+          tema = localStorage.getItem('nocturne_theme') || 'light';
+        } catch (e) {}
+        var oscuro =
+          tema === 'dark' ||
+          (tema === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        document.documentElement.dataset.theme = oscuro ? 'dark' : 'light';
+        if (oscuro) {
+          document.querySelector('meta[name="theme-color"]').content = '#451019';
+        }
+      })();
+    </script>
     <link rel="icon" type="image/svg+xml" href="favicon.svg" />
     <link rel="apple-touch-icon" href="apple-touch-icon.png" />
     <link rel="alternate icon" type="image/x-icon" href="favicon.ico" />
