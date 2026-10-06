@@ -139,20 +139,54 @@ describe('AdminLayout', () => {
       expect(sidenav().classList).not.toContain('mat-drawer-opened');
     });
 
-    it('el buscador global vive en el header, y expandirlo en móvil oculta hamburguesa y título', async () => {
+    it('el buscador global vive en el header, y expandirlo en móvil oculta la marca', async () => {
       await setup(admin, { mobile: true });
       fixture.detectChanges();
 
       const header: HTMLElement = fixture.nativeElement.querySelector('.header');
       expect(header.querySelector('app-global-search')).not.toBeNull();
-      expect(menuButton()).not.toBeNull();
-      expect(header.textContent).toContain('Panel de administración');
+      expect(header.querySelector('.header-brand')?.textContent).toContain('Nocturne');
 
       component.searchExpanded.set(true);
       fixture.detectChanges();
 
-      expect(menuButton()).toBeNull();
-      expect(header.textContent).not.toContain('Panel de administración');
+      expect(header.querySelector('.header-brand')).toBeNull();
+    });
+
+    it('en pantalla angosta hay barra inferior con los accesos de todos los días y "Menú"', async () => {
+      await setup(admin, { mobile: true });
+      fixture.detectChanges();
+
+      const bar: HTMLElement = fixture.nativeElement.querySelector('.bottom-bar');
+      const links = Array.from(bar.querySelectorAll<HTMLAnchorElement>('a.bottom-item'));
+      expect(links.map((a) => a.getAttribute('href'))).toEqual([
+        '/dashboard',
+        '/sales',
+        '/vencimientos',
+        '/accounts',
+      ]);
+      expect(bar.querySelector('.menu-button')?.textContent).toContain('Menú');
+    });
+
+    it('en desktop no hay barra inferior y el header muestra la fecha de hoy', async () => {
+      await setup(admin);
+      fixture.detectChanges();
+
+      const el: HTMLElement = fixture.nativeElement;
+      expect(el.querySelector('.bottom-bar')).toBeNull();
+      expect(el.querySelector('.header-date')?.textContent?.trim()).not.toBe('');
+    });
+
+    it('el menú agrupa las secciones bajo sus títulos, con Inicio suelto arriba', async () => {
+      await setup(admin);
+      fixture.detectChanges();
+
+      const el: HTMLElement = fixture.nativeElement;
+      const groups = Array.from(el.querySelectorAll('.nav-group')).map((g) =>
+        g.textContent?.trim(),
+      );
+      expect(groups).toEqual(['Vender', 'Inventario', 'Dinero', 'Administración']);
+      expect(el.querySelector('a[mat-list-item]')?.textContent).toContain('Inicio');
     });
 
     it('en desktop elegir una opción no cierra el sidebar', async () => {

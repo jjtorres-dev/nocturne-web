@@ -1,4 +1,5 @@
 import type { ChartData } from 'chart.js';
+import { cssToken } from '../../shared/css-token';
 import type { TimelinePoint } from './accounting.model';
 
 // Separado del componente para poder testear la transformación de datos sin
@@ -12,22 +13,22 @@ export function buildTimelineChartData(
       {
         label: 'Cobrado',
         data: points.map((p) => p.ingresos),
-        backgroundColor: '#10b981', // --nc-accent-green
+        backgroundColor: cssToken('--nc-serie-ingresos'),
       },
       {
         label: 'Pagado a proveedores',
         data: points.map((p) => p.inversion),
-        backgroundColor: '#f59e0b',
+        backgroundColor: cssToken('--nc-serie-inversion'),
       },
       {
         label: 'Gastos',
         data: points.map((p) => p.gastos),
-        backgroundColor: '#ef4444',
+        backgroundColor: cssToken('--nc-serie-gastos'),
       },
       {
         label: 'Ganancia',
         data: points.map((p) => p.ganancia),
-        backgroundColor: '#3b82f6', // --nc-accent-blue
+        backgroundColor: cssToken('--nc-serie-ganancia'),
       },
     ],
   };

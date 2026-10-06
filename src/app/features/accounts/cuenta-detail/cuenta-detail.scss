@@ -104,7 +104,7 @@
 
   &.positiva,
   &.cubierto {
-    color: var(--nc-accent-green);
+    color: var(--nc-al-dia-ink);
   }
 
   &.faltante {
@@ -161,10 +161,9 @@
   margin: 0 0 8px;
 }
 
-// Aviso de cuenta caída: arriba de todo, en ámbar (mismo color que el chip
+// Aviso de cuenta caída: arriba de todo, en magenta (mismo color que el chip
 // "Cuenta caída", ver .chip-caida en styles.scss).
 .caida-banner {
-  --nc-caida: #f59e0b;
   display: flex;
   align-items: center;
   flex-wrap: wrap;

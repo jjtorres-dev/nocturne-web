@@ -1,8 +1,7 @@
-// Include theming for Angular Material with `mat.theme()`.
-// This Sass mixin will define CSS variables that are used for styling Angular Material
-// components according to the Material 3 design spec.
-// Learn more about theming and how to use it for your application's
-// custom components at https://material.angular.dev/guide/theming
+// Tema de Angular Material (`mat.theme()`): define las variables CSS de
+// Material 3. La paleta de Material solo es el punto de partida; más abajo
+// todos los tokens `--mat-sys-*` de color se reasignan a los de Nocturne.
+// https://material.angular.dev/guide/theming
 @use '@angular/material' as mat;
 
 html {
@@ -10,135 +9,308 @@ html {
   @include mat.theme(
     (
       color: (
-        primary: mat.$azure-palette,
-        tertiary: mat.$blue-palette,
+        primary: mat.$red-palette,
+        theme-type: light,
       ),
-      typography: Inter,
-      density: 0,
+      typography: Archivo,
+      density: -1,
     )
   );
 }
 
 // ---------------------------------------------------------------------------
-// Nocturne — design tokens (Fase 1)
+// Nocturne — design tokens ("Cartelera", modo claro)
 //
-// Paleta de fondos oscuros (azul-marino) + acento en degradado azul -> verde-
-// turquesa. Documentados en detalle en PROGRESS.md (nocturne-api) para
-// referencia al propagar el resto de pantallas en Fase 2.
+// Una cartelera de cine de barrio a plena luz: tablero blanco ópalo con
+// rieles negros, riel de navegación rojo butaca, ámbar de bombilla para la
+// selección y estados en color plano. Ver DESIGN.md.
 //
-// Los tokens `--mat-sys-secondary*`, `--mat-sys-tertiary*` y `--mat-sys-error*`
-// quedan intactos a propósito: de ahí salen los colores de Activo/Inactivo
-// (mat-chip con/sin `highlighted`) y Vencida (mat-sys-error), que no debemos
-// tocar en esta fase.
+// REGLA: ningún componente escribe un color directo. Todo color sale de un
+// token de este bloque (o de un `--mat-sys-*`, que más abajo también apunta
+// acá). El modo oscuro va a redefinir solo este bloque.
 // ---------------------------------------------------------------------------
 :root {
-  // Fondos
-  --nc-bg: #0a0e17;
-  --nc-surface: #131826;
-  --nc-surface-elevated: #1c2333;
-  --nc-border: #232b40;
+  // Tablero y superficies
+  --nc-ground: #f3f1ee; // fondo de página
+  --nc-surface: #ffffff; // paneles, diálogos, menús
+  --nc-surface-sunken: #e9e5e0; // hover de filas, campos de búsqueda
+  --nc-rule: #d8d2cb; // líneas finas entre filas y paneles
+  --nc-rule-field: #8c8179; // borde de campos (3:1 contra el tablero)
+  --nc-rail: #1c1615; // riel negro del tablero: va bajo cada título
 
-  // Texto (nunca blanco/negro puro)
-  --nc-text-primary: #e6e9f0;
-  --nc-text-secondary: #94a3b8;
+  // Tinta
+  --nc-ink: #1c1615;
+  --nc-ink-muted: #5c524d;
+  --nc-ink-faint: #746a64;
+  --nc-on-ink: #ffffff;
 
-  // Acento: degradado azul eléctrico -> verde-turquesa
-  --nc-accent-blue: #3b82f6;
-  --nc-accent-cyan: #06b6d4;
-  --nc-accent-green: #10b981;
-  --nc-accent-solid: #14b8a6; // color intermedio sólido, para texto/íconos
-  --nc-gradient-primary: linear-gradient(135deg, #3b82f6 0%, #06b6d4 50%, #10b981 100%);
-  --nc-glow-primary:
-    0 0 16px 1px rgba(59, 130, 246, 0.35),
-    0 0 28px 4px rgba(16, 185, 129, 0.2);
+  // Marca: rojo butaca (navegación, enlaces, selección)
+  --nc-brand: #8f1a2c;
+  --nc-brand-tint: #f6e3e5;
+  --nc-on-brand: #ffffff;
+  --nc-nav: #6e1423; // fondo del riel de navegación
+  --nc-nav-hover: #85192b;
+  --nc-nav-active: #4f0d18;
+  --nc-nav-rule: #8f3040;
+  --nc-on-nav: #fbf1ee;
+  --nc-on-nav-muted: #e0bcb8;
+  --nc-bulb: #ffc83d; // ámbar de bombilla: selección dentro del riel
+  --nc-on-bulb: #1c1615;
 
-  // Tipografía
-  --nc-font-sans: 'Inter', 'Roboto', sans-serif;
-  // Definida para Fase 2 (códigos de venta/combo tipo V-00001 / C-00001).
+  // Estados (color plano). `-ink` es la variante para texto sobre claro.
+  --nc-vencida: #c2330f;
+  --nc-vencida-ink: #b02b0b;
+  --nc-vencida-tint: #fbe6df;
+  --nc-on-vencida: #ffffff;
+  --nc-por-vencer: #f2b400;
+  --nc-por-vencer-ink: #855600;
+  --nc-por-vencer-tint: #fdf1cc;
+  --nc-on-por-vencer: #1c1615;
+  --nc-al-dia: #1f7a4d;
+  --nc-al-dia-ink: #1a6941;
+  --nc-al-dia-tint: #dff1e6;
+  --nc-on-al-dia: #ffffff;
+  --nc-caida: #8e2a8a;
+  --nc-caida-ink: #7d2379;
+  --nc-caida-tint: #f4e2f3;
+  --nc-on-caida: #ffffff;
+  --nc-libre: #0d7c8c;
+  --nc-libre-ink: #0a6876;
+  --nc-libre-tint: #dcf0f3;
+  --nc-on-libre: #ffffff;
+
+  // Series de dinero (Contabilidad y "Ganancia del mes"). Tintas propias:
+  // los colores de estado no se reutilizan para categorías de dinero. Solo
+  // lo que queda (la ganancia) lleva color.
+  --nc-serie-ingresos: #b5aba3;
+  --nc-serie-inversion: #1c1615;
+  --nc-serie-gastos: #746a64;
+  --nc-serie-ganancia: #1f7a4d;
+
+  // Avatares con inicial: tonos oscuros para iniciales en blanco.
+  --nc-avatar-1: #8f1a2c;
+  --nc-avatar-2: #0a6876;
+  --nc-avatar-3: #1a6941;
+  --nc-avatar-4: #7d2379;
+  --nc-avatar-5: #855600;
+  --nc-avatar-6: #3d4a8a;
+  --nc-on-avatar: #ffffff;
+
+  // Foco, selección de texto y capas flotantes
+  --nc-focus: #1c1615;
+  --nc-selection: #ffe08a;
+  --nc-scrim: rgb(28 22 21 / 0.45);
+  --nc-shadow-overlay: 0 12px 32px -8px rgb(28 22 21 / 0.28), 0 2px 6px rgb(28 22 21 / 0.12);
+
+  // Forma, medidas y movimiento
+  --nc-radius: 3px;
+  --nc-rail-width: 2px;
+  --nc-nav-width: 232px;
+  --nc-topbar-height: 52px;
+  --nc-bottombar-height: 60px;
+  --nc-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --nc-duration: 160ms;
+
+  // Tipografía: Archivo en dos anchos.
+  --nc-font-sans: 'Archivo', 'Helvetica Neue', Arial, sans-serif;
   --nc-font-mono: 'JetBrains Mono', 'Roboto Mono', monospace;
+  --nc-width-condensed: 68%; // títulos y cifras (letras de cartelera)
+  --nc-width-normal: 100%;
+
+  // Alias heredados: los usan las pantallas que todavía no se rediseñaron.
+  // No usarlos en código nuevo.
+  --nc-bg: var(--nc-ground);
+  --nc-surface-elevated: var(--nc-surface-sunken);
+  --nc-border: var(--nc-rule);
+  --nc-text-primary: var(--nc-ink);
+  --nc-text-secondary: var(--nc-ink-muted);
+  --nc-accent-solid: var(--nc-brand);
 }
 
-// Reasigna los tokens M3 de superficie/fondo/primario a la paleta oscura de
-// Nocturne. No se tocan secondary/tertiary/error (ver nota arriba).
+// Reasigna los tokens M3 a la paleta de Nocturne.
 html {
-  --mat-sys-surface: var(--nc-bg);
-  --mat-sys-surface-dim: var(--nc-bg);
-  --mat-sys-surface-bright: var(--nc-surface-elevated);
-  --mat-sys-surface-container-lowest: var(--nc-bg);
+  --mat-sys-background: var(--nc-ground);
+  --mat-sys-on-background: var(--nc-ink);
+  --mat-sys-surface: var(--nc-ground);
+  --mat-sys-surface-dim: var(--nc-surface-sunken);
+  --mat-sys-surface-bright: var(--nc-surface);
+  --mat-sys-surface-variant: var(--nc-surface-sunken);
+  --mat-sys-surface-container-lowest: var(--nc-surface);
   --mat-sys-surface-container-low: var(--nc-surface);
   --mat-sys-surface-container: var(--nc-surface);
-  --mat-sys-surface-container-high: var(--nc-surface-elevated);
-  --mat-sys-surface-container-highest: var(--nc-surface-elevated);
-  --mat-sys-background: var(--nc-bg);
-  --mat-sys-on-background: var(--nc-text-primary);
-  --mat-sys-on-surface: var(--nc-text-primary);
-  --mat-sys-on-surface-variant: var(--nc-text-secondary);
-  --mat-sys-outline: #2f3a52;
-  --mat-sys-outline-variant: #1c2333;
-  --mat-sys-inverse-surface: var(--nc-text-primary);
-  --mat-sys-inverse-on-surface: var(--nc-bg);
+  --mat-sys-surface-container-high: var(--nc-surface-sunken);
+  --mat-sys-surface-container-highest: var(--nc-surface-sunken);
+  --mat-sys-on-surface: var(--nc-ink);
+  --mat-sys-on-surface-variant: var(--nc-ink-muted);
+  --mat-sys-outline: var(--nc-rule-field);
+  --mat-sys-outline-variant: var(--nc-rule);
+  --mat-sys-inverse-surface: var(--nc-ink);
+  --mat-sys-inverse-on-surface: var(--nc-on-ink);
+  --mat-sys-inverse-primary: var(--nc-bulb);
+  --mat-sys-scrim: var(--nc-ink);
 
-  --mat-sys-primary: var(--nc-accent-solid);
-  --mat-sys-on-primary: #ffffff;
-  --mat-sys-primary-container: var(--nc-surface-elevated);
-  --mat-sys-on-primary-container: var(--nc-text-primary);
+  --mat-sys-primary: var(--nc-brand);
+  --mat-sys-on-primary: var(--nc-on-brand);
+  --mat-sys-primary-container: var(--nc-brand-tint);
+  --mat-sys-on-primary-container: var(--nc-brand);
+  --mat-sys-secondary: var(--nc-ink-muted);
+  --mat-sys-on-secondary: var(--nc-on-ink);
+  // "Activo" (mat-chip highlighted) en todas las listas.
+  --mat-sys-secondary-container: var(--nc-al-dia-tint);
+  --mat-sys-on-secondary-container: var(--nc-al-dia-ink);
+  --mat-sys-tertiary: var(--nc-libre);
+  --mat-sys-on-tertiary: var(--nc-on-libre);
+  --mat-sys-tertiary-container: var(--nc-libre-tint);
+  --mat-sys-on-tertiary-container: var(--nc-libre-ink);
+  --mat-sys-error: var(--nc-vencida-ink);
+  --mat-sys-on-error: var(--nc-on-vencida);
+  --mat-sys-error-container: var(--nc-vencida-tint);
+  --mat-sys-on-error-container: var(--nc-vencida-ink);
+
+  // Esquinas: una sola, la de las letras del tablero.
+  --mat-sys-corner-extra-small: var(--nc-radius);
+  --mat-sys-corner-small: var(--nc-radius);
+  --mat-sys-corner-medium: var(--nc-radius);
+  --mat-sys-corner-large: var(--nc-radius);
+  --mat-sys-corner-extra-large: var(--nc-radius);
+  --mat-button-filled-container-shape: var(--nc-radius);
+  --mat-button-outlined-container-shape: var(--nc-radius);
+  --mat-button-text-container-shape: var(--nc-radius);
+  --mat-button-tonal-container-shape: var(--nc-radius);
+  --mat-button-protected-container-shape: var(--nc-radius);
+  --mat-icon-button-container-shape: var(--nc-radius);
+  --mat-icon-button-state-layer-shape: var(--nc-radius);
+
+  // Sin sombras en lo que está apoyado en el tablero; solo flotan las capas.
+  --mat-sys-level0: none;
+  --mat-sys-level1: none;
+  --mat-sys-level2: var(--nc-shadow-overlay);
+  --mat-sys-level3: var(--nc-shadow-overlay);
+  --mat-sys-level4: var(--nc-shadow-overlay);
+  --mat-sys-level5: var(--nc-shadow-overlay);
+
+  // Acción principal en tinta negra: el rojo queda para la marca y el
+  // bermellón para "vencida", así un botón nunca se confunde con un estado.
+  --mat-button-filled-container-color: var(--nc-ink);
+  --mat-button-filled-label-text-color: var(--nc-on-ink);
+  --mat-button-outlined-label-text-color: var(--nc-ink);
+  --mat-button-outlined-outline-color: var(--nc-rule-field);
+
+  --mat-dialog-container-color: var(--nc-surface);
+  --mat-sidenav-scrim-color: var(--nc-scrim);
 }
 
 body {
-  // La app usa el esquema oscuro de Nocturne (scrollbars/inputs nativos
-  // también se pintan oscuros).
-  color-scheme: dark;
-
-  // Fondo y colores base usando los system-tokens de Material 3, ya
-  // remapeados arriba a la paleta oscura de Nocturne.
-  background-color: var(--mat-sys-surface);
-  color: var(--mat-sys-on-surface);
+  color-scheme: light;
+  background-color: var(--nc-ground);
+  color: var(--nc-ink);
   font: var(--mat-sys-body-medium);
-
-  // Reset the user agent margin.
+  font-family: var(--nc-font-sans);
+  font-variant-numeric: tabular-nums;
+  caret-color: var(--nc-brand);
+  scrollbar-color: var(--nc-rule-field) transparent;
   margin: 0;
   height: 100%;
 }
-/* You can add global styles to this file, and also import other style files */
 
-// ---------------------------------------------------------------------------
-// Botones primarios: fondo en degradado + glow sutil al hover.
-// ---------------------------------------------------------------------------
-.mat-mdc-unelevated-button.mat-primary:not(:disabled),
-.mat-mdc-raised-button.mat-primary:not(:disabled) {
-  background-image: var(--nc-gradient-primary);
-  background-color: transparent;
-  color: #ffffff;
-  transition:
-    box-shadow 150ms ease,
-    transform 150ms ease;
+::selection {
+  background: var(--nc-selection);
+  color: var(--nc-ink);
 }
 
-.mat-mdc-unelevated-button.mat-primary:not(:disabled):hover,
-.mat-mdc-raised-button.mat-primary:not(:disabled):hover {
-  box-shadow: var(--nc-glow-primary);
+a {
+  color: var(--nc-brand);
+  text-underline-offset: 0.18em;
 }
 
 // ---------------------------------------------------------------------------
-// Tarjetas: borde sutil + sombra suave (el fondo ya sale de
-// --mat-sys-surface-container-low, remapeado arriba).
+// Tipografía de cartelera: títulos en Archivo condensada, mayúsculas.
+// ---------------------------------------------------------------------------
+h1,
+.nc-title {
+  margin: 0;
+  font-family: var(--nc-font-sans);
+  font-stretch: var(--nc-width-condensed);
+  font-size: 1.75rem;
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  text-wrap: balance;
+}
+
+// Panel: una región del tablero. Título sobre riel negro, sin sombra.
+.nc-panel {
+  background: var(--nc-surface);
+  border: 1px solid var(--nc-rule);
+  border-radius: var(--nc-radius);
+}
+
+.nc-panel-title {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0;
+  padding: 10px 14px 8px;
+  border-bottom: var(--nc-rail-width) solid var(--nc-rail);
+  font-family: var(--nc-font-sans);
+  font-stretch: var(--nc-width-condensed);
+  font-size: 1.125rem;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+// Marcador de carga: ocupa el lugar del contenido mientras llega.
+.nc-skeleton {
+  display: block;
+  height: 36px;
+  border-radius: var(--nc-radius);
+  background: var(--nc-surface-sunken);
+  animation: nc-skeleton 1.2s ease-in-out infinite alternate;
+}
+
+@keyframes nc-skeleton {
+  to {
+    opacity: 0.5;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nc-skeleton {
+    animation: none;
+  }
+}
+
+// Texto solo para lectores de pantalla.
+.nc-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+// ---------------------------------------------------------------------------
+// Tarjetas y tablas de las pantallas que aún usan Material tal cual.
 // ---------------------------------------------------------------------------
 .mat-mdc-card {
-  border: 1px solid var(--nc-border);
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--nc-rule);
 }
 
-// ---------------------------------------------------------------------------
-// Tablas: encabezados más discretos, filas con hover sutil.
-// ---------------------------------------------------------------------------
 .mat-mdc-header-cell {
-  color: var(--nc-text-secondary);
-  font-weight: 500;
-  letter-spacing: 0.01em;
+  color: var(--nc-ink-muted);
+  font-weight: 600;
 }
 
 .mat-mdc-row:hover {
-  background-color: var(--nc-surface-elevated);
+  background-color: var(--nc-surface-sunken);
 }
 
 // ---------------------------------------------------------------------------
@@ -174,21 +346,14 @@ body {
   gap: 4px;
 }
 
-// Diálogos: superficie elevada (no la misma que el fondo/sidebar) + borde
-// sutil, igual que las tarjetas.
-html {
-  --mat-dialog-container-color: var(--nc-surface-elevated);
-}
-
+// Diálogos: borde fino, igual que los paneles.
 .mat-mdc-dialog-surface {
-  border: 1px solid var(--nc-border);
+  border: 1px solid var(--nc-rule);
 }
 
 // mat-chip sin "highlighted" (Inactivo, en todas las pantallas): con
 // opacity 0.7 el texto (on-surface-variant) queda por debajo de 4.5:1 de
-// contraste contra el nuevo fondo oscuro. Se sube a 0.8 (~4.9:1) sin tocar
-// el color en sí — antes vivía duplicado en cada *-list.scss/*.detail.scss,
-// se centraliza acá.
+// contraste. Con 0.8 pasa sin tocar el color en sí.
 .chip-inactive {
   opacity: 0.8;
 }
@@ -199,17 +364,16 @@ html {
 .chip-vencida {
   --mat-chip-label-text-color: var(--mat-sys-error);
   --mat-chip-outline-color: var(--mat-sys-error);
-  --mat-chip-elevated-container-color: color-mix(in srgb, var(--mat-sys-error) 14%, transparent);
+  --mat-chip-elevated-container-color: var(--nc-vencida-tint);
 }
 
-// Venta cuya cuenta está caída (shared/cuenta-caida-chip): ámbar y no el
-// rojo de "Vencida" — no es un cobro atrasado, es un cliente esperando
+// Venta cuya cuenta está caída (shared/cuenta-caida-chip): magenta y no el
+// bermellón de "Vencida" — no es un cobro atrasado, es un cliente esperando
 // a que el proveedor reponga la cuenta.
 .chip-caida {
-  --nc-chip-caida: #f59e0b;
-  --mat-chip-label-text-color: var(--nc-chip-caida);
-  --mat-chip-outline-color: var(--nc-chip-caida);
-  --mat-chip-elevated-container-color: color-mix(in srgb, var(--nc-chip-caida) 14%, transparent);
+  --mat-chip-label-text-color: var(--nc-caida-ink);
+  --mat-chip-outline-color: var(--nc-caida);
+  --mat-chip-elevated-container-color: var(--nc-caida-tint);
 }
 
 // ---------------------------------------------------------------------------

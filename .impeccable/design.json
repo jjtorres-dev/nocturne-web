@@ -1,0 +1,1157 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-05T00:00:00Z",
+  "title": "Design System: Nocturne",
+  "extensions": {
+    "colorMeta": {
+      "ground": {
+        "role": "neutral",
+        "displayName": "Ópalo",
+        "cssVar": "--nc-ground",
+        "canonical": "oklch(95.9% 0.005 78)",
+        "tonalRamp": [
+          "#0c0b09",
+          "#282624",
+          "#444240",
+          "#656360",
+          "#858380",
+          "#a9a7a4",
+          "#cccac7",
+          "#f0eeeb"
+        ]
+      },
+      "surface": {
+        "role": "neutral",
+        "displayName": "Blanco de tablero",
+        "cssVar": "--nc-surface",
+        "canonical": "oklch(100.0% 0.000 90)",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#262626",
+          "#424242",
+          "#636363",
+          "#838383",
+          "#a8a8a8",
+          "#cacaca",
+          "#eeeeee"
+        ]
+      },
+      "surface-sunken": {
+        "role": "neutral",
+        "displayName": "Ópalo hundido",
+        "cssVar": "--nc-surface-sunken",
+        "canonical": "oklch(92.4% 0.008 74)",
+        "tonalRamp": [
+          "#0d0b08",
+          "#292622",
+          "#45423e",
+          "#66635e",
+          "#86827e",
+          "#aba7a2",
+          "#cecac5",
+          "#f2eee9"
+        ]
+      },
+      "rule": {
+        "role": "neutral",
+        "displayName": "Línea fina",
+        "cssVar": "--nc-rule",
+        "canonical": "oklch(86.7% 0.012 72)",
+        "tonalRamp": [
+          "#0e0a06",
+          "#2a2620",
+          "#46413c",
+          "#67625c",
+          "#88827c",
+          "#aca7a0",
+          "#cfc9c2",
+          "#f4ede6"
+        ]
+      },
+      "rule-field": {
+        "role": "neutral",
+        "displayName": "Borde de campo",
+        "cssVar": "--nc-rule-field",
+        "canonical": "oklch(61.1% 0.018 58)",
+        "tonalRamp": [
+          "#110905",
+          "#2d241e",
+          "#4a4039",
+          "#6b6159",
+          "#8c8179",
+          "#b1a59d",
+          "#d4c8bf",
+          "#f8ece3"
+        ]
+      },
+      "rail": {
+        "role": "primary",
+        "displayName": "Riel negro",
+        "cssVar": "--nc-rail",
+        "canonical": "oklch(20.7% 0.010 29)",
+        "tonalRamp": [
+          "#0f0a09",
+          "#2b2524",
+          "#48403f",
+          "#696160",
+          "#898180",
+          "#aea5a4",
+          "#d1c8c7",
+          "#f5eceb"
+        ]
+      },
+      "ink": {
+        "role": "primary",
+        "displayName": "Tinta negra",
+        "cssVar": "--nc-ink",
+        "canonical": "oklch(20.7% 0.010 29)",
+        "tonalRamp": [
+          "#0f0a09",
+          "#2b2524",
+          "#48403f",
+          "#696160",
+          "#898180",
+          "#aea5a4",
+          "#d1c8c7",
+          "#f5eceb"
+        ]
+      },
+      "ink-muted": {
+        "role": "neutral",
+        "displayName": "Tinta suave",
+        "cssVar": "--nc-ink-muted",
+        "canonical": "oklch(44.7% 0.016 48)",
+        "tonalRamp": [
+          "#110906",
+          "#2d2420",
+          "#4a403b",
+          "#6b615c",
+          "#8b817b",
+          "#b0a59f",
+          "#d4c8c2",
+          "#f8ece6"
+        ]
+      },
+      "ink-faint": {
+        "role": "neutral",
+        "displayName": "Tinta tenue",
+        "cssVar": "--nc-ink-faint",
+        "canonical": "oklch(53.2% 0.016 53)",
+        "tonalRamp": [
+          "#100906",
+          "#2d241f",
+          "#49403b",
+          "#6b615b",
+          "#8b817b",
+          "#b0a59f",
+          "#d3c8c1",
+          "#f8ece5"
+        ]
+      },
+      "on-ink": {
+        "role": "neutral",
+        "displayName": "Sobre tinta",
+        "cssVar": "--nc-on-ink",
+        "canonical": "oklch(100.0% 0.000 90)",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#262626",
+          "#424242",
+          "#636363",
+          "#838383",
+          "#a8a8a8",
+          "#cacaca",
+          "#eeeeee"
+        ]
+      },
+      "brand": {
+        "role": "secondary",
+        "displayName": "Rojo butaca",
+        "cssVar": "--nc-brand",
+        "canonical": "oklch(42.6% 0.151 19)",
+        "tonalRamp": [
+          "#200002",
+          "#4e0210",
+          "#800220",
+          "#a83440",
+          "#ce575f",
+          "#f87c82",
+          "#feb4b5",
+          "#fee9e8"
+        ]
+      },
+      "brand-tint": {
+        "role": "secondary",
+        "displayName": "Tinte rojo butaca",
+        "cssVar": "--nc-brand-tint",
+        "canonical": "oklch(93.2% 0.021 10)",
+        "tonalRamp": [
+          "#130809",
+          "#302224",
+          "#4d3e40",
+          "#6f5f60",
+          "#8f7e80",
+          "#b4a3a4",
+          "#d8c5c7",
+          "#fce9eb"
+        ]
+      },
+      "on-brand": {
+        "role": "neutral",
+        "displayName": "Sobre rojo butaca",
+        "cssVar": "--nc-on-brand",
+        "canonical": "oklch(100.0% 0.000 90)",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#262626",
+          "#424242",
+          "#636363",
+          "#838383",
+          "#a8a8a8",
+          "#cacaca",
+          "#eeeeee"
+        ]
+      },
+      "nav": {
+        "role": "secondary",
+        "displayName": "Rojo del riel",
+        "cssVar": "--nc-nav",
+        "canonical": "oklch(35.6% 0.123 17)",
+        "tonalRamp": [
+          "#200003",
+          "#4e0212",
+          "#761c29",
+          "#9d4149",
+          "#c26268",
+          "#ea868b",
+          "#feb4b6",
+          "#fee9e9"
+        ]
+      },
+      "nav-hover": {
+        "role": "secondary",
+        "displayName": "Rojo del riel, hover",
+        "cssVar": "--nc-nav-hover",
+        "canonical": "oklch(40.6% 0.142 18)",
+        "tonalRamp": [
+          "#200003",
+          "#4f0011",
+          "#7c0e24",
+          "#a43944",
+          "#ca5b63",
+          "#f38086",
+          "#fdb5b6",
+          "#ffe8e8"
+        ]
+      },
+      "nav-active": {
+        "role": "secondary",
+        "displayName": "Rojo del riel, activo",
+        "cssVar": "--nc-nav-active",
+        "canonical": "oklch(28.4% 0.096 17)",
+        "tonalRamp": [
+          "#200003",
+          "#4b0815",
+          "#6c2930",
+          "#924b4f",
+          "#b56a6e",
+          "#dd8f92",
+          "#feb4b6",
+          "#fee8e9"
+        ]
+      },
+      "nav-rule": {
+        "role": "secondary",
+        "displayName": "Línea del riel",
+        "cssVar": "--nc-nav-rule",
+        "canonical": "oklch(45.3% 0.128 14)",
+        "tonalRamp": [
+          "#200004",
+          "#4f0015",
+          "#77192d",
+          "#9f3e4d",
+          "#c35f6c",
+          "#ed848f",
+          "#fdb4ba",
+          "#ffe8e9"
+        ]
+      },
+      "on-nav": {
+        "role": "neutral",
+        "displayName": "Sobre el riel",
+        "cssVar": "--nc-on-nav",
+        "canonical": "oklch(96.5% 0.012 37)",
+        "tonalRamp": [
+          "#100a08",
+          "#2c2522",
+          "#48403e",
+          "#6a615f",
+          "#8a817e",
+          "#afa5a3",
+          "#d2c8c5",
+          "#f6ece9"
+        ]
+      },
+      "on-nav-muted": {
+        "role": "neutral",
+        "displayName": "Sobre el riel, suave",
+        "cssVar": "--nc-on-nav-muted",
+        "canonical": "oklch(82.5% 0.042 25)",
+        "tonalRamp": [
+          "#190403",
+          "#381e1c",
+          "#573a37",
+          "#7a5a57",
+          "#9b7a76",
+          "#c19e9a",
+          "#e5c1bd",
+          "#fee9e6"
+        ]
+      },
+      "bulb": {
+        "role": "tertiary",
+        "displayName": "Ámbar de bombilla",
+        "cssVar": "--nc-bulb",
+        "canonical": "oklch(85.9% 0.158 86)",
+        "tonalRamp": [
+          "#120900",
+          "#332400",
+          "#553f01",
+          "#7d5e08",
+          "#a47d0a",
+          "#d0a01d",
+          "#f8c234",
+          "#ffedc6"
+        ]
+      },
+      "on-bulb": {
+        "role": "neutral",
+        "displayName": "Sobre bombilla",
+        "cssVar": "--nc-on-bulb",
+        "canonical": "oklch(20.7% 0.010 29)",
+        "tonalRamp": [
+          "#0f0a09",
+          "#2b2524",
+          "#48403f",
+          "#696160",
+          "#898180",
+          "#aea5a4",
+          "#d1c8c7",
+          "#f5eceb"
+        ]
+      },
+      "vencida": {
+        "role": "tertiary",
+        "displayName": "Bermellón vencida",
+        "cssVar": "--nc-vencida",
+        "canonical": "oklch(53.9% 0.185 34)",
+        "tonalRamp": [
+          "#200000",
+          "#4c0900",
+          "#7a1901",
+          "#b12b06",
+          "#db4c2c",
+          "#fe7b5d",
+          "#fdb7a6",
+          "#ffe9e4"
+        ]
+      },
+      "vencida-ink": {
+        "role": "tertiary",
+        "displayName": "Tinta bermellón",
+        "cssVar": "--nc-vencida-ink",
+        "canonical": "oklch(49.9% 0.174 34)",
+        "tonalRamp": [
+          "#200000",
+          "#4c0900",
+          "#7a1903",
+          "#b02b0c",
+          "#d75135",
+          "#fe7b5f",
+          "#ffb6a5",
+          "#ffe9e4"
+        ]
+      },
+      "vencida-tint": {
+        "role": "tertiary",
+        "displayName": "Tinte bermellón",
+        "cssVar": "--nc-vencida-tint",
+        "canonical": "oklch(94.0% 0.025 39)",
+        "tonalRamp": [
+          "#140704",
+          "#31221d",
+          "#4f3e39",
+          "#705f59",
+          "#917e78",
+          "#b6a39c",
+          "#dac5bf",
+          "#fee9e2"
+        ]
+      },
+      "on-vencida": {
+        "role": "neutral",
+        "displayName": "Sobre vencida",
+        "cssVar": "--nc-on-vencida",
+        "canonical": "oklch(100.0% 0.000 90)",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#262626",
+          "#424242",
+          "#636363",
+          "#838383",
+          "#a8a8a8",
+          "#cacaca",
+          "#eeeeee"
+        ]
+      },
+      "por-vencer": {
+        "role": "tertiary",
+        "displayName": "Ámbar por vencer",
+        "cssVar": "--nc-por-vencer",
+        "canonical": "oklch(80.6% 0.165 83)",
+        "tonalRamp": [
+          "#130900",
+          "#332300",
+          "#563e02",
+          "#7e5d0a",
+          "#a67b0f",
+          "#d49e04",
+          "#febf24",
+          "#feecca"
+        ]
+      },
+      "por-vencer-ink": {
+        "role": "tertiary",
+        "displayName": "Tinta ámbar",
+        "cssVar": "--nc-por-vencer-ink",
+        "canonical": "oklch(49.3% 0.105 73)",
+        "tonalRamp": [
+          "#140800",
+          "#372101",
+          "#5c3a00",
+          "#875804",
+          "#a97833",
+          "#d09d59",
+          "#f5c07b",
+          "#ffebd4"
+        ]
+      },
+      "por-vencer-tint": {
+        "role": "tertiary",
+        "displayName": "Tinte ámbar",
+        "cssVar": "--nc-por-vencer-tint",
+        "canonical": "oklch(95.8% 0.050 92)",
+        "tonalRamp": [
+          "#110a00",
+          "#2f2505",
+          "#4c4222",
+          "#6d6342",
+          "#8e8361",
+          "#b3a784",
+          "#d6caa6",
+          "#faeec9"
+        ]
+      },
+      "on-por-vencer": {
+        "role": "neutral",
+        "displayName": "Sobre por vencer",
+        "cssVar": "--nc-on-por-vencer",
+        "canonical": "oklch(20.7% 0.010 29)",
+        "tonalRamp": [
+          "#0f0a09",
+          "#2b2524",
+          "#48403f",
+          "#696160",
+          "#898180",
+          "#aea5a4",
+          "#d1c8c7",
+          "#f5eceb"
+        ]
+      },
+      "al-dia": {
+        "role": "tertiary",
+        "displayName": "Verde al día",
+        "cssVar": "--nc-al-dia",
+        "canonical": "oklch(51.5% 0.110 157)",
+        "tonalRamp": [
+          "#001005",
+          "#003019",
+          "#02502e",
+          "#187549",
+          "#419768",
+          "#68bd8b",
+          "#8be0ad",
+          "#c5ffda"
+        ]
+      },
+      "al-dia-ink": {
+        "role": "tertiary",
+        "displayName": "Tinta verde",
+        "cssVar": "--nc-al-dia-ink",
+        "canonical": "oklch(46.3% 0.099 156)",
+        "tonalRamp": [
+          "#001005",
+          "#003018",
+          "#03502e",
+          "#28744b",
+          "#4b956a",
+          "#71bb8e",
+          "#93deb0",
+          "#c5ffd9"
+        ]
+      },
+      "al-dia-tint": {
+        "role": "tertiary",
+        "displayName": "Tinte verde",
+        "cssVar": "--nc-al-dia-tint",
+        "canonical": "oklch(94.2% 0.024 159)",
+        "tonalRamp": [
+          "#030e08",
+          "#1c2a22",
+          "#38463e",
+          "#58685e",
+          "#78887e",
+          "#9cada2",
+          "#bed0c5",
+          "#e2f4e9"
+        ]
+      },
+      "on-al-dia": {
+        "role": "neutral",
+        "displayName": "Sobre al día",
+        "cssVar": "--nc-on-al-dia",
+        "canonical": "oklch(100.0% 0.000 90)",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#262626",
+          "#424242",
+          "#636363",
+          "#838383",
+          "#a8a8a8",
+          "#cacaca",
+          "#eeeeee"
+        ]
+      },
+      "caida": {
+        "role": "tertiary",
+        "displayName": "Magenta caída",
+        "cssVar": "--nc-caida",
+        "canonical": "oklch(47.5% 0.174 330)",
+        "tonalRamp": [
+          "#1b001a",
+          "#440142",
+          "#70006d",
+          "#963292",
+          "#ba55b5",
+          "#e27bdc",
+          "#fea8f7",
+          "#fee6fc"
+        ]
+      },
+      "caida-ink": {
+        "role": "tertiary",
+        "displayName": "Tinta magenta",
+        "cssVar": "--nc-caida-ink",
+        "canonical": "oklch(43.2% 0.160 330)",
+        "tonalRamp": [
+          "#1a0019",
+          "#440042",
+          "#6d0f6a",
+          "#93398e",
+          "#b65ab0",
+          "#de80d7",
+          "#ffa7f7",
+          "#ffe5fc"
+        ]
+      },
+      "caida-tint": {
+        "role": "tertiary",
+        "displayName": "Tinte magenta",
+        "cssVar": "--nc-caida-tint",
+        "canonical": "oklch(93.2% 0.030 328)",
+        "tonalRamp": [
+          "#120712",
+          "#2e212e",
+          "#4b3d4b",
+          "#6d5d6c",
+          "#8d7d8d",
+          "#b2a1b1",
+          "#d6c4d5",
+          "#fae8f9"
+        ]
+      },
+      "on-caida": {
+        "role": "neutral",
+        "displayName": "Sobre caída",
+        "cssVar": "--nc-on-caida",
+        "canonical": "oklch(100.0% 0.000 90)",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#262626",
+          "#424242",
+          "#636363",
+          "#838383",
+          "#a8a8a8",
+          "#cacaca",
+          "#eeeeee"
+        ]
+      },
+      "libre": {
+        "role": "tertiary",
+        "displayName": "Turquesa libre",
+        "cssVar": "--nc-libre",
+        "canonical": "oklch(53.9% 0.091 211)",
+        "tonalRamp": [
+          "#000e12",
+          "#002c33",
+          "#064b55",
+          "#02707f",
+          "#3092a2",
+          "#5bb7c8",
+          "#7fdbec",
+          "#cff7ff"
+        ]
+      },
+      "libre-ink": {
+        "role": "tertiary",
+        "displayName": "Tinta turquesa",
+        "cssVar": "--nc-libre-ink",
+        "canonical": "oklch(47.5% 0.080 211)",
+        "tonalRamp": [
+          "#000e12",
+          "#002c34",
+          "#024b56",
+          "#186f7d",
+          "#41909f",
+          "#67b6c4",
+          "#8ad9e8",
+          "#d0f7fe"
+        ]
+      },
+      "libre-tint": {
+        "role": "tertiary",
+        "displayName": "Tinte turquesa",
+        "cssVar": "--nc-libre-tint",
+        "canonical": "oklch(94.1% 0.021 208)",
+        "tonalRamp": [
+          "#020e10",
+          "#1a292c",
+          "#354648",
+          "#55676a",
+          "#75878a",
+          "#99acaf",
+          "#bbcfd2",
+          "#dff3f6"
+        ]
+      },
+      "on-libre": {
+        "role": "neutral",
+        "displayName": "Sobre libre",
+        "cssVar": "--nc-on-libre",
+        "canonical": "oklch(100.0% 0.000 90)",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#262626",
+          "#424242",
+          "#636363",
+          "#838383",
+          "#a8a8a8",
+          "#cacaca",
+          "#eeeeee"
+        ]
+      },
+      "serie-ingresos": {
+        "role": "tertiary",
+        "displayName": "Serie ingresos",
+        "cssVar": "--nc-serie-ingresos",
+        "canonical": "oklch(74.7% 0.016 61)",
+        "tonalRamp": [
+          "#100a05",
+          "#2c251e",
+          "#49413a",
+          "#6a615a",
+          "#8b817a",
+          "#b0a69e",
+          "#d3c8c0",
+          "#f7ece4"
+        ]
+      },
+      "serie-inversion": {
+        "role": "tertiary",
+        "displayName": "Serie inversión",
+        "cssVar": "--nc-serie-inversion",
+        "canonical": "oklch(20.7% 0.010 29)",
+        "tonalRamp": [
+          "#0f0a09",
+          "#2b2524",
+          "#48403f",
+          "#696160",
+          "#898180",
+          "#aea5a4",
+          "#d1c8c7",
+          "#f5eceb"
+        ]
+      },
+      "serie-gastos": {
+        "role": "tertiary",
+        "displayName": "Serie gastos",
+        "cssVar": "--nc-serie-gastos",
+        "canonical": "oklch(53.2% 0.016 53)",
+        "tonalRamp": [
+          "#100906",
+          "#2d241f",
+          "#49403b",
+          "#6b615b",
+          "#8b817b",
+          "#b0a59f",
+          "#d3c8c1",
+          "#f8ece5"
+        ]
+      },
+      "serie-ganancia": {
+        "role": "tertiary",
+        "displayName": "Serie ganancia",
+        "cssVar": "--nc-serie-ganancia",
+        "canonical": "oklch(51.5% 0.110 157)",
+        "tonalRamp": [
+          "#001005",
+          "#003019",
+          "#02502e",
+          "#187549",
+          "#419768",
+          "#68bd8b",
+          "#8be0ad",
+          "#c5ffda"
+        ]
+      },
+      "avatar-1": {
+        "role": "tertiary",
+        "displayName": "Avatar 1",
+        "cssVar": "--nc-avatar-1",
+        "canonical": "oklch(42.6% 0.151 19)",
+        "tonalRamp": [
+          "#200002",
+          "#4e0210",
+          "#800220",
+          "#a83440",
+          "#ce575f",
+          "#f87c82",
+          "#feb4b5",
+          "#fee9e8"
+        ]
+      },
+      "avatar-2": {
+        "role": "tertiary",
+        "displayName": "Avatar 2",
+        "cssVar": "--nc-avatar-2",
+        "canonical": "oklch(47.5% 0.080 211)",
+        "tonalRamp": [
+          "#000e12",
+          "#002c34",
+          "#024b56",
+          "#186f7d",
+          "#41909f",
+          "#67b6c4",
+          "#8ad9e8",
+          "#d0f7fe"
+        ]
+      },
+      "avatar-3": {
+        "role": "tertiary",
+        "displayName": "Avatar 3",
+        "cssVar": "--nc-avatar-3",
+        "canonical": "oklch(46.3% 0.099 156)",
+        "tonalRamp": [
+          "#001005",
+          "#003018",
+          "#03502e",
+          "#28744b",
+          "#4b956a",
+          "#71bb8e",
+          "#93deb0",
+          "#c5ffd9"
+        ]
+      },
+      "avatar-4": {
+        "role": "tertiary",
+        "displayName": "Avatar 4",
+        "cssVar": "--nc-avatar-4",
+        "canonical": "oklch(43.2% 0.160 330)",
+        "tonalRamp": [
+          "#1a0019",
+          "#440042",
+          "#6d0f6a",
+          "#93398e",
+          "#b65ab0",
+          "#de80d7",
+          "#ffa7f7",
+          "#ffe5fc"
+        ]
+      },
+      "avatar-5": {
+        "role": "tertiary",
+        "displayName": "Avatar 5",
+        "cssVar": "--nc-avatar-5",
+        "canonical": "oklch(49.3% 0.105 73)",
+        "tonalRamp": [
+          "#140800",
+          "#372101",
+          "#5c3a00",
+          "#875804",
+          "#a97833",
+          "#d09d59",
+          "#f5c07b",
+          "#ffebd4"
+        ]
+      },
+      "avatar-6": {
+        "role": "tertiary",
+        "displayName": "Avatar 6",
+        "cssVar": "--nc-avatar-6",
+        "canonical": "oklch(43.1% 0.106 273)",
+        "tonalRamp": [
+          "#050034",
+          "#171d59",
+          "#303c7a",
+          "#4f5ea0",
+          "#6e7ec3",
+          "#91a3eb",
+          "#b9c8fe",
+          "#e9eefe"
+        ]
+      },
+      "on-avatar": {
+        "role": "neutral",
+        "displayName": "Sobre avatar",
+        "cssVar": "--nc-on-avatar",
+        "canonical": "oklch(100.0% 0.000 90)",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#262626",
+          "#424242",
+          "#636363",
+          "#838383",
+          "#a8a8a8",
+          "#cacaca",
+          "#eeeeee"
+        ]
+      },
+      "focus": {
+        "role": "primary",
+        "displayName": "Foco",
+        "cssVar": "--nc-focus",
+        "canonical": "oklch(20.7% 0.010 29)",
+        "tonalRamp": [
+          "#0f0a09",
+          "#2b2524",
+          "#48403f",
+          "#696160",
+          "#898180",
+          "#aea5a4",
+          "#d1c8c7",
+          "#f5eceb"
+        ]
+      },
+      "selection": {
+        "role": "neutral",
+        "displayName": "Selección de texto",
+        "cssVar": "--nc-selection",
+        "canonical": "oklch(91.4% 0.111 90)",
+        "tonalRamp": [
+          "#110a00",
+          "#312500",
+          "#524000",
+          "#796006",
+          "#9d8025",
+          "#c2a54f",
+          "#e6c872",
+          "#ffeebf"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Cifra de cada bloque de la barra de señal."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "h1 de pantalla y marca del riel."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Título de panel, siempre sobre riel negro."
+      },
+      "funcion": {
+        "displayName": "Función",
+        "purpose": "El cuándo que abre cada fila, en la tinta de su estado."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Texto general de trabajo, con cifras tabulares."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Etiquetas de bloque, enlaces dentro de títulos, botones compactos."
+      },
+      "grupo": {
+        "displayName": "Grupo",
+        "purpose": "Títulos de grupo del menú y del buscador; fecha de la barra superior."
+      },
+      "code": {
+        "displayName": "Code",
+        "purpose": "Códigos de venta y combo."
+      }
+    },
+    "shadows": [
+      {
+        "name": "shadow-overlay",
+        "value": "0 12px 32px -8px rgb(28 22 21 / 0.28), 0 2px 6px rgb(28 22 21 / 0.12)",
+        "purpose": "Única sombra del sistema: capas flotantes (menús, diálogos, resultados del buscador). Token --nc-shadow-overlay."
+      },
+      {
+        "name": "scrim",
+        "value": "rgb(28 22 21 / 0.45)",
+        "purpose": "Velo detrás del panel lateral en celular. Token --nc-scrim."
+      },
+      {
+        "name": "riel-hover",
+        "value": "inset 0 -4px 0 var(--nc-rail)",
+        "purpose": "No es elevación: riel negro interior que aparece al pasar por un bloque de señal (8px al presionar)."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Curva de toda transición de estado. Token --nc-ease."
+      },
+      {
+        "name": "duration",
+        "value": "160ms",
+        "purpose": "Duración de las transiciones de estado; no hay secuencias de entrada. Token --nc-duration."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "celular",
+        "value": "767.98px"
+      },
+      {
+        "name": "una-columna",
+        "value": "1099.98px"
+      },
+      {
+        "name": "boton-corto",
+        "value": "1399.98px"
+      }
+    ],
+    "darkModeProposal": {
+      "status": "proposed-not-implemented",
+      "note": "Propuesta sin renderizar ni revisar en pantalla. Se implementará redefiniendo solo el bloque :root bajo un selector de tema (p. ej. [data-theme='dark']) con color-scheme: dark.",
+      "concept": "Una sala de cine con las luces apagadas",
+      "tokens": {
+        "--nc-ground": "#140e0f",
+        "--nc-surface": "#1f1617",
+        "--nc-surface-sunken": "#2a1e20",
+        "--nc-rule": "#3a2b2d",
+        "--nc-rule-field": "#8a7a76",
+        "--nc-rail": "#f1e6e2",
+        "--nc-ink": "#f1e6e2",
+        "--nc-ink-muted": "#c2b3ae",
+        "--nc-ink-faint": "#9c8d88",
+        "--nc-on-ink": "#140e0f",
+        "--nc-brand": "#ff8a98",
+        "--nc-brand-tint": "#3a1219",
+        "--nc-on-brand": "#140e0f",
+        "--nc-nav": "#2b0a11",
+        "--nc-nav-hover": "#3d0f19",
+        "--nc-nav-active": "#1a0509",
+        "--nc-nav-rule": "#4a1a24",
+        "--nc-on-nav": "#fbf1ee",
+        "--nc-on-nav-muted": "#c9a3a0",
+        "--nc-bulb": "#ffc83d",
+        "--nc-on-bulb": "#1c1615",
+        "--nc-vencida": "#e5502a",
+        "--nc-vencida-ink": "#ff8a6b",
+        "--nc-vencida-tint": "#3a1a12",
+        "--nc-por-vencer": "#f2b400",
+        "--nc-por-vencer-ink": "#ffcf4d",
+        "--nc-por-vencer-tint": "#3a2c08",
+        "--nc-al-dia": "#2f9e68",
+        "--nc-al-dia-ink": "#5fd39a",
+        "--nc-al-dia-tint": "#12301f",
+        "--nc-caida": "#b548b0",
+        "--nc-caida-ink": "#e88ae4",
+        "--nc-caida-tint": "#331531",
+        "--nc-libre": "#1a9aad",
+        "--nc-libre-ink": "#5fd0e0",
+        "--nc-libre-tint": "#0f2c31",
+        "--nc-focus": "#ffc83d",
+        "--nc-selection": "#5a4410"
+      }
+    }
+  },
+  "components": [
+    {
+      "name": "Botón principal",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Acción principal de la vista: relleno en tinta negra. Nunca rojo ni color de estado.",
+      "html": "<button class=\"ds-btn-primary\">Registrar venta</button>",
+      "css": ".ds-btn-primary { font-family: var(--nc-font-sans); height: 36px; padding: 0 16px; border: 0; border-radius: var(--nc-radius); background: var(--nc-ink); color: var(--nc-on-ink); font-size: 0.875rem; font-weight: 500; cursor: pointer; transition: opacity var(--nc-duration) var(--nc-ease); } .ds-btn-primary:hover { opacity: 0.88; } .ds-btn-primary:focus-visible { outline: 2px solid var(--nc-focus); outline-offset: 2px; }"
+    },
+    {
+      "name": "Botón delineado de fila",
+      "kind": "button",
+      "refersTo": "button-outlined",
+      "description": "Acción propia de una fila: texto en tinta y borde de campo.",
+      "html": "<button class=\"ds-btn-outlined\"><svg viewBox=\"0 0 24 24\" width=\"18\" height=\"18\" aria-hidden=\"true\"><path fill=\"currentColor\" d=\"M12 6v3l4-4-4-4v3c-4.42 0-8 3.58-8 8 0 1.57.46 3.03 1.24 4.26L6.7 14.8A5.87 5.87 0 0 1 6 12c0-3.31 2.69-6 6-6zm6.76 1.74L17.3 9.2c.44.84.7 1.79.7 2.8 0 3.31-2.69 6-6 6v-3l-4 4 4 4v-3c4.42 0 8-3.58 8-8 0-1.57-.46-3.03-1.24-4.26z\"/></svg><span>Renovar con el proveedor</span></button>",
+      "css": ".ds-btn-outlined { font-family: var(--nc-font-sans); display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 10px; border: 1px solid var(--nc-rule-field); border-radius: var(--nc-radius); background: transparent; color: var(--nc-ink); font-size: 0.8125rem; font-weight: 500; cursor: pointer; transition: background-color var(--nc-duration) var(--nc-ease); } .ds-btn-outlined:hover { background: var(--nc-surface-sunken); } .ds-btn-outlined:focus-visible { outline: 2px solid var(--nc-focus); outline-offset: 2px; }"
+    },
+    {
+      "name": "Buscador global",
+      "kind": "input",
+      "refersTo": "search-field",
+      "description": "Campo de la barra superior: ópalo hundido en reposo, blanco con borde negro al enfocar.",
+      "html": "<label class=\"ds-search\"><svg viewBox=\"0 0 24 24\" width=\"20\" height=\"20\" aria-hidden=\"true\"><path fill=\"currentColor\" d=\"M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z\"/></svg><input class=\"ds-search-input\" type=\"search\" placeholder=\"Buscar cliente, correo o código…\" aria-label=\"Buscar\"></label>",
+      "css": ".ds-search { display: flex; align-items: center; gap: 8px; width: 360px; max-width: 100%; height: 36px; padding-inline: 10px; border: 1px solid var(--nc-rule-field); border-radius: var(--nc-radius); background: var(--nc-surface-sunken); color: var(--nc-ink-muted); transition: background-color var(--nc-duration) var(--nc-ease), border-color var(--nc-duration) var(--nc-ease); } .ds-search:hover { border-color: var(--nc-ink-muted); } .ds-search:focus-within { border-color: var(--nc-focus); background: var(--nc-surface); outline: 1px solid var(--nc-focus); } .ds-search-input { flex: 1 1 auto; min-width: 0; border: 0; background: transparent; color: var(--nc-ink); font-family: var(--nc-font-sans); font-size: 0.875rem; outline: none; } .ds-search-input::placeholder { color: var(--nc-ink-muted); opacity: 1; }"
+    },
+    {
+      "name": "Riel de navegación",
+      "kind": "nav",
+      "refersTo": "nav-rail",
+      "description": "Riel rojo butaca: marca sobre bombillas, grupos, y la sección actual en ámbar con su bombilla encendida.",
+      "html": "<nav class=\"ds-rail\"><a class=\"ds-rail-brand\" href=\"#\">Nocturne</a><a class=\"ds-rail-item ds-rail-item--active\" href=\"#\"><svg viewBox=\"0 0 24 24\" width=\"20\" height=\"20\" aria-hidden=\"true\"><path fill=\"currentColor\" d=\"M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z\"/></svg><span>Inicio</span></a><div class=\"ds-rail-group\">Vender</div><a class=\"ds-rail-item\" href=\"#\"><svg viewBox=\"0 0 24 24\" width=\"20\" height=\"20\" aria-hidden=\"true\"><path fill=\"currentColor\" d=\"M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z\"/></svg><span>Ventas</span></a><a class=\"ds-rail-item\" href=\"#\"><svg viewBox=\"0 0 24 24\" width=\"20\" height=\"20\" aria-hidden=\"true\"><path fill=\"currentColor\" d=\"M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z\"/></svg><span>Vencimientos</span></a></nav>",
+      "css": ".ds-rail { font-family: var(--nc-font-sans); display: flex; flex-direction: column; width: 232px; padding: 0 8px 12px; background: var(--nc-nav); color: var(--nc-on-nav); } .ds-rail-brand { margin: 14px 8px 10px; padding-bottom: 9px; border-bottom: 3px dotted var(--nc-bulb); color: var(--nc-on-nav); font-stretch: var(--nc-width-condensed); text-transform: uppercase; font-size: 1.75rem; font-weight: 800; line-height: 1; letter-spacing: 0.06em; text-decoration: none; } .ds-rail-group { margin: 12px 0 4px; padding: 0 12px 4px; border-bottom: 1px solid var(--nc-nav-rule); color: var(--nc-on-nav-muted); font-stretch: var(--nc-width-condensed); text-transform: uppercase; font-size: 0.8125rem; font-weight: 700; letter-spacing: 0.06em; line-height: 1.6; } .ds-rail-item { position: relative; display: flex; align-items: center; gap: 10px; height: 36px; padding: 0 10px 0 12px; border-radius: var(--nc-radius); color: var(--nc-on-nav); font-size: 0.875rem; font-weight: 500; text-decoration: none; transition: background-color var(--nc-duration) var(--nc-ease); } .ds-rail-item svg { color: var(--nc-on-nav-muted); } .ds-rail-item:hover { background: var(--nc-nav-hover); } .ds-rail-item:focus-visible { outline: 2px solid var(--nc-bulb); outline-offset: -2px; } .ds-rail-item--active, .ds-rail-item--active:hover { background: var(--nc-nav-active); color: var(--nc-bulb); font-weight: 700; } .ds-rail-item--active svg { color: var(--nc-bulb); } .ds-rail-item--active::after { content: \"\"; position: absolute; inset-inline-end: 12px; top: 50%; width: 6px; height: 6px; border-radius: 50%; background: var(--nc-bulb); translate: 0 -50%; }"
+    },
+    {
+      "name": "Barra de señal",
+      "kind": "custom",
+      "refersTo": "senal-bloque-vencida",
+      "description": "Componente firma: franja exacta arriba y bloques-botón de color plano cuyo ancho es su conteo; las caídas van aparte.",
+      "html": "<section class=\"ds-senal\"><div class=\"ds-senal-medida\"><div class=\"ds-senal-franja\" aria-hidden=\"true\"><span class=\"ds-vencida\" style=\"flex-grow:4\"></span><span class=\"ds-por-vencer\" style=\"flex-grow:11\"></span><span class=\"ds-al-dia\" style=\"flex-grow:86\"></span></div><div class=\"ds-senal-ventas\"><button class=\"ds-senal-bloque ds-vencida\" style=\"flex-grow:4\"><span class=\"ds-senal-cifra\">4</span><span class=\"ds-senal-label\">Ventas vencidas</span></button><button class=\"ds-senal-bloque ds-por-vencer\" style=\"flex-grow:11\"><span class=\"ds-senal-cifra\">11</span><span class=\"ds-senal-label\">Ventas por vencer</span></button><button class=\"ds-senal-bloque ds-al-dia\" style=\"flex-grow:86\"><span class=\"ds-senal-cifra\">86</span><span class=\"ds-senal-label\">Ventas al día</span></button></div></div><button class=\"ds-senal-bloque ds-caida\"><span class=\"ds-senal-cifra\">2</span><span class=\"ds-senal-label\">Cuentas caídas</span></button></section>",
+      "css": ".ds-senal { font-family: var(--nc-font-sans); display: flex; align-items: flex-end; gap: 8px; font-variant-numeric: tabular-nums; } .ds-senal-medida { display: flex; flex: 1 1 auto; flex-direction: column; gap: 4px; min-width: 0; } .ds-senal-franja { display: flex; gap: 2px; height: 14px; } .ds-senal-franja span { flex: 0 0 0; border-radius: 1px; background: var(--ds-estado); } .ds-senal-ventas { display: flex; gap: 2px; min-width: 0; } .ds-senal-bloque { display: flex; flex: 0 0 auto; flex-direction: column; justify-content: center; gap: 2px; min-width: max-content; min-height: 72px; padding: 10px 16px; border: 0; border-radius: var(--nc-radius); background: var(--ds-estado); color: var(--ds-sobre); font: inherit; text-align: start; cursor: pointer; transition: box-shadow var(--nc-duration) var(--nc-ease); } .ds-senal-ventas .ds-senal-bloque { flex-basis: 0; } .ds-senal-bloque:hover { box-shadow: inset 0 -4px 0 var(--nc-rail); } .ds-senal-bloque:active { box-shadow: inset 0 -8px 0 var(--nc-rail); } .ds-senal-bloque:focus-visible { outline: 2px solid var(--nc-focus); outline-offset: 2px; } .ds-senal-cifra { font-stretch: var(--nc-width-condensed); font-size: 2.25rem; font-weight: 800; line-height: 0.95; } .ds-senal-label { font-size: 0.8125rem; font-weight: 600; line-height: 1.2; white-space: nowrap; } .ds-vencida { --ds-estado: var(--nc-vencida); --ds-sobre: var(--nc-on-vencida); } .ds-por-vencer { --ds-estado: var(--nc-por-vencer); --ds-sobre: var(--nc-on-por-vencer); } .ds-al-dia { --ds-estado: var(--nc-al-dia); --ds-sobre: var(--nc-on-al-dia); } .ds-caida { --ds-estado: var(--nc-caida); --ds-sobre: var(--nc-on-caida); }"
+    },
+    {
+      "name": "Panel con filas de función",
+      "kind": "card",
+      "refersTo": "panel",
+      "description": "Región del tablero: título condensado sobre riel negro y filas que abren con su cuándo en la tinta del estado.",
+      "html": "<section class=\"ds-panel\"><h2 class=\"ds-panel-title\">Cuentas que debes pagar al proveedor</h2><a class=\"ds-fila\" href=\"#\"><span class=\"ds-fila-cuando ds-fila-cuando--vencida\">Venció hace 2 días</span><span class=\"ds-fila-info\"><span class=\"ds-fila-nombre\">Netflix</span><span class=\"ds-fila-dato\">cine.familia01@proveedor.com</span></span><span class=\"ds-fila-clientes\">4 clientes la usan</span></a><a class=\"ds-fila\" href=\"#\"><span class=\"ds-fila-cuando\">Vence en 3 días</span><span class=\"ds-fila-info\"><span class=\"ds-fila-nombre\">Disney+</span><span class=\"ds-fila-dato\">magia.perfiles22@proveedor.com</span></span><span class=\"ds-fila-clientes\">1 cliente la usa</span></a></section>",
+      "css": ".ds-panel { font-family: var(--nc-font-sans); background: var(--nc-surface); border: 1px solid var(--nc-rule); border-radius: var(--nc-radius); color: var(--nc-ink); font-size: 0.875rem; font-variant-numeric: tabular-nums; } .ds-panel-title { margin: 0; padding: 10px 14px 8px; border-bottom: var(--nc-rail-width) solid var(--nc-rail); font-stretch: var(--nc-width-condensed); text-transform: uppercase; font-size: 1.125rem; font-weight: 700; line-height: 1.2; letter-spacing: 0.02em; } .ds-fila { display: grid; grid-template-columns: 8.5rem minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 7px 14px; border-bottom: 1px solid var(--nc-rule); color: inherit; text-decoration: none; transition: background-color var(--nc-duration) var(--nc-ease); } .ds-fila:last-child { border-bottom: 0; } .ds-fila:hover { background: var(--nc-surface-sunken); } .ds-fila:focus-visible { outline: 2px solid var(--nc-focus); outline-offset: -2px; } .ds-fila-cuando { color: var(--nc-por-vencer-ink); font-stretch: var(--nc-width-condensed); text-transform: uppercase; font-size: 1rem; font-weight: 700; letter-spacing: 0.02em; line-height: 1.2; } .ds-fila-cuando--vencida { color: var(--nc-vencida-ink); } .ds-fila-info { display: flex; flex-direction: column; min-width: 0; } .ds-fila-nombre { font-weight: 600; line-height: 1.3; } .ds-fila-dato, .ds-fila-clientes { color: var(--nc-ink-muted); font-size: 0.8125rem; line-height: 1.3; } .ds-fila-dato { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }"
+    },
+    {
+      "name": "Chips de estado",
+      "kind": "chip",
+      "refersTo": "chip-vencida",
+      "description": "Estado de un registro: tinte de fondo, tinta del estado y contorno. El color significa el estado y nada más.",
+      "html": "<span class=\"ds-chip ds-chip--activo\">Activo</span> <span class=\"ds-chip ds-chip--vencida\">Vencida</span> <span class=\"ds-chip ds-chip--caida\">Cuenta caída</span>",
+      "css": ".ds-chip { font-family: var(--nc-font-sans); display: inline-flex; align-items: center; height: 28px; padding: 0 12px; border: 1px solid transparent; border-radius: var(--nc-radius); font-size: 0.8125rem; font-weight: 500; } .ds-chip--activo { background: var(--nc-al-dia-tint); color: var(--nc-al-dia-ink); } .ds-chip--vencida { background: var(--nc-vencida-tint); color: var(--nc-vencida-ink); border-color: var(--nc-vencida-ink); } .ds-chip--caida { background: var(--nc-caida-tint); color: var(--nc-caida-ink); border-color: var(--nc-caida); }"
+    },
+    {
+      "name": "Butacas libres",
+      "kind": "custom",
+      "refersTo": "butaca",
+      "description": "Inventario disponible: una butaca turquesa por perfil o cuenta libre (hasta 12) junto a la cifra condensada.",
+      "html": "<div class=\"ds-inv\"><span class=\"ds-inv-nombre\">Netflix</span><span class=\"ds-butacas\" aria-hidden=\"true\"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span><span class=\"ds-inv-libres\">7 <small>perfiles</small></span></div>",
+      "css": ".ds-inv { font-family: var(--nc-font-sans); display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 5px 14px; background: var(--nc-surface); border: 1px solid var(--nc-rule); border-radius: var(--nc-radius); color: var(--nc-ink); font-size: 0.875rem; font-variant-numeric: tabular-nums; } .ds-inv-nombre { flex: 1 1 auto; font-weight: 600; } .ds-butacas { display: flex; gap: 2px; } .ds-butacas i { width: 6px; height: 14px; border-radius: 1px; background: var(--nc-libre); } .ds-inv-libres { min-width: 4.25rem; font-stretch: var(--nc-width-condensed); font-size: 1.25rem; font-weight: 800; line-height: 1; text-align: end; } .ds-inv-libres small { color: var(--nc-ink-muted); font-stretch: var(--nc-width-normal); font-size: 0.75rem; font-weight: 400; }"
+    },
+    {
+      "name": "Franja de ganancia",
+      "kind": "custom",
+      "refersTo": "panel",
+      "description": "Lo cobrado repartido en inversión, gastos y lo que queda, con las tintas de serie de dinero.",
+      "html": "<div class=\"ds-gan\"><span class=\"ds-gan-valor\">S/ 2,034.50</span><div class=\"ds-gan-franja\" aria-hidden=\"true\"><span class=\"ds-gan-inv\" style=\"flex-grow:1260\"></span><span class=\"ds-gan-gas\" style=\"flex-grow:185.5\"></span><span class=\"ds-gan-queda\" style=\"flex-grow:2034.5\"></span></div></div>",
+      "css": ".ds-gan { font-family: var(--nc-font-sans); display: grid; gap: 10px; padding: 12px 14px 14px; background: var(--nc-surface); border: 1px solid var(--nc-rule); border-radius: var(--nc-radius); color: var(--nc-ink); font-variant-numeric: tabular-nums; } .ds-gan-valor { font-stretch: var(--nc-width-condensed); font-size: 1.875rem; font-weight: 800; line-height: 1; } .ds-gan-franja { display: flex; gap: 2px; height: 12px; } .ds-gan-franja span { flex: 0 0 0; border-radius: 1px; } .ds-gan-inv { background: var(--nc-serie-inversion); } .ds-gan-gas { background: var(--nc-serie-gastos); } .ds-gan-queda { background: var(--nc-serie-ganancia); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "Cartelera",
+    "overview": "Nocturne es la cartelera de un cine de barrio a plena luz: cada cuenta es una sala y cada venta una función con hora de término. El panel se lee como un tablero de letras blanco ópalo con rieles negros bajo cada título, un riel de navegación rojo butaca a la izquierda y el ámbar de una bombilla encendida marcando dónde estás. Rechaza la rejilla de tarjetas iguales con un número grande sobre fondo azul oscuro.\n\nEs una superficie de operación, densa y plana: filas de 36 a 50 px, paneles pegados a 16 px, color plano sin degradados y sin sombras en nada que esté apoyado en el tablero. El color fuerte se reserva para lo que cuesta dinero si se pasa por alto (vencidas, por vencer, caídas); todo lo demás es tinta sobre blanco. Celular y escritorio valen lo mismo: el mismo tablero se pliega a una columna con una barra inferior de cinco destinos.\n\n**Alcance actual.** Solo están rediseñados en este mundo el layout del panel (riel, barra superior, barra inferior en celular), el buscador global e Inicio. Las demás pantallas (Ventas, Ventas de combos, Vencimientos, Clientes y proveedores, Servicios, Cuentas, Combos, Gastos, Contabilidad, Usuarios, Configuración) y el login hoy solo heredan los tokens a través de Material; cada una todavía debe su propio rediseño dentro de la Cartelera.",
+    "keyCharacteristics": [
+      "Tablero claro: fondo ópalo cálido, paneles blancos, líneas finas, riel negro de 2 px bajo cada título.",
+      "Riel de navegación rojo butaca con la sección actual en ámbar de bombilla.",
+      "Acción principal en tinta negra; el rojo es marca, nunca botón.",
+      "Estados en color plano con significado fijo: bermellón, ámbar, verde, magenta, turquesa.",
+      "Archivo en dos anchos: condensada en mayúsculas para títulos y cifras, normal para el texto; cifras tabulares.",
+      "Una sola esquina (3 px) y sombra solo en capas flotantes.",
+      "Cada fila urgente abre con su \"función\": el cuándo, en letras de cartelera."
+    ],
+    "rules": [
+      {
+        "name": "Regla del Token Único",
+        "body": "Todo color es un token CSS definido en el bloque `:root` de `src/styles.scss`. Ningún componente escribe un color literal (ni hex, ni `rgb()`, ni nombre): usa `var(--nc-*)` o un `--mat-sys-*`, que también apunta a ese bloque. La única excepción son los colores de marca de los servicios de streaming en `src/app/shared/service-icon/service-icons.data.ts`, que son datos de terceros y no parte de la paleta.",
+        "section": "colors"
+      },
+      {
+        "name": "Regla del Lienzo",
+        "body": "Lo que pinta en un `<canvas>` (Chart.js) no puede usar `var()`: lee el token ya resuelto con `cssToken('--nc-…')` de `src/app/shared/css-token.ts`. Nunca se copia el valor al TypeScript.",
+        "section": "colors"
+      },
+      {
+        "name": "Regla de la Tinta que Actúa",
+        "body": "La acción principal es negra. El rojo butaca es marca, navegación, enlace y selección; no rellena botones. Así un botón nunca se confunde con un estado ni con el bermellón de \"vencida\".",
+        "section": "colors"
+      },
+      {
+        "name": "Regla de la Bombilla",
+        "body": "El ámbar de bombilla solo se enciende dentro del riel rojo (y su barra inferior) para decir \"estás acá\". Fuera del riel, el ámbar que se ve es el estado \"por vencer\", que es otro token.",
+        "section": "colors"
+      },
+      {
+        "name": "Regla del Estado",
+        "body": "Bermellón, ámbar, verde, magenta y turquesa significan estados y nada más. No decoran, no distinguen categorías, no son series de dinero: para eso existen `--nc-serie-*`. En cero, un bloque de estado se apaga a su `-tint` con texto `-ink`: color solo donde hay algo que atender.",
+        "section": "colors"
+      },
+      {
+        "name": "Regla de los Alias Heredados",
+        "body": "`--nc-bg`, `--nc-surface-elevated`, `--nc-border`, `--nc-text-primary`, `--nc-text-secondary` y `--nc-accent-solid` existen solo para las pantallas que todavía no se rediseñaron. No se usan en código nuevo; al rediseñar una pantalla se reemplazan por el token real y, cuando no quede ninguna, se borran.",
+        "section": "colors"
+      },
+      {
+        "name": "Regla de los Dos Anchos",
+        "body": "Condensada (68 %) en mayúsculas para títulos, cifras y el cuándo; normal (100 %) para todo lo que se lee como frase. Un texto dentro de un título que no es título (un enlace, un total) vuelve a ancho normal, sin mayúsculas y sin tracking.",
+        "section": "typography"
+      },
+      {
+        "name": "Regla de la Cifra Tabular",
+        "body": "`font-variant-numeric: tabular-nums` está puesto en `body`: toda cifra se alinea en columna sin pedirlo.",
+        "section": "typography"
+      },
+      {
+        "name": "Regla del Tablero Plano",
+        "body": "Si está apoyado, no tiene sombra. Solo flota lo que tapa otra cosa, y toda capa flotante usa la misma sombra.",
+        "section": "elevation"
+      },
+      {
+        "name": "Regla del Riel que Aparece",
+        "body": "La respuesta al puntero no es elevación: un bloque de señal muestra un riel negro interior de 4 px abajo (8 px al presionar) y una fila cambia a ópalo hundido. Transiciones de 160 ms (`--nc-duration`) con `--nc-ease`, sin secuencias de entrada; con movimiento reducido el marcador de carga deja de pulsar.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "**Sí:** toma cada color de un token `--nc-*` del bloque `:root` de `src/styles.scss`; si falta uno, se agrega ahí con su nombre de rol.",
+      "**Sí:** en gráficos de canvas, lee el color con `cssToken()`.",
+      "**Sí:** pon cada título de panel o de grupo sobre un riel negro de 2 px (`--nc-rail-width`, `--nc-rail`).",
+      "**Sí:** usa la tinta negra para la acción principal y el botón delineado con borde `rule-field` para las acciones de fila.",
+      "**Sí:** abre las filas que tienen fecha con su cuándo en condensada, mayúsculas y la tinta `-ink` de su estado.",
+      "**Sí:** usa la variante `-ink` de un estado para texto sobre claro y el sólido solo como fondo con su `on-`.",
+      "**Sí:** mantén 3 px en toda esquina y 1 px en las marcas que miden.",
+      "**Sí:** da 44 px a todo lo que se toca por debajo de 768 px.",
+      "**Sí:** agrega cada sección nueva al menú dentro de uno de los grupos existentes."
+    ],
+    "donts": [
+      "**No:** escribas un color literal en un componente, ni copies el valor de un token a TypeScript.",
+      "**No:** uses los alias heredados (`--nc-bg`, `--nc-surface-elevated`, `--nc-border`, `--nc-text-primary`, `--nc-text-secondary`, `--nc-accent-solid`) en código nuevo.",
+      "**No:** rellenes un botón con rojo butaca ni con un color de estado.",
+      "**No:** uses el ámbar de bombilla fuera del riel de navegación y su barra inferior.",
+      "**No:** uses un color de estado para decorar, para distinguir categorías o como serie de dinero.",
+      "**No:** pongas sombra a un panel, una tarjeta o una fila; la sombra es solo de capas flotantes.",
+      "**No:** armes una rejilla de tarjetas iguales con un número grande: el ancho de un bloque dice su conteo.",
+      "**No:** uses degradados, vidrio ni esquinas redondeadas grandes.",
+      "**No:** agregues secuencias de entrada; solo transiciones de estado de 160 ms.",
+      "**No:** cambies la terminología del producto (servicio, cuenta, perfil, venta, vencimiento, cuenta caída)."
+    ]
+  }
+}

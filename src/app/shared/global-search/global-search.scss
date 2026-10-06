@@ -1,5 +1,5 @@
 // El host no aporta caja propia: sus hijos participan directo del layout
-// flex del <mat-toolbar> del header (ver admin-layout.html/scss).
+// flex del header (ver admin-layout.html/scss).
 :host {
   display: contents;
 }
@@ -9,33 +9,49 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding-inline: 12px;
-  height: 40px;
-  border-radius: 20px;
-  background: var(--nc-surface-elevated);
-  border: 1px solid var(--nc-border);
+  padding-inline: 10px;
+  height: 36px;
+  border: 1px solid var(--nc-rule-field);
+  border-radius: var(--nc-radius);
+  background: var(--nc-surface-sunken);
+  transition:
+    background-color var(--nc-duration) var(--nc-ease),
+    border-color var(--nc-duration) var(--nc-ease);
+
+  &:hover {
+    border-color: var(--nc-ink-muted);
+  }
+
+  &:focus-within {
+    border-color: var(--nc-focus);
+    background: var(--nc-surface);
+    outline: 1px solid var(--nc-focus);
+  }
 }
 
 .search-bar--desktop {
-  // Empuja la barra al extremo derecho del toolbar sin tocar el resto del
-  // header (no hace falta un spacer aparte).
-  margin-inline-start: auto;
-  width: min(360px, 40vw);
+  // A la izquierda de la barra superior, sobre la columna de contenido.
+  flex: 0 1 520px;
+  min-width: 240px;
 }
 
 .search-bar--mobile {
-  // Los hermanos (hamburguesa/título) se ocultan en admin-layout.html
-  // cuando está expandido, así que esta barra pasa a ocupar todo el ancho.
+  // La marca del header se oculta en admin-layout.html cuando está
+  // expandido, así que esta barra pasa a ocupar todo el ancho.
   // min-width: 0 para que el flex item se pueda achicar por debajo de su
   // contenido (si no, en pantallas muy angostas el input empuja el ancho
   // total más allá del viewport en vez de recortarse).
   flex: 1 1 auto;
   min-width: 0;
+  padding-inline-end: 0;
 }
 
 .search-icon {
   flex-shrink: 0;
-  color: var(--nc-text-secondary);
+  width: 20px;
+  height: 20px;
+  color: var(--nc-ink-muted);
+  font-size: 20px;
 }
 
 .search-input {
@@ -43,26 +59,27 @@
   min-width: 0;
   border: 0;
   background: transparent;
-  color: var(--nc-text-primary);
+  color: var(--nc-ink);
   font: inherit;
   outline: none;
 
   &::placeholder {
-    color: var(--nc-text-secondary);
+    color: var(--nc-ink-muted);
+    opacity: 1;
   }
 }
 
 .result-panel {
   position: absolute;
-  top: calc(100% + 8px);
+  top: calc(100% + 6px);
   inset-inline: 0;
   max-height: min(70vh, 480px);
   overflow-y: auto;
-  padding: 8px;
-  border-radius: 12px;
-  background: var(--nc-surface-elevated);
-  border: 1px solid var(--nc-border);
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
+  padding: 0;
+  border: 1px solid var(--nc-rule);
+  border-radius: var(--nc-radius);
+  background: var(--nc-surface);
+  box-shadow: var(--nc-shadow-overlay);
   z-index: 10;
 }
 
@@ -80,75 +97,101 @@
   position: fixed;
   bottom: 0;
   max-height: none;
+  border-inline: 0;
   border-radius: 0;
+  box-shadow: none;
 }
 
 .panel-status {
   margin: 0;
-  padding: 12px;
-  color: var(--nc-text-secondary);
+  padding: 16px 12px 10px;
+  color: var(--nc-ink-muted);
   font-size: 0.875rem;
   text-align: center;
 }
 
-.result-group + .result-group {
-  margin-top: 8px;
-  padding-top: 8px;
-  border-top: 1px solid var(--nc-border);
-}
-
+// Cada categoría es un renglón del tablero: título sobre riel negro.
 .result-group-header {
+  position: sticky;
+  top: 0;
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 4px 8px;
-  color: var(--nc-text-secondary);
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
+  padding: 10px 12px 6px;
+  border-bottom: var(--nc-rail-width) solid var(--nc-rail);
+  background: var(--nc-surface);
+  color: var(--nc-ink);
+  font-stretch: var(--nc-width-condensed);
+  font-size: 0.875rem;
+  font-weight: 700;
   letter-spacing: 0.04em;
+  line-height: 1.2;
+  text-transform: uppercase;
 
   .mat-icon {
-    font-size: 16px;
-    width: 16px;
-    height: 16px;
+    width: 18px;
+    height: 18px;
+    color: var(--nc-ink-muted);
+    font-size: 18px;
   }
 }
 
 .result-item {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 2px;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
   width: 100%;
-  padding: 8px;
+  min-height: 36px;
+  padding: 8px 12px;
   border: 0;
-  border-radius: 8px;
+  border-bottom: 1px solid var(--nc-rule);
   background: transparent;
   color: inherit;
   font: inherit;
   text-align: start;
   cursor: pointer;
 
-  &:hover,
+  .result-group:last-child &:last-child {
+    border-bottom: 0;
+  }
+
+  &:hover {
+    background: var(--nc-surface-sunken);
+  }
+
+  // Ítem activo con las flechas del teclado.
   &.active {
-    background: var(--nc-surface);
+    background: var(--nc-ink);
+    color: var(--nc-on-ink);
+
+    .result-owner {
+      color: var(--nc-on-ink);
+    }
   }
 
   &:focus-visible {
-    outline: 2px solid var(--nc-accent-solid);
+    outline: 2px solid var(--nc-focus);
     outline-offset: -2px;
   }
 }
 
 .result-main {
+  flex: 1 1 auto;
+  min-width: 0;
   overflow: hidden;
-  width: 100%;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .result-owner {
-  color: var(--nc-text-secondary);
+  flex-shrink: 0;
+  color: var(--nc-ink-muted);
   font-size: 0.75rem;
+}
+
+@media (max-width: 767.98px) {
+  .result-item {
+    min-height: 44px;
+  }
 }

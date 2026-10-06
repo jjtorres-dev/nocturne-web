@@ -1,230 +1,618 @@
 .page-header {
-  margin-bottom: 16px;
+  margin-bottom: 12px;
+}
 
-  h1 {
-    margin: 0;
-    font-size: 1.5rem;
+// ---------------------------------------------------------------------------
+// Barra de señal
+// ---------------------------------------------------------------------------
+.senal {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+// Las ventas: franja exacta arriba, bloques abajo. Las caídas quedan fuera.
+.senal-medida {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+// Franja exacta: cada tramo mide lo que vale su conteo, sin piso de ancho.
+// Los bloques de abajo sí tienen piso (para leerse y tocarse), así que la
+// proporción real se lee acá.
+.senal-franja {
+  display: flex;
+  gap: 2px;
+  height: 14px;
+
+  span {
+    flex: 0 0 0;
+    border-radius: 1px;
+    background: var(--estado);
   }
 }
 
-.summary-cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 16px;
-
-  @media (max-width: 767.98px) {
-    grid-template-columns: 1fr;
-  }
+.senal-ventas {
+  display: flex;
+  gap: 2px;
+  min-width: 0;
 }
 
-.summary-card {
+.senal-cargando {
+  flex: 1 1 auto;
+  height: 90px;
+}
+
+.senal-bloque {
+  // Proporcional a su conteo (flex-grow inline) con un piso: el que vale
+  // cero o muy poco igual se lee y se puede tocar.
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  min-width: max-content;
+  min-height: 72px;
+  padding: 10px 16px;
+  border: 0;
+  border-radius: var(--nc-radius);
+  background: var(--estado);
+  color: var(--sobre-estado);
+  font: inherit;
+  text-align: start;
   cursor: pointer;
+  transition: box-shadow var(--nc-duration) var(--nc-ease);
 
-  mat-card-content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-    padding: 16px 0;
+  // Al pasar por encima aparece el riel negro del tablero bajo el bloque.
+  &:hover {
+    box-shadow: inset 0 -4px 0 var(--nc-rail);
   }
+
+  &:active {
+    box-shadow: inset 0 -8px 0 var(--nc-rail);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--nc-focus);
+    outline-offset: 2px;
+  }
+
+  // En cero el bloque se apaga: color solo donde hay algo que atender.
+  &.vacio {
+    background: var(--estado-tinte);
+    color: var(--estado-tinta);
+  }
+}
+
+.senal-ventas .senal-bloque {
+  flex-basis: 0;
+}
+
+.vencida {
+  --estado: var(--nc-vencida);
+  --sobre-estado: var(--nc-on-vencida);
+  --estado-tinte: var(--nc-vencida-tint);
+  --estado-tinta: var(--nc-vencida-ink);
+}
+
+.por-vencer {
+  --estado: var(--nc-por-vencer);
+  --sobre-estado: var(--nc-on-por-vencer);
+  --estado-tinte: var(--nc-por-vencer-tint);
+  --estado-tinta: var(--nc-por-vencer-ink);
+}
+
+.al-dia {
+  --estado: var(--nc-al-dia);
+  --sobre-estado: var(--nc-on-al-dia);
+  --estado-tinte: var(--nc-al-dia-tint);
+  --estado-tinta: var(--nc-al-dia-ink);
+}
+
+.caida {
+  --estado: var(--nc-caida);
+  --sobre-estado: var(--nc-on-caida);
+  --estado-tinte: var(--nc-caida-tint);
+  --estado-tinta: var(--nc-caida-ink);
 }
 
 .summary-count {
-  font-size: 2.5rem;
-  font-weight: 600;
+  font-stretch: var(--nc-width-condensed);
+  font-size: 2.25rem;
+  font-weight: 800;
+  line-height: 0.95;
 }
 
 .summary-label {
-  color: var(--mat-sys-on-surface-variant);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
 }
 
-.vencida .summary-count {
-  color: var(--mat-sys-error);
-}
-
-.por-vencer .summary-count {
-  color: #b8860b;
-}
-
-.al-dia .summary-count {
-  color: var(--mat-sys-primary);
-}
-
-.loading {
-  display: flex;
-  justify-content: center;
-  padding: 48px 0;
-}
-
+// ---------------------------------------------------------------------------
+// Paneles: lo urgente a la izquierda, el negocio a la derecha.
+// ---------------------------------------------------------------------------
 .info-cards {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+  grid-template-columns: minmax(0, 2fr) minmax(300px, 1fr);
   gap: 16px;
-  margin-top: 16px;
   align-items: start;
+  margin-top: 16px;
 }
 
-.info-card mat-card-content {
+.columna {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+}
+
+.info-card {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  transition: outline-color 600ms var(--nc-ease);
+
+  &:focus-visible {
+    outline-color: var(--nc-focus);
+  }
+
+  // Llegada desde el bloque "Cuentas caídas" de la barra de señal.
+  &.destacada {
+    outline-color: var(--nc-caida);
+    transition-duration: 0ms;
+  }
+}
+
+.card-error,
+.card-empty {
   display: flex;
-  flex-direction: column;
+  align-items: center;
   gap: 8px;
-  padding-top: 12px;
+  margin: 0;
+  padding: 12px 14px;
 }
 
 .card-error {
-  margin: 0;
-  color: var(--mat-sys-error);
+  color: var(--nc-vencida-ink);
 }
 
 .card-empty {
-  margin: 0;
-  color: var(--mat-sys-on-surface-variant);
+  color: var(--nc-ink-muted);
+
+  .mat-icon {
+    flex-shrink: 0;
+    color: var(--nc-al-dia);
+  }
 }
 
 .card-link {
-  color: var(--mat-sys-primary);
-  font-size: 0.875rem;
-  text-decoration: none;
+  font-stretch: var(--nc-width-normal);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
 }
 
 .owner {
-  display: block;
+  margin-inline-start: 6px;
+  color: var(--nc-ink-muted);
   font-size: 0.75rem;
-  color: var(--mat-sys-on-surface-variant);
+  font-weight: 400;
 }
 
-.ganancia-value {
-  font-size: 2rem;
-  font-weight: 600;
-  color: var(--nc-accent-green);
-
-  &.negativa {
-    color: var(--mat-sys-error);
-  }
+.panel-cargando {
+  display: grid;
+  gap: 8px;
+  padding: 12px 14px;
 }
 
-.ganancia-detalle {
-  font-size: 0.8125rem;
-  color: var(--mat-sys-on-surface-variant);
+.nc-skeleton--alto {
+  width: 60%;
+  height: 44px;
 }
 
+// ---------------------------------------------------------------------------
+// Filas de cuentas (caídas y por pagar al proveedor)
+// ---------------------------------------------------------------------------
 .inventario-list,
 .renovar-list,
 .caida-list {
-  list-style: none;
   margin: 0;
   padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.inventario-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-
-  &.agotado {
-    opacity: 0.45;
-  }
-}
-
-.inventario-nombre {
-  flex: 1;
-  min-width: 0;
-  overflow-wrap: anywhere;
-}
-
-.inventario-libres {
-  font-size: 1.25rem;
-  font-weight: 600;
-  text-align: right;
-
-  small {
-    display: block;
-    font-size: 0.6875rem;
-    font-weight: 400;
-    color: var(--mat-sys-on-surface-variant);
-  }
+  list-style: none;
 }
 
 .renovar-row,
-.caida-row {
+.caida-row,
+.inventario-item {
+  border-bottom: 1px solid var(--nc-rule);
+
+  &:last-child {
+    border-bottom: 0;
+  }
+}
+
+.renovar-row {
   display: flex;
-  flex-direction: column;
-  align-items: stretch;
+  align-items: center;
+  gap: 8px;
+  padding-inline-end: 10px;
 }
 
 .renovar-accion {
-  align-self: flex-end;
+  --mat-button-outlined-container-height: 32px;
+  --mat-button-outlined-horizontal-padding: 10px;
+
+  flex-shrink: 0;
+  font-size: 0.8125rem;
 }
 
+// Cada fila abre con su "función": el cuándo, en letras de cartelera.
 .renovar-item,
 .caida-item {
-  display: flex;
+  display: grid;
+  flex: 1 1 auto;
+  grid-template-columns: 8.5rem 28px minmax(0, 1fr) auto;
   align-items: center;
-  gap: 12px;
-  padding: 8px;
-  margin: 0 -8px;
-  border-radius: 8px;
+  gap: 10px;
+  min-width: 0;
+  padding: 7px 14px;
   color: inherit;
   text-decoration: none;
+  transition: background-color var(--nc-duration) var(--nc-ease);
 
-  &:hover,
+  &:hover {
+    background: var(--nc-surface-sunken);
+  }
+
   &:focus-visible {
-    background: var(--mat-sys-surface-container-high);
+    outline: 2px solid var(--nc-focus);
+    outline-offset: -2px;
   }
 
   &.vencida .renovar-dias {
-    color: var(--mat-sys-error);
+    color: var(--nc-vencida-ink);
   }
+}
+
+.renovar-dias,
+.caida-dias {
+  font-stretch: var(--nc-width-condensed);
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.renovar-dias {
+  color: var(--nc-por-vencer-ink);
+}
+
+// Magenta: el del chip "Cuenta caída" (ver .chip-caida en styles.scss).
+.caida-dias {
+  color: var(--nc-caida-ink);
 }
 
 .renovar-info,
 .caida-info {
   display: flex;
   flex-direction: column;
-  flex: 1;
   min-width: 0;
+}
+
+.renovar-servicio,
+.caida-servicio {
+  font-weight: 600;
+  line-height: 1.3;
 }
 
 .renovar-correo,
 .caida-correo {
-  font-size: 0.8125rem;
-  color: var(--mat-sys-on-surface-variant);
   overflow: hidden;
+  color: var(--nc-ink-muted);
+  font-size: 0.8125rem;
+  line-height: 1.3;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.renovar-meta,
-.caida-meta {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  text-align: right;
-  font-size: 0.8125rem;
-}
-
-.renovar-dias {
-  font-weight: 600;
-  color: #b8860b;
-}
-
 .renovar-clientes,
 .caida-clientes {
-  color: var(--mat-sys-on-surface-variant);
-}
-
-// Tarjeta "Cuentas caídas": mismas filas que "Cuentas que debes pagar al
-// proveedor", con el total de clientes sin servicio arriba. Ámbar, el del
-// chip "Cuenta caída" (ver .chip-caida en styles.scss).
-.caidas-total,
-.caida-dias {
-  font-weight: 600;
-  color: #f59e0b;
+  color: var(--nc-ink-muted);
+  font-size: 0.8125rem;
+  text-align: end;
 }
 
 .caidas-total {
+  color: var(--nc-caida-ink);
+  font-stretch: var(--nc-width-normal);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+// ---------------------------------------------------------------------------
+// Ganancia del mes
+// ---------------------------------------------------------------------------
+.ganancia-cuerpo {
+  display: grid;
+  gap: 10px;
+  padding: 12px 14px 14px;
+}
+
+.ganancia-value {
+  color: var(--nc-ink);
+  font-stretch: var(--nc-width-condensed);
+  font-size: 1.875rem;
+  font-weight: 800;
+  line-height: 1;
+
+  &.negativa {
+    color: var(--nc-vencida-ink);
+  }
+}
+
+.ganancia-franja {
+  display: flex;
+  gap: 2px;
+  height: 12px;
+
+  span {
+    flex: 0 0 0;
+    border-radius: 1px;
+  }
+}
+
+.inversion {
+  background: var(--nc-serie-inversion);
+}
+
+.gastos {
+  background: var(--nc-serie-gastos);
+}
+
+.queda {
+  background: var(--nc-serie-ganancia);
+}
+
+.ganancia-detalle {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  font-size: 0.875rem;
+
+  div {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  dt {
+    color: var(--nc-ink-muted);
+  }
+
+  dd {
+    margin: 0;
+    font-weight: 600;
+  }
+}
+
+.muestra {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-inline-end: 6px;
+  border-radius: 1px;
+}
+
+// ---------------------------------------------------------------------------
+// Disponible para vender
+// ---------------------------------------------------------------------------
+.inventario-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 40px;
+  padding: 5px 14px;
+
+  // Sin libres: la fila se apaga, pero el texto sigue siendo legible.
+  &.agotado {
+    color: var(--nc-ink-muted);
+
+    app-service-icon {
+      filter: grayscale(1);
+      opacity: 0.5;
+    }
+
+    .inventario-nombre {
+      font-weight: 400;
+    }
+  }
+}
+
+.inventario-nombre {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-weight: 600;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.butacas {
+  display: flex;
+  flex-shrink: 0;
+  gap: 2px;
+}
+
+.butaca {
+  width: 6px;
+  height: 14px;
+  border-radius: 1px;
+  background: var(--nc-libre);
+}
+
+.inventario-libres {
+  flex-shrink: 0;
+  min-width: 4.25rem;
+  font-stretch: var(--nc-width-condensed);
   font-size: 1.25rem;
+  font-weight: 800;
+  line-height: 1;
+  text-align: end;
+
+  small {
+    color: var(--nc-ink-muted);
+    font-stretch: var(--nc-width-normal);
+    font-size: 0.75rem;
+    font-weight: 400;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Pantallas medianas y celular
+// ---------------------------------------------------------------------------
+
+// Sin ancho de sobra, el botón dice solo "Renovar" para no recortar el
+// correo de la cuenta; el nombre completo sigue para lectores de pantalla.
+@media (max-width: 1399.98px) {
+  .renovar-resto {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 1099.98px) {
+  .info-cards {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 767.98px) {
+  .senal {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  .senal-franja {
+    grid-column: 1 / -1;
+    height: 20px;
+  }
+
+  .senal-medida,
+  .senal-ventas {
+    display: contents;
+  }
+
+  .senal-cargando {
+    grid-column: 1 / -1;
+    height: 132px;
+  }
+
+  .senal-bloque,
+  .senal-ventas .senal-bloque {
+    min-width: 0;
+    min-height: 60px;
+    padding: 8px 12px;
+  }
+
+  .summary-count {
+    font-size: 1.875rem;
+  }
+
+  .info-cards,
+  .columna {
+    gap: 12px;
+  }
+
+  .info-cards {
+    margin-top: 12px;
+  }
+
+  // Dos renglones por fila: arriba el cuándo y los clientes; abajo el
+  // servicio y el correo. El ícono ocupa ambos.
+  .renovar-item,
+  .caida-item {
+    grid-template-columns: 28px minmax(0, 1fr) auto;
+    grid-template-areas:
+      'icono cuando clientes'
+      'icono cuenta cuenta';
+    gap: 1px 10px;
+  }
+
+  .renovar-item {
+    padding-inline-end: 4px;
+  }
+
+  .renovar-item app-service-icon,
+  .caida-item app-service-icon {
+    grid-area: icono;
+  }
+
+  .renovar-dias,
+  .caida-dias {
+    grid-area: cuando;
+    white-space: nowrap;
+  }
+
+  .renovar-clientes,
+  .caida-clientes {
+    grid-area: clientes;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .renovar-info,
+  .caida-info {
+    grid-area: cuenta;
+    flex-direction: row;
+    align-items: baseline;
+    gap: 6px;
+  }
+
+  .renovar-servicio,
+  .caida-servicio {
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+
+  // Botón de 44 px solo con el ícono al final de la fila.
+  .renovar-row {
+    padding-inline-end: 8px;
+  }
+
+  .renovar-accion {
+    --mat-button-outlined-container-height: 44px;
+    --mat-button-outlined-horizontal-padding: 0;
+    --mat-button-outlined-icon-spacing: 0;
+    --mat-button-outlined-icon-offset: 0;
+
+    width: 44px;
+    min-width: 44px;
+  }
+
+  .renovar-texto {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .butaca {
+    width: 5px;
+  }
 }

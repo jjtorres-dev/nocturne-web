@@ -6,18 +6,23 @@
     [opened]="!isMobile()"
   >
     <div class="sidenav-body">
-      <div class="brand">Nocturne</div>
-      <mat-nav-list class="nav-list">
-        @for (item of navItems(); track item.route) {
-          <a
-            mat-list-item
-            [routerLink]="item.route"
-            routerLinkActive="active-link"
-            (click)="closeIfMobile(sidenav)"
-          >
-            <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
-            <span matListItemTitle>{{ item.label }}</span>
-          </a>
+      <a class="brand" routerLink="/dashboard" (click)="closeIfMobile(sidenav)">Nocturne</a>
+      <mat-nav-list class="nav-list" aria-label="Secciones">
+        @for (group of navGroups(); track group.label) {
+          @if (group.label) {
+            <div class="nav-group">{{ group.label }}</div>
+          }
+          @for (item of group.items; track item.route) {
+            <a
+              mat-list-item
+              [routerLink]="item.route"
+              routerLinkActive="active-link"
+              (click)="closeIfMobile(sidenav)"
+            >
+              <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
+              <span matListItemTitle>{{ item.label }}</span>
+            </a>
+          }
         }
       </mat-nav-list>
 
@@ -25,7 +30,7 @@
       @if (auth.currentUser(); as user) {
         <div class="sidenav-footer">
           <button type="button" class="user-card" [matMenuTriggerFor]="userMenu">
-            <app-avatar-inicial [nombre]="user.name" [size]="36" />
+            <app-avatar-inicial [nombre]="user.name" [size]="32" />
             <span class="user-info">
               <span class="user-name">{{ user.name }}</span>
               <span class="user-role">{{ roleLabels[user.role] }}</span>
@@ -48,26 +53,41 @@
     </div>
   </mat-sidenav>
 
-  <mat-sidenav-content>
-    <mat-toolbar class="header">
+  <mat-sidenav-content class="main">
+    <header class="header">
       @if (isMobile() && !searchExpanded()) {
-        <button
-          mat-icon-button
-          class="menu-button"
-          (click)="sidenav.toggle()"
-          aria-label="Abrir menú"
-        >
-          <mat-icon>menu</mat-icon>
-        </button>
-      }
-      @if (!isMobile() || !searchExpanded()) {
-        <span>Panel de administración</span>
+        <a class="header-brand" routerLink="/dashboard">Nocturne</a>
       }
       <app-global-search [(mobileExpanded)]="searchExpanded" />
-    </mat-toolbar>
+      @if (!isMobile()) {
+        <span class="header-date">{{ hoy }}</span>
+      }
+    </header>
 
     <main class="content">
       <router-outlet />
     </main>
+
+    <!-- En celular, los destinos de todos los días quedan al alcance del
+         pulgar; "Menú" abre el resto en el panel lateral. -->
+    @if (isMobile()) {
+      <nav class="bottom-bar" aria-label="Accesos rápidos">
+        @for (item of bottomItems; track item.route) {
+          <a class="bottom-item" [routerLink]="item.route" routerLinkActive="bottom-item--active">
+            <mat-icon aria-hidden="true">{{ item.icon }}</mat-icon>
+            <span>{{ item.label }}</span>
+          </a>
+        }
+        <button
+          type="button"
+          class="bottom-item menu-button"
+          [attr.aria-expanded]="sidenav.opened"
+          (click)="sidenav.toggle()"
+        >
+          <mat-icon aria-hidden="true">menu</mat-icon>
+          <span>Menú</span>
+        </button>
+      </nav>
+    }
   </mat-sidenav-content>
 </mat-sidenav-container>

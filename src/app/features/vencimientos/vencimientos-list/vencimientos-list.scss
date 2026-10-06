@@ -70,7 +70,7 @@
 }
 
 .dias-por-vencer {
-  color: #b8860b;
+  color: var(--nc-por-vencer-ink);
 }
 
 // Acción principal de la tarjeta: botón grande. `flex: 1 1 auto` en vez de

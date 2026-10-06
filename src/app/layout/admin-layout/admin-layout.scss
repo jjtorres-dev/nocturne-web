@@ -2,13 +2,20 @@
   height: 100vh;
   // En móvil 100vh incluye la barra de URL y desborda; dvh la descuenta.
   height: 100dvh;
+  background: var(--nc-ground);
 }
 
+// ---------------------------------------------------------------------------
+// Riel de navegación: rojo butaca.
+// ---------------------------------------------------------------------------
 .sidenav {
-  width: 256px;
-  display: flex;
-  flex-direction: column;
-  border-inline-end: 1px solid var(--nc-border);
+  --mat-sidenav-container-background-color: var(--nc-nav);
+  --mat-sidenav-container-text-color: var(--nc-on-nav);
+  --mat-sidenav-container-shape: 0;
+  --mat-sidenav-container-divider-color: transparent;
+
+  width: var(--nc-nav-width);
+  border: 0;
 }
 
 // Columna que ocupa todo el alto del drawer: la navegación crece y el pie
@@ -20,77 +27,108 @@
   min-height: 100%;
 }
 
-// Con los 16px por defecto de Material (entre ícono y texto, y a la derecha)
-// "Clientes y proveedores" no entra en 256px y se corta con "…"; con 12px
-// entra en una sola línea sin ensanchar más el menú.
+// Marca: letras de marquesina sobre una fila de bombillas.
+.brand {
+  display: block;
+  margin: 14px 16px 6px;
+  padding-bottom: 9px;
+  border-bottom: 3px dotted var(--nc-bulb);
+  color: var(--nc-on-nav);
+  font-stretch: var(--nc-width-condensed);
+  font-size: 1.75rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0.06em;
+  text-decoration: none;
+  text-transform: uppercase;
+
+  &:focus-visible {
+    outline: 2px solid var(--nc-bulb);
+    outline-offset: 4px;
+  }
+}
+
 .nav-list {
+  --mat-list-list-item-one-line-container-height: 36px;
+  --mat-list-list-item-leading-icon-start-space: 12px;
+  --mat-list-list-item-leading-icon-end-space: 10px;
+  --mat-list-list-item-leading-icon-size: 20px;
+  --mat-list-list-item-label-text-color: var(--nc-on-nav);
+  --mat-list-list-item-hover-label-text-color: var(--nc-on-nav);
+  --mat-list-list-item-focus-label-text-color: var(--nc-on-nav);
+  --mat-list-list-item-leading-icon-color: var(--nc-on-nav-muted);
+  --mat-list-list-item-hover-leading-icon-color: var(--nc-on-nav);
+  --mat-list-list-item-hover-state-layer-color: var(--nc-on-nav);
+  --mat-list-list-item-focus-state-layer-color: var(--nc-on-nav);
+  --mat-list-list-item-label-text-size: 0.875rem;
+  --mat-list-list-item-label-text-weight: 500;
+  --mat-list-list-item-label-text-line-height: 1.25;
+  --mat-list-active-indicator-shape: var(--nc-radius);
+  --mat-list-active-indicator-color: transparent;
+
   flex: 1 1 auto;
-  --mat-list-list-item-leading-icon-end-space: 12px;
+  padding: 4px 8px 12px;
 
   .mat-mdc-list-item {
-    padding-inline-end: 12px;
+    padding-inline: 0 10px;
+    border-radius: var(--nc-radius);
+    transition: background-color var(--nc-duration) var(--nc-ease);
+
+    &:focus-visible {
+      outline: 2px solid var(--nc-bulb);
+      outline-offset: -2px;
+    }
   }
-}
-
-.brand {
-  padding: 16px;
-  font-size: 1.35rem;
-  font-weight: 700;
-  letter-spacing: 0.01em;
-  background: var(--nc-gradient-primary);
-  background-clip: text;
-  -webkit-background-clip: text;
-  color: transparent;
-  -webkit-text-fill-color: transparent;
-}
-
-.header {
-  position: sticky;
-  top: 0;
-  z-index: 1;
-  border-bottom: 1px solid var(--nc-border);
-}
-
-.menu-button {
-  margin-right: 8px;
-}
-
-.content {
-  padding: 24px;
-}
-
-@media (max-width: 767.98px) {
-  .header {
-    padding-inline: 8px;
-  }
-
-  .content {
-    padding: 16px;
-  }
-}
-
-// El indicador activo no usa el secondary-container de Material (ese token
-// alimenta también los chips de Activo/Inactivo, que no debemos tocar):
-// en su lugar, una superficie elevada + una barra de acento con glow.
-.active-link {
-  --mat-list-active-indicator-color: var(--nc-surface-elevated);
-  position: relative;
-  color: var(--nc-accent-solid) !important;
 
   .mat-icon {
-    color: var(--nc-accent-solid);
+    font-size: 20px;
+  }
+}
+
+// Título de grupo: no es un link, solo ordena la lista.
+.nav-group {
+  margin-top: 12px;
+  padding: 0 12px 4px;
+  border-bottom: 1px solid var(--nc-nav-rule);
+  color: var(--nc-on-nav-muted);
+  font-stretch: var(--nc-width-condensed);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  line-height: 1.6;
+  text-transform: uppercase;
+}
+
+.nav-group + .mat-mdc-list-item {
+  margin-top: 4px;
+}
+
+// Sección actual: fondo más hondo, texto en ámbar y una bombilla encendida
+// a la derecha.
+.active-link {
+  --mat-list-list-item-label-text-color: var(--nc-bulb);
+  --mat-list-list-item-hover-label-text-color: var(--nc-bulb);
+  --mat-list-list-item-focus-label-text-color: var(--nc-bulb);
+  --mat-list-list-item-leading-icon-color: var(--nc-bulb);
+  --mat-list-list-item-hover-leading-icon-color: var(--nc-bulb);
+  --mat-list-list-item-label-text-weight: 700;
+
+  background: var(--nc-nav-active);
+
+  .mat-icon {
+    font-variation-settings: 'FILL' 1;
   }
 
-  &::before {
+  &::after {
     content: '';
     position: absolute;
-    inset-inline-start: 0;
-    top: 8px;
-    bottom: 8px;
-    width: 3px;
-    border-radius: 0 4px 4px 0;
-    background: var(--nc-gradient-primary);
-    box-shadow: 0 0 12px 1px rgba(59, 130, 246, 0.5);
+    inset-inline-end: 12px;
+    top: 50%;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--nc-bulb);
+    translate: 0 -50%;
   }
 }
 
@@ -98,33 +136,40 @@
   position: sticky;
   bottom: 0;
   padding: 8px;
-  border-top: 1px solid var(--nc-border);
-  background: var(--mat-sys-surface-container-low);
+  border-top: 1px solid var(--nc-nav-rule);
+  background: var(--nc-nav);
 }
 
-// Tarjeta chica clickeable: avatar + nombre + rol; abre el menú del usuario.
+// Avatar + nombre + rol; abre el menú del usuario.
 .user-card {
   display: flex;
   align-items: center;
   gap: 10px;
   width: 100%;
-  padding: 8px;
+  padding: 6px 8px;
   border: 0;
-  border-radius: 12px;
+  border-radius: var(--nc-radius);
   background: transparent;
-  color: inherit;
+  color: var(--nc-on-nav);
   font: inherit;
   text-align: start;
   cursor: pointer;
+  transition: background-color var(--nc-duration) var(--nc-ease);
 
   &:hover,
   &[aria-expanded='true'] {
-    background: var(--nc-surface-elevated);
+    background: var(--nc-nav-hover);
   }
 
   &:focus-visible {
-    outline: 2px solid var(--nc-accent-solid);
-    outline-offset: 2px;
+    outline: 2px solid var(--nc-bulb);
+    outline-offset: -2px;
+  }
+
+  // El avatar se separa del rojo del riel con un filo claro.
+  app-avatar-inicial {
+    border-radius: 50%;
+    box-shadow: 0 0 0 2px var(--nc-on-nav);
   }
 }
 
@@ -139,16 +184,155 @@
   overflow: hidden;
   font-size: 0.875rem;
   font-weight: 600;
+  line-height: 1.25;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .user-role {
+  color: var(--nc-on-nav-muted);
   font-size: 0.75rem;
-  color: var(--nc-text-secondary);
+  line-height: 1.3;
 }
 
 .user-chevron {
   flex-shrink: 0;
-  color: var(--nc-text-secondary);
+  color: var(--nc-on-nav-muted);
+}
+
+// ---------------------------------------------------------------------------
+// Barra superior y contenido.
+// ---------------------------------------------------------------------------
+.main {
+  background: var(--nc-ground);
+}
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  height: var(--nc-topbar-height);
+  padding-inline: 24px;
+  border-bottom: 1px solid var(--nc-rule);
+  background: var(--nc-surface);
+}
+
+.header-date {
+  flex-shrink: 0;
+  margin-inline-start: auto;
+  color: var(--nc-ink-muted);
+  font-stretch: var(--nc-width-condensed);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.header-brand {
+  flex: 1 1 auto;
+  color: var(--nc-brand);
+  font-stretch: var(--nc-width-condensed);
+  font-size: 1.375rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  line-height: 1;
+  text-decoration: none;
+  text-transform: uppercase;
+
+  &:focus-visible {
+    outline: 2px solid var(--nc-focus);
+    outline-offset: 4px;
+  }
+}
+
+.content {
+  max-width: 1600px;
+  padding: 20px 24px 32px;
+}
+
+// ---------------------------------------------------------------------------
+// Celular: panel lateral más ancho y barra inferior.
+// ---------------------------------------------------------------------------
+.bottom-bar {
+  position: fixed;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 1;
+  display: grid;
+  grid-auto-columns: minmax(0, 1fr);
+  grid-auto-flow: column;
+  height: calc(var(--nc-bottombar-height) + env(safe-area-inset-bottom));
+  padding-bottom: env(safe-area-inset-bottom);
+  background: var(--nc-nav);
+}
+
+.bottom-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-width: 0;
+  padding: 0 2px;
+  border: 0;
+  background: transparent;
+  color: var(--nc-on-nav-muted);
+  font: inherit;
+  font-stretch: 82%;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.2;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background-color var(--nc-duration) var(--nc-ease),
+    color var(--nc-duration) var(--nc-ease);
+
+  span {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &:active {
+    background: var(--nc-nav-hover);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--nc-bulb);
+    outline-offset: -3px;
+  }
+}
+
+.bottom-item--active {
+  background: var(--nc-nav-active);
+  color: var(--nc-bulb);
+
+  .mat-icon {
+    font-variation-settings: 'FILL' 1;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .sidenav {
+    width: min(288px, 86vw);
+  }
+
+  // Filas más altas: se tocan con el dedo.
+  .nav-list {
+    --mat-list-list-item-one-line-container-height: 44px;
+  }
+
+  .header {
+    gap: 8px;
+    padding-inline: 16px 8px;
+  }
+
+  .content {
+    padding: 16px 16px calc(var(--nc-bottombar-height) + env(safe-area-inset-bottom) + 24px);
+  }
 }

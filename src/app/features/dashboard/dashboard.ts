@@ -1,15 +1,15 @@
 import {
   Component,
+  type ElementRef,
   OnInit,
   type WritableSignal,
   computed,
   inject,
   signal,
+  viewChild,
 } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
-import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
@@ -44,13 +44,15 @@ function initialState<T>(): CardState<T> {
   return { loading: true, error: false, data: null };
 }
 
+// Tope de butacas dibujadas por servicio en "Disponible para vender": con
+// más libres que esto, la fila se llena y el número de al lado dice cuántas.
+const MAX_BUTACAS = 12;
+
 @Component({
   imports: [
     RouterLink,
     MatButtonModule,
-    MatCardModule,
     MatIconModule,
-    MatProgressSpinnerModule,
     ServiceIcon,
     SolesPipe,
   ],
@@ -106,6 +108,29 @@ export class Dashboard implements OnInit {
     } finally {
       this.loading.set(false);
     }
+  }
+
+  private readonly caidasPanel = viewChild<ElementRef<HTMLElement>>('caidasPanel');
+
+  // Marca por un momento el panel "Cuentas caídas" al llegar desde la barra
+  // de señal (ver verCaidas).
+  protected readonly caidasDestacada = signal(false);
+
+  // El bloque "Cuentas caídas" de la barra de señal lleva a su lista, en esta
+  // misma pantalla: las caídas son cuentas, no ventas, así que no tienen
+  // filtro en Vencimientos. El panel se resalta un momento para que se vea
+  // adónde llevó el toque aunque ya estuviera a la vista.
+  verCaidas(): void {
+    const panel = this.caidasPanel()?.nativeElement;
+    panel?.scrollIntoView?.({ block: 'start' });
+    panel?.focus({ preventScroll: true });
+    this.caidasDestacada.set(true);
+    setTimeout(() => this.caidasDestacada.set(false), 1200);
+  }
+
+  // Una butaca por perfil o cuenta libre, hasta MAX_BUTACAS.
+  butacas(libres: number): number[] {
+    return Array.from({ length: Math.min(libres, MAX_BUTACAS) }, (_, i) => i);
   }
 
   goToVencimientos(estado: VencimientoFiltro): void {

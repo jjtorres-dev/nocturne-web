@@ -10,56 +10,19 @@
   overflow: hidden;
 }
 
-// Glow decorativo con el degradado de marca: dos manchas grandes,
-// desenfocadas y con opacidad baja, en diagonal (misma dirección que
-// --nc-gradient-primary) — de fondo, nunca compiten con la tarjeta.
-.login-page::before,
-.login-page::after {
-  content: '';
-  position: absolute;
-  z-index: 0;
-  pointer-events: none;
-  border-radius: 50%;
-  filter: blur(90px);
-  opacity: 0.35;
-}
-
-.login-page::before {
-  top: -160px;
-  left: -160px;
-  width: 480px;
-  height: 480px;
-  background: radial-gradient(circle, var(--nc-accent-blue), transparent 70%);
-}
-
-.login-page::after {
-  bottom: -160px;
-  right: -160px;
-  width: 480px;
-  height: 480px;
-  background: radial-gradient(circle, var(--nc-accent-green), transparent 70%);
-}
-
 .login-brand {
   position: relative;
   z-index: 1;
   display: flex;
   align-items: center;
   gap: 10px;
-  // Margen de seguridad: background-clip: text puede recortar un par de
-  // píxeles del borde inferior del glyph incluso con line-height correcto.
-  padding-bottom: 4px;
 }
 
 .brand-icon {
   font-size: 2rem;
   width: 2rem;
   height: 2rem;
-  background: var(--nc-gradient-primary);
-  background-clip: text;
-  -webkit-background-clip: text;
-  color: transparent;
-  -webkit-text-fill-color: transparent;
+  color: var(--nc-brand);
 }
 
 .brand-text {
@@ -70,11 +33,7 @@
   line-height: 1.35;
   font-weight: 700;
   letter-spacing: 0.01em;
-  background: var(--nc-gradient-primary);
-  background-clip: text;
-  -webkit-background-clip: text;
-  color: transparent;
-  -webkit-text-fill-color: transparent;
+  color: var(--nc-brand);
 }
 
 .login-card {

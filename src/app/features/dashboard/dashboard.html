@@ -2,86 +2,244 @@
   <h1>Inicio</h1>
 </div>
 
-@if (loading()) {
-  <div class="loading">
-    <mat-spinner diameter="32" />
-  </div>
-} @else if (summary(); as s) {
-  <div class="summary-cards">
-    <mat-card
-      class="summary-card vencida"
-      tabindex="0"
-      role="button"
-      (click)="goToVencimientos(VencimientoFiltro.VENCIDA)"
-      (keyup.enter)="goToVencimientos(VencimientoFiltro.VENCIDA)"
-    >
-      <mat-card-content>
+<!-- Barra de señal: el estado de las ventas en bloques de color plano. El
+     ancho de cada bloque es su conteo; cada uno lleva a Vencimientos ya
+     filtrado. Las cuentas caídas van aparte: se cuentan en otra unidad. -->
+<section class="senal" aria-label="Estado de tus ventas y cuentas">
+  @if (loading()) {
+    <div class="senal-cargando nc-skeleton" aria-busy="true">
+      <span class="nc-sr-only">Cargando el resumen de ventas…</span>
+    </div>
+  } @else if (summary(); as s) {
+    <!-- La franja mide solo las ventas: va sobre sus tres bloques. -->
+    <div class="senal-medida">
+    <div class="senal-franja" aria-hidden="true">
+      <span class="vencida" [style.flex-grow]="s.vencidas"></span>
+      <span class="por-vencer" [style.flex-grow]="s.porVencer"></span>
+      <span class="al-dia" [style.flex-grow]="s.alDia"></span>
+    </div>
+
+    <div class="senal-ventas">
+      <button
+        type="button"
+        class="summary-card senal-bloque vencida"
+        [class.vacio]="s.vencidas === 0"
+        [style.flex-grow]="s.vencidas"
+        (click)="goToVencimientos(VencimientoFiltro.VENCIDA)"
+      >
         <span class="summary-count">{{ s.vencidas }}</span>
         <span class="summary-label">Ventas vencidas</span>
-      </mat-card-content>
-    </mat-card>
+      </button>
 
-    <mat-card
-      class="summary-card por-vencer"
-      tabindex="0"
-      role="button"
-      (click)="goToVencimientos(VencimientoFiltro.POR_VENCER)"
-      (keyup.enter)="goToVencimientos(VencimientoFiltro.POR_VENCER)"
-    >
-      <mat-card-content>
+      <button
+        type="button"
+        class="summary-card senal-bloque por-vencer"
+        [class.vacio]="s.porVencer === 0"
+        [style.flex-grow]="s.porVencer"
+        (click)="goToVencimientos(VencimientoFiltro.POR_VENCER)"
+      >
         <span class="summary-count">{{ s.porVencer }}</span>
         <span class="summary-label">Ventas por vencer</span>
-      </mat-card-content>
-    </mat-card>
+      </button>
 
-    <mat-card
-      class="summary-card al-dia"
-      tabindex="0"
-      role="button"
-      (click)="goToVencimientos(VencimientoFiltro.AL_DIA)"
-      (keyup.enter)="goToVencimientos(VencimientoFiltro.AL_DIA)"
-    >
-      <mat-card-content>
+      <button
+        type="button"
+        class="summary-card senal-bloque al-dia"
+        [class.vacio]="s.alDia === 0"
+        [style.flex-grow]="s.alDia"
+        (click)="goToVencimientos(VencimientoFiltro.AL_DIA)"
+      >
         <span class="summary-count">{{ s.alDia }}</span>
         <span class="summary-label">Ventas al día</span>
-      </mat-card-content>
-    </mat-card>
-  </div>
-}
+      </button>
+    </div>
+    </div>
+  }
+
+  @if (caidas().data; as cuentas) {
+    <button
+      type="button"
+      class="senal-bloque caida"
+      [class.vacio]="cuentas.length === 0"
+      (click)="verCaidas()"
+    >
+      <span class="summary-count">{{ cuentas.length }}</span>
+      <span class="summary-label">Cuentas caídas</span>
+    </button>
+  }
+</section>
 
 <div class="info-cards">
-  <mat-card class="info-card ganancia-card">
-    <mat-card-header>
-      <mat-card-title>Ganancia del mes</mat-card-title>
-    </mat-card-header>
-    <mat-card-content>
+  <div class="columna columna--urgente">
+    <section
+      #caidasPanel
+      class="nc-panel info-card caidas-card"
+      [class.destacada]="caidasDestacada()"
+      tabindex="-1"
+    >
+      <h2 class="nc-panel-title">
+        Cuentas caídas
+        @if (caidas().data?.length) {
+          <span class="caidas-total">{{ clientesSinServicio() }}</span>
+        }
+      </h2>
+      @if (caidas(); as ca) {
+        @if (ca.loading) {
+          <div class="panel-cargando" aria-busy="true">
+            <span class="nc-skeleton"></span>
+            <span class="nc-skeleton"></span>
+          </div>
+        } @else if (ca.data; as cuentas) {
+          @if (cuentas.length === 0) {
+            <p class="card-empty">
+              <mat-icon aria-hidden="true">check_circle</mat-icon>
+              No tienes cuentas caídas.
+            </p>
+          } @else {
+            <ul class="caida-list">
+              @for (c of cuentas; track c.id) {
+                <li class="caida-row">
+                  <a class="caida-item" [routerLink]="['/accounts', c.id]">
+                    <span class="caida-dias">{{ diasCaidaLabel(c.fechaCaida) }}</span>
+                    <app-service-icon [nombre]="c.servicioNombre" [size]="28" />
+                    <span class="caida-info">
+                      <span class="caida-servicio">
+                        {{ c.servicioNombre }}
+                        @if (c.ownerName) {
+                          <small class="owner">{{ c.ownerName }}</small>
+                        }
+                      </span>
+                      <span class="caida-correo">{{ c.correo }}</span>
+                    </span>
+                    <span class="caida-clientes">
+                      {{ clientesAfectadosLabel(c.clientesAfectados) }}
+                    </span>
+                  </a>
+                </li>
+              }
+            </ul>
+          }
+        } @else {
+          <p class="card-error">No se pudieron cargar las cuentas caídas.</p>
+        }
+      }
+    </section>
+
+    <section class="nc-panel info-card renovar-card">
+      <h2 class="nc-panel-title">Cuentas que debes pagar al proveedor</h2>
+      @if (porRenovar(); as pr) {
+        @if (pr.loading) {
+          <div class="panel-cargando" aria-busy="true">
+            <span class="nc-skeleton"></span>
+            <span class="nc-skeleton"></span>
+            <span class="nc-skeleton"></span>
+          </div>
+        } @else if (pr.data; as cuentas) {
+          @if (cuentas.length === 0) {
+            <p class="card-empty">
+              <mat-icon aria-hidden="true">check_circle</mat-icon>
+              Ninguna cuenta vence en los próximos 7 días.
+            </p>
+          } @else {
+            <ul class="renovar-list">
+              @for (c of cuentas; track c.id) {
+                <li class="renovar-row">
+                  <a
+                    class="renovar-item"
+                    [routerLink]="['/accounts', c.id]"
+                    [class.vencida]="c.diasRestantes < 0"
+                  >
+                    <span class="renovar-dias">{{ diasLabel(c.diasRestantes) }}</span>
+                    <app-service-icon [nombre]="c.servicioNombre" [size]="28" />
+                    <span class="renovar-info">
+                      <span class="renovar-servicio">
+                        {{ c.servicioNombre }}
+                        @if (c.ownerName) {
+                          <small class="owner">{{ c.ownerName }}</small>
+                        }
+                      </span>
+                      <span class="renovar-correo">{{ c.correo }}</span>
+                    </span>
+                    <span class="renovar-clientes">{{ clientesLabel(c.clientesActivos) }}</span>
+                  </a>
+                  <button
+                    mat-stroked-button
+                    type="button"
+                    class="renovar-accion"
+                    (click)="openRenovarProveedor(c)"
+                  >
+                    <mat-icon>autorenew</mat-icon>
+                    <!-- Con poco ancho se ve solo "Renovar" y en celular solo el
+                         ícono; el nombre completo sigue en el botón para lectores
+                         de pantalla. -->
+                    <span class="renovar-texto">Renovar<span class="renovar-resto"> con el proveedor</span></span>
+                  </button>
+                </li>
+              }
+            </ul>
+          }
+        } @else {
+          <p class="card-error">No se pudieron cargar las cuentas por renovar.</p>
+        }
+      }
+    </section>
+  </div>
+
+  <div class="columna columna--negocio">
+    <section class="nc-panel info-card ganancia-card">
+      <h2 class="nc-panel-title">
+        Ganancia del mes
+        <a routerLink="/accounting" class="card-link">Ver detalle</a>
+      </h2>
       @if (ganancia(); as g) {
         @if (g.loading) {
-          <mat-spinner diameter="24" />
+          <div class="panel-cargando" aria-busy="true">
+            <span class="nc-skeleton nc-skeleton--alto"></span>
+            <span class="nc-skeleton"></span>
+          </div>
         } @else if (g.data; as d) {
-          <span class="ganancia-value" [class.negativa]="d.ganancia < 0">
-            {{ d.ganancia | soles }}
-          </span>
-          <span class="ganancia-detalle">
-            Cobrado {{ d.ingresos | soles }} · Pagado a proveedores {{ d.inversion | soles }} ·
-            Otros gastos {{ d.gastos | soles }}
-          </span>
-          <a routerLink="/accounting" class="card-link">Ver detalle</a>
+          <div class="ganancia-cuerpo">
+            <span class="ganancia-value" [class.negativa]="d.ganancia < 0">
+              {{ d.ganancia | soles }}
+            </span>
+            <!-- Lo cobrado, repartido: a proveedores, a otros gastos y lo que queda. -->
+            @if (d.ganancia >= 0 && d.ingresos > 0) {
+              <div class="ganancia-franja" aria-hidden="true">
+                <span class="inversion" [style.flex-grow]="d.inversion"></span>
+                <span class="gastos" [style.flex-grow]="d.gastos"></span>
+                <span class="queda" [style.flex-grow]="d.ganancia"></span>
+              </div>
+            }
+            <dl class="ganancia-detalle">
+              <div>
+                <dt>Cobrado</dt>
+                <dd>{{ d.ingresos | soles }}</dd>
+              </div>
+              <div>
+                <dt><span class="muestra inversion" aria-hidden="true"></span>Pagado a proveedores</dt>
+                <dd>{{ d.inversion | soles }}</dd>
+              </div>
+              <div>
+                <dt><span class="muestra gastos" aria-hidden="true"></span>Otros gastos</dt>
+                <dd>{{ d.gastos | soles }}</dd>
+              </div>
+            </dl>
+          </div>
         } @else {
           <p class="card-error">No se pudo cargar la ganancia del mes.</p>
         }
       }
-    </mat-card-content>
-  </mat-card>
+    </section>
 
-  <mat-card class="info-card inventario-card">
-    <mat-card-header>
-      <mat-card-title>Disponible para vender</mat-card-title>
-    </mat-card-header>
-    <mat-card-content>
+    <section class="nc-panel info-card inventario-card">
+      <h2 class="nc-panel-title">Disponible para vender</h2>
       @if (inventario(); as inv) {
         @if (inv.loading) {
-          <mat-spinner diameter="24" />
+          <div class="panel-cargando" aria-busy="true">
+            <span class="nc-skeleton"></span>
+            <span class="nc-skeleton"></span>
+            <span class="nc-skeleton"></span>
+          </div>
         } @else if (inv.data; as items) {
           @if (items.length === 0) {
             <p class="card-empty">Todavía no tienes servicios. Créalos en Servicios.</p>
@@ -89,11 +247,17 @@
             <ul class="inventario-list">
               @for (item of items; track item.servicioId) {
                 <li class="inventario-item" [class.agotado]="item.libres === 0">
-                  <app-service-icon [nombre]="item.nombre" [size]="28" />
+                  <app-service-icon [nombre]="item.nombre" [size]="24" />
                   <span class="inventario-nombre">
                     {{ item.nombre }}
                     @if (item.ownerName) {
                       <small class="owner">{{ item.ownerName }}</small>
+                    }
+                  </span>
+                  <!-- Butacas libres: una por perfil o cuenta disponible. -->
+                  <span class="butacas" aria-hidden="true">
+                    @for (b of butacas(item.libres); track b) {
+                      <span class="butaca"></span>
                     }
                   </span>
                   <span
@@ -113,106 +277,6 @@
           <p class="card-error">No se pudo cargar el inventario.</p>
         }
       }
-    </mat-card-content>
-  </mat-card>
-
-  <mat-card class="info-card caidas-card">
-    <mat-card-header>
-      <mat-card-title>Cuentas caídas</mat-card-title>
-    </mat-card-header>
-    <mat-card-content>
-      @if (caidas(); as ca) {
-        @if (ca.loading) {
-          <mat-spinner diameter="24" />
-        } @else if (ca.data; as cuentas) {
-          @if (cuentas.length === 0) {
-            <p class="card-empty">No tienes cuentas caídas.</p>
-          } @else {
-            <span class="caidas-total">{{ clientesSinServicio() }}</span>
-            <ul class="caida-list">
-              @for (c of cuentas; track c.id) {
-                <li class="caida-row">
-                  <a class="caida-item" [routerLink]="['/accounts', c.id]">
-                    <app-service-icon [nombre]="c.servicioNombre" [size]="28" />
-                    <span class="caida-info">
-                      <span class="caida-servicio">
-                        {{ c.servicioNombre }}
-                        @if (c.ownerName) {
-                          <small class="owner">{{ c.ownerName }}</small>
-                        }
-                      </span>
-                      <span class="caida-correo">{{ c.correo }}</span>
-                    </span>
-                    <span class="caida-meta">
-                      <span class="caida-dias">{{ diasCaidaLabel(c.fechaCaida) }}</span>
-                      <span class="caida-clientes">
-                        {{ clientesAfectadosLabel(c.clientesAfectados) }}
-                      </span>
-                    </span>
-                  </a>
-                </li>
-              }
-            </ul>
-          }
-        } @else {
-          <p class="card-error">No se pudieron cargar las cuentas caídas.</p>
-        }
-      }
-    </mat-card-content>
-  </mat-card>
-
-  <mat-card class="info-card renovar-card">
-    <mat-card-header>
-      <mat-card-title>Cuentas que debes pagar al proveedor</mat-card-title>
-    </mat-card-header>
-    <mat-card-content>
-      @if (porRenovar(); as pr) {
-        @if (pr.loading) {
-          <mat-spinner diameter="24" />
-        } @else if (pr.data; as cuentas) {
-          @if (cuentas.length === 0) {
-            <p class="card-empty">Ninguna cuenta vence en los próximos 7 días.</p>
-          } @else {
-            <ul class="renovar-list">
-              @for (c of cuentas; track c.id) {
-                <li class="renovar-row">
-                  <a
-                    class="renovar-item"
-                    [routerLink]="['/accounts', c.id]"
-                    [class.vencida]="c.diasRestantes < 0"
-                  >
-                    <app-service-icon [nombre]="c.servicioNombre" [size]="28" />
-                    <span class="renovar-info">
-                      <span class="renovar-servicio">
-                        {{ c.servicioNombre }}
-                        @if (c.ownerName) {
-                          <small class="owner">{{ c.ownerName }}</small>
-                        }
-                      </span>
-                      <span class="renovar-correo">{{ c.correo }}</span>
-                    </span>
-                    <span class="renovar-meta">
-                      <span class="renovar-dias">{{ diasLabel(c.diasRestantes) }}</span>
-                      <span class="renovar-clientes">{{ clientesLabel(c.clientesActivos) }}</span>
-                    </span>
-                  </a>
-                  <button
-                    mat-button
-                    type="button"
-                    class="renovar-accion"
-                    (click)="openRenovarProveedor(c)"
-                  >
-                    <mat-icon>autorenew</mat-icon>
-                    Renovar con el proveedor
-                  </button>
-                </li>
-              }
-            </ul>
-          }
-        } @else {
-          <p class="card-error">No se pudieron cargar las cuentas por renovar.</p>
-        }
-      }
-    </mat-card-content>
-  </mat-card>
+    </section>
+  </div>
 </div>

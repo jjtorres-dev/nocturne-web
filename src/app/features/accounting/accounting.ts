@@ -40,6 +40,7 @@ import { hoyIso } from '../../shared/fecha.util';
 import { InfoHint } from '../../shared/info-hint/info-hint';
 import { InfoToggle } from '../../shared/info-hint/info-toggle';
 import { FechaField } from '../../shared/fecha-field/fecha-field';
+import { cssToken } from '../../shared/css-token';
 
 // Sentinel para "sin filtro de dueño" en el backend (ver
 // AccountingService.VIEW_ALL en nocturne-api) — nunca un id real.
@@ -269,33 +270,35 @@ export class Accounting implements OnInit, AfterViewInit, OnDestroy {
       this.chart.update();
       return;
     }
-    // Colores fijos que reflejan los tokens de Nocturne (--nc-text-secondary,
-    // --nc-text-primary, --nc-surface-elevated, --nc-border): Chart.js pinta
-    // en un <canvas>, así que no puede tomar `var(--mat-sys-*)` directo.
+    // Chart.js pinta en un <canvas> y no entiende `var(--nc-*)`: los colores
+    // se leen de los tokens ya resueltos al crear el gráfico.
+    const tinta = cssToken('--nc-ink');
+    const tintaSuave = cssToken('--nc-ink-muted');
+    const linea = cssToken('--nc-rule');
     this.chart = new Chart(ctx, {
       type: 'bar',
       data,
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        color: '#94a3b8',
+        color: tintaSuave,
         scales: {
           x: {
-            ticks: { color: '#94a3b8' },
-            grid: { color: 'rgba(255, 255, 255, 0.06)' },
+            ticks: { color: tintaSuave },
+            grid: { color: linea },
           },
           y: {
-            ticks: { color: '#94a3b8' },
-            grid: { color: 'rgba(255, 255, 255, 0.06)' },
+            ticks: { color: tintaSuave },
+            grid: { color: linea },
           },
         },
         plugins: {
-          legend: { labels: { color: '#e6e9f0' } },
+          legend: { labels: { color: tinta } },
           tooltip: {
-            backgroundColor: '#1c2333',
-            titleColor: '#e6e9f0',
-            bodyColor: '#e6e9f0',
-            borderColor: '#232b40',
+            backgroundColor: tinta,
+            titleColor: cssToken('--nc-on-ink'),
+            bodyColor: cssToken('--nc-on-ink'),
+            borderColor: tinta,
             borderWidth: 1,
           },
         },

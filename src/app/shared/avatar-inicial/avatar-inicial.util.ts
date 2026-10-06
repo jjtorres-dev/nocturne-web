@@ -1,13 +1,13 @@
-// Paleta chica que armoniza con el degradado de marca (azul -> cian ->
-// verde-turquesa, ver `--nc-gradient-primary` en styles.scss). Son tonos
-// 600/700 para que el texto blanco de las iniciales conserve buen contraste.
+// Tonos oscuros de la paleta de Nocturne (tokens `--nc-avatar-*` en
+// styles.scss) para que las iniciales en `--nc-on-avatar` conserven buen
+// contraste.
 export const AVATAR_PALETTE = [
-  '#2563eb', // azul
-  '#0e7490', // cian
-  '#0f766e', // turquesa
-  '#047857', // esmeralda
-  '#4f46e5', // índigo
-  '#0369a1', // celeste
+  'var(--nc-avatar-1)',
+  'var(--nc-avatar-2)',
+  'var(--nc-avatar-3)',
+  'var(--nc-avatar-4)',
+  'var(--nc-avatar-5)',
+  'var(--nc-avatar-6)',
 ] as const;
 
 const ALNUM = /[\p{L}\p{N}]/u;
