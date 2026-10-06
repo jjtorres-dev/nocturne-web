@@ -1,7 +1,7 @@
 import { Component, DestroyRef, computed, inject, input, signal, type OnInit } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import type { ControlValueAccessor } from '@angular/forms';
-import { NgControl } from '@angular/forms';
+import { NgControl, Validators } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatInputModule } from '@angular/material/input';
@@ -44,6 +44,12 @@ export class MetodoPagoSelect implements ControlValueAccessor, OnInit {
   // confiable. `control.events` sí emite ante ese cambio — se usa para
   // empujar un signal y que showRequiredError (computed) se recalcule.
   private readonly controlTick = signal(0);
+  // Obligatorio en casi todos los formularios: el campo lo dice con su
+  // asterisco, igual que los demás.
+  protected readonly obligatorio = computed(() => {
+    this.controlTick();
+    return this.ngControl?.control?.hasValidator(Validators.required) ?? false;
+  });
   protected readonly showRequiredError = computed(() => {
     this.controlTick();
     return (

@@ -1,27 +1,6 @@
-.page-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 16px;
-
-  h1 {
-    margin: 0;
-    font-size: 1.5rem;
-  }
-}
-
-.page-header-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.filters {
-  display: flex;
-  gap: 16px;
-  flex-wrap: wrap;
-  margin-bottom: 8px;
-}
+// Encabezado, filtros, tablero y celdas: estilos compartidos de listas en
+// src/styles.scss (.page-header, .nc-filtros, .table-scroll, .nc-celda,
+// .nc-acciones, .combo-badge). Acá, solo lo propio de Ventas.
 
 .filters-toggle {
   width: 100%;
@@ -36,36 +15,75 @@
   width: 100%;
 }
 
-.loading {
+// Botones de acción de 36 px, a la medida de su casilla.
+.nc-acciones {
+  --mat-icon-button-state-layer-size: 36px;
+}
+
+// Ícono del servicio junto a su nombre y su cuenta.
+.celda-servicio {
   display: flex;
-  justify-content: center;
-  padding: 48px 0;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.celda-monto {
+  text-align: end;
+  white-space: nowrap;
+}
+
+// Código y, si aplica, el enlace al combo, en el mismo renglón.
+// Nunca se parten: el enlace al combo queda en el renglón del código.
+.mat-column-cliente .nc-celda-sub {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  white-space: nowrap;
+}
+
+// Correo y perfil: juntos si entran; si no, el perfil baja entero.
+.cuenta-perfil {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 5px;
+
+  span {
+    white-space: nowrap;
+  }
+}
+
+// Estado, vence, cobrado y acciones miden lo que su contenido; lo que sobra
+// va al servicio.
+.mat-column-activo,
+.mat-column-acciones,
+.mat-column-precio,
+.mat-column-fechaFin {
+  width: 1%;
+}
+
+// El nombre del dueño se ve entero: si no entra en un renglón, baja por
+// palabras (Material recorta las celdas con "…" por defecto).
+td.mat-column-dueno {
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+}
+
+// Fecha de vencimiento que pide atención: tinta de su estado.
+.vence-urgente {
+  color: var(--estado-tinta);
+}
+
+// Fechas y código en un renglón; la columna del servicio absorbe lo demás.
+.mat-column-fechaFin .nc-celda-sub,
+.mat-column-cliente .nc-code {
+  white-space: nowrap;
 }
 
 
 .original-amount {
-  color: var(--mat-sys-on-surface-variant);
-  font-size: 0.85em;
-  margin-left: 4px;
-}
-
-.combo-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 4px 12px;
-  border-radius: 16px;
-  background: var(--mat-sys-secondary-container);
-  color: var(--mat-sys-on-secondary-container);
-  font-size: 0.8125rem;
-  text-decoration: none;
-  cursor: pointer;
-
-  mat-icon {
-    font-size: 16px;
-    width: 16px;
-    height: 16px;
-  }
+  justify-content: flex-end;
 }
 
 // Estado + "Cuenta caída": uno al lado del otro, o apilados si no entran.
@@ -78,4 +96,40 @@
 
 td .estado-chips {
   justify-content: flex-start;
+}
+
+// ---------------------------------------------------------------------------
+// Tarjetas (celular)
+// ---------------------------------------------------------------------------
+.combo-en-tarjeta {
+  margin-top: 10px;
+}
+
+// Acciones en casillas iguales: ícono arriba, nombre abajo.
+.tarjeta-acciones {
+  display: grid;
+  grid-auto-columns: minmax(0, 1fr);
+  grid-auto-flow: column;
+  gap: 2px;
+
+  .accion {
+    --mat-button-text-container-height: 48px;
+    --mat-button-text-horizontal-padding: 2px;
+    --mat-button-text-label-text-color: var(--nc-ink);
+    --mat-button-text-icon-spacing: 0;
+    --mat-button-text-icon-offset: 0;
+
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    font-size: 0.75rem;
+    line-height: 1.1;
+    white-space: nowrap;
+
+    .mat-icon {
+      margin: 0;
+      color: var(--nc-ink-muted);
+    }
+  }
 }

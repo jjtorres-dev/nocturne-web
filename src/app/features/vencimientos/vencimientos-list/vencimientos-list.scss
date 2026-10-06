@@ -1,107 +1,175 @@
-.page-header {
-  margin-bottom: 16px;
+// Encabezado, tablero y celdas: estilos compartidos de listas en
+// src/styles.scss. Acá, solo lo propio de Vencimientos.
 
-  h1 {
-    margin: 0;
-    font-size: 1.5rem;
-  }
-}
-
-.filters {
+// El resumen (pestañas) a la izquierda y los días de aviso a la derecha.
+.venc-barra {
   display: flex;
-  align-items: center;
-  gap: 16px;
   flex-wrap: wrap;
-  margin-bottom: 8px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
 }
 
+// Pestañas de estado: son el resumen y el filtro a la vez. La elegida se
+// llena con el color de su estado; las otras quedan en blanco con su número
+// en la tinta del estado.
+.venc-resumen {
+  --mat-button-toggle-shape: var(--nc-radius);
+  --mat-button-toggle-height: 44px;
+  --mat-button-toggle-divider-color: var(--nc-rule-field);
+  --mat-button-toggle-background-color: var(--nc-surface);
+  --mat-button-toggle-text-color: var(--nc-ink);
+
+  border: 1px solid var(--nc-rule-field);
+
+  // En cada pestaña (y no en el grupo): `--estado` lo fija su clase
+  // `.nc-estado-*`.
+  .mat-button-toggle {
+    --mat-button-toggle-selected-state-background-color: var(--estado);
+    --mat-button-toggle-selected-state-text-color: var(--sobre-estado);
+
+    flex: 1 1 auto;
+  }
+
+  // En cero la pestaña se apaga, esté elegida o no: color pleno solo donde
+  // hay algo que atender.
+  .mat-button-toggle.vacio {
+    --mat-button-toggle-selected-state-background-color: var(--estado-tinte);
+    --mat-button-toggle-selected-state-text-color: var(--estado-tinta);
+  }
+}
+
+.venc-resumen-label {
+  font-weight: 600;
+}
+
+.venc-resumen-conteo {
+  margin-inline-start: 8px;
+  color: var(--estado-tinta);
+  font-stretch: var(--nc-width-condensed);
+  font-size: 1.25rem;
+  font-weight: 800;
+  line-height: 1;
+  vertical-align: -1px;
+
+  .mat-button-toggle-checked & {
+    color: inherit;
+  }
+}
+
+// Ancho suficiente para que "Avisarme con (días antes)" entre completo junto
+// al ícono de información (el renglón de ayuda lo quita `.nc-sin-ayuda`).
 .dias-alerta {
-  width: 140px;
-}
+  --mat-form-field-container-height: 44px;
+  --mat-form-field-container-vertical-padding: 10px;
 
-// Filtros apilados en pantallas angostas (ver .filters en styles.scss): este
-// componente fija align-items y un ancho propio que lo impedirían.
-@media (max-width: 767.98px) {
-  .filters {
-    align-items: stretch;
-  }
-
-  .dias-alerta {
-    width: 100%;
-  }
+  width: 250px;
 }
 
 .vencimientos-table {
   width: 100%;
 }
 
-.dias-negativo {
-  color: var(--mat-sys-error);
-}
-
-.loading {
+.celda-servicio {
   display: flex;
-  justify-content: center;
-  padding: 48px 0;
-}
-
-
-.original-amount {
-  color: var(--mat-sys-on-surface-variant);
-  font-size: 0.85em;
-  margin-left: 4px;
-}
-
-// Badge de días de la tarjeta (móvil): vencida/negativo en rojo, por vencer
-// en ámbar (mismos colores que el Dashboard), al día en el color primario.
-.dias-badge {
-  flex-shrink: 0;
-  padding: 4px 10px;
-  border-radius: 16px;
-  font-size: 0.8125rem;
-  font-weight: 500;
-  white-space: nowrap;
-  color: var(--mat-sys-primary);
-  background: color-mix(in srgb, currentColor 14%, transparent);
-}
-
-.dias-vencida {
-  color: var(--mat-sys-error);
-}
-
-.dias-por-vencer {
-  color: var(--nc-por-vencer-ink);
-}
-
-// Acción principal de la tarjeta: botón grande. `flex: 1 1 auto` en vez de
-// `width: 100%` porque ahora comparte el pie con Renovar (o el badge de
-// combo, ver Bloque B) — a todo el ancho no dejaría lugar para el segundo.
-.whatsapp-button {
-  --mat-button-filled-container-height: 48px;
-  flex: 1 1 auto;
-  font-size: 1rem;
-}
-
-.combo-badge {
-  display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 4px 12px;
-  border-radius: 16px;
-  background: var(--mat-sys-secondary-container);
-  color: var(--mat-sys-on-secondary-container);
-  font-size: 0.8125rem;
-  text-decoration: none;
-  cursor: pointer;
+  gap: 10px;
+  min-width: 0;
+}
 
-  mat-icon {
-    font-size: 16px;
-    width: 16px;
-    height: 16px;
+.celda-monto {
+  text-align: end;
+  white-space: nowrap;
+}
+
+// Fechas y código en un renglón; la columna del servicio absorbe lo demás.
+.mat-column-fechaFin .nc-celda-sub,
+.mat-column-dias .nc-celda-sub,
+.mat-column-cliente .nc-celda-sub {
+  white-space: nowrap;
+}
+
+// Acciones de la fila en dos casillas fijas a la derecha (recordatorio y
+// renovar): una venta de combo, que no se renueva sola, deja vacía la
+// segunda y los botones de WhatsApp quedan en columna.
+.venc-acciones {
+  display: grid;
+  grid-template-columns: auto 124px 110px;
+  align-items: center;
+  justify-content: end;
+  gap: 8px;
+  white-space: nowrap;
+
+  .whatsapp-accion {
+    grid-column: 2;
+  }
+
+  .renovar-accion {
+    grid-column: 3;
   }
 }
 
-// Chip "Cuenta caída" de la tarjeta (móvil), bajo el nombre del cliente.
+.whatsapp-accion,
+.renovar-accion {
+  --mat-button-filled-container-height: 36px;
+  --mat-button-outlined-container-height: 36px;
+  --mat-button-filled-horizontal-padding: 12px;
+  --mat-button-outlined-horizontal-padding: 12px;
+}
+
+// ---------------------------------------------------------------------------
+// Tarjetas (celular)
+// ---------------------------------------------------------------------------
+.dias-badge {
+  flex-shrink: 0;
+}
+
+// Enlace al combo, dentro de la tarjeta (el pie queda para el botón).
+.combo-en-tarjeta {
+  margin-top: 8px;
+}
+
+// Chip "Cuenta caída" de la tarjeta, bajo el nombre del cliente.
 .caida-row {
   margin: 6px 0 0;
+}
+
+// Acción principal de la tarjeta: botón grande que ocupa el ancho libre.
+.whatsapp-button {
+  --mat-button-filled-container-height: 48px;
+  --mat-button-filled-horizontal-padding: 12px;
+
+  // Base 0: comparte el renglón con "Renovar" en vez de empujarlo abajo.
+  flex: 1 1 0;
+  min-width: 0;
+  font-size: 0.9375rem;
+  white-space: nowrap;
+}
+
+.renovar-button {
+  --mat-button-outlined-container-height: 48px;
+
+  flex: 0 0 auto;
+}
+
+// Si el botón y lo que lo acompaña no entran en un renglón, lo segundo baja.
+.nc-card-footer {
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+@media (max-width: 767.98px) {
+  .venc-resumen {
+    display: flex;
+    width: 100%;
+  }
+
+  .venc-resumen-conteo {
+    margin-inline-start: 6px;
+  }
+
+  .dias-alerta {
+    width: 100%;
+  }
 }

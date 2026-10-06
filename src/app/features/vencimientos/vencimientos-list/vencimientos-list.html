@@ -2,18 +2,29 @@
   <h1>Vencimientos de tus clientes</h1>
 </div>
 
-<div class="filters">
+<!-- El resumen es a la vez el filtro: tres pestañas con su conteo, cada una
+     en el color de su estado. -->
+<div class="venc-barra">
   <mat-button-toggle-group
+    class="venc-resumen"
     [(ngModel)]="estado"
     (change)="refresh()"
     aria-label="Estado de vencimiento"
+    hideSingleSelectionIndicator
   >
     @for (e of estados; track e) {
-      <mat-button-toggle [value]="e">{{ estadoLabels[e] }}</mat-button-toggle>
+      <mat-button-toggle [value]="e" [class]="estadoClase[e]" [class.vacio]="conteo(e) === 0">
+        <span class="venc-resumen-label">{{ estadoLabels[e] }}</span>
+        @if (conteo(e); as n) {
+          <span class="venc-resumen-conteo">{{ n }}</span>
+        } @else if (resumen()) {
+          <span class="venc-resumen-conteo">0</span>
+        }
+      </mat-button-toggle>
     }
   </mat-button-toggle-group>
 
-  <mat-form-field appearance="outline" class="dias-alerta">
+  <mat-form-field appearance="outline" class="dias-alerta nc-sin-ayuda">
     <mat-label>Avisarme con (días antes)</mat-label>
     <input
       matInput
@@ -31,8 +42,18 @@
 />
 
 @if (loading()) {
-  <div class="loading">
-    <mat-spinner diameter="32" />
+  <div class="nc-lista-cargando" aria-busy="true">
+    <span class="nc-lista-cargando-texto">Cargando vencimientos…</span>
+    <span class="nc-skeleton"></span>
+    <span class="nc-skeleton"></span>
+    <span class="nc-skeleton"></span>
+    <span class="nc-skeleton"></span>
+  </div>
+} @else if (error()) {
+  <div class="nc-lista-error" role="alert">
+    <mat-icon aria-hidden="true">error</mat-icon>
+    <p>No se pudieron cargar los vencimientos. Revisa tu conexión e inténtalo de nuevo.</p>
+    <button mat-stroked-button type="button" (click)="refresh()">Reintentar</button>
   </div>
 } @else {
   @if (isMobile()) {
@@ -44,7 +65,8 @@
             <div class="nc-card-header">
               <span class="nc-card-title">{{ clienteNombre(v.clienteId) }}</span>
               <span
-                class="dias-badge"
+                class="dias-badge nc-cuando"
+                [class]="cuandoClase(dias)"
                 [class.dias-vencida]="dias < 0"
                 [class.dias-por-vencer]="dias >= 0 && estado === VencimientoFiltro.POR_VENCER"
               >
@@ -53,6 +75,12 @@
             </div>
             @if (v.cuentaCaida) {
               <p class="caida-row"><app-cuenta-caida-chip /></p>
+            }
+            @if (mostrarWhatsapp() && v.ventaComboId) {
+              <a class="combo-badge combo-en-tarjeta" [routerLink]="['/combo-sales', v.ventaComboId]">
+                <mat-icon>link</mat-icon>
+                {{ comboLabel(v) }}
+              </a>
             }
 
             <dl class="nc-card-fields">
@@ -80,12 +108,11 @@
             </dl>
           </mat-card-content>
 
-          @if (puedeCobrar(v) || (mostrarWhatsapp() && v.ventaComboId)) {
+          @if (puedeCobrar(v)) {
             <div class="nc-card-footer">
               @if (puedeCobrar(v)) {
                 <button
                   mat-flat-button
-                  color="primary"
                   class="whatsapp-button"
                   (click)="abrirWhatsapp(v)"
                 >
@@ -93,13 +120,8 @@
                   Enviar por WhatsApp
                 </button>
               }
-              @if (v.ventaComboId) {
-                <a class="combo-badge" [routerLink]="['/combo-sales', v.ventaComboId]">
-                  <mat-icon>link</mat-icon>
-                  {{ comboLabel(v) }}
-                </a>
-              } @else if (puedeCobrar(v)) {
-                <button mat-button (click)="openRenew(v)">
+              @if (!v.ventaComboId) {
+                <button mat-stroked-button class="renovar-button" (click)="openRenew(v)">
                   <mat-icon>autorenew</mat-icon>
                   Renovar
                 </button>
@@ -109,63 +131,27 @@
         </mat-card>
       }
     </div>
-  } @else {
+  } @else if (ventas().length > 0) {
     <div class="table-scroll">
       <table mat-table [dataSource]="ventas()" class="vencimientos-table">
+        <!-- Cada fila abre con su cuándo, en letras de cartelera. -->
+        <ng-container matColumnDef="dias">
+          <th mat-header-cell *matHeaderCellDef>Cuándo</th>
+          <td mat-cell *matCellDef="let v">
+            @let dias = diasDiferencia(v.fechaFin);
+            <div class="nc-celda">
+              <span class="nc-cuando" [class]="cuandoClase(dias)">{{ diasLabel(dias) }}</span>
+              <span class="nc-celda-sub">{{ v.fechaFin | date: 'dd/MM/yyyy' }}</span>
+            </div>
+          </td>
+        </ng-container>
+
         <ng-container matColumnDef="cliente">
           <th mat-header-cell *matHeaderCellDef>Cliente</th>
-          <td mat-cell *matCellDef="let v">{{ clienteNombre(v.clienteId) }}</td>
-        </ng-container>
-
-        <ng-container matColumnDef="servicio">
-          <th mat-header-cell *matHeaderCellDef>Servicio</th>
-          <td mat-cell *matCellDef="let v">{{ servicioNombre(v.servicioId) }}</td>
-        </ng-container>
-
-        <ng-container matColumnDef="cuentaPerfil">
-          <th mat-header-cell *matHeaderCellDef>Cuenta / Perfil</th>
-          <td mat-cell *matCellDef="let v">{{ cuentaPerfilLabel(v) }}</td>
-        </ng-container>
-
-        <ng-container matColumnDef="fechaFin">
-          <th mat-header-cell *matHeaderCellDef>Vence</th>
-          <td mat-cell *matCellDef="let v">{{ v.fechaFin | date: 'dd/MM/yyyy' }}</td>
-        </ng-container>
-
-        <ng-container matColumnDef="dias">
-          <th mat-header-cell *matHeaderCellDef>Días para vencer</th>
-          <td mat-cell *matCellDef="let v" [class.dias-negativo]="diasDiferencia(v.fechaFin) < 0">
-            {{ diasDiferencia(v.fechaFin) }}
-          </td>
-        </ng-container>
-
-        <ng-container matColumnDef="precio">
-          <th mat-header-cell *matHeaderCellDef>Cobrado</th>
           <td mat-cell *matCellDef="let v">
-            {{ v.precioPEN | soles }}
-            @if (v.moneda !== Moneda.PEN) {
-              <span class="original-amount">({{ v.precio | number: '1.2-2' }} {{ v.moneda }})</span>
-            }
-          </td>
-        </ng-container>
-
-        <ng-container matColumnDef="acciones">
-          <th mat-header-cell *matHeaderCellDef></th>
-          <td mat-cell *matCellDef="let v">
-            @if (v.cuentaCaida) {
-              <app-cuenta-caida-chip />
-            }
-            @if (puedeCobrar(v)) {
-              <button
-                mat-icon-button
-                matTooltip="Enviar recordatorio por WhatsApp"
-                (click)="abrirWhatsapp(v)"
-              >
-                <mat-icon>chat</mat-icon>
-              </button>
-            }
-            @if (mostrarWhatsapp()) {
-              @if (v.ventaComboId) {
+            <div class="nc-celda">
+              <span class="nc-celda-principal">{{ clienteNombre(v.clienteId) }}</span>
+              @if (mostrarWhatsapp() && v.ventaComboId) {
                 <a
                   class="combo-badge"
                   [routerLink]="['/combo-sales', v.ventaComboId]"
@@ -174,12 +160,68 @@
                   <mat-icon>link</mat-icon>
                   {{ comboLabel(v) }}
                 </a>
-              } @else if (puedeCobrar(v)) {
-                <button mat-icon-button matTooltip="Renovar" (click)="openRenew(v)">
-                  <mat-icon>autorenew</mat-icon>
-                </button>
               }
-            }
+            </div>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="servicio">
+          <th mat-header-cell *matHeaderCellDef>Servicio y cuenta</th>
+          <td mat-cell *matCellDef="let v">
+            <div class="celda-servicio">
+              <app-service-icon [nombre]="servicioNombre(v.servicioId)" [size]="28" />
+              <div class="nc-celda">
+                <span class="nc-celda-principal">{{ servicioNombre(v.servicioId) }}</span>
+                <span class="nc-celda-sub">{{ cuentaPerfilLabel(v) }}</span>
+              </div>
+            </div>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="precio">
+          <th mat-header-cell *matHeaderCellDef class="celda-monto">Cobrado</th>
+          <td mat-cell *matCellDef="let v" class="celda-monto">
+            <div class="nc-celda">
+              <span class="nc-celda-principal">{{ v.precioPEN | soles }}</span>
+              @if (v.moneda !== Moneda.PEN) {
+                <span class="nc-celda-sub original-amount">({{ v.precio | number: '1.2-2' }} {{ v.moneda }})</span>
+              }
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- El recordatorio por WhatsApp es la acción de esta pantalla: va
+             con su nombre escrito, no como un ícono más. -->
+        <ng-container matColumnDef="acciones">
+          <th mat-header-cell *matHeaderCellDef><span class="nc-sr-only">Acciones</span></th>
+          <td mat-cell *matCellDef="let v">
+            <div class="venc-acciones">
+              @if (v.cuentaCaida) {
+                <app-cuenta-caida-chip />
+              }
+              @if (puedeCobrar(v)) {
+                <button
+                  mat-flat-button
+                  class="whatsapp-accion"
+                  matTooltip="Enviar recordatorio por WhatsApp"
+                  (click)="abrirWhatsapp(v)"
+                >
+                  <mat-icon>chat</mat-icon>
+                  WhatsApp
+                </button>
+                @if (!v.ventaComboId) {
+                  <button
+                    mat-stroked-button
+                    class="renovar-accion"
+                    matTooltip="Renovar"
+                    (click)="openRenew(v)"
+                  >
+                    <mat-icon>autorenew</mat-icon>
+                    Renovar
+                  </button>
+                }
+              }
+            </div>
           </td>
         </ng-container>
 
@@ -190,6 +232,10 @@
   }
 
   @if (ventas().length === 0) {
-    <app-empty-state icon="event_busy" mensaje="No hay clientes en esta lista." />
+    <app-empty-state
+      [icon]="estado === VencimientoFiltro.VENCIDA ? 'check_circle' : 'event_available'"
+      [bueno]="estado === VencimientoFiltro.VENCIDA"
+      [mensaje]="vacioMensaje()"
+    />
   }
 }

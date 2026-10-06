@@ -103,6 +103,19 @@ typography:
     lineHeight: 1.6
     letterSpacing: "0.06em"
     fontVariation: "'wdth' 68"
+  encabezado:
+    fontFamily: "Archivo, 'Helvetica Neue', Arial, sans-serif"
+    fontSize: "0.875rem"
+    fontWeight: 700
+    letterSpacing: "0.04em"
+    fontVariation: "'wdth' 68"
+  dialogo:
+    fontFamily: "Archivo, 'Helvetica Neue', Arial, sans-serif"
+    fontSize: "1.25rem"
+    fontWeight: 700
+    lineHeight: 1.2
+    letterSpacing: "0.02em"
+    fontVariation: "'wdth' 68"
   code:
     fontFamily: "'JetBrains Mono', 'Roboto Mono', monospace"
     letterSpacing: "0.02em"
@@ -134,6 +147,28 @@ components:
     rounded: "{rounded.base}"
     height: "32px"
     padding: "0 10px"
+  button-outlined-lista:
+    backgroundColor: "transparent"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.base}"
+    height: "36px"
+    padding: "0 12px"
+  button-whatsapp:
+    backgroundColor: "{colors.ink}"
+    textColor: "{colors.on-ink}"
+    rounded: "{rounded.base}"
+    height: "36px"
+    padding: "0 12px"
+  button-whatsapp-celular:
+    backgroundColor: "{colors.ink}"
+    textColor: "{colors.on-ink}"
+    rounded: "{rounded.base}"
+    height: "48px"
+    padding: "0 12px"
+  button-text:
+    backgroundColor: "transparent"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.base}"
   panel:
     backgroundColor: "{colors.surface}"
     textColor: "{colors.ink}"
@@ -250,6 +285,68 @@ components:
     textColor: "{colors.ink}"
     rounded: "{rounded.base}"
     padding: "10px 12px"
+  tablero:
+    backgroundColor: "{colors.surface}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.base}"
+  tablero-encabezado:
+    textColor: "{colors.ink}"
+    typography: "{typography.encabezado}"
+    height: "40px"
+    padding: "0 8px"
+  tablero-fila:
+    textColor: "{colors.ink}"
+    height: "48px"
+    padding: "0 8px"
+  tablero-fila-hover:
+    backgroundColor: "{colors.surface-sunken}"
+  casilla-accion:
+    textColor: "{colors.ink-muted}"
+    width: "36px"
+  filtro-campo:
+    rounded: "{rounded.base}"
+    height: "44px"
+    width: "220px"
+  combo-enlace:
+    textColor: "{colors.brand}"
+  pestana-estado:
+    backgroundColor: "{colors.surface}"
+    textColor: "{colors.ink}"
+    height: "44px"
+  pestana-estado-vencida:
+    backgroundColor: "{colors.vencida}"
+    textColor: "{colors.on-vencida}"
+    height: "44px"
+  pestana-estado-por-vencer:
+    backgroundColor: "{colors.por-vencer}"
+    textColor: "{colors.on-por-vencer}"
+    height: "44px"
+  pestana-estado-al-dia:
+    backgroundColor: "{colors.al-dia}"
+    textColor: "{colors.on-al-dia}"
+    height: "44px"
+  pestana-estado-vacia:
+    backgroundColor: "{colors.vencida-tint}"
+    textColor: "{colors.vencida-ink}"
+    height: "44px"
+  lista-cargando:
+    backgroundColor: "{colors.surface}"
+    textColor: "{colors.ink-muted}"
+    rounded: "{rounded.base}"
+    padding: "14px"
+  lista-error:
+    backgroundColor: "{colors.vencida-tint}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.base}"
+    padding: "14px"
+  lista-vacia:
+    backgroundColor: "{colors.surface}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.base}"
+    padding: "14px"
+  dialogo-titulo:
+    textColor: "{colors.ink}"
+    typography: "{typography.dialogo}"
 ---
 
 # Design System: Nocturne
@@ -262,7 +359,9 @@ Nocturne es la cartelera de un cine de barrio a plena luz: cada cuenta es una sa
 
 Es una superficie de operación, densa y plana: filas de 36 a 50 px, paneles pegados a 16 px, color plano sin degradados y sin sombras en nada que esté apoyado en el tablero. El color fuerte se reserva para lo que cuesta dinero si se pasa por alto (vencidas, por vencer, caídas); todo lo demás es tinta sobre blanco. Celular y escritorio valen lo mismo: el mismo tablero se pliega a una columna con una barra inferior de cinco destinos.
 
-**Alcance actual.** Están rediseñados en este mundo el layout del panel (riel, barra superior, barra inferior en celular), el buscador global, Inicio y el login, que es la fachada del mismo cine: a un lado el letrero, al otro la taquilla; con él se rehízo el favicon. Las demás pantallas (Ventas, Ventas de combos, Vencimientos, Clientes y proveedores, Servicios, Cuentas, Combos, Gastos, Contabilidad, Usuarios, Configuración) hoy solo heredan los tokens a través de Material; cada una todavía debe su propio rediseño dentro de la Cartelera.
+**Alcance actual.** Están rediseñados en este mundo el layout del panel (riel, barra superior, barra inferior en celular), el buscador global, Inicio, el login (la fachada del mismo cine: a un lado el letrero, al otro la taquilla; con él se rehízo el favicon) y las dos listas de uso diario, Ventas y Vencimientos, con los diálogos que se abren desde ellas (nueva venta, editar, renovar, finalizar).
+
+Con esas dos listas llegaron reglas que son GLOBALES y viven en `src/styles.scss`: el tablero de las listas, las reglas de diálogos, las de campos y las de botones. Las que se enganchan a Material (tablero blanco con borde, encabezados sobre el riel, margen de celdas, alto de filas, título y zonas de los diálogos, botones de texto en tinta) y el vacío compartido (`app-empty-state`) ya cambian el aspecto de todas las demás listas y diálogos de la app sin que nadie los haya tocado. De esas otras pantallas, después del cambio solo se revisaron en pantalla Cuentas y el diálogo "Nueva cuenta"; el resto lo recibe sin revisar. Las piezas que se piden por clase (celda de dos renglones, casillas de acción, el cuándo, filtros compactos, carga y error de lista) hoy solo las usan Ventas y Vencimientos: las demás pantallas (Ventas de combos, Clientes y proveedores, Servicios, Cuentas, Combos, Gastos, Contabilidad, Usuarios, Configuración) todavía cargan con el indicador giratorio de Material, llevan filtros de alto completo y deben su propio rediseño dentro de la Cartelera.
 
 **Key Characteristics:**
 - Tablero claro: fondo ópalo cálido, paneles blancos, líneas finas, riel negro de 2 px bajo cada título.
@@ -272,6 +371,7 @@ Es una superficie de operación, densa y plana: filas de 36 a 50 px, paneles peg
 - Archivo en dos anchos: condensada en mayúsculas para títulos y cifras, normal para el texto; cifras tabulares.
 - Una sola esquina (3 px) y sombra solo en capas flotantes.
 - Cada fila urgente abre con su "función": el cuándo, en letras de cartelera.
+- Las listas son tableros: encabezado en letras de cartelera sobre el riel, celdas de dos renglones y acciones en casillas fijas.
 - El inventario es la cartelera: una sala por servicio y una butaca por perfil o cuenta completa, ocupada o libre.
 
 ## Colors
@@ -279,11 +379,11 @@ Es una superficie de operación, densa y plana: filas de 36 a 50 px, paneles peg
 Blanco ópalo y tinta casi negra de tono cálido, un rojo vino para la marca y cinco colores de estado planos y saturados. Todos los valores viven en el frontmatter y, en el código, en el bloque `:root` de `src/styles.scss` como `--nc-*`.
 
 ### Primary
-- **Tinta negra** (`ink`, `on-ink`): texto principal y acción principal. Los botones rellenos de Material son negros con texto blanco; los delineados llevan texto en tinta y borde `rule-field`. También es el ítem activo del buscador, el anillo de foco sobre claro (`focus`) y, en todo campo de formulario, el contorno, la etiqueta y el cursor al enfocar.
+- **Tinta negra** (`ink`, `on-ink`): texto principal y acción principal. Los botones rellenos de Material son negros con texto blanco; los delineados llevan texto en tinta y borde `rule-field`; los de texto ("Cancelar" y las demás acciones secundarias) también van en tinta. También es el ítem activo del buscador, el anillo de foco sobre claro (`focus`) y, en todo campo de formulario, el contorno, la etiqueta y el cursor al enfocar.
 - **Riel negro** (`rail`): la línea de 2 px bajo cada título de panel y de grupo de resultados. Mismo valor que la tinta, token aparte porque en modo oscuro se separan.
 
 ### Secondary
-- **Rojo butaca** (`brand`, `brand-tint`, `on-brand`): marca, enlaces y selección de Material (`--mat-sys-primary`). Es el "Nocturne" de la barra superior en celular y los enlaces "Ver detalle". No marca el foco de un campo.
+- **Rojo butaca** (`brand`, `brand-tint`, `on-brand`): marca, enlaces y selección de Material (`--mat-sys-primary`). Es el "Nocturne" de la barra superior en celular, los enlaces "Ver detalle" y el enlace "Parte de combo" de una fila. No marca el foco de un campo ni colorea un botón de texto.
 - **Rojo del riel** (`nav`, `nav-hover`, `nav-active`, `nav-rule`, `on-nav`, `on-nav-muted`): familia del riel de navegación y de la barra inferior. `nav-active` es más hondo que `nav`, no más claro. Fuera del panel, `nav` es el fondo del letrero del login, del favicon y de la barra del navegador en celular (`theme-color`), con `on-nav` para la marca y `on-nav-muted` para la línea que dice qué es Nocturne.
 
 ### Tertiary
@@ -313,11 +413,11 @@ Blanco ópalo y tinta casi negra de tono cálido, un rojo vino para la marca y c
 
 **Regla del Lienzo.** Lo que pinta en un `<canvas>` (Chart.js) no puede usar `var()`: lee el token ya resuelto con `cssToken('--nc-…')` de `src/app/shared/css-token.ts`. Nunca se copia el valor al TypeScript.
 
-**Regla de la Tinta que Actúa.** La acción principal es negra. El rojo butaca es marca, navegación, enlace y selección; no rellena botones. Así un botón nunca se confunde con un estado ni con el bermellón de "vencida".
+**Regla de la Tinta que Actúa.** Toda acción va en tinta. La principal es un relleno negro; la de fila, un delineado con texto en tinta; la secundaria ("Cancelar" y los demás botones de texto), texto en tinta con su capa de estado también en tinta; los botones de ícono y el ícono de ayuda (ⓘ), en tinta suave. El rojo butaca es marca, navegación, enlace y selección: no rellena botones ni colorea su texto. El bermellón es "vencida" y error. Así un botón nunca se confunde con un estado.
 
 **Regla de la Bombilla.** El ámbar de bombilla se enciende dentro del riel rojo (y su barra inferior) para decir "estás acá" y, por pedido expreso del usuario, en la fila de bombillas de la marca en dos lugares más: el letrero del login y el favicon. No es un acento general: siempre va sobre rojo butaca y nunca sobre el tablero claro. Fuera de esos lugares, el ámbar que se ve es el estado "por vencer", que es otro token.
 
-**Regla del Estado.** Bermellón, ámbar, verde, magenta y turquesa significan estados y nada más. No decoran, no distinguen categorías, no son series de dinero: para eso existen `--nc-serie-*`. En cero, un bloque de estado se apaga a su `-tint` con texto `-ink`: color solo donde hay algo que atender. Un bloque o etiqueta toma los cuatro colores de su estado de las clases globales `.nc-estado-vencida`, `.nc-estado-por-vencer`, `.nc-estado-al-dia` y `.nc-estado-caida` (en `src/styles.scss`), que fijan `--estado`, `--sobre-estado`, `--estado-tinte` y `--estado-tinta`. Los avisos del login usan tres de esos tintes como fondo de un mensaje, con texto en tinta y el ícono en la `-ink` del estado: por vencer para la sesión expirada, al día para la contraseña cambiada y vencida para un error.
+**Regla del Estado.** Bermellón, ámbar, verde, magenta y turquesa significan estados y nada más. No decoran, no distinguen categorías, no son series de dinero: para eso existen `--nc-serie-*`. En cero, un bloque de estado se apaga a su `-tint` con texto `-ink`: color solo donde hay algo que atender; vale igual para una pestaña de estado elegida. Un bloque o etiqueta toma los cuatro colores de su estado de las clases globales `.nc-estado-vencida`, `.nc-estado-por-vencer`, `.nc-estado-al-dia` y `.nc-estado-caida` (en `src/styles.scss`), que fijan `--estado`, `--sobre-estado`, `--estado-tinte` y `--estado-tinta`. Los avisos del login usan tres de esos tintes como fondo de un mensaje, con texto en tinta y el ícono en la `-ink` del estado: por vencer para la sesión expirada, al día para la contraseña cambiada y vencida para un error.
 
 **Regla del Foco en Tinta.** En todo campo de formulario, el contorno enfocado, la etiqueta enfocada y el cursor van en tinta (`--nc-focus` y `--nc-ink`, vía `--mat-form-field-outlined-focus-outline-color`, `--mat-form-field-outlined-focus-label-text-color` y `--mat-form-field-outlined-caret-color` en `src/styles.scss`). El rojo nunca significa foco: queda para la marca, y el bermellón para el error, así un campo enfocado no parece un campo con error. El autocompletado del navegador conserva el fondo del campo y su tinta en vez de pintar el suyo.
 
@@ -337,9 +437,11 @@ Blanco ópalo y tinta casi negra de tono cálido, un rojo vino para la marca y c
 - **Display** (800, 2.25rem, 0.95, condensada): la cifra de cada tarjeta de estado (1.875rem en celular). La cifra de "Ganancia del mes" baja a 1.875rem, mismo ancho y peso.
 - **Headline** (800, 1.75rem, 1.1, condensada, mayúsculas, 0.01em): el `h1` de cada pantalla y la marca en el riel (esta con 0.06em). En el letrero del login la marca crece con el mismo ancho y peso: 6rem en escritorio (0.04em, alto de línea 0.9), 3rem en la banda de celular y 1.5rem en la banda compacta.
 - **Title** (700, 1.125rem, 1.2, condensada, mayúsculas, 0.02em): título de panel, siempre sobre su riel negro.
-- **Función** (700, 1rem, 1.2, condensada, mayúsculas, 0.02em): el cuándo que abre cada fila ("VENCE EN 3 DÍAS"), en la tinta de su estado.
-- **Body** (400, 0.875rem, 1.43, ancho normal): texto general, vía `--mat-sys-body-medium`. El nombre principal de una fila sube a 600; el dato secundario baja a 0.8125rem en tinta suave.
-- **Label** (600, 0.8125rem, 1.2, ancho normal, sin mayúsculas): etiqueta de tarjeta de estado, enlaces dentro de un título, texto de botón compacto y, en tinta suave, el subtítulo que separa las salas por unidad de venta.
+- **Diálogo** (700, 1.25rem, 1.2, condensada, mayúsculas, 0.02em): título de todo diálogo, sobre su riel negro.
+- **Función** (700, 1rem, 1.2, condensada, mayúsculas, 0.02em): el cuándo que abre cada fila ("VENCE EN 3 DÍAS"), en la tinta de su estado. En las listas es la clase global `.nc-cuando`, que nunca se parte en dos renglones.
+- **Encabezado** (700, 0.875rem, condensada, mayúsculas, 0.04em): encabezado de columna de todo tablero, en un solo renglón sobre el riel negro.
+- **Body** (400, 0.875rem, 1.43, ancho normal): texto general, vía `--mat-sys-body-medium`. El nombre principal de una fila sube a 600; el dato secundario baja a 0.8125rem en tinta suave. En un tablero son los dos renglones de una celda (`.nc-celda-principal` y `.nc-celda-sub`, alto de línea 1.3).
+- **Label** (600, 0.8125rem, 1.2, ancho normal, sin mayúsculas): etiqueta de tarjeta de estado, enlaces dentro de un título, texto de botón compacto, el enlace "Parte de combo" y, en tinta suave, el subtítulo que separa las salas por unidad de venta.
 - **Grupo** (700, 0.8125rem, condensada, mayúsculas, 0.06em): título de grupo del menú; en el buscador, 0.875rem con 0.04em. La fecha de la barra superior usa el mismo registro a 0.9375rem, peso 600.
 - **Code** (JetBrains Mono, 0.02em): códigos de venta y combo (V-00001, C-00001).
 
@@ -355,17 +457,21 @@ Riel fijo de 232 px (`--nc-nav-width`) a la izquierda y, a su derecha, una barra
 
 Inicio abre con las tarjetas de estado a todo el ancho y debajo una rejilla de dos columnas `2fr / 1fr` (mínimo 300 px la derecha) con 16 px de separación, en tres filas de áreas: arriba, las cuentas por pagar al proveedor a la izquierda y las cuentas caídas a la derecha; bajo las caídas, la ganancia del mes (las cuentas por pagar ocupan las dos filas de su columna); y al pie, a todo el ancho, "Disponible para vender". Lo urgente a la izquierda, el negocio a la derecha, el inventario cerrando.
 
-Ritmo observado (no hay tokens de espaciado en el CSS; son los valores que se repiten): 2 px entre bloques y tramos contiguos, 4 px entre butacas (3 px en celular), 4 y 8 px dentro de un grupo, 10 px entre columnas de una fila, 14 px de margen interno horizontal de panel, 16 px entre paneles, 20 px entre columnas de salas, 24 px de margen de página. Filas de 36 px en el menú y el buscador y alrededor de 50 px en las listas de cuentas. Material corre con densidad -1.
+Una pantalla de lista se arma en tres pisos separados 12 px: el encabezado de página (`.page-header`: el `h1` a la izquierda y las acciones a la derecha, 8 px entre ellas), la línea de filtros o de resumen y el tablero. Los filtros compactos (`.nc-filtros`) van en una línea que se pliega, con 12 px entre campos de 220 px de ancho.
+
+Ritmo observado (no hay tokens de espaciado en el CSS; son los valores que se repiten): 2 px entre bloques y tramos contiguos, 4 px entre butacas (3 px en celular), 4 y 8 px dentro de un grupo, 10 px entre columnas de una fila y a cada lado de una celda de tablero (14 px al borde izquierdo del tablero), 12 px entre los pisos de una lista y entre sus tarjetas en celular, 14 px de margen interno horizontal de panel, 16 px entre paneles, 20 px entre columnas de salas, 24 px de margen de página. Filas de 36 px en el menú y el buscador, alrededor de 50 px en las listas de cuentas de Inicio y, en todo tablero, 40 px de encabezado y 48 px como mínimo por fila (una fila con celdas de dos renglones crece lo que pidan). Material corre con densidad -1.
 
 El login no lleva riel ni barras: son dos mitades a toda la altura, el letrero rojo a la izquierda y la taquilla clara a la derecha, en proporción `9fr / 11fr` (45 % y 55 %), sin tarjeta que envuelva el formulario. Las dos mitades empiezan a la misma altura (`clamp(48px, 28vh, 300px)`), así el tope de la marca y el del título comparten línea y el título no se mueve cuando aparece o desaparece un aviso. El formulario es una columna de 360 px como máximo, alineada a la izquierda de su mitad.
 
 Cortes:
 - **Menos de 900 px (solo el login):** una columna. El letrero pasa a ser una banda arriba con la marca, su fila de bombillas y la línea que dice qué es Nocturne; debajo, la misma columna del formulario, centrada, con 20 px a los lados.
-- **Menos de 1400 px:** el botón de fila acorta su texto ("Renovar").
+- **Menos de 1400 px:** el botón de fila de Inicio acorta su texto ("Renovar").
 - **Desde 1100 px:** la fila de cuentas por pagar pasa a un solo renglón en columnas. **Menos de 1100 px:** la rejilla de Inicio pasa a una columna en este orden: cuentas caídas, cuentas por pagar, ganancia, salas.
-- **Menos de 768 px** (el mismo corte de `shared/breakpoints.ts`): el riel se vuelve un panel lateral sobre el contenido (hasta 288 px o 86 % del ancho) y aparece la barra inferior de 60 px más el área segura, con cuatro destinos diarios y "Menú". Las tarjetas de estado pasan a una rejilla 2×2 con 6 px de separación; los paneles se separan 12 px; los objetivos táctiles suben a 44 px; el margen de página baja a 16 px. Las tablas hacen scroll horizontal dentro de `.table-scroll` y los diálogos ocupan el ancho menos 32 px.
+- **Menos de 768 px** (el mismo corte de `shared/breakpoints.ts`): el riel se vuelve un panel lateral sobre el contenido (hasta 288 px o 86 % del ancho) y aparece la barra inferior de 60 px más el área segura, con cuatro destinos diarios y "Menú". Las tarjetas de estado pasan a una rejilla 2×2 con 6 px de separación; los paneles se separan 12 px; los objetivos táctiles suben a 44 px; el margen de página baja a 16 px. Ventas y Vencimientos cambian su tablero por una lista de tarjetas (`.nc-card`, 12 px entre ellas); las demás tablas hacen scroll horizontal dentro de `.table-scroll`, con las celdas en un renglón. El encabezado de página se pliega, los filtros de Ventas se guardan tras un botón "Filtros" a todo el ancho y los diálogos ocupan el ancho menos 32 px.
 
 **Regla del Teclado.** En el login en celular, los campos y el botón tienen que seguir a la vista con el teclado abierto. Cuando el área visible se achica (`visualViewport` por debajo del 75 % del alto de la ventana) o la ventana mide menos de 520 px de alto, la banda se compacta a un renglón (marca a 1.5rem sobre bombillas de 2 px), se ocultan la línea que dice qué es Nocturne y la línea de ayuda, el título baja a 1.375rem y el formulario sube hasta el borde de lo visible.
+
+**Regla de las Casillas Fijas.** Las acciones de una fila viven en casillas de ancho fijo, a la derecha, siempre en el mismo orden (`.nc-acciones`: una casilla de 36 px por acción). Una fila con menos acciones deja sus casillas vacías; nunca corre las otras. Así cada acción queda en la misma columna en todo el tablero y una fila distinta (la venta que es parte de un combo) no desordena a las demás.
 
 Anchos de revisión: 1440 px en escritorio y 360 px en celular. A 360 px ninguna fila de cuenta se monta: lo que no entra en un renglón baja al siguiente. El login se revisa además a 360 px con el teclado abierto.
 
@@ -398,8 +504,11 @@ Las líneas tienen tres pesos con papel fijo: 1 px `rule` separa, 1 px `rule-fie
 ### Buttons
 - **Shape:** esquina de tablero (3 px).
 - **Primary:** relleno en tinta negra con texto blanco (`--mat-button-filled-*`).
-- **Outlined:** texto en tinta, borde `rule-field`, fondo transparente. Es el botón de fila ("Renovar con el proveedor"): 32 px de alto y 10 px de margen horizontal en escritorio; en celular, cuadrado de 44 px solo con el ícono y el nombre completo para lectores de pantalla.
+- **Outlined:** texto en tinta, borde `rule-field`, fondo transparente. Es el botón de fila. En Inicio ("Renovar con el proveedor"): 32 px de alto y 10 px de margen horizontal en escritorio; en celular, cuadrado de 44 px solo con el ícono y el nombre completo para lectores de pantalla. En el tablero de Vencimientos ("Renovar"): 36 px de alto y 12 px de margen horizontal, con ícono y nombre; en su tarjeta de celular, 48 px.
+- **Text:** texto en tinta, con capa de estado y onda en tinta (`--mat-button-text-*`). Es "Cancelar" y toda acción secundaria de un diálogo. Nunca rojo.
+- **Icon:** ícono en tinta suave (`--mat-icon-button-icon-color`). Son las acciones de fila de Ventas y el ícono de ayuda (ⓘ) junto a un campo o una casilla, que es una ayuda y no una alerta.
 - **Hover / Focus:** capa de estado de Material; foco con anillo de 2 px en `focus`.
+- **Botón que responde:** en los diálogos de venta (nueva, editar, renovar) el botón principal está habilitado en reposo. Al presionarlo con datos faltantes se marcan todos los campos y cada uno dice qué le falta; solo deja de responder mientras guarda (y, en "Nueva venta", mientras cargan las opciones). Los demás formularios de la app todavía lo deshabilitan mientras el formulario no es válido: es deuda, no la regla.
 
 ### Chips
 - **Style:** `mat-chip` con fondo `-tint`, texto `-ink` y contorno del estado, esquina de 3 px.
@@ -408,8 +517,9 @@ Las líneas tienen tres pesos con papel fijo: 1 px `rule` separa, 1 px `rule-fie
 ### Cards / Containers
 - **Panel** (`.nc-panel`): blanco, borde de 1 px `rule`, esquina de 3 px, sin sombra, sin margen interno propio: las filas llegan de borde a borde.
 - **Título de panel** (`.nc-panel-title`): registro Title, margen `10px 14px 8px`, riel negro de 2 px debajo. Puede llevar a la derecha un enlace o una leyenda en ancho normal. No lleva totales: el conteo ya está en su tarjeta de estado y cada fila dice lo suyo.
-- **Vacío y error:** una línea dentro del panel, margen `12px 14px`; el vacío bueno lleva un ícono en verde al día, el error va en tinta bermellón.
-- **Carga** (`.nc-skeleton`, clase global de `src/styles.scss`): bloques de 36 px en ópalo hundido que ocupan el lugar del contenido.
+- **Vacío y error dentro de un panel de Inicio:** una línea dentro del panel, margen `12px 14px`; el vacío bueno lleva un ícono en verde al día, el error va en tinta bermellón. Los de una lista entera están en "Estados de una lista".
+- **Barra de carga** (`.nc-skeleton`, clase global de `src/styles.scss`): bloque de 36 px en ópalo hundido que ocupa el lugar de una fila; pulsa, salvo con movimiento reducido.
+- **Tarjeta de lista** (`.nc-card`, celular): blanca, borde de 1 px `rule`, sin sombra. Arriba el título en 600 a 1.05rem con su estado al otro extremo; debajo un renglón secundario a 0.8125rem en tinta suave; después los datos como pares etiqueta y valor (etiqueta de 104 px en tinta suave, 8 px entre renglones); al pie, tras una línea `rule`, las acciones.
 
 ### Inputs / Fields
 - **Buscador:** 36 px de alto, fondo ópalo hundido, borde de 1 px `rule-field`, esquina de 3 px, lupa en tinta suave.
@@ -417,7 +527,9 @@ Las líneas tienen tres pesos con papel fijo: 1 px `rule` separa, 1 px `rule-fie
 - **Focus:** fondo blanco, borde y contorno de 1 px en `focus` (se lee como un borde de 2 px negro).
 - **Resultados:** panel flotante con la sombra de capa. Cada categoría es un renglón del tablero: título condensado sobre riel negro, pegado arriba al hacer scroll. Ítems de 36 px (44 px en celular) con línea fina; el ítem activo con el teclado se invierte a tinta negra con texto blanco.
 - **Campos de formulario** (Material, delineados): borde `--mat-sys-outline` (`rule-field`) y radio de 3 px. Al enfocar, contorno, etiqueta y cursor en tinta (Regla del Foco en Tinta); el error va en tinta bermellón con su mensaje debajo. El autocompletado del navegador no cambia el fondo ni la tinta del campo.
-- Este cambio de foco y de autocompletado es global y se hizo junto con el login: después de hacerlo solo se revisó en pantalla el login. Los formularios de las demás pantallas lo heredan sin revisar.
+- **Obligatorio:** todo campo obligatorio muestra su asterisco, también "Método de pago", que lo toma del validador de su control.
+- **Filtros compactos** (`.nc-filtros`): campos de 44 px de alto y 220 px de ancho, sin el renglón de ayuda, porque un filtro no lleva ayuda ni error. Un campo suelto en la misma situación quita ese renglón con `.nc-sin-ayuda`.
+- El foco en tinta y el autocompletado son globales y se hicieron junto con el login; los revisados en pantalla son el login, los diálogos de venta y "Nueva cuenta". Los formularios de las demás pantallas los heredan sin revisar.
 
 ### Navigation
 - **Riel** (232 px, `nav`): arriba la marca en letras de marquesina sobre una fila de bombillas punteada; el menú en grupos (Vender, Inventario, Dinero y, solo para el administrador, Administración) con título de grupo en `on-nav-muted` sobre una línea `nav-rule`; al pie, fijo, el usuario con avatar, nombre y rol.
@@ -427,6 +539,60 @@ Las líneas tienen tres pesos con papel fijo: 1 px `rule` separa, 1 px `rule-fie
 - **Foco:** contorno de 2 px en ámbar de bombilla, hacia adentro.
 - **Barra superior** (52 px, blanca, línea fina abajo): buscador a la izquierda y fecha de hoy a la derecha en el registro Grupo, tinta suave. En celular muestra la marca en rojo butaca y la lupa.
 - **Barra inferior (celular):** 60 px más área segura, fondo `nav`, cinco columnas iguales (Inicio, Ventas, Vencimientos, Cuentas, Menú) con ícono y etiqueta de 0.75rem en `on-nav-muted`; el activo va sobre `nav-active` en ámbar con ícono relleno.
+
+### Listas
+El tablero: toda tabla de la app, por reglas globales de `src/styles.scss`.
+
+- **Tablero** (`.table-scroll`): blanco, borde de 1 px `rule`, esquina de 3 px, sin sombra; si la tabla no entra, hace scroll horizontal ahí dentro.
+- **Encabezado:** 40 px, registro Encabezado en tinta, en un renglón, sobre el riel negro de 2 px. La columna de acciones no lleva texto visible, solo su nombre para lectores de pantalla.
+- **Filas:** 48 px como mínimo, línea fina entre filas y ninguna bajo la última; al pasar el puntero cambian a ópalo hundido en 160 ms. Celdas con 8 px a cada lado (14 px la primera, al borde del tablero).
+- **Celda de dos renglones** (`.nc-celda`): el dato principal en 600 y en un solo renglón (`.nc-celda-principal`) y debajo el secundario a 0.8125rem en tinta suave (`.nc-celda-sub`), que puede partirse sin dejar una palabra suelta pero nunca se recorta. Margen vertical de 6 px, 1 px entre renglones. Con un ícono de servicio, este mide 28 px y va a la izquierda, a 10 px.
+- **Montos:** alineados a la derecha, encabezado incluido, en un renglón; el monto en otra moneda va debajo, entre paréntesis.
+- **Casillas de acción** (`.nc-acciones`): Regla de las Casillas Fijas; cada casilla es un botón de ícono con su nombre en un globo y para lectores de pantalla.
+- **El cuándo** (`.nc-cuando`): registro Función en la tinta del estado que le da su clase `.nc-estado-*`; sin clase de estado, en tinta.
+- **Enlace de combo** (`.combo-badge`): "Parte de combo C-00001" con un ícono de eslabón de 16 px, registro Label en rojo butaca, en un renglón. Lleva a la venta de combo.
+- **En celular:** Ventas y Vencimientos pasan a tarjetas de lista; las demás tablas siguen en su tablero con scroll horizontal.
+
+Las celdas de dos renglones, las casillas, el cuándo y el enlace de combo se piden por clase: hoy solo los usan Ventas y Vencimientos. Lo demás de esta lista ya se aplica solo a toda tabla.
+
+### Estados de una lista
+Los tres son globales. Reemplazan al indicador giratorio y al ícono grande centrado.
+
+- **Carga** (`.nc-lista-cargando`): un panel blanco con borde `rule`, margen interno de 14 px, que lo dice con una línea visible en tinta suave ("Cargando ventas…") sobre cuatro barras hundidas (`.nc-skeleton`) separadas 8 px. Se lee como carga también sin animación.
+- **Error de carga** (`.nc-lista-error`): un aviso sobre tinte vencida, sin borde, margen interno de 14 px: ícono en tinta bermellón, una frase en tinta que dice qué pasó y cómo seguir, y un botón delineado "Reintentar". Si no entra en un renglón, el botón baja.
+- **Vacío** (`app-empty-state`): una línea dentro de un panel de tablero (blanco, borde `rule`, margen interno de 14 px): ícono de 24 px en tinta tenue, el mensaje en tinta y, si hay algo que hacer, una segunda línea a 0.8125rem en tinta suave ("Prueba cambiando o quitando los filtros."). El ícono pasa a verde al día solo cuando el vacío es una buena noticia (opción `bueno`: "Ningún cliente tiene una venta vencida."). Sin ilustración ni ícono gigante.
+
+La carga y el error los usan Ventas y Vencimientos; el vacío es un componente compartido y ya se ve así en todas las listas y en el buscador.
+
+### Ventas
+El tablero de todas las ventas: encontrar una y actuar sin abrir nada más.
+
+- **Encabezado y filtros:** "Ventas" con "Exportar CSV" (delineado) y "Nueva venta" (relleno en tinta) a la derecha; debajo, tres filtros compactos en una línea: Cliente, Servicio y Estado.
+- **Columnas:** siete para el administrador: Cliente (nombre sobre el código de venta en Code), Servicio y cuenta (ícono, servicio sobre correo y perfil), Vence (la fecha sobre "desde" y su fecha de inicio), Cobrado, Dueño, Estado (chip, más "Cuenta caída" si corresponde) y acciones. El revendedor ve seis: no lleva Dueño. Estado, Vence, Cobrado y acciones miden lo que su contenido; lo que sobra va al servicio.
+- **Vence:** en una venta sin finalizar, la fecha toma la tinta bermellón si ya pasó y la tinta ámbar si vence dentro de 3 días; si no, queda en tinta.
+- **Acciones:** cuatro casillas fijas: copiar los datos para el cliente, editar, renovar y finalizar. Una venta finalizada lleva copiar, editar y reactivar, y deja la cuarta vacía.
+- **Fila de combo:** una venta que es parte de un combo solo conserva "copiar"; las otras tres casillas quedan vacías. Su enlace al combo va junto al código, en el mismo renglón secundario, y no se parte.
+- **Vacío:** "No hay ventas con estos filtros." con su segunda línea.
+- **Celular:** una tarjeta por venta: cliente y chips de estado arriba; código y dueño; Servicio, Cuenta / Perfil, Desde y Vence, Cobrado; el enlace de combo al final del contenido. Al pie, hasta cuatro acciones en casillas iguales de 48 px, cada una con su ícono en tinta suave arriba y su nombre escrito debajo a 0.75rem ("Copiar datos", "Editar", "Renovar", "Finalizar"). La tarjeta de combo deja solo "Copiar datos", centrado.
+
+### Vencimientos
+La lista de cobro: quién vence, cuándo, y el recordatorio a un toque.
+
+- **Pestañas de estado:** la interacción firma. Tres pestañas juntas (Vencidas, Por vencer, Al día), cada una con su conteo: son el resumen y el filtro a la vez. 44 px de alto, borde y divisores `rule-field`, etiqueta en 600 y el conteo en condensada 800 a 1.25rem. La elegida se llena con el sólido de su estado y su texto `on-`; las otras quedan en blanco con el conteo en la tinta de su estado. Una pestaña en cero se apaga a su tinte con texto en la tinta del estado, también cuando está elegida. En celular ocupan todo el ancho.
+- **Días de aviso:** a la derecha, el campo "Avisarme con (días antes)" de 44 px y 250 px de ancho, sin renglón de ayuda y con su ícono de ayuda; la etiqueta entra completa. En celular va a todo el ancho, bajo las pestañas.
+- **Columnas:** cinco: Cuándo, Cliente, Servicio y cuenta, Cobrado y acciones. Cada fila abre con su cuándo ("VENCIÓ HACE 22 DÍAS") sobre la fecha; va en tinta bermellón si ya pasó y, si no, en la tinta de la pestaña en la que está. El enlace de combo va bajo el cliente.
+- **Acciones:** en columnas fijas: "WhatsApp", botón relleno en tinta con ícono y nombre (columna de 124 px), y "Renovar", delineado con ícono y nombre (columna de 110 px), los dos de 36 px. Una venta de combo no se renueva sola y deja vacía esa columna; una venta con la cuenta caída muestra su chip magenta en lugar de los botones. En "Al día" no hay acciones. El recordatorio es la acción de la pantalla y por eso lleva el nombre escrito; no toma el verde de la marca de WhatsApp.
+- **Vacío:** una línea por pestaña; solo el de Vencidas es buena noticia y lleva el ícono en verde al día.
+- **Celular:** una tarjeta por venta con el cliente arriba y el cuándo al otro extremo; Servicio, Cuenta / Perfil, Vence y Cobrado. Al pie, "Enviar por WhatsApp" de 48 px, relleno en tinta, toma el ancho del pie; cuando hay "Renovar" (48 px, delineado), comparten el renglón y WhatsApp se queda con lo que sobra.
+
+### Diálogos
+Globales, por reglas de `src/styles.scss`.
+
+- **Superficie:** blanca, borde de 1 px `rule`, esquina de 3 px, con la sombra de capa flotante.
+- **Título:** registro Diálogo sobre el riel negro de 2 px, con 10 px de aire antes del riel.
+- **Contenido:** se desplaza entre el título y los botones, que quedan fijos; 10 px arriba para que la etiqueta del primer campo no se recorte y 16 px abajo. Su alto máximo es el de la pantalla menos 220 px (menos 180 px en celular).
+- **Acciones:** una línea `rule` encima marca dónde termina la zona que se desplaza. A la derecha, "Cancelar" como botón de texto en tinta y después la acción principal en relleno negro.
+- **Celular:** el ancho de la pantalla menos 32 px.
 
 ### Tarjetas de estado
 La interacción firma de Inicio. Son botones: color plano del estado, cifra en Display y etiqueta en Label, mínimo 72 px de alto (60 px en celular). Las cuatro (vencidas, por vencer, al día y cuentas caídas) tienen el mismo ancho en escritorio, sin importar su número, separadas 8 px: el dato es la cifra, no el tamaño de la tarjeta. En cero la tarjeta se apaga a su tinte. Al pasar el puntero aparece el riel negro interior. Las tres de ventas llevan a Vencimientos ya filtrado; la de caídas lleva a su panel en la misma pantalla y lo resalta un momento con un contorno magenta de 2 px que se desvanece. En celular las cuatro pasan a una rejilla 2×2.
@@ -480,7 +646,12 @@ Una N condensada clara (el valor de `on-nav`) sobre rojo butaca del riel, con un
 - **Sí:** toma cada color de un token `--nc-*` del bloque `:root` de `src/styles.scss`; si falta uno, se agrega ahí con su nombre de rol.
 - **Sí:** en gráficos de canvas, lee el color con `cssToken()`.
 - **Sí:** pon cada título de panel o de grupo sobre un riel negro de 2 px (`--nc-rail-width`, `--nc-rail`).
-- **Sí:** usa la tinta negra para la acción principal y el botón delineado con borde `rule-field` para las acciones de fila.
+- **Sí:** usa la tinta negra para la acción principal, el botón delineado con borde `rule-field` para las acciones de fila y el botón de texto en tinta para "Cancelar" y las acciones secundarias.
+- **Sí:** arma toda lista nueva con el tablero global: `.table-scroll`, `.nc-celda` para dos renglones, `.nc-acciones` para las acciones y `.nc-filtros` para los filtros.
+- **Sí:** deja vacía la casilla de una acción que una fila no tiene.
+- **Sí:** di la carga con `.nc-lista-cargando` y una línea visible, el error con `.nc-lista-error` y "Reintentar", y el vacío con `app-empty-state`.
+- **Sí:** escribe el nombre de la acción central de una pantalla en su botón ("WhatsApp", "Renovar").
+- **Sí:** marca con su asterisco todo campo obligatorio.
 - **Sí:** abre las filas que tienen fecha con su cuándo en condensada, mayúsculas y la tinta `-ink` de su estado.
 - **Sí:** usa la variante `-ink` de un estado para texto sobre claro y el sólido solo como fondo con su `on-`.
 - **Sí:** da a un bloque su estado con una clase global `.nc-estado-*` en vez de repetir sus cuatro colores.
@@ -504,8 +675,11 @@ Una N condensada clara (el valor de `on-nav`) sobre rojo butaca del riel, con un
 - **No:** uses degradados, vidrio ni esquinas redondeadas grandes.
 - **No:** agregues secuencias de entrada; solo transiciones de estado de 160 ms.
 - **No:** cambies la terminología del producto (servicio, cuenta, perfil, venta, vencimiento, cuenta caída).
-- **No:** uses el rojo para marcar el foco de un campo.
-- **No:** deshabilites el botón principal de un formulario en reposo ni mientras carga; en el login solo se deshabilita durante la espera por demasiados intentos.
+- **No:** uses el rojo para marcar el foco de un campo, ni para un botón de texto o un ícono de ayuda.
+- **No:** deshabilites el botón principal de un formulario porque le falten datos: queda habilitado y valida al presionarlo. En el login solo se deshabilita durante la espera por demasiados intentos; en los diálogos de venta, solo mientras guarda.
+- **No:** uses un indicador giratorio suelto ni un ícono grande centrado para la carga o el vacío de una lista.
+- **No:** pintes de verde el ícono de un vacío que no es una buena noticia.
+- **No:** corras las acciones de una fila para tapar el hueco de una que falta.
 
 ## Modo oscuro (pendiente, no implementado)
 

@@ -3,5 +3,6 @@
 }
 
 .info-toggle mat-icon {
-  color: var(--mat-sys-primary);
+  // Tinta suave, no rojo: es una ayuda, no una alerta.
+  color: var(--nc-ink-muted);
 }

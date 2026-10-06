@@ -195,6 +195,12 @@ html {
   --mat-button-filled-container-color: var(--nc-ink);
   --mat-button-filled-label-text-color: var(--nc-on-ink);
   --mat-button-outlined-label-text-color: var(--nc-ink);
+  // Los botones de texto (Cancelar y demás acciones secundarias) también en
+  // tinta: en la app el rojo es marca o error, nunca una acción neutra.
+  --mat-button-text-label-text-color: var(--nc-ink);
+  --mat-button-text-state-layer-color: var(--nc-ink);
+  --mat-button-text-ripple-color: color-mix(in srgb, var(--nc-ink) 12%, transparent);
+  --mat-icon-button-icon-color: var(--nc-ink-muted);
   --mat-button-outlined-outline-color: var(--nc-rule-field);
 
   // Campos: el foco va en tinta. El rojo queda para la marca y el bermellón
@@ -396,19 +402,230 @@ h1,
 }
 
 // ---------------------------------------------------------------------------
-// Tarjetas y tablas de las pantallas que aún usan Material tal cual.
+// Listas (toda la app): tablero con encabezado de cartelera
 // ---------------------------------------------------------------------------
 .mat-mdc-card {
   border: 1px solid var(--nc-rule);
 }
 
-.mat-mdc-header-cell {
-  color: var(--nc-ink-muted);
+html {
+  --mat-table-background-color: var(--nc-surface);
+  --mat-table-row-item-outline-color: var(--nc-rule);
+  --mat-table-header-container-height: 40px;
+  --mat-table-row-item-container-height: 48px;
+  --mat-table-header-headline-color: var(--nc-ink);
+  --mat-table-row-item-label-text-color: var(--nc-ink);
+}
+
+// El tablero: la tabla sobre blanco, con borde fino. El contenedor hace
+// scroll horizontal si no entra (ver "Responsive" más abajo).
+.table-scroll {
+  border: 1px solid var(--nc-rule);
+  border-radius: var(--nc-radius);
+  background: var(--nc-surface);
+}
+
+// Celdas más juntas que las de Material (16 px por lado): entran más
+// columnas sin scroll horizontal.
+.mat-mdc-table .mat-mdc-header-cell,
+.mat-mdc-table .mat-mdc-cell {
+  padding-inline: 8px;
+
+  &:first-of-type {
+    padding-inline-start: 14px;
+  }
+
+  &:last-of-type {
+    padding-inline-end: 10px;
+  }
+}
+
+// Encabezados en letras de cartelera sobre el riel negro.
+.mat-mdc-header-row .mat-mdc-header-cell {
+  border-bottom: var(--nc-rail-width) solid var(--nc-rail);
+  font-stretch: var(--nc-width-condensed);
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.mat-mdc-row {
+  transition: background-color var(--nc-duration) var(--nc-ease);
+
+  &:hover {
+    background-color: var(--nc-surface-sunken);
+  }
+
+  &:last-child .mat-mdc-cell {
+    border-bottom: 0;
+  }
+}
+
+// Celda de dos renglones: el dato principal y, debajo, el secundario.
+.nc-celda {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+  padding-block: 6px;
+  line-height: 1.3;
+}
+
+.nc-celda-principal {
   font-weight: 600;
 }
 
-.mat-mdc-row:hover {
-  background-color: var(--nc-surface-sunken);
+.nc-celda-sub {
+  color: var(--nc-ink-muted);
+  font-size: 0.8125rem;
+}
+
+// En el tablero el dato principal va en un renglón; el secundario puede
+// partirse si la columna no da (un correo largo), pero nunca se recorta.
+.mat-mdc-cell .nc-celda-principal {
+  white-space: nowrap;
+}
+
+.mat-mdc-cell .nc-celda-sub {
+  // `pretty`: al partirse no deja una palabra suelta en el último renglón.
+  text-wrap: pretty;
+}
+
+// Acciones de una fila en casillas fijas, a la derecha: una fila con menos
+// acciones deja casillas vacías en vez de desalinearse.
+.nc-acciones {
+  display: grid;
+  grid-auto-columns: 36px;
+  grid-auto-flow: column;
+  justify-content: end;
+  align-items: center;
+}
+
+// El cuándo de una fila o tarjeta, en letras de cartelera con el color de su
+// estado (`.nc-estado-*` fija `--estado-tinta`).
+.nc-cuando {
+  color: var(--estado-tinta, var(--nc-ink));
+  font-stretch: var(--nc-width-condensed);
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1.2;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+// Enlace "Parte de combo C-00001".
+.combo-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  color: var(--nc-brand);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  white-space: nowrap;
+
+  .mat-icon {
+    width: 16px;
+    height: 16px;
+    font-size: 16px;
+  }
+}
+
+// Encabezado de página: título a la izquierda, acciones a la derecha.
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.page-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+// Filtros compactos en una línea. No llevan ayuda ni error, así que no
+// reservan ese renglón.
+.nc-filtros {
+  --mat-form-field-container-height: 44px;
+  --mat-form-field-container-vertical-padding: 10px;
+
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+
+  .mat-mdc-form-field {
+    width: 220px;
+  }
+
+  .mat-mdc-form-field-subscript-wrapper {
+    display: none;
+  }
+}
+
+// Campo suelto que no lleva ayuda ni error: no reserva ese renglón.
+.mat-mdc-form-field.nc-sin-ayuda .mat-mdc-form-field-subscript-wrapper {
+  display: none;
+}
+
+// Carga de una lista: un panel que dice que está cargando, con barras en el
+// lugar de las filas (se lee como carga también sin animación).
+.nc-lista-cargando {
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+  border: 1px solid var(--nc-rule);
+  border-radius: var(--nc-radius);
+  background: var(--nc-surface);
+}
+
+.nc-lista-cargando-texto {
+  color: var(--nc-ink-muted);
+  font-size: 0.875rem;
+}
+
+// Error al cargar una lista: qué pasó y cómo seguir.
+.nc-lista-error {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  border-radius: var(--nc-radius);
+  background: var(--nc-vencida-tint);
+
+  .mat-icon {
+    flex-shrink: 0;
+    color: var(--nc-vencida-ink);
+  }
+
+  p {
+    flex: 1 1 200px;
+    margin: 0;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Diálogos (toda la app): título en letras de cartelera sobre el riel.
+// ---------------------------------------------------------------------------
+// (Clase repetida: tiene que ganarle a la tipografía que fija Material.)
+.mat-mdc-dialog-container .mat-mdc-dialog-title.mat-mdc-dialog-title {
+  margin-bottom: 0;
+  padding-bottom: 10px;
+  border-bottom: var(--nc-rail-width) solid var(--nc-rail);
+  font-family: var(--nc-font-sans);
+  font-stretch: var(--nc-width-condensed);
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1.2;
+  text-transform: uppercase;
 }
 
 // ---------------------------------------------------------------------------
@@ -547,6 +764,10 @@ h1,
 }
 
 .nc-card {
+  // Mismo filo que el tablero de escritorio.
+  border: 1px solid var(--nc-rule);
+  box-shadow: none;
+
   // El pie no es un mat-card-actions, así que el contenido no es el último
   // hijo y Material no le da padding inferior.
   .mat-mdc-card-content {
@@ -570,7 +791,7 @@ h1,
   .nc-card-subtitle {
     margin: 2px 0 0;
     font-size: 0.8125rem;
-    color: var(--nc-text-secondary);
+    color: var(--nc-ink-muted);
   }
 
   .nc-card-fields {
@@ -586,7 +807,7 @@ h1,
 
     dt {
       font-size: 0.8125rem;
-      color: var(--nc-text-secondary);
+      color: var(--nc-ink-muted);
     }
 
     dd {
@@ -601,8 +822,8 @@ h1,
     display: flex;
     align-items: center;
     gap: 4px;
-    padding: 8px 12px 12px;
-    border-top: 1px solid var(--nc-border);
+    padding: 6px 8px 8px;
+    border-top: 1px solid var(--nc-rule);
 
     .mat-mdc-button {
       flex: 1 1 0;

@@ -85,7 +85,7 @@ describe('VencimientosList', () => {
 
   let fixture: ComponentFixture<VencimientosList>;
   let component: VencimientosList;
-  let api: { list: ReturnType<typeof vi.fn> };
+  let api: { list: ReturnType<typeof vi.fn>; summary: ReturnType<typeof vi.fn> };
   let serviciosApi: { list: ReturnType<typeof vi.fn> };
   let contactosApi: { list: ReturnType<typeof vi.fn> };
   let cuentasApi: { list: ReturnType<typeof vi.fn> };
@@ -98,7 +98,10 @@ describe('VencimientosList', () => {
     queryParams: Record<string, string> = {},
     { mobile = false }: { mobile?: boolean } = {},
   ) {
-    api = { list: vi.fn().mockResolvedValue([venta]) };
+    api = {
+      list: vi.fn().mockResolvedValue([venta]),
+      summary: vi.fn().mockResolvedValue({ vencidas: 4, porVencer: 2, alDia: 9 }),
+    };
     serviciosApi = { list: vi.fn().mockResolvedValue([servicio]) };
     contactosApi = { list: vi.fn().mockResolvedValue([cliente]) };
     cuentasApi = { list: vi.fn().mockResolvedValue([cuenta]) };
@@ -150,6 +153,59 @@ describe('VencimientosList', () => {
       vencimiento: VencimientoFiltro.VENCIDA,
       diasAlerta: 3,
     });
+  });
+
+  it('las pestañas de estado son el resumen: cada una muestra su conteo, con los días de aviso', async () => {
+    await setup();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(api.summary).toHaveBeenCalledWith(3);
+    const pestanas = Array.from(
+      fixture.nativeElement.querySelectorAll('mat-button-toggle') as NodeListOf<HTMLElement>,
+    ).map((p) => [
+      p.querySelector('.venc-resumen-label')?.textContent?.trim(),
+      p.querySelector('.venc-resumen-conteo')?.textContent?.trim(),
+    ]);
+    expect(pestanas).toEqual([
+      ['Vencidas', '4'],
+      ['Por vencer', '2'],
+      ['Al día', '9'],
+    ]);
+  });
+
+  it('si el resumen falla, las pestañas siguen funcionando sin número', async () => {
+    await setup();
+    api.summary.mockRejectedValue(new Error('sin red'));
+    await component.refresh();
+    fixture.detectChanges();
+
+    const pestanas = Array.from(
+      fixture.nativeElement.querySelectorAll('mat-button-toggle') as NodeListOf<HTMLElement>,
+    ).map((p) => p.textContent?.replace(/\s+/g, ' ').trim());
+    expect(pestanas).toEqual(['Vencidas', 'Por vencer', 'Al día']);
+  });
+
+  it('el recordatorio por WhatsApp va con su nombre escrito y cada fila abre con su cuándo', async () => {
+    await setup();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const fila: HTMLElement = fixture.nativeElement.querySelector('tr[mat-row]');
+    expect(fila.querySelector('.whatsapp-accion')?.textContent).toContain('WhatsApp');
+    expect(fila.querySelector('td')?.querySelector('.nc-cuando')).not.toBeNull();
+  });
+
+  it('si la carga falla muestra el aviso con "Reintentar"', async () => {
+    await setup();
+    api.list.mockRejectedValue(new Error('sin red'));
+    await fixture.whenStable();
+    await component.refresh();
+    fixture.detectChanges();
+
+    const aviso: HTMLElement = fixture.nativeElement.querySelector('.nc-lista-error');
+    expect(aviso.textContent).toContain('No se pudieron cargar los vencimientos.');
+    expect(aviso.querySelector('button')?.textContent).toContain('Reintentar');
   });
 
   it('formatea el precio en soles (S/), no como decimal crudo', async () => {

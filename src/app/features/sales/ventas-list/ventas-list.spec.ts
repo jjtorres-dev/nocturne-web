@@ -525,6 +525,39 @@ describe('VentasList', () => {
     expect(badge!.textContent).toContain('Parte de combo C-00001');
   });
 
+  it('una fila de combo conserva las cuatro casillas de acciones y lleva el enlace junto al código', async () => {
+    api.list.mockResolvedValue([venta, ventaDeCombo]);
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const rows = fixture.nativeElement.querySelectorAll('tr.mat-mdc-row') as NodeListOf<HTMLElement>;
+    const casillas = (row: HTMLElement) => row.querySelector('.nc-acciones')!.children.length;
+    expect(casillas(rows[0])).toBe(4);
+    expect(casillas(rows[1])).toBe(4);
+    // El enlace al combo ya no vive en la celda de acciones.
+    expect(rows[1].querySelector('.nc-acciones .combo-badge')).toBeNull();
+    expect(rows[1].querySelector('.mat-column-cliente .combo-badge')).not.toBeNull();
+  });
+
+  it('si la carga falla muestra el aviso con "Reintentar", que vuelve a cargar', async () => {
+    api.list.mockRejectedValue(new Error('sin red'));
+    await fixture.whenStable();
+    await component.refresh();
+    fixture.detectChanges();
+
+    const aviso: HTMLElement = fixture.nativeElement.querySelector('.nc-lista-error');
+    expect(aviso.textContent).toContain('No se pudieron cargar las ventas.');
+    expect(fixture.nativeElement.querySelector('table')).toBeNull();
+
+    api.list.mockResolvedValue([venta]);
+    aviso.querySelector('button')!.click();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.nc-lista-error')).toBeNull();
+    expect(fixture.nativeElement.querySelectorAll('tr.mat-mdc-row').length).toBe(1);
+  });
+
   it('el badge de combo enlaza a /combo-sales/:id', async () => {
     api.list.mockResolvedValue([ventaDeCombo]);
 

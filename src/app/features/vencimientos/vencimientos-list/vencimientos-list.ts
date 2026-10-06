@@ -9,7 +9,6 @@ import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatIconModule } from '@angular/material/icon';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -19,6 +18,7 @@ import {
   VENCIMIENTO_LABELS,
   VencimientoFiltro,
   type Venta,
+  type SalesSummary,
 } from '../../sales/venta.model';
 import { whatsappRenewalUrl } from '../../sales/whatsapp.util';
 import { ServiciosApi } from '../../services/servicios-api';
@@ -38,6 +38,8 @@ import { CuentaCaidaChip } from '../../../shared/cuenta-caida-chip/cuenta-caida-
 import { InfoHint } from '../../../shared/info-hint/info-hint';
 import { InfoToggle } from '../../../shared/info-hint/info-toggle';
 
+import { ServiceIcon } from '../../../shared/service-icon/service-icon';
+
 const ESTADOS_VALIDOS = new Set<string>(Object.values(VencimientoFiltro));
 
 @Component({
@@ -51,6 +53,7 @@ const ESTADOS_VALIDOS = new Set<string>(Object.values(VencimientoFiltro));
     DatePipe,
     DecimalPipe,
     SolesPipe,
+    ServiceIcon,
     MatTableModule,
     MatCardModule,
     MatFormFieldModule,
@@ -58,7 +61,6 @@ const ESTADOS_VALIDOS = new Set<string>(Object.values(VencimientoFiltro));
     MatButtonModule,
     MatButtonToggleModule,
     MatIconModule,
-    MatProgressSpinnerModule,
     MatTooltipModule,
   ],
   selector: 'app-vencimientos-list',
@@ -82,15 +84,14 @@ export class VencimientosList implements OnInit {
   protected readonly estadoLabels = VENCIMIENTO_LABELS;
   protected readonly VencimientoFiltro = VencimientoFiltro;
 
-  protected readonly displayedColumns = [
-    'cliente',
-    'servicio',
-    'cuentaPerfil',
-    'fechaFin',
-    'dias',
-    'precio',
-    'acciones',
-  ];
+  // Clase global de estado (styles.scss) de cada pestaña del resumen.
+  protected readonly estadoClase: Record<VencimientoFiltro, string> = {
+    [VencimientoFiltro.VENCIDA]: 'nc-estado-vencida',
+    [VencimientoFiltro.POR_VENCER]: 'nc-estado-por-vencer',
+    [VencimientoFiltro.AL_DIA]: 'nc-estado-al-dia',
+  };
+
+  protected readonly displayedColumns = ['dias', 'cliente', 'servicio', 'precio', 'acciones'];
 
   readonly ventas = signal<Venta[]>([]);
   readonly servicios = signal<Servicio[]>([]);
@@ -99,6 +100,13 @@ export class VencimientosList implements OnInit {
   readonly perfilNombres = signal<Map<string, string>>(new Map());
   readonly comboCodigos = signal<Map<string, string>>(new Map());
   readonly loading = signal(false);
+  // La última carga falló: en vez de la lista se muestra el aviso con
+  // "Reintentar".
+  readonly error = signal(false);
+  // Conteo de cada estado para las pestañas (mismo endpoint que Inicio, con
+  // los días de aviso de esta pantalla). null: todavía no llegó o falló; las
+  // pestañas funcionan igual, solo sin número.
+  readonly resumen = signal<SalesSummary | null>(null);
 
   estado: VencimientoFiltro = VencimientoFiltro.VENCIDA;
   diasAlerta = 3;
@@ -130,6 +138,8 @@ export class VencimientosList implements OnInit {
 
   async refresh(): Promise<void> {
     this.loading.set(true);
+    this.error.set(false);
+    void this.loadResumen();
     try {
       const data = await this.api.list({
         vencimiento: this.estado,
@@ -138,12 +148,50 @@ export class VencimientosList implements OnInit {
       this.ventas.set(data);
       await this.loadPerfilNombres(data);
     } catch {
-      this.snackBar.open('No se pudieron cargar los vencimientos.', 'Cerrar', {
-        duration: 4000,
-      });
+      // El aviso va en el lugar de la lista, con "Reintentar" (sin snackbar:
+      // sería el mismo mensaje dos veces).
+      this.error.set(true);
     } finally {
       this.loading.set(false);
     }
+  }
+
+  private async loadResumen(): Promise<void> {
+    try {
+      this.resumen.set(await this.api.summary(this.diasAlerta));
+    } catch {
+      this.resumen.set(null);
+    }
+  }
+
+  protected conteo(estado: VencimientoFiltro): number | null {
+    const r = this.resumen();
+    if (!r) {
+      return null;
+    }
+    return {
+      [VencimientoFiltro.VENCIDA]: r.vencidas,
+      [VencimientoFiltro.POR_VENCER]: r.porVencer,
+      [VencimientoFiltro.AL_DIA]: r.alDia,
+    }[estado];
+  }
+
+  // Color del cuándo de una fila: vencida si ya pasó; si no, el de la
+  // pestaña en la que está.
+  protected cuandoClase(dias: number): string {
+    return dias < 0
+      ? this.estadoClase[VencimientoFiltro.VENCIDA]
+      : this.estadoClase[
+          this.estado === VencimientoFiltro.VENCIDA ? VencimientoFiltro.AL_DIA : this.estado
+        ];
+  }
+
+  protected vacioMensaje(): string {
+    return {
+      [VencimientoFiltro.VENCIDA]: 'Ningún cliente tiene una venta vencida.',
+      [VencimientoFiltro.POR_VENCER]: 'Ninguna venta vence en los próximos días.',
+      [VencimientoFiltro.AL_DIA]: 'No hay ventas al día.',
+    }[this.estado];
   }
 
   private async loadPerfilNombres(ventas: Venta[]): Promise<void> {

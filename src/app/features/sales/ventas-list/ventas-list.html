@@ -30,7 +30,7 @@
 }
 
 @if (!isMobile() || filtersOpen()) {
-  <div class="filters" id="ventas-filters">
+  <div class="filters nc-filtros" id="ventas-filters">
     <mat-form-field appearance="outline">
       <mat-label>Cliente</mat-label>
       <mat-select [(ngModel)]="clienteFilter" (selectionChange)="refresh()">
@@ -63,8 +63,18 @@
 }
 
 @if (loading()) {
-  <div class="loading">
-    <mat-spinner diameter="32" />
+  <div class="nc-lista-cargando" aria-busy="true">
+    <span class="nc-lista-cargando-texto">Cargando ventas…</span>
+    <span class="nc-skeleton"></span>
+    <span class="nc-skeleton"></span>
+    <span class="nc-skeleton"></span>
+    <span class="nc-skeleton"></span>
+  </div>
+} @else if (error()) {
+  <div class="nc-lista-error" role="alert">
+    <mat-icon aria-hidden="true">error</mat-icon>
+    <p>No se pudieron cargar las ventas. Revisa tu conexión e inténtalo de nuevo.</p>
+    <button mat-stroked-button type="button" (click)="refresh()">Reintentar</button>
   </div>
 } @else {
   @if (isMobile()) {
@@ -112,31 +122,41 @@
                 </dd>
               </div>
             </dl>
-          </mat-card-content>
 
-          <div class="nc-card-footer">
-            <button mat-button (click)="copiarDatos(v)">
-              Copiar datos para el cliente
-            </button>
             @if (v.ventaComboId) {
-              <a class="combo-badge" [routerLink]="['/combo-sales', v.ventaComboId]">
+              <a class="combo-badge combo-en-tarjeta" [routerLink]="['/combo-sales', v.ventaComboId]">
                 <mat-icon>link</mat-icon>
                 {{ comboLabel(v) }}
               </a>
-            } @else {
-              <button mat-button (click)="openEdit(v)">
-                Editar
+            }
+          </mat-card-content>
+
+          <!-- Acciones en casillas iguales: ícono arriba, nombre abajo. Una
+               venta que es parte de un combo solo tiene "Copiar datos"; el
+               resto se hace desde la venta de combo. -->
+          <div class="nc-card-footer tarjeta-acciones">
+            <button mat-button class="accion" (click)="copiarDatos(v)">
+              <mat-icon>content_copy</mat-icon>
+              <span>Copiar datos<span class="nc-sr-only"> para el cliente</span></span>
+            </button>
+            @if (!v.ventaComboId) {
+              <button mat-button class="accion" (click)="openEdit(v)">
+                <mat-icon>edit</mat-icon>
+                <span>Editar</span>
               </button>
               @if (v.activo) {
-                <button mat-button (click)="openRenew(v)">
-                  Renovar
+                <button mat-button class="accion" (click)="openRenew(v)">
+                  <mat-icon>autorenew</mat-icon>
+                  <span>Renovar</span>
                 </button>
-                <button mat-button (click)="confirmDeactivate(v)">
-                  Finalizar
+                <button mat-button class="accion" (click)="confirmDeactivate(v)">
+                  <mat-icon>block</mat-icon>
+                  <span>Finalizar</span>
                 </button>
               } @else {
-                <button mat-button (click)="confirmReactivate(v)">
-                  Reactivar
+                <button mat-button class="accion" (click)="confirmReactivate(v)">
+                  <mat-icon>restart_alt</mat-icon>
+                  <span>Reactivar</span>
                 </button>
               }
             }
@@ -147,43 +167,69 @@
   } @else {
     <div class="table-scroll">
       <table mat-table [dataSource]="ventas()" class="sales-table">
-        <ng-container matColumnDef="codigoVenta">
-          <th mat-header-cell *matHeaderCellDef>Código</th>
-          <td mat-cell *matCellDef="let v"><span class="nc-code">{{ v.codigoVenta }}</span></td>
-        </ng-container>
-
         <ng-container matColumnDef="cliente">
           <th mat-header-cell *matHeaderCellDef>Cliente</th>
-          <td mat-cell *matCellDef="let v">{{ clienteNombre(v.clienteId) }}</td>
+          <td mat-cell *matCellDef="let v">
+            <div class="nc-celda">
+              <span class="nc-celda-principal">{{ clienteNombre(v.clienteId) }}</span>
+              <span class="nc-celda-sub">
+                <span class="nc-code">{{ v.codigoVenta }}</span>
+                @if (v.ventaComboId) {
+                  <a
+                    class="combo-badge"
+                    [routerLink]="['/combo-sales', v.ventaComboId]"
+                    matTooltip="Ver la venta de combo"
+                  >
+                    <mat-icon>link</mat-icon>
+                    {{ comboLabel(v) }}
+                  </a>
+                }
+              </span>
+            </div>
+          </td>
         </ng-container>
 
         <ng-container matColumnDef="servicio">
-          <th mat-header-cell *matHeaderCellDef>Servicio</th>
-          <td mat-cell *matCellDef="let v">{{ servicioNombre(v.servicioId) }}</td>
-        </ng-container>
-
-        <ng-container matColumnDef="cuentaPerfil">
-          <th mat-header-cell *matHeaderCellDef>Cuenta / Perfil</th>
-          <td mat-cell *matCellDef="let v">{{ cuentaPerfilLabel(v) }}</td>
-        </ng-container>
-
-        <ng-container matColumnDef="fechaInicio">
-          <th mat-header-cell *matHeaderCellDef>Desde</th>
-          <td mat-cell *matCellDef="let v">{{ v.fechaInicio | date: 'dd/MM/yyyy' }}</td>
+          <th mat-header-cell *matHeaderCellDef>Servicio y cuenta</th>
+          <td mat-cell *matCellDef="let v">
+            <div class="celda-servicio">
+              <app-service-icon [nombre]="servicioNombre(v.servicioId)" [size]="28" />
+              <div class="nc-celda">
+                <span class="nc-celda-principal">{{ servicioNombre(v.servicioId) }}</span>
+                <!-- Correo y perfil en dos trozos: si no entran juntos, el
+                     perfil baja entero, sin dejar un guion suelto. -->
+                <span class="nc-celda-sub cuenta-perfil">
+                  <span>{{ cuentaCorreo(v) }}</span>
+                  @if (perfilNombre(v); as perfil) {
+                    <span>— {{ perfil }}</span>
+                  }
+                </span>
+              </div>
+            </div>
+          </td>
         </ng-container>
 
         <ng-container matColumnDef="fechaFin">
           <th mat-header-cell *matHeaderCellDef>Vence</th>
-          <td mat-cell *matCellDef="let v">{{ v.fechaFin | date: 'dd/MM/yyyy' }}</td>
+          <td mat-cell *matCellDef="let v">
+            <div class="nc-celda">
+              <span class="nc-celda-principal" [class]="venceClase(v)">
+                {{ v.fechaFin | date: 'dd/MM/yyyy' }}
+              </span>
+              <span class="nc-celda-sub">desde {{ v.fechaInicio | date: 'dd/MM/yyyy' }}</span>
+            </div>
+          </td>
         </ng-container>
 
         <ng-container matColumnDef="precio">
-          <th mat-header-cell *matHeaderCellDef>Cobrado</th>
-          <td mat-cell *matCellDef="let v">
-            {{ v.precioPEN | soles }}
-            @if (v.moneda !== Moneda.PEN) {
-              <span class="original-amount">({{ v.precio | number: '1.2-2' }} {{ v.moneda }})</span>
-            }
+          <th mat-header-cell *matHeaderCellDef class="celda-monto">Cobrado</th>
+          <td mat-cell *matCellDef="let v" class="celda-monto">
+            <div class="nc-celda">
+              <span class="nc-celda-principal">{{ v.precioPEN | soles }}</span>
+              @if (v.moneda !== Moneda.PEN) {
+                <span class="nc-celda-sub original-amount">({{ v.precio | number: '1.2-2' }} {{ v.moneda }})</span>
+              }
+            </div>
           </td>
         </ng-container>
 
@@ -204,38 +250,37 @@
           </td>
         </ng-container>
 
+        <!-- Cuatro casillas fijas. Una venta que es parte de un combo solo
+             tiene "Copiar datos": las otras casillas quedan vacías y la fila
+             no se desalinea (el enlace al combo va junto al código). -->
         <ng-container matColumnDef="acciones">
-          <th mat-header-cell *matHeaderCellDef></th>
+          <th mat-header-cell *matHeaderCellDef><span class="nc-sr-only">Acciones</span></th>
           <td mat-cell *matCellDef="let v">
-            <button mat-icon-button matTooltip="Copiar datos para el cliente" (click)="copiarDatos(v)">
-              <mat-icon>content_copy</mat-icon>
-            </button>
-            @if (v.ventaComboId) {
-              <a
-                class="combo-badge"
-                [routerLink]="['/combo-sales', v.ventaComboId]"
-                matTooltip="Ver la venta de combo"
-              >
-                <mat-icon>link</mat-icon>
-                {{ comboLabel(v) }}
-              </a>
-            } @else {
-              <button mat-icon-button matTooltip="Editar" (click)="openEdit(v)">
-                <mat-icon>edit</mat-icon>
+            <div class="nc-acciones">
+              <button mat-icon-button matTooltip="Copiar datos para el cliente" aria-label="Copiar datos para el cliente" (click)="copiarDatos(v)">
+                <mat-icon>content_copy</mat-icon>
               </button>
-              @if (v.activo) {
-                <button mat-icon-button matTooltip="Renovar" (click)="openRenew(v)">
-                  <mat-icon>autorenew</mat-icon>
-                </button>
-                <button mat-icon-button matTooltip="Finalizar venta" (click)="confirmDeactivate(v)">
-                  <mat-icon>block</mat-icon>
-                </button>
+              @if (v.ventaComboId) {
+                <span></span><span></span><span></span>
               } @else {
-                <button mat-icon-button matTooltip="Reactivar" (click)="confirmReactivate(v)">
-                  <mat-icon>restart_alt</mat-icon>
+                <button mat-icon-button matTooltip="Editar" aria-label="Editar" (click)="openEdit(v)">
+                  <mat-icon>edit</mat-icon>
                 </button>
+                @if (v.activo) {
+                  <button mat-icon-button matTooltip="Renovar" aria-label="Renovar" (click)="openRenew(v)">
+                    <mat-icon>autorenew</mat-icon>
+                  </button>
+                  <button mat-icon-button matTooltip="Finalizar venta" aria-label="Finalizar venta" (click)="confirmDeactivate(v)">
+                    <mat-icon>block</mat-icon>
+                  </button>
+                } @else {
+                  <button mat-icon-button matTooltip="Reactivar" aria-label="Reactivar" (click)="confirmReactivate(v)">
+                    <mat-icon>restart_alt</mat-icon>
+                  </button>
+                  <span></span>
+                }
               }
-            }
+            </div>
           </td>
         </ng-container>
 

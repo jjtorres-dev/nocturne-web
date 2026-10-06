@@ -900,7 +900,7 @@
       },
       "funcion": {
         "displayName": "Función",
-        "purpose": "El cuándo que abre cada fila, en la tinta de su estado."
+        "purpose": "El cuándo que abre cada fila, en la tinta de su estado. En las listas es la clase global .nc-cuando."
       },
       "body": {
         "displayName": "Body",
@@ -913,6 +913,14 @@
       "grupo": {
         "displayName": "Grupo",
         "purpose": "Títulos de grupo del menú y del buscador; fecha de la barra superior."
+      },
+      "encabezado": {
+        "displayName": "Encabezado",
+        "purpose": "Encabezado de columna de todo tablero, en un renglón sobre el riel negro."
+      },
+      "dialogo": {
+        "displayName": "Diálogo",
+        "purpose": "Título de todo diálogo, sobre su riel negro."
       },
       "code": {
         "displayName": "Code",
@@ -951,12 +959,23 @@
         "name": "aviso-entra",
         "value": "opacity 0 → 1, translate 0 -4px → 0, var(--nc-duration) var(--nc-ease)",
         "purpose": "Entrada de un aviso del login al aparecer; no corre con movimiento reducido."
+      },
+      {
+        "name": "fila-hover",
+        "value": "background-color var(--nc-duration) var(--nc-ease)",
+        "purpose": "Toda fila de tablero cambia a ópalo hundido al pasar el puntero."
+      },
+      {
+        "name": "skeleton",
+        "value": "opacity 1 → 0.5, 1.2s ease-in-out infinite alternate",
+        "purpose": "Pulso de las barras de carga (.nc-skeleton); no corre con movimiento reducido."
       }
     ],
     "breakpoints": [
       {
         "name": "celular",
-        "value": "767.98px"
+        "value": "767.98px",
+        "purpose": "Riel a panel lateral, barra inferior; Ventas y Vencimientos pasan de tablero a tarjetas."
       },
       {
         "name": "una-columna",
@@ -968,7 +987,8 @@
       },
       {
         "name": "boton-corto",
-        "value": "1399.98px"
+        "value": "1399.98px",
+        "purpose": "Solo Inicio: el botón de fila acorta su texto."
       },
       {
         "name": "login-banda",
@@ -1060,6 +1080,33 @@
         "mobileBand": "132 px de alto (cerca de 360x132 del centro); 48 px con el teclado abierto (360x48).",
         "reviewed": "Solo con una imagen sintética de prueba."
       }
+    },
+    "globalListKit": {
+      "note": "Reglas de src/styles.scss que valen para toda la app. Las automáticas ya cambian todas las listas y diálogos; de las otras pantallas solo se revisaron en pantalla Cuentas y el diálogo \"Nueva cuenta\".",
+      "automatic": [
+        ".table-scroll (tablero blanco, borde 1px rule, radio 3px)",
+        "encabezados de tabla (condensada, mayúsculas, 0.875rem, 700, 0.04em, riel de 2px, 40px)",
+        "celdas (10px por lado, 14px la primera) y filas (48px mínimo, hover ópalo hundido)",
+        "título de diálogo (1.25rem condensada sobre riel), contenido que se desplaza, línea sobre las acciones",
+        "botones de texto en tinta; botones de ícono e ícono de ayuda en tinta suave",
+        "app-empty-state (vacío en una línea dentro de un panel)"
+      ],
+      "optIn": [
+        ".nc-celda / .nc-celda-principal / .nc-celda-sub",
+        ".nc-acciones (casillas de 40px)",
+        ".nc-cuando",
+        ".combo-badge",
+        ".page-header / .page-header-actions",
+        ".nc-filtros (campos de 44px, 220px, sin renglón de ayuda)",
+        ".nc-sin-ayuda",
+        ".nc-lista-cargando / .nc-lista-cargando-texto",
+        ".nc-lista-error",
+        ".nc-card-list / .nc-card (tarjetas de lista en celular)"
+      ],
+      "optInAdoptedBy": [
+        "Ventas",
+        "Vencimientos"
+      ]
     }
   },
   "components": [
@@ -1075,7 +1122,7 @@
       "name": "Botón delineado de fila",
       "kind": "button",
       "refersTo": "button-outlined",
-      "description": "Acción propia de una fila: texto en tinta y borde de campo.",
+      "description": "Acción propia de una fila: texto en tinta y borde de campo. 32 px en Inicio; 36 px con 12 px de margen en el tablero de Vencimientos y 48 px en su tarjeta de celular.",
       "html": "<button class=\"ds-btn-outlined\"><svg viewBox=\"0 0 24 24\" width=\"18\" height=\"18\" aria-hidden=\"true\"><path fill=\"currentColor\" d=\"M12 6v3l4-4-4-4v3c-4.42 0-8 3.58-8 8 0 1.57.46 3.03 1.24 4.26L6.7 14.8A5.87 5.87 0 0 1 6 12c0-3.31 2.69-6 6-6zm6.76 1.74L17.3 9.2c.44.84.7 1.79.7 2.8 0 3.31-2.69 6-6 6v-3l-4 4 4 4v-3c4.42 0 8-3.58 8-8 0-1.57-.46-3.03-1.24-4.26z\"/></svg><span>Renovar con el proveedor</span></button>",
       "css": ".ds-btn-outlined { font-family: var(--nc-font-sans); display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 10px; border: 1px solid var(--nc-rule-field); border-radius: var(--nc-radius); background: transparent; color: var(--nc-ink); font-size: 0.8125rem; font-weight: 500; cursor: pointer; transition: background-color var(--nc-duration) var(--nc-ease); } .ds-btn-outlined:hover { background: var(--nc-surface-sunken); } .ds-btn-outlined:focus-visible { outline: 2px solid var(--nc-focus); outline-offset: 2px; }"
     },
@@ -1110,6 +1157,30 @@
       "description": "Región del tablero: título condensado sobre riel negro y filas de dos renglones. Arriba el cuándo en la tinta del estado y los clientes; abajo el servicio y el correo. Lo que no entra baja de renglón.",
       "html": "<section class=\"ds-panel\"><h2 class=\"ds-panel-title\">Cuentas que debes pagar al proveedor</h2><a class=\"ds-fila\" href=\"#\"><svg class=\"ds-fila-icono\" viewBox=\"0 0 28 28\" width=\"28\" height=\"28\" aria-hidden=\"true\"><circle cx=\"14\" cy=\"14\" r=\"14\" fill=\"currentColor\"/></svg><span class=\"ds-fila-cuando\"><span class=\"ds-fila-dias ds-fila-dias--vencida\">Venció hace 2 días</span><span class=\"ds-fila-clientes\">4 clientes la usan</span></span><span class=\"ds-fila-info\"><span class=\"ds-fila-nombre\">Netflix</span><span class=\"ds-fila-dato\">cine.familia01@proveedor.com</span></span></a><a class=\"ds-fila\" href=\"#\"><svg class=\"ds-fila-icono\" viewBox=\"0 0 28 28\" width=\"28\" height=\"28\" aria-hidden=\"true\"><circle cx=\"14\" cy=\"14\" r=\"14\" fill=\"currentColor\"/></svg><span class=\"ds-fila-cuando\"><span class=\"ds-fila-dias\">Vence en 3 días</span><span class=\"ds-fila-clientes\">1 cliente la usa</span></span><span class=\"ds-fila-info\"><span class=\"ds-fila-nombre\">Disney+</span><span class=\"ds-fila-dato\">magia.perfiles22@proveedor.com</span></span></a></section>",
       "css": ".ds-panel { font-family: var(--nc-font-sans); background: var(--nc-surface); border: 1px solid var(--nc-rule); border-radius: var(--nc-radius); color: var(--nc-ink); font-size: 0.875rem; font-variant-numeric: tabular-nums; } .ds-panel-title { margin: 0; padding: 10px 14px 8px; border-bottom: var(--nc-rail-width) solid var(--nc-rail); font-stretch: var(--nc-width-condensed); text-transform: uppercase; font-size: 1.125rem; font-weight: 700; line-height: 1.2; letter-spacing: 0.02em; } .ds-fila { display: grid; grid-template-columns: 28px minmax(0, 1fr); align-items: center; gap: 1px 10px; padding: 7px 14px; border-bottom: 1px solid var(--nc-rule); color: inherit; text-decoration: none; transition: background-color var(--nc-duration) var(--nc-ease); } .ds-fila:last-child { border-bottom: 0; } .ds-fila:hover { background: var(--nc-surface-sunken); } .ds-fila:focus-visible { outline: 2px solid var(--nc-focus); outline-offset: -2px; } .ds-fila-icono { grid-row: 1 / span 2; color: var(--nc-ink-faint); } .ds-fila-cuando { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 0 10px; min-width: 0; } .ds-fila-dias { color: var(--nc-por-vencer-ink); font-stretch: var(--nc-width-condensed); text-transform: uppercase; font-size: 1rem; font-weight: 700; letter-spacing: 0.02em; line-height: 1.2; } .ds-fila-dias--vencida { color: var(--nc-vencida-ink); } .ds-fila-info { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 6px; min-width: 0; } .ds-fila-nombre { font-weight: 600; line-height: 1.3; } .ds-fila-dato, .ds-fila-clientes { color: var(--nc-ink-muted); font-size: 0.8125rem; line-height: 1.3; } .ds-fila-dato { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }"
+    },
+    {
+      "name": "Tablero de lista",
+      "kind": "custom",
+      "refersTo": "tablero",
+      "description": "Toda tabla: tablero blanco con borde fino, encabezado en letras de cartelera sobre el riel, celdas de dos renglones y acciones en casillas fijas de 40 px. La fila de combo conserva solo \"copiar\", deja vacías las otras casillas y lleva su enlace junto al código. La fecha de Vence toma la tinta de su estado.",
+      "html": "<div class=\"ds-tablero\"><table class=\"ds-tab\"><thead><tr><th>Cliente</th><th>Servicio y cuenta</th><th>Vence</th><th class=\"ds-tab-monto\">Cobrado</th><th><span class=\"ds-tab-sr\">Acciones</span></th></tr></thead><tbody><tr><td><div class=\"ds-celda\"><span class=\"ds-celda-principal\">Ana Quispe</span><span class=\"ds-celda-sub ds-tab-linea\"><span class=\"ds-tab-code\">V-02122</span></span></div></td><td><div class=\"ds-celda\"><span class=\"ds-celda-principal\">Netflix</span><span class=\"ds-celda-sub\">cine.familia01@proveedor.com · Perfil 1</span></div></td><td><div class=\"ds-celda\"><span class=\"ds-celda-principal ds-tab-por-vencer\">07/10/2026</span><span class=\"ds-celda-sub\">desde 02/10/2026</span></div></td><td class=\"ds-tab-monto\"><div class=\"ds-celda\"><span class=\"ds-celda-principal\">S/ 14.00</span></div></td><td><div class=\"ds-tab-acciones\"><button class=\"ds-tab-ico\" type=\"button\" aria-label=\"Copiar datos para el cliente\" title=\"Copiar datos para el cliente\"><svg viewBox=\"0 0 24 24\" width=\"24\" height=\"24\" aria-hidden=\"true\"><path fill=\"currentColor\" d=\"M16 1H2v16h2V3h12V1zm5 4H6v18h15V5zm-2 16H8V7h11v14z\"/></svg></button><button class=\"ds-tab-ico\" type=\"button\" aria-label=\"Editar\" title=\"Editar\"><svg viewBox=\"0 0 24 24\" width=\"24\" height=\"24\" aria-hidden=\"true\"><path fill=\"currentColor\" d=\"M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM5.92 19H5v-.92l9.06-9.06.92.92L5.92 19zM20.71 5.63l-2.34-2.34-1.83 1.83 3.75 3.75 1.83-1.83-1.41-1.41z\"/></svg></button><button class=\"ds-tab-ico\" type=\"button\" aria-label=\"Renovar\" title=\"Renovar\"><svg viewBox=\"0 0 24 24\" width=\"24\" height=\"24\" aria-hidden=\"true\"><path fill=\"currentColor\" d=\"M12 6v3l4-4-4-4v3c-4.42 0-8 3.58-8 8 0 1.57.46 3.03 1.24 4.26L6.7 14.8A5.87 5.87 0 0 1 6 12c0-3.31 2.69-6 6-6zm6.76 1.74L17.3 9.2c.44.84.7 1.79.7 2.8 0 3.31-2.69 6-6 6v-3l-4 4 4 4v-3c4.42 0 8-3.58 8-8 0-1.57-.46-3.03-1.24-4.26z\"/></svg></button><button class=\"ds-tab-ico\" type=\"button\" aria-label=\"Finalizar venta\" title=\"Finalizar venta\"><svg viewBox=\"0 0 24 24\" width=\"24\" height=\"24\" aria-hidden=\"true\"><path fill=\"currentColor\" d=\"M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zM4 12c0-4.42 3.58-8 8-8 1.85 0 3.55.63 4.9 1.69L5.69 16.9A7.902 7.902 0 0 1 4 12zm8 8c-1.85 0-3.55-.63-4.9-1.69L18.31 7.1A7.902 7.902 0 0 1 20 12c0 4.42-3.58 8-8 8z\"/></svg></button></div></td></tr><tr><td><div class=\"ds-celda\"><span class=\"ds-celda-principal\">Maycol Mille</span><span class=\"ds-celda-sub ds-tab-linea\"><span class=\"ds-tab-code\">V-00292</span><a class=\"ds-combo\" href=\"#\"><svg viewBox=\"0 0 24 24\" width=\"16\" height=\"16\" aria-hidden=\"true\"><path fill=\"currentColor\" d=\"M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z\"/></svg>Parte de combo C-00046</a></span></div></td><td><div class=\"ds-celda\"><span class=\"ds-celda-principal\">Disney+</span><span class=\"ds-celda-sub\">magia.perfiles22@proveedor.com</span></div></td><td><div class=\"ds-celda\"><span class=\"ds-celda-principal ds-tab-vencida\">01/03/2026</span><span class=\"ds-celda-sub\">desde 01/01/2026</span></div></td><td class=\"ds-tab-monto\"><div class=\"ds-celda\"><span class=\"ds-celda-principal\">S/ 0.00</span></div></td><td><div class=\"ds-tab-acciones\"><button class=\"ds-tab-ico\" type=\"button\" aria-label=\"Copiar datos para el cliente\" title=\"Copiar datos para el cliente\"><svg viewBox=\"0 0 24 24\" width=\"24\" height=\"24\" aria-hidden=\"true\"><path fill=\"currentColor\" d=\"M16 1H2v16h2V3h12V1zm5 4H6v18h15V5zm-2 16H8V7h11v14z\"/></svg></button><span></span><span></span><span></span></div></td></tr></tbody></table></div>",
+      "css": ".ds-tablero { font-family: var(--nc-font-sans); overflow-x: auto; border: 1px solid var(--nc-rule); border-radius: var(--nc-radius); background: var(--nc-surface); color: var(--nc-ink); font-size: 0.875rem; font-variant-numeric: tabular-nums; } .ds-tab { width: 100%; border-collapse: collapse; } .ds-tab th { height: 40px; padding: 0 10px; border-bottom: var(--nc-rail-width) solid var(--nc-rail); font-stretch: var(--nc-width-condensed); font-size: 0.875rem; font-weight: 700; letter-spacing: 0.04em; text-align: start; text-transform: uppercase; white-space: nowrap; } .ds-tab td { height: 48px; padding: 0 10px; border-bottom: 1px solid var(--nc-rule); } .ds-tab th:first-child, .ds-tab td:first-child { padding-inline-start: 14px; } .ds-tab tbody tr { transition: background-color var(--nc-duration) var(--nc-ease); } .ds-tab tbody tr:hover { background: var(--nc-surface-sunken); } .ds-tab tbody tr:last-child td { border-bottom: 0; } .ds-tab .ds-tab-monto { text-align: end; white-space: nowrap; } .ds-celda { display: flex; flex-direction: column; gap: 1px; min-width: 0; padding-block: 6px; line-height: 1.3; } .ds-celda-principal { font-weight: 600; white-space: nowrap; } .ds-celda-sub { color: var(--nc-ink-muted); font-size: 0.8125rem; text-wrap: pretty; } .ds-tab-linea { display: flex; align-items: center; gap: 10px; white-space: nowrap; } .ds-tab-code { font-family: var(--nc-font-mono); letter-spacing: 0.02em; } .ds-tab-vencida { color: var(--nc-vencida-ink); } .ds-tab-por-vencer { color: var(--nc-por-vencer-ink); } .ds-combo { display: inline-flex; align-items: center; gap: 3px; color: var(--nc-brand); font-size: 0.8125rem; font-weight: 600; text-underline-offset: 0.18em; white-space: nowrap; } .ds-combo:focus-visible { outline: 2px solid var(--nc-focus); outline-offset: 2px; } .ds-tab-acciones { display: grid; grid-auto-columns: 40px; grid-auto-flow: column; justify-content: end; align-items: center; } .ds-tab-ico { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border: 0; border-radius: var(--nc-radius); background: transparent; color: var(--nc-ink-muted); cursor: pointer; transition: background-color var(--nc-duration) var(--nc-ease); } .ds-tab-ico:hover { background: var(--nc-rule); } .ds-tab-ico:focus-visible { outline: 2px solid var(--nc-focus); } .ds-tab-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }"
+    },
+    {
+      "name": "Pestañas de estado y acciones de Vencimientos",
+      "kind": "custom",
+      "refersTo": "pestana-estado",
+      "description": "Interacción firma de Vencimientos: tres pestañas con su conteo que son resumen y filtro a la vez; la elegida se llena con su estado y en cero se apaga a su tinte aun elegida. Cada fila abre con el cuándo y cierra con \"WhatsApp\" (relleno en tinta) y \"Renovar\" (delineado) en columnas fijas de 36 px de alto.",
+      "html": "<div class=\"ds-venc\"><div class=\"ds-pest\" role=\"group\" aria-label=\"Estado de vencimiento\"><button class=\"ds-pest-item ds-pest-vencida\" type=\"button\" aria-pressed=\"true\">Vencidas <b>10</b></button><button class=\"ds-pest-item ds-pest-por-vencer\" type=\"button\" aria-pressed=\"false\">Por vencer <b>5</b></button><button class=\"ds-pest-item ds-pest-al-dia\" type=\"button\" aria-pressed=\"false\">Al día <b>7</b></button></div><div class=\"ds-pest\" role=\"group\" aria-label=\"Estado de vencimiento, sin vencidas\"><button class=\"ds-pest-item ds-pest-vencida ds-pest-vacia\" type=\"button\" aria-pressed=\"true\">Vencidas <b>0</b></button><button class=\"ds-pest-item ds-pest-por-vencer\" type=\"button\" aria-pressed=\"false\">Por vencer <b>1</b></button><button class=\"ds-pest-item ds-pest-al-dia\" type=\"button\" aria-pressed=\"false\">Al día <b>2</b></button></div><div class=\"ds-venc-fila\"><span class=\"ds-venc-celda\"><span class=\"ds-cuando\">Venció hace 22 días</span><span class=\"ds-venc-sub\">14/09/2026</span></span><span class=\"ds-venc-acciones\"><button class=\"ds-wsp\" type=\"button\"><svg viewBox=\"0 0 24 24\" width=\"18\" height=\"18\" aria-hidden=\"true\"><path fill=\"currentColor\" d=\"M4 4h16v12H5.17L4 17.17V4m0-2v20l4-4h14V2H4zm2 10h12v2H6v-2zm0-3h12v2H6V9zm0-3h12v2H6V6z\"/></svg>WhatsApp</button><button class=\"ds-renovar\" type=\"button\"><svg viewBox=\"0 0 24 24\" width=\"18\" height=\"18\" aria-hidden=\"true\"><path fill=\"currentColor\" d=\"M12 6v3l4-4-4-4v3c-4.42 0-8 3.58-8 8 0 1.57.46 3.03 1.24 4.26L6.7 14.8A5.87 5.87 0 0 1 6 12c0-3.31 2.69-6 6-6zm6.76 1.74L17.3 9.2c.44.84.7 1.79.7 2.8 0 3.31-2.69 6-6 6v-3l-4 4 4 4v-3c4.42 0 8-3.58 8-8 0-1.57-.46-3.03-1.24-4.26z\"/></svg>Renovar</button></span></div><div class=\"ds-venc-fila\"><span class=\"ds-venc-celda\"><span class=\"ds-cuando\">Venció hace 219 días</span><span class=\"ds-venc-sub\">01/03/2026</span></span><span class=\"ds-venc-acciones\"><button class=\"ds-wsp\" type=\"button\"><svg viewBox=\"0 0 24 24\" width=\"18\" height=\"18\" aria-hidden=\"true\"><path fill=\"currentColor\" d=\"M4 4h16v12H5.17L4 17.17V4m0-2v20l4-4h14V2H4zm2 10h12v2H6v-2zm0-3h12v2H6V9zm0-3h12v2H6V6z\"/></svg>WhatsApp</button></span></div></div>",
+      "css": ".ds-venc { font-family: var(--nc-font-sans); display: grid; gap: 12px; color: var(--nc-ink); font-size: 0.875rem; font-variant-numeric: tabular-nums; } .ds-pest { display: inline-flex; justify-self: start; border: 1px solid var(--nc-rule-field); border-radius: var(--nc-radius); overflow: hidden; } .ds-pest-item { height: 44px; padding: 0 12px; border: 0; border-inline-start: 1px solid var(--nc-rule-field); background: var(--nc-surface); color: var(--nc-ink); font: inherit; font-weight: 600; cursor: pointer; transition: background-color var(--nc-duration) var(--nc-ease); } .ds-pest-item:first-child { border-inline-start: 0; } .ds-pest-item b { margin-inline-start: 8px; color: var(--ds-tinta); font-stretch: var(--nc-width-condensed); font-size: 1.25rem; font-weight: 800; line-height: 1; vertical-align: -1px; } .ds-pest-item:hover { background: var(--nc-surface-sunken); } .ds-pest-item:focus-visible { outline: 2px solid var(--nc-focus); outline-offset: -2px; } .ds-pest-item[aria-pressed=\"true\"], .ds-pest-item[aria-pressed=\"true\"]:hover { background: var(--ds-estado); color: var(--ds-sobre); } .ds-pest-item[aria-pressed=\"true\"] b { color: inherit; } .ds-pest-item.ds-pest-vacia[aria-pressed=\"true\"], .ds-pest-item.ds-pest-vacia[aria-pressed=\"true\"]:hover { background: var(--ds-tinte); color: var(--ds-tinta); } .ds-pest-vencida { --ds-estado: var(--nc-vencida); --ds-sobre: var(--nc-on-vencida); --ds-tinte: var(--nc-vencida-tint); --ds-tinta: var(--nc-vencida-ink); } .ds-pest-por-vencer { --ds-estado: var(--nc-por-vencer); --ds-sobre: var(--nc-on-por-vencer); --ds-tinte: var(--nc-por-vencer-tint); --ds-tinta: var(--nc-por-vencer-ink); } .ds-pest-al-dia { --ds-estado: var(--nc-al-dia); --ds-sobre: var(--nc-on-al-dia); --ds-tinte: var(--nc-al-dia-tint); --ds-tinta: var(--nc-al-dia-ink); } .ds-venc-fila { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 48px; padding: 0 10px 0 14px; border: 1px solid var(--nc-rule); border-radius: var(--nc-radius); background: var(--nc-surface); } .ds-venc-celda { display: flex; flex-direction: column; gap: 1px; padding-block: 6px; line-height: 1.3; } .ds-venc-sub { color: var(--nc-ink-muted); font-size: 0.8125rem; } .ds-cuando { color: var(--nc-vencida-ink); font-stretch: var(--nc-width-condensed); font-size: 1rem; font-weight: 700; letter-spacing: 0.02em; line-height: 1.2; text-transform: uppercase; white-space: nowrap; } .ds-venc-acciones { display: grid; grid-template-columns: 124px 110px; align-items: center; gap: 8px; } .ds-wsp, .ds-renovar { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 36px; padding: 0 12px; border-radius: var(--nc-radius); font: inherit; font-weight: 500; white-space: nowrap; cursor: pointer; } .ds-wsp { grid-column: 1; border: 0; background: var(--nc-ink); color: var(--nc-on-ink); transition: opacity var(--nc-duration) var(--nc-ease); } .ds-wsp:hover { opacity: 0.88; } .ds-renovar { grid-column: 2; border: 1px solid var(--nc-rule-field); background: transparent; color: var(--nc-ink); transition: background-color var(--nc-duration) var(--nc-ease); } .ds-renovar:hover { background: var(--nc-surface-sunken); } .ds-wsp:focus-visible, .ds-renovar:focus-visible { outline: 2px solid var(--nc-focus); outline-offset: 2px; }"
+    },
+    {
+      "name": "Estados de una lista",
+      "kind": "card",
+      "refersTo": "lista-cargando",
+      "description": "Carga: panel blanco con una línea visible y barras hundidas. Error: aviso sobre tinte vencida con \"Reintentar\". Vacío: una línea dentro de un panel, con el ícono en verde al día solo cuando es una buena noticia.",
+      "html": "<div class=\"ds-estados\"><div class=\"ds-cargando\" aria-busy=\"true\"><span class=\"ds-cargando-texto\">Cargando ventas…</span><span class=\"ds-barra\"></span><span class=\"ds-barra\"></span><span class=\"ds-barra\"></span><span class=\"ds-barra\"></span></div><div class=\"ds-error\" role=\"alert\"><svg viewBox=\"0 0 24 24\" width=\"24\" height=\"24\" aria-hidden=\"true\"><path fill=\"currentColor\" d=\"M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z\"/></svg><p>No se pudieron cargar las ventas. Revisa tu conexión e inténtalo de nuevo.</p><button class=\"ds-reintentar\" type=\"button\">Reintentar</button></div><div class=\"ds-vacio\"><svg viewBox=\"0 0 24 24\" width=\"24\" height=\"24\" aria-hidden=\"true\"><path fill=\"currentColor\" d=\"M17 2H7v6h10V2zm-2 4H9V4h6v2zm5 16H4v-4h16v4zM18.53 10H5.47L2 17h20l-3.47-7zM9.5 16h-1v-1h1v1zm0-2h-1v-1h1v1zm0-2h-1v-1h1v1zm3 4h-1v-1h1v1zm0-2h-1v-1h1v1zm0-2h-1v-1h1v1zm3 4h-1v-1h1v1zm0-2h-1v-1h1v1zm0-2h-1v-1h1v1z\"/></svg><div><p class=\"ds-vacio-mensaje\">No hay ventas con estos filtros.</p><p class=\"ds-vacio-sub\">Prueba cambiando o quitando los filtros.</p></div></div><div class=\"ds-vacio ds-vacio--bueno\"><svg viewBox=\"0 0 24 24\" width=\"24\" height=\"24\" aria-hidden=\"true\"><path fill=\"currentColor\" d=\"M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm4.59-12.42L10 14.17l-2.59-2.58L6 13l4 4 8-8z\"/></svg><div><p class=\"ds-vacio-mensaje\">Ningún cliente tiene una venta vencida.</p></div></div></div>",
+      "css": ".ds-estados { font-family: var(--nc-font-sans); display: grid; gap: 12px; color: var(--nc-ink); font-size: 0.875rem; } .ds-cargando { display: grid; gap: 8px; padding: 14px; border: 1px solid var(--nc-rule); border-radius: var(--nc-radius); background: var(--nc-surface); } .ds-cargando-texto { color: var(--nc-ink-muted); } .ds-barra { display: block; height: 36px; border-radius: var(--nc-radius); background: var(--nc-surface-sunken); animation: ds-barra 1.2s ease-in-out infinite alternate; } @keyframes ds-barra { to { opacity: 0.5; } } @media (prefers-reduced-motion: reduce) { .ds-barra { animation: none; } } .ds-error { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 14px; border-radius: var(--nc-radius); background: var(--nc-vencida-tint); } .ds-error svg { flex-shrink: 0; color: var(--nc-vencida-ink); } .ds-error p { flex: 1 1 200px; margin: 0; } .ds-reintentar { height: 36px; padding: 0 16px; border: 1px solid var(--nc-rule-field); border-radius: var(--nc-radius); background: transparent; color: var(--nc-ink); font: inherit; font-weight: 500; cursor: pointer; transition: background-color var(--nc-duration) var(--nc-ease); } .ds-reintentar:hover { background: var(--nc-surface); } .ds-reintentar:focus-visible { outline: 2px solid var(--nc-focus); outline-offset: 2px; } .ds-vacio { display: flex; align-items: flex-start; gap: 10px; padding: 14px; border: 1px solid var(--nc-rule); border-radius: var(--nc-radius); background: var(--nc-surface); color: var(--nc-ink-muted); } .ds-vacio svg { flex-shrink: 0; color: var(--nc-ink-faint); } .ds-vacio--bueno svg { color: var(--nc-al-dia); } .ds-vacio-mensaje { margin: 0; color: var(--nc-ink); } .ds-vacio-sub { margin: 2px 0 0; font-size: 0.8125rem; }"
     },
     {
       "name": "Chips de estado",
@@ -1154,7 +1225,7 @@
   ],
   "narrative": {
     "northStar": "Cartelera",
-    "overview": "Nocturne es la cartelera de un cine de barrio a plena luz: cada cuenta es una sala y cada venta una función con hora de término. El panel se lee como un tablero de letras blanco ópalo con rieles negros bajo cada título, un riel de navegación rojo butaca a la izquierda y el ámbar de una bombilla encendida marcando dónde estás. Rechaza la rejilla de tarjetas iguales con un número grande sobre fondo azul oscuro.\n\nEs una superficie de operación, densa y plana: filas de 36 a 50 px, paneles pegados a 16 px, color plano sin degradados y sin sombras en nada que esté apoyado en el tablero. El color fuerte se reserva para lo que cuesta dinero si se pasa por alto (vencidas, por vencer, caídas); todo lo demás es tinta sobre blanco. Celular y escritorio valen lo mismo: el mismo tablero se pliega a una columna con una barra inferior de cinco destinos.\n\n**Alcance actual.** Están rediseñados en este mundo el layout del panel (riel, barra superior, barra inferior en celular), el buscador global, Inicio y el login, que es la fachada del mismo cine: a un lado el letrero, al otro la taquilla; con él se rehízo el favicon. Las demás pantallas (Ventas, Ventas de combos, Vencimientos, Clientes y proveedores, Servicios, Cuentas, Combos, Gastos, Contabilidad, Usuarios, Configuración) hoy solo heredan los tokens a través de Material; cada una todavía debe su propio rediseño dentro de la Cartelera.",
+    "overview": "Nocturne es la cartelera de un cine de barrio a plena luz: cada cuenta es una sala y cada venta una función con hora de término. El panel se lee como un tablero de letras blanco ópalo con rieles negros bajo cada título, un riel de navegación rojo butaca a la izquierda y el ámbar de una bombilla encendida marcando dónde estás. Rechaza la rejilla de tarjetas iguales con un número grande sobre fondo azul oscuro.\n\nEs una superficie de operación, densa y plana: filas de 36 a 50 px, paneles pegados a 16 px, color plano sin degradados y sin sombras en nada que esté apoyado en el tablero. El color fuerte se reserva para lo que cuesta dinero si se pasa por alto (vencidas, por vencer, caídas); todo lo demás es tinta sobre blanco. Celular y escritorio valen lo mismo: el mismo tablero se pliega a una columna con una barra inferior de cinco destinos.\n\n**Alcance actual.** Están rediseñados en este mundo el layout del panel (riel, barra superior, barra inferior en celular), el buscador global, Inicio, el login (la fachada del mismo cine: a un lado el letrero, al otro la taquilla; con él se rehízo el favicon) y las dos listas de uso diario, Ventas y Vencimientos, con los diálogos que se abren desde ellas (nueva venta, editar, renovar, finalizar).\n\nCon esas dos listas llegaron reglas que son GLOBALES y viven en `src/styles.scss`: el tablero de las listas, las reglas de diálogos, las de campos y las de botones. Las que se enganchan a Material (tablero blanco con borde, encabezados sobre el riel, margen de celdas, alto de filas, título y zonas de los diálogos, botones de texto en tinta) y el vacío compartido (`app-empty-state`) ya cambian el aspecto de todas las demás listas y diálogos de la app sin que nadie los haya tocado. De esas otras pantallas, después del cambio solo se revisaron en pantalla Cuentas y el diálogo \"Nueva cuenta\"; el resto lo recibe sin revisar. Las piezas que se piden por clase (celda de dos renglones, casillas de acción, el cuándo, filtros compactos, carga y error de lista) hoy solo las usan Ventas y Vencimientos: las demás pantallas (Ventas de combos, Clientes y proveedores, Servicios, Cuentas, Combos, Gastos, Contabilidad, Usuarios, Configuración) todavía cargan con el indicador giratorio de Material, llevan filtros de alto completo y deben su propio rediseño dentro de la Cartelera.",
     "keyCharacteristics": [
       "Tablero claro: fondo ópalo cálido, paneles blancos, líneas finas, riel negro de 2 px bajo cada título.",
       "Riel de navegación rojo butaca con la sección actual en ámbar de bombilla.",
@@ -1163,6 +1234,7 @@
       "Archivo en dos anchos: condensada en mayúsculas para títulos y cifras, normal para el texto; cifras tabulares.",
       "Una sola esquina (3 px) y sombra solo en capas flotantes.",
       "Cada fila urgente abre con su \"función\": el cuándo, en letras de cartelera.",
+      "Las listas son tableros: encabezado en letras de cartelera sobre el riel, celdas de dos renglones y acciones en casillas fijas.",
       "El inventario es la cartelera: una sala por servicio y una butaca por perfil o cuenta completa, ocupada o libre."
     ],
     "rules": [
@@ -1178,7 +1250,7 @@
       },
       {
         "name": "Regla de la Tinta que Actúa",
-        "body": "La acción principal es negra. El rojo butaca es marca, navegación, enlace y selección; no rellena botones. Así un botón nunca se confunde con un estado ni con el bermellón de \"vencida\".",
+        "body": "Toda acción va en tinta. La principal es un relleno negro; la de fila, un delineado con texto en tinta; la secundaria (\"Cancelar\" y los demás botones de texto), texto en tinta con su capa de estado también en tinta; los botones de ícono y el ícono de ayuda (ⓘ), en tinta suave. El rojo butaca es marca, navegación, enlace y selección: no rellena botones ni colorea su texto. El bermellón es \"vencida\" y error. Así un botón nunca se confunde con un estado.",
         "section": "colors"
       },
       {
@@ -1188,12 +1260,17 @@
       },
       {
         "name": "Regla del Estado",
-        "body": "Bermellón, ámbar, verde, magenta y turquesa significan estados y nada más. No decoran, no distinguen categorías, no son series de dinero: para eso existen `--nc-serie-*`. En cero, un bloque de estado se apaga a su `-tint` con texto `-ink`: color solo donde hay algo que atender. Un bloque o etiqueta toma los cuatro colores de su estado de las clases globales `.nc-estado-vencida`, `.nc-estado-por-vencer`, `.nc-estado-al-dia` y `.nc-estado-caida` (en `src/styles.scss`), que fijan `--estado`, `--sobre-estado`, `--estado-tinte` y `--estado-tinta`. Los avisos del login usan tres de esos tintes como fondo de un mensaje, con texto en tinta y el ícono en la `-ink` del estado: por vencer para la sesión expirada, al día para la contraseña cambiada y vencida para un error.",
+        "body": "Bermellón, ámbar, verde, magenta y turquesa significan estados y nada más. No decoran, no distinguen categorías, no son series de dinero: para eso existen `--nc-serie-*`. En cero, un bloque de estado se apaga a su `-tint` con texto `-ink`: color solo donde hay algo que atender; vale igual para una pestaña de estado elegida. Un bloque o etiqueta toma los cuatro colores de su estado de las clases globales `.nc-estado-vencida`, `.nc-estado-por-vencer`, `.nc-estado-al-dia` y `.nc-estado-caida` (en `src/styles.scss`), que fijan `--estado`, `--sobre-estado`, `--estado-tinte` y `--estado-tinta`. Los avisos del login usan tres de esos tintes como fondo de un mensaje, con texto en tinta y el ícono en la `-ink` del estado: por vencer para la sesión expirada, al día para la contraseña cambiada y vencida para un error.",
         "section": "colors"
       },
       {
         "name": "Regla del Foco en Tinta",
         "body": "En todo campo de formulario, el contorno enfocado, la etiqueta enfocada y el cursor van en tinta (`--nc-focus` y `--nc-ink`, vía `--mat-form-field-outlined-focus-outline-color`, `--mat-form-field-outlined-focus-label-text-color` y `--mat-form-field-outlined-caret-color` en `src/styles.scss`). El rojo nunca significa foco: queda para la marca, y el bermellón para el error, así un campo enfocado no parece un campo con error. El autocompletado del navegador conserva el fondo del campo y su tinta en vez de pintar el suyo.",
+        "section": "colors"
+      },
+      {
+        "name": "Regla de la Ayuda que Empuja",
+        "body": "El texto de ayuda o de error bajo un campo ocupa el alto que necesite (por CSS global en `styles.scss`, sin la opción global de Material, que engordaba el bundle inicial): si pasa a dos renglones empuja al campo siguiente, nunca se monta sobre su etiqueta. `styles.scss` le da un mínimo de 20 px, para que los campos sin ayuda conserven el ritmo, y 8 px de aire abajo. En los diálogos el contenido se desplaza entre el título y los botones, con 10 px arriba, 16 px abajo y una línea `rule` sobre los botones que marca el fin de la zona que se desplaza.",
         "section": "colors"
       },
       {
@@ -1217,6 +1294,11 @@
         "section": "layout"
       },
       {
+        "name": "Regla de las Casillas Fijas",
+        "body": "Las acciones de una fila viven en casillas de ancho fijo, a la derecha, siempre en el mismo orden (`.nc-acciones`: una casilla de 36 px por acción). Una fila con menos acciones deja sus casillas vacías; nunca corre las otras. Así cada acción queda en la misma columna en todo el tablero y una fila distinta (la venta que es parte de un combo) no desordena a las demás.",
+        "section": "layout"
+      },
+      {
         "name": "Regla del Tablero Plano",
         "body": "Si está apoyado, no tiene sombra. Solo flota lo que tapa otra cosa, y toda capa flotante usa la misma sombra.",
         "section": "elevation"
@@ -1231,7 +1313,12 @@
       "**Sí:** toma cada color de un token `--nc-*` del bloque `:root` de `src/styles.scss`; si falta uno, se agrega ahí con su nombre de rol.",
       "**Sí:** en gráficos de canvas, lee el color con `cssToken()`.",
       "**Sí:** pon cada título de panel o de grupo sobre un riel negro de 2 px (`--nc-rail-width`, `--nc-rail`).",
-      "**Sí:** usa la tinta negra para la acción principal y el botón delineado con borde `rule-field` para las acciones de fila.",
+      "**Sí:** usa la tinta negra para la acción principal, el botón delineado con borde `rule-field` para las acciones de fila y el botón de texto en tinta para \"Cancelar\" y las acciones secundarias.",
+      "**Sí:** arma toda lista nueva con el tablero global: `.table-scroll`, `.nc-celda` para dos renglones, `.nc-acciones` para las acciones y `.nc-filtros` para los filtros.",
+      "**Sí:** deja vacía la casilla de una acción que una fila no tiene.",
+      "**Sí:** di la carga con `.nc-lista-cargando` y una línea visible, el error con `.nc-lista-error` y \"Reintentar\", y el vacío con `app-empty-state`.",
+      "**Sí:** escribe el nombre de la acción central de una pantalla en su botón (\"WhatsApp\", \"Renovar\").",
+      "**Sí:** marca con su asterisco todo campo obligatorio.",
       "**Sí:** abre las filas que tienen fecha con su cuándo en condensada, mayúsculas y la tinta `-ink` de su estado.",
       "**Sí:** usa la variante `-ink` de un estado para texto sobre claro y el sólido solo como fondo con su `on-`.",
       "**Sí:** da a un bloque su estado con una clase global `.nc-estado-*` en vez de repetir sus cuatro colores.",
@@ -1255,8 +1342,11 @@
       "**No:** uses degradados, vidrio ni esquinas redondeadas grandes.",
       "**No:** agregues secuencias de entrada; solo transiciones de estado de 160 ms.",
       "**No:** cambies la terminología del producto (servicio, cuenta, perfil, venta, vencimiento, cuenta caída).",
-      "**No:** uses el rojo para marcar el foco de un campo.",
-      "**No:** deshabilites el botón principal de un formulario en reposo ni mientras carga; en el login solo se deshabilita durante la espera por demasiados intentos."
+      "**No:** uses el rojo para marcar el foco de un campo, ni para un botón de texto o un ícono de ayuda.",
+      "**No:** deshabilites el botón principal de un formulario porque le falten datos: queda habilitado y valida al presionarlo. En el login solo se deshabilita durante la espera por demasiados intentos; en los diálogos de venta, solo mientras guarda.",
+      "**No:** uses un indicador giratorio suelto ni un ícono grande centrado para la carga o el vacío de una lista.",
+      "**No:** pintes de verde el ícono de un vacío que no es una buena noticia.",
+      "**No:** corras las acciones de una fila para tapar el hueco de una que falta."
     ]
   }
 }

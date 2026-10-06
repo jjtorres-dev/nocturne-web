@@ -3,6 +3,7 @@
   <mat-select
     [value]="selected()"
     [disabled]="disabled()"
+    [required]="obligatorio()"
     (selectionChange)="onSelectChange($event.value)"
     (blur)="markTouched()"
   >

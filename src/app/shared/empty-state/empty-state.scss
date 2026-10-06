@@ -1,27 +1,39 @@
+// Una línea dentro de un panel del tablero: ícono, mensaje y, si hay, qué
+// hacer. Sin ilustración ni ícono gigante.
 :host {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 40px 16px;
-  text-align: center;
-  color: var(--mat-sys-on-surface-variant);
+  align-items: flex-start;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid var(--nc-rule);
+  border-radius: var(--nc-radius);
+  background: var(--nc-surface);
+  color: var(--nc-ink-muted);
 }
 
 .icon {
-  width: 56px;
-  height: 56px;
-  font-size: 56px;
-  margin-bottom: 12px;
-  opacity: 0.45;
+  flex-shrink: 0;
+  color: var(--nc-ink-faint);
+}
+
+// Vacío que es buena noticia (nada vencido, nada caído).
+:host(.bueno) .icon {
+  color: var(--nc-al-dia);
+}
+
+.textos {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
 }
 
 .mensaje {
   margin: 0;
-  font-size: 1rem;
+  color: var(--nc-ink);
 }
 
 .submensaje {
-  margin: 4px 0 0;
-  font-size: 0.875rem;
-  opacity: 0.75;
+  margin: 0;
+  font-size: 0.8125rem;
 }

@@ -8,7 +8,6 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -29,7 +28,7 @@ import { ConfirmDialog } from '../../../shared/confirm-dialog/confirm-dialog';
 import { injectIsMobile } from '../../../shared/breakpoints';
 import { SolesPipe } from '../../../shared/soles.pipe';
 import { exportToCsv, type CsvColumn } from '../../../shared/csv-export';
-import { formatFechaCorta, hoyIso } from '../../../shared/fecha.util';
+import { diasEntre, formatFechaCorta, hoyIso } from '../../../shared/fecha.util';
 import { Auth, UserRole } from '../../../core/auth/auth';
 import { EmptyState } from '../../../shared/empty-state/empty-state';
 import { formatearDatosParaCliente } from '../copiar-datos.util';
@@ -39,6 +38,12 @@ import { ESTADO_VENTA_LABELS, estadoVenta } from '../../../shared/estado-venta/e
 import { extractErrorMessage } from '../../../shared/form-error';
 
 type ActivoFilter = 'todos' | 'activos' | 'inactivos';
+
+import { ServiceIcon } from '../../../shared/service-icon/service-icon';
+
+// Días de aviso para colorear la fecha de vencimiento (el valor por defecto
+// de "Avisarme con" en Vencimientos).
+const DIAS_AVISO = 3;
 
 @Component({
   imports: [
@@ -50,13 +55,13 @@ type ActivoFilter = 'todos' | 'activos' | 'inactivos';
     DecimalPipe,
     RouterLink,
     SolesPipe,
+    ServiceIcon,
     MatTableModule,
     MatCardModule,
     MatFormFieldModule,
     MatSelectModule,
     MatButtonModule,
     MatIconModule,
-    MatProgressSpinnerModule,
     MatTooltipModule,
   ],
   selector: 'app-ventas-list',
@@ -81,29 +86,8 @@ export class VentasList implements OnInit {
   );
   protected readonly displayedColumns = computed(() =>
     this.isAdmin()
-      ? [
-          'codigoVenta',
-          'cliente',
-          'servicio',
-          'cuentaPerfil',
-          'fechaInicio',
-          'fechaFin',
-          'precio',
-          'dueno',
-          'activo',
-          'acciones',
-        ]
-      : [
-          'codigoVenta',
-          'cliente',
-          'servicio',
-          'cuentaPerfil',
-          'fechaInicio',
-          'fechaFin',
-          'precio',
-          'activo',
-          'acciones',
-        ],
+      ? ['cliente', 'servicio', 'fechaFin', 'precio', 'dueno', 'activo', 'acciones']
+      : ['cliente', 'servicio', 'fechaFin', 'precio', 'activo', 'acciones'],
   );
 
   readonly ventas = signal<Venta[]>([]);
@@ -113,12 +97,34 @@ export class VentasList implements OnInit {
   readonly perfilNombres = signal<Map<string, string>>(new Map());
   readonly comboCodigos = signal<Map<string, string>>(new Map());
   readonly loading = signal(false);
+  // La última carga falló: en vez de la lista se muestra el aviso con
+  // "Reintentar".
+  readonly error = signal(false);
   // Solo aplica en pantalla angosta: en desktop los filtros siempre se ven.
   protected readonly filtersOpen = signal(false);
 
   clienteFilter = 'todos';
   servicioFilter = 'todos';
   activoFilter: ActivoFilter = 'activos';
+
+  // Color de la fecha de vencimiento de una venta sin finalizar: bermellón
+  // si ya pasó, ámbar si vence dentro de los días de aviso (los mismos 3 que
+  // Vencimientos usa por defecto). Así una venta que vence hoy no se lee
+  // igual que una que vence en un mes.
+  protected venceClase(venta: Venta): string {
+    if (!venta.activo) {
+      return '';
+    }
+    const dias = diasEntre(hoyIso(), venta.fechaFin.slice(0, 10));
+    if (dias < 0) {
+      return 'nc-estado-vencida vence-urgente';
+    }
+    return dias <= DIAS_AVISO ? 'nc-estado-por-vencer vence-urgente' : '';
+  }
+
+  protected perfilNombre(venta: Venta): string | null {
+    return venta.perfilId ? (this.perfilNombres().get(venta.perfilId) ?? '—') : null;
+  }
 
   protected toggleFilters(): void {
     this.filtersOpen.update((open) => !open);
@@ -154,6 +160,7 @@ export class VentasList implements OnInit {
 
   async refresh(): Promise<void> {
     this.loading.set(true);
+    this.error.set(false);
     try {
       const data = await this.api.list({
         clienteId: this.clienteFilter === 'todos' ? undefined : this.clienteFilter,
@@ -167,9 +174,9 @@ export class VentasList implements OnInit {
       this.ventas.set(data);
       await this.loadPerfilNombres(data);
     } catch {
-      this.snackBar.open('No se pudieron cargar las ventas.', 'Cerrar', {
-        duration: 4000,
-      });
+      // El aviso va en el lugar de la lista, con "Reintentar" (sin snackbar:
+      // sería el mismo mensaje dos veces).
+      this.error.set(true);
     } finally {
       this.loading.set(false);
     }
@@ -327,7 +334,7 @@ export class VentasList implements OnInit {
     return perfil ? `${correo} — ${perfil}` : correo;
   }
 
-  private cuentaCorreo(venta: Venta): string {
+  protected cuentaCorreo(venta: Venta): string {
     return this.cuentas().find((c) => c.id === venta.cuentaId)?.correo ?? '—';
   }
 
