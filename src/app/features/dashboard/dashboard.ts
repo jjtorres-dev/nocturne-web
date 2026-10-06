@@ -45,8 +45,8 @@ function initialState<T>(): CardState<T> {
 }
 
 // Tope de butacas dibujadas por servicio en "Disponible para vender": con
-// más libres que esto, la fila se llena y el número de al lado dice cuántas.
-const MAX_BUTACAS = 12;
+// más que esto, la sala se dibuja hasta acá y el texto dice cuántas son.
+const MAX_BUTACAS = 40;
 
 @Component({
   imports: [
@@ -78,13 +78,15 @@ export class Dashboard implements OnInit {
   readonly porRenovar = signal(initialState<CuentaPorRenovar[]>());
   readonly caidas = signal(initialState<CuentaCaida[]>());
 
-  // "3 clientes sin servicio": suma de los clientes de cada cuenta caída.
-  protected readonly clientesSinServicio = computed(() => {
-    const total = (this.caidas().data ?? []).reduce(
-      (suma, cuenta) => suma + cuenta.clientesAfectados,
-      0,
-    );
-    return `${clientesTexto(total)} sin servicio`;
+  // "Disponible para vender" separa lo que se vende por perfil de lo que se
+  // vende por cuenta completa: son unidades distintas y no se mezclan en una
+  // misma lista.
+  protected readonly inventarioGrupos = computed(() => {
+    const items = this.inventario().data ?? [];
+    return [
+      { titulo: 'Se venden por perfil', items: items.filter((i) => i.usaPerfiles) },
+      { titulo: 'Se venden por cuenta completa', items: items.filter((i) => !i.usaPerfiles) },
+    ].filter((grupo) => grupo.items.length > 0);
   });
 
   ngOnInit(): void {
@@ -112,11 +114,11 @@ export class Dashboard implements OnInit {
 
   private readonly caidasPanel = viewChild<ElementRef<HTMLElement>>('caidasPanel');
 
-  // Marca por un momento el panel "Cuentas caídas" al llegar desde la barra
-  // de señal (ver verCaidas).
+  // Marca por un momento el panel "Cuentas caídas" al llegar desde su tarjeta
+  // de estado (ver verCaidas).
   protected readonly caidasDestacada = signal(false);
 
-  // El bloque "Cuentas caídas" de la barra de señal lleva a su lista, en esta
+  // La tarjeta de estado "Cuentas caídas" lleva a su lista, en esta
   // misma pantalla: las caídas son cuentas, no ventas, así que no tienen
   // filtro en Vencimientos. El panel se resalta un momento para que se vea
   // adónde llevó el toque aunque ya estuviera a la vista.
@@ -128,9 +130,24 @@ export class Dashboard implements OnInit {
     setTimeout(() => this.caidasDestacada.set(false), 1200);
   }
 
-  // Una butaca por perfil o cuenta libre, hasta MAX_BUTACAS.
-  butacas(libres: number): number[] {
-    return Array.from({ length: Math.min(libres, MAX_BUTACAS) }, (_, i) => i);
+  // Una butaca por perfil (o cuenta completa) del servicio: primero las
+  // ocupadas (false), después las libres (true). Si el backend todavía no
+  // manda `total`, solo se conocen las libres.
+  butacas(item: InventarioItem): boolean[] {
+    const total = Math.max(item.total ?? item.libres, item.libres);
+    const dibujadas = Math.min(total, MAX_BUTACAS);
+    const libres = Math.min(item.libres, dibujadas);
+    return Array.from({ length: dibujadas }, (_, i) => i >= dibujadas - libres);
+  }
+
+  // "Libres: 3 de 4 perfiles" / "Libres: 0 de 1 cuenta". La unidad va
+  // siempre escrita: perfiles y cuentas completas no son lo mismo.
+  libresLabel(item: InventarioItem): string {
+    const unidad = (n: number) =>
+      item.usaPerfiles ? (n === 1 ? 'perfil' : 'perfiles') : n === 1 ? 'cuenta' : 'cuentas';
+    return item.total === undefined
+      ? `Libres: ${item.libres} ${unidad(item.libres)}`
+      : `Libres: ${item.libres} de ${item.total} ${unidad(item.total)}`;
   }
 
   goToVencimientos(estado: VencimientoFiltro): void {

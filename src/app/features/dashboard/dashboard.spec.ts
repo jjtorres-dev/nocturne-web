@@ -25,8 +25,8 @@ describe('Dashboard', () => {
     ganancia: 350,
   };
   const inventario: InventarioItem[] = [
-    { servicioId: 's1', nombre: 'Netflix', usaPerfiles: true, libres: 3 },
-    { servicioId: 's2', nombre: 'Crunchyroll', usaPerfiles: false, libres: 0 },
+    { servicioId: 's1', nombre: 'Netflix', usaPerfiles: true, libres: 3, total: 5 },
+    { servicioId: 's2', nombre: 'Crunchyroll', usaPerfiles: false, libres: 0, total: 2 },
   ];
   const porRenovar: CuentaPorRenovar[] = [
     {
@@ -201,6 +201,37 @@ describe('Dashboard', () => {
       expect(items[1].classList).toContain('agotado');
     });
 
+    it('dibuja una butaca por perfil o cuenta: ocupadas y libres', async () => {
+      const el = await render();
+
+      const items = Array.from(el.querySelectorAll<HTMLElement>('.inventario-item'));
+      expect(items[0].textContent).toContain('Libres: 3 de 5 perfiles');
+      expect(items[0].querySelectorAll('.butaca')).toHaveLength(5);
+      expect(items[0].querySelectorAll('.butaca.ocupada')).toHaveLength(2);
+      expect(items[1].textContent).toContain('Libres: 0 de 2 cuentas');
+      expect(items[1].querySelectorAll('.butaca.ocupada')).toHaveLength(2);
+    });
+
+    it('separa lo que se vende por perfil de lo que se vende por cuenta completa', async () => {
+      const el = await render();
+
+      const titulos = Array.from(el.querySelectorAll('.inventario-card .salas-titulo')).map(
+        (t) => t.textContent?.trim(),
+      );
+      expect(titulos).toEqual(['Se venden por perfil', 'Se venden por cuenta completa']);
+    });
+
+    it('sin `total` (backend anterior) solo dibuja las libres', async () => {
+      dashboardApi.inventario.mockResolvedValue([
+        { servicioId: 's1', nombre: 'Netflix', usaPerfiles: true, libres: 3 },
+      ]);
+      const item = (await render()).querySelector<HTMLElement>('.inventario-item')!;
+
+      expect(item.textContent).toContain('Libres: 3 perfiles');
+      expect(item.querySelectorAll('.butaca')).toHaveLength(3);
+      expect(item.querySelectorAll('.butaca.ocupada')).toHaveLength(0);
+    });
+
     it('si falla, muestra el error solo en esa tarjeta', async () => {
       dashboardApi.inventario.mockRejectedValue(new Error('boom'));
       const el = await render();
@@ -317,13 +348,14 @@ describe('Dashboard', () => {
       vi.useRealTimers();
     });
 
-    it('muestra cuántos clientes están sin servicio y cada fila lleva al detalle de su cuenta', async () => {
+    it('cada fila dice cuántos clientes están sin servicio y lleva al detalle de su cuenta', async () => {
       const el = await render();
       const card = el.querySelector('.caidas-card')!;
 
       expect(cuentasApi.caidas).toHaveBeenCalled();
       expect(card.textContent).toContain('Cuentas caídas');
-      expect(card.querySelector('.caidas-total')?.textContent).toContain('4 clientes sin servicio');
+      // El conteo va una sola vez, en la fila de cada cuenta (no en el título).
+      expect(card.querySelector('.nc-panel-title')?.textContent).not.toContain('sin servicio');
 
       const filas = Array.from(card.querySelectorAll<HTMLAnchorElement>('a.caida-item'));
       expect(filas.map((a) => a.getAttribute('href'))).toEqual([
@@ -337,12 +369,11 @@ describe('Dashboard', () => {
       expect(filas[1].textContent).toContain('1 cliente sin servicio');
     });
 
-    it('sin cuentas caídas lo dice, sin total', async () => {
+    it('sin cuentas caídas lo dice', async () => {
       cuentasApi.caidas.mockResolvedValue([]);
       const card = (await render()).querySelector('.caidas-card')!;
 
       expect(card.textContent).toContain('No tienes cuentas caídas.');
-      expect(card.querySelector('.caidas-total')).toBeNull();
     });
 
     it('si falla la carga muestra su propio error sin tapar las demás tarjetas', async () => {

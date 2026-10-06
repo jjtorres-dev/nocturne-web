@@ -39,6 +39,7 @@ colors:
   caida-ink: "#7d2379"
   caida-tint: "#f4e2f3"
   on-caida: "#ffffff"
+  butaca-ocupada: "#9a8f87"
   libre: "#0d7c8c"
   libre-ink: "#0a6876"
   libre-tint: "#dcf0f3"
@@ -213,8 +214,18 @@ components:
     rounded: "{rounded.base}"
   butaca:
     backgroundColor: "{colors.libre}"
-    rounded: "{rounded.micro}"
-    width: "6px"
+    rounded: "2px 2px 1px 1px"
+    width: "9px"
+    height: "14px"
+  butaca-ocupada:
+    backgroundColor: "{colors.butaca-ocupada}"
+    rounded: "2px 2px 1px 1px"
+    width: "9px"
+    height: "14px"
+  butaca-cuenta:
+    backgroundColor: "{colors.libre}"
+    rounded: "2px 2px 1px 1px"
+    width: "20px"
     height: "14px"
 ---
 
@@ -238,6 +249,7 @@ Es una superficie de operación, densa y plana: filas de 36 a 50 px, paneles peg
 - Archivo en dos anchos: condensada en mayúsculas para títulos y cifras, normal para el texto; cifras tabulares.
 - Una sola esquina (3 px) y sombra solo en capas flotantes.
 - Cada fila urgente abre con su "función": el cuándo, en letras de cartelera.
+- El inventario es la cartelera: una sala por servicio y una butaca por perfil o cuenta completa, ocupada o libre.
 
 ## Colors
 
@@ -258,7 +270,7 @@ Blanco ópalo y tinta casi negra de tono cálido, un rojo vino para la marca y c
   - **Ámbar por vencer** (`por-vencer`): vence pronto. Es el único sólido que lleva texto en tinta negra encima.
   - **Verde al día** (`al-dia`): en regla; también el chip "Activo" y el ícono de los vacíos buenos ("No tienes cuentas caídas").
   - **Magenta caída** (`caida`): cuenta caída, un cliente esperando reposición. No es un cobro atrasado y por eso no comparte color con vencida.
-  - **Turquesa libre** (`libre`): perfiles o cuentas disponibles para vender (las butacas).
+  - **Turquesa libre** (`libre`): perfiles o cuentas disponibles para vender (las butacas libres).
 - **Series de dinero** (`serie-ingresos`, `serie-inversion`, `serie-gastos`, `serie-ganancia`): tintas propias de Contabilidad y de "Ganancia del mes". Ingresos, inversión y gastos van en grises y negro; solo lo que queda, la ganancia, lleva color.
 - **Avatares** (`avatar-1` a `avatar-6`, `on-avatar`): seis tonos oscuros para la inicial en blanco.
 
@@ -269,6 +281,7 @@ Blanco ópalo y tinta casi negra de tono cálido, un rojo vino para la marca y c
 - **Línea fina** (`rule`): separador de 1 px entre filas y borde de paneles.
 - **Borde de campo** (`rule-field`): borde de campos y de botones delineados; cumple 3:1 contra el tablero.
 - **Tinta suave** (`ink-muted`) y **tinta tenue** (`ink-faint`): texto secundario y terciario; ambas pasan 4.5:1 sobre el fondo y sobre el blanco.
+- **Butaca ocupada** (`butaca-ocupada`): gris cálido de la butaca ya vendida en "Disponible para vender". Es neutro a propósito: en la sala, lo único con color es lo libre.
 - **Selección de texto** (`selection`): ámbar pálido con texto en tinta.
 
 ### Named Rules
@@ -281,7 +294,7 @@ Blanco ópalo y tinta casi negra de tono cálido, un rojo vino para la marca y c
 
 **Regla de la Bombilla.** El ámbar de bombilla solo se enciende dentro del riel rojo (y su barra inferior) para decir "estás acá". Fuera del riel, el ámbar que se ve es el estado "por vencer", que es otro token.
 
-**Regla del Estado.** Bermellón, ámbar, verde, magenta y turquesa significan estados y nada más. No decoran, no distinguen categorías, no son series de dinero: para eso existen `--nc-serie-*`. En cero, un bloque de estado se apaga a su `-tint` con texto `-ink`: color solo donde hay algo que atender.
+**Regla del Estado.** Bermellón, ámbar, verde, magenta y turquesa significan estados y nada más. No decoran, no distinguen categorías, no son series de dinero: para eso existen `--nc-serie-*`. En cero, un bloque de estado se apaga a su `-tint` con texto `-ink`: color solo donde hay algo que atender. Un bloque o etiqueta toma los cuatro colores de su estado de las clases globales `.nc-estado-vencida`, `.nc-estado-por-vencer`, `.nc-estado-al-dia` y `.nc-estado-caida` (en `src/styles.scss`), que fijan `--estado`, `--sobre-estado`, `--estado-tinte` y `--estado-tinta`.
 
 **Regla de los Alias Heredados.** `--nc-bg`, `--nc-surface-elevated`, `--nc-border`, `--nc-text-primary`, `--nc-text-secondary` y `--nc-accent-solid` existen solo para las pantallas que todavía no se rediseñaron. No se usan en código nuevo; al rediseñar una pantalla se reemplazan por el token real y, cuando no quede ninguna, se borran.
 
@@ -294,18 +307,18 @@ Blanco ópalo y tinta casi negra de tono cálido, un rojo vino para la marca y c
 **Character:** Una sola familia en dos anchos. La condensada en mayúsculas y peso 700–800 son las letras de plástico de la cartelera; la normal es el texto de trabajo. La fuente se carga con el eje de ancho 62–125 y pesos 400–800; los anchos en uso son los tokens `--nc-width-condensed` (68 %) y `--nc-width-normal` (100 %).
 
 ### Hierarchy
-- **Display** (800, 2.25rem, 0.95, condensada): la cifra de cada bloque de la barra de señal (1.875rem en celular). Las cifras de panel bajan a 1.875rem (ganancia) y 1.25rem (libres), mismo ancho y peso.
+- **Display** (800, 2.25rem, 0.95, condensada): la cifra de cada tarjeta de estado (1.875rem en celular). La cifra de "Ganancia del mes" baja a 1.875rem, mismo ancho y peso.
 - **Headline** (800, 1.75rem, 1.1, condensada, mayúsculas, 0.01em): el `h1` de cada pantalla y la marca en el riel (esta con 0.06em).
 - **Title** (700, 1.125rem, 1.2, condensada, mayúsculas, 0.02em): título de panel, siempre sobre su riel negro.
 - **Función** (700, 1rem, 1.2, condensada, mayúsculas, 0.02em): el cuándo que abre cada fila ("VENCE EN 3 DÍAS"), en la tinta de su estado.
 - **Body** (400, 0.875rem, 1.43, ancho normal): texto general, vía `--mat-sys-body-medium`. El nombre principal de una fila sube a 600; el dato secundario baja a 0.8125rem en tinta suave.
-- **Label** (600, 0.8125rem, 1.2, ancho normal, sin mayúsculas): etiqueta de bloque de señal, enlaces dentro de un título, texto de botón compacto.
+- **Label** (600, 0.8125rem, 1.2, ancho normal, sin mayúsculas): etiqueta de tarjeta de estado, enlaces dentro de un título, texto de botón compacto y, en tinta suave, el subtítulo que separa las salas por unidad de venta.
 - **Grupo** (700, 0.8125rem, condensada, mayúsculas, 0.06em): título de grupo del menú; en el buscador, 0.875rem con 0.04em. La fecha de la barra superior usa el mismo registro a 0.9375rem, peso 600.
 - **Code** (JetBrains Mono, 0.02em): códigos de venta y combo (V-00001, C-00001).
 
 ### Named Rules
 
-**Regla de los Dos Anchos.** Condensada (68 %) en mayúsculas para títulos, cifras y el cuándo; normal (100 %) para todo lo que se lee como frase. Un texto dentro de un título que no es título (un enlace, un total) vuelve a ancho normal, sin mayúsculas y sin tracking.
+**Regla de los Dos Anchos.** Condensada (68 %) en mayúsculas para títulos, cifras y el cuándo; normal (100 %) para todo lo que se lee como frase. Un texto dentro de un título que no es título (un enlace, una leyenda) vuelve a ancho normal, sin mayúsculas y sin tracking.
 
 **Regla de la Cifra Tabular.** `font-variant-numeric: tabular-nums` está puesto en `body`: toda cifra se alinea en columna sin pedirlo.
 
@@ -313,14 +326,16 @@ Blanco ópalo y tinta casi negra de tono cálido, un rojo vino para la marca y c
 
 Riel fijo de 232 px (`--nc-nav-width`) a la izquierda y, a su derecha, una barra superior de 52 px (`--nc-topbar-height`) pegada arriba con el buscador a la izquierda (hasta 520 px) y la fecha de hoy a la derecha. El contenido tiene un máximo de 1600 px con 20 px arriba, 24 px a los lados y 32 px abajo.
 
-Inicio abre con la barra de señal a todo el ancho y debajo una rejilla de dos columnas `2fr / 1fr` (mínimo 300 px la derecha) con 16 px de separación: lo urgente a la izquierda, el negocio a la derecha. Los paneles se apilan con 16 px entre sí.
+Inicio abre con las tarjetas de estado a todo el ancho y debajo una rejilla de dos columnas `2fr / 1fr` (mínimo 300 px la derecha) con 16 px de separación, en tres filas de áreas: arriba, las cuentas por pagar al proveedor a la izquierda y las cuentas caídas a la derecha; bajo las caídas, la ganancia del mes (las cuentas por pagar ocupan las dos filas de su columna); y al pie, a todo el ancho, "Disponible para vender". Lo urgente a la izquierda, el negocio a la derecha, el inventario cerrando.
 
-Ritmo observado (no hay tokens de espaciado en el CSS; son los valores que se repiten): 2 px entre tramos y bloques contiguos, 4 y 8 px dentro de un grupo, 10 px entre columnas de una fila, 14 px de margen interno horizontal de panel, 16 px entre paneles, 24 px de margen de página. Filas de 36 px en el menú y el buscador, alrededor de 50 px en las listas de cuentas, 40 px mínimo en inventario. Material corre con densidad -1.
+Ritmo observado (no hay tokens de espaciado en el CSS; son los valores que se repiten): 2 px entre bloques y tramos contiguos, 3 px entre butacas, 4 y 8 px dentro de un grupo, 10 px entre columnas de una fila, 14 px de margen interno horizontal de panel, 16 px entre paneles, 20 px entre columnas de salas, 24 px de margen de página. Filas de 36 px en el menú y el buscador y alrededor de 50 px en las listas de cuentas. Material corre con densidad -1.
 
 Cortes:
 - **Menos de 1400 px:** el botón de fila acorta su texto ("Renovar").
-- **Menos de 1100 px:** la rejilla de Inicio pasa a una columna.
-- **Menos de 768 px** (el mismo corte de `shared/breakpoints.ts`): el riel se vuelve un panel lateral sobre el contenido (hasta 288 px o 86 % del ancho) y aparece la barra inferior de 60 px más el área segura, con cuatro destinos diarios y "Menú". La señal pasa a rejilla 2×2 bajo la franja; las filas pasan a dos renglones; los objetivos táctiles suben a 44 px; el margen de página baja a 16 px. Las tablas hacen scroll horizontal dentro de `.table-scroll` y los diálogos ocupan el ancho menos 32 px.
+- **Desde 1100 px:** la fila de cuentas por pagar pasa a un solo renglón en columnas. **Menos de 1100 px:** la rejilla de Inicio pasa a una columna en este orden: cuentas caídas, cuentas por pagar, ganancia, salas.
+- **Menos de 768 px** (el mismo corte de `shared/breakpoints.ts`): el riel se vuelve un panel lateral sobre el contenido (hasta 288 px o 86 % del ancho) y aparece la barra inferior de 60 px más el área segura, con cuatro destinos diarios y "Menú". Las tarjetas de estado pasan a una rejilla 2×2 con 6 px de separación; los paneles se separan 12 px; los objetivos táctiles suben a 44 px; el margen de página baja a 16 px. Las tablas hacen scroll horizontal dentro de `.table-scroll` y los diálogos ocupan el ancho menos 32 px.
+
+Anchos de revisión: 1440 px en escritorio y 360 px en celular. A 360 px ninguna fila de cuenta se monta: lo que no entra en un renglón baja al siguiente.
 
 ## Elevation & Depth
 
@@ -334,13 +349,13 @@ Plano. Nada apoyado en el tablero tiene sombra: los niveles 0 y 1 de Material es
 
 **Regla del Tablero Plano.** Si está apoyado, no tiene sombra. Solo flota lo que tapa otra cosa, y toda capa flotante usa la misma sombra.
 
-**Regla del Riel que Aparece.** La respuesta al puntero no es elevación: un bloque de señal muestra un riel negro interior de 4 px abajo (8 px al presionar) y una fila cambia a ópalo hundido. Transiciones de 160 ms (`--nc-duration`) con `--nc-ease`, sin secuencias de entrada; con movimiento reducido el marcador de carga deja de pulsar.
+**Regla del Riel que Aparece.** La respuesta al puntero no es elevación: una tarjeta de estado muestra un riel negro interior de 4 px abajo (8 px al presionar) y una fila cambia a ópalo hundido. Transiciones de 160 ms (`--nc-duration`) con `--nc-ease`, sin secuencias de entrada; con movimiento reducido el marcador de carga deja de pulsar.
 
 ## Shapes
 
 Una sola esquina: 3 px (`--nc-radius`), la de las letras del tablero. Todos los radios de Material (de extra-small a extra-large, botones, botones de ícono, chips, diálogos) están reasignados a ese valor. El riel de navegación y la barra inferior van a ras, sin radio.
 
-Las marcas pequeñas que miden algo (tramos de la franja de señal, tramos de la franja de ganancia, butacas, muestras de leyenda) usan 1 px. El círculo queda para lo que es redondo en el mundo: avatares, íconos de servicio y la bombilla.
+Las marcas pequeñas que miden algo (tramos de la franja de ganancia, muestras de leyenda) usan 1 px. La butaca tiene silueta propia: 2 px arriba y 1 px abajo, como un respaldo. El círculo queda para lo que es redondo en el mundo: avatares, íconos de servicio y la bombilla.
 
 Las líneas tienen tres pesos con papel fijo: 1 px `rule` separa, 1 px `rule-field` delimita algo editable o pulsable, 2 px `rail` (`--nc-rail-width`) sostiene un título. La fila de bombillas bajo la marca es un borde punteado de 3 px en ámbar.
 
@@ -360,9 +375,9 @@ Las líneas tienen tres pesos con papel fijo: 1 px `rule` separa, 1 px `rule-fie
 
 ### Cards / Containers
 - **Panel** (`.nc-panel`): blanco, borde de 1 px `rule`, esquina de 3 px, sin sombra, sin margen interno propio: las filas llegan de borde a borde.
-- **Título de panel** (`.nc-panel-title`): registro Title, margen `10px 14px 8px`, riel negro de 2 px debajo. Puede llevar a la derecha un enlace o un total en ancho normal.
+- **Título de panel** (`.nc-panel-title`): registro Title, margen `10px 14px 8px`, riel negro de 2 px debajo. Puede llevar a la derecha un enlace o una leyenda en ancho normal. No lleva totales: el conteo ya está en su tarjeta de estado y cada fila dice lo suyo.
 - **Vacío y error:** una línea dentro del panel, margen `12px 14px`; el vacío bueno lleva un ícono en verde al día, el error va en tinta bermellón.
-- **Carga** (`.nc-skeleton`): bloques de 36 px en ópalo hundido que ocupan el lugar del contenido.
+- **Carga** (`.nc-skeleton`, clase global de `src/styles.scss`): bloques de 36 px en ópalo hundido que ocupan el lugar del contenido.
 
 ### Inputs / Fields
 - **Buscador:** 36 px de alto, fondo ópalo hundido, borde de 1 px `rule-field`, esquina de 3 px, lupa en tinta suave.
@@ -380,17 +395,24 @@ Las líneas tienen tres pesos con papel fijo: 1 px `rule` separa, 1 px `rule-fie
 - **Barra superior** (52 px, blanca, línea fina abajo): buscador a la izquierda y fecha de hoy a la derecha en el registro Grupo, tinta suave. En celular muestra la marca en rojo butaca y la lupa.
 - **Barra inferior (celular):** 60 px más área segura, fondo `nav`, cinco columnas iguales (Inicio, Ventas, Vencimientos, Cuentas, Menú) con ícono y etiqueta de 0.75rem en `on-nav-muted`; el activo va sobre `nav-active` en ámbar con ícono relleno.
 
-### Barra de señal
-El componente firma. Arriba, una franja exacta de 14 px (20 px en celular): tres tramos separados por 2 px cuyo ancho es su conteo, sin piso. Debajo, los bloques, que son botones: color plano del estado, cifra en Display y etiqueta en Label, mínimo 72 px de alto (60 px en celular), ancho proporcional al conteo con un piso para que el que vale poco igual se lea y se toque. Las cuentas caídas van en un bloque aparte, separado 8 px, porque se cuentan en otra unidad. En cero el bloque se apaga a su tinte. Al pasar el puntero aparece el riel negro interior. Los tres bloques de ventas llevan a Vencimientos ya filtrado; el de caídas lleva a su panel en la misma pantalla y lo resalta un momento con un contorno magenta de 2 px que se desvanece.
+### Tarjetas de estado
+La interacción firma de Inicio. Son botones: color plano del estado, cifra en Display y etiqueta en Label, mínimo 72 px de alto (60 px en celular). Las tres de ventas (vencidas, por vencer, al día) van juntas, separadas 2 px, y se reparten el ancho según su conteo con un piso (el ancho de su propio contenido) para que la que vale poco o cero igual se lea y se toque. Por ese piso el ancho es una señal aproximada, no una medida: el dato es la cifra. Las cuentas caídas van en un bloque aparte, separado 8 px, porque se cuentan en otra unidad. En cero la tarjeta se apaga a su tinte. Al pasar el puntero aparece el riel negro interior. Las tres de ventas llevan a Vencimientos ya filtrado; la de caídas lleva a su panel en la misma pantalla y lo resalta un momento con un contorno magenta de 2 px que se desvanece. En celular las cuatro pasan a una rejilla 2×2 de bloques iguales.
 
 ### Fila de función
-Cada fila de una lista urgente abre con su cuándo en el registro Función y en la tinta de su estado (columna fija de 8.5rem), sigue el ícono del servicio (28 px), el nombre en 600 sobre el correo en tinta suave, y a la derecha el dato de clientes en tinta suave. Toda la fila es un enlace al detalle; la acción propia de la fila, si la hay, es un botón delineado al final. En celular el cuándo pasa al primer renglón junto al dato de clientes y el servicio con su correo al segundo.
+La fila de una lista urgente (cuentas caídas, cuentas por pagar) va en dos renglones, con el ícono del servicio (28 px) ocupando ambos. Arriba, el cuándo en el registro Función y en la tinta de su estado y, al otro extremo, el dato de clientes en tinta suave a 0.8125rem; si no entran juntos, los clientes bajan de renglón. Abajo, el servicio en 600 (con su dueño en pequeño) seguido del correo en tinta suave; si no entran juntos, el correo baja de renglón. Toda la fila es un enlace al detalle y cambia a ópalo hundido al pasar; la acción propia de la fila, si la hay, es un botón delineado al final. El dato de clientes se dice una sola vez, en la fila.
+
+Desde 1100 px, la fila de cuentas por pagar pasa a un solo renglón en columnas: cuándo (9.5rem) | ícono | cuenta (servicio sobre correo) | clientes | acción. Las cuentas caídas viven en la columna angosta y conservan los dos renglones en todo ancho.
 
 ### Franja de ganancia
-Cifra del mes en condensada 800 a 1.875rem (bermellón si es negativa), una franja de 12 px que reparte lo cobrado en inversión, gastos y lo que queda con las tintas `--nc-serie-*`, y una lista de pares etiqueta y monto con una muestra cuadrada de 10 px como leyenda.
+Cifra del mes en condensada 800 a 1.875rem (bermellón si es negativa), una franja de 12 px que reparte lo cobrado en inversión, gastos y lo que queda con las tintas `--nc-serie-*`, y una lista de pares etiqueta y monto con una muestra cuadrada de 10 px como leyenda. La franja solo aparece si hubo cobros y la ganancia no es negativa.
 
-### Butacas
-En "Disponible para vender", una butaca turquesa de 6×14 px (5 px de ancho en celular) por cada perfil o cuenta libre, hasta 12, junto a la cifra en condensada 800 y su unidad en texto pequeño. Un servicio sin libres apaga la fila: tinta suave, peso normal e ícono en gris.
+### Cartelera de salas
+"Disponible para vender" es la cartelera: un panel a todo el ancho con una rejilla de salas, una por servicio, en tantas columnas de 250 px mínimo como entren (`repeat(auto-fill, minmax(250px, 1fr))`, 20 px entre columnas) y una línea fina bajo cada sala. Cada sala lleva el ícono del servicio (24 px), su nombre en 600 (con su dueño en pequeño), una línea de texto a 0.8125rem como "Libres: 3 de 5 perfiles" y su mapa de butacas.
+
+- **Butacas:** una por perfil o por cuenta completa, primero las ocupadas (`butaca-ocupada`) y después las libres (turquesa `libre`), de 9×14 px con 3 px de separación; si no entran en un renglón, siguen en el siguiente. Se dibujan hasta 40 por sala; el texto siempre dice la cantidad real.
+- **Unidad:** la línea de texto escribe siempre la unidad (perfil, perfiles, cuenta, cuentas) y la concuerda con el total. Los servicios se separan bajo dos subtítulos, "Se venden por perfil" y "Se venden por cuenta completa", para que las dos unidades nunca se mezclen; el subtítulo solo aparece cuando existen los dos grupos. La butaca de cuenta completa es más ancha (20 px).
+- **Leyenda:** en el título del panel, una butaca libre y una ocupada con su palabra, a 0.75rem en tinta suave.
+- **Agotado:** una sala sin libres se apaga: ícono en gris a media opacidad, nombre y texto en tinta suave.
 
 ## Do's and Don'ts
 
@@ -401,6 +423,9 @@ En "Disponible para vender", una butaca turquesa de 6×14 px (5 px de ancho en c
 - **Sí:** usa la tinta negra para la acción principal y el botón delineado con borde `rule-field` para las acciones de fila.
 - **Sí:** abre las filas que tienen fecha con su cuándo en condensada, mayúsculas y la tinta `-ink` de su estado.
 - **Sí:** usa la variante `-ink` de un estado para texto sobre claro y el sólido solo como fondo con su `on-`.
+- **Sí:** da a un bloque su estado con una clase global `.nc-estado-*` en vez de repetir sus cuatro colores.
+- **Sí:** deja que lo que no entra en un renglón baje al siguiente antes de montarse sobre otro dato.
+- **Sí:** escribe siempre la unidad junto a una cantidad de inventario (perfiles o cuentas) y no mezcles las dos en una misma lista.
 - **Sí:** mantén 3 px en toda esquina y 1 px en las marcas que miden.
 - **Sí:** da 44 px a todo lo que se toca por debajo de 768 px.
 - **Sí:** agrega cada sección nueva al menú dentro de uno de los grupos existentes.
@@ -412,7 +437,8 @@ En "Disponible para vender", una butaca turquesa de 6×14 px (5 px de ancho en c
 - **No:** uses el ámbar de bombilla fuera del riel de navegación y su barra inferior.
 - **No:** uses un color de estado para decorar, para distinguir categorías o como serie de dinero.
 - **No:** pongas sombra a un panel, una tarjeta o una fila; la sombra es solo de capas flotantes.
-- **No:** armes una rejilla de tarjetas iguales con un número grande: el ancho de un bloque dice su conteo.
+- **No:** armes en escritorio una fila de tarjetas iguales con un número grande: las de ventas se reparten el ancho según su conteo, con un piso para leerse. La rejilla 2×2 de bloques iguales es solo del celular.
+- **No:** repitas el mismo dato en dos formas en la misma vista (una medida encima de las tarjetas que ya lo dicen, un total en el título de una lista que ya lo dice fila por fila).
 - **No:** uses degradados, vidrio ni esquinas redondeadas grandes.
 - **No:** agregues secuencias de entrada; solo transiciones de estado de 160 ms.
 - **No:** cambies la terminología del producto (servicio, cuenta, perfil, venta, vencimiento, cuenta caída).
@@ -450,6 +476,7 @@ En "Disponible para vender", una butaca turquesa de 6×14 px (5 px de ancho en c
 | `--nc-on-nav-muted` | `#e0bcb8` | `#c9a3a0` |
 | `--nc-bulb` | `#ffc83d` | `#ffc83d` |
 | `--nc-on-bulb` | `#1c1615` | `#1c1615` |
+| `--nc-butaca-ocupada` | `#9a8f87` | `#5a4a47` |
 | `--nc-focus` | `#1c1615` | `#ffc83d` |
 | `--nc-selection` | `#ffe08a` | `#5a4410` |
 
@@ -478,6 +505,7 @@ Sombra de capa flotante (`--nc-shadow-overlay`): más profunda y más negra que 
 La propuesta no trae valores para estos tokens; se deciden y se revisan en pantalla, no antes:
 - Los `--nc-on-*` de los estados (texto sobre el sólido). Por cálculo, el blanco no alcanza 4.5:1 sobre los sólidos propuestos de vencida, al día y libre; hay que elegir entre texto oscuro o ajustar el sólido.
 - `--nc-nav` propuesto queda casi al mismo valor de luz que `--nc-ground` (cerca de 1.05:1): verificar en pantalla que el riel se siga leyendo como riel.
+- `--nc-butaca-ocupada` propuesto (`#5a4a47`) no se ha visto sobre `--nc-surface` oscuro: verificar en pantalla que la butaca ocupada se distinga del tablero y de la libre.
 - `--nc-serie-*`, `--nc-avatar-*`, `--nc-on-avatar` y `--nc-scrim`.
 - El valor exacto de `--nc-shadow-overlay`.
 - El botón de tema, dónde vive y cómo se recuerda la preferencia.

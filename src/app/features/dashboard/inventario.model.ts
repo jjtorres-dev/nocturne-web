@@ -6,6 +6,9 @@ export interface InventarioItem {
   // IPTV).
   usaPerfiles: boolean;
   libres: number;
+  // Libres + ocupados, en la misma unidad que `libres`. Opcional: un
+  // backend anterior al rediseño no lo manda.
+  total?: number;
   // Solo llega para ADMIN (ve los servicios de todos).
   ownerName?: string;
 }

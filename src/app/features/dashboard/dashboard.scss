@@ -3,40 +3,16 @@
 }
 
 // ---------------------------------------------------------------------------
-// Barra de señal
+// Tarjetas de estado
 // ---------------------------------------------------------------------------
 .senal {
   display: flex;
-  align-items: flex-end;
   gap: 8px;
-}
-
-// Las ventas: franja exacta arriba, bloques abajo. Las caídas quedan fuera.
-.senal-medida {
-  display: flex;
-  flex: 1 1 auto;
-  flex-direction: column;
-  gap: 4px;
-  min-width: 0;
-}
-
-// Franja exacta: cada tramo mide lo que vale su conteo, sin piso de ancho.
-// Los bloques de abajo sí tienen piso (para leerse y tocarse), así que la
-// proporción real se lee acá.
-.senal-franja {
-  display: flex;
-  gap: 2px;
-  height: 14px;
-
-  span {
-    flex: 0 0 0;
-    border-radius: 1px;
-    background: var(--estado);
-  }
 }
 
 .senal-ventas {
   display: flex;
+  flex: 1 1 auto;
   gap: 2px;
   min-width: 0;
 }
@@ -87,36 +63,9 @@
   }
 }
 
+// Los colores de cada estado vienen de las clases globales `.nc-estado-*`.
 .senal-ventas .senal-bloque {
   flex-basis: 0;
-}
-
-.vencida {
-  --estado: var(--nc-vencida);
-  --sobre-estado: var(--nc-on-vencida);
-  --estado-tinte: var(--nc-vencida-tint);
-  --estado-tinta: var(--nc-vencida-ink);
-}
-
-.por-vencer {
-  --estado: var(--nc-por-vencer);
-  --sobre-estado: var(--nc-on-por-vencer);
-  --estado-tinte: var(--nc-por-vencer-tint);
-  --estado-tinta: var(--nc-por-vencer-ink);
-}
-
-.al-dia {
-  --estado: var(--nc-al-dia);
-  --sobre-estado: var(--nc-on-al-dia);
-  --estado-tinte: var(--nc-al-dia-tint);
-  --estado-tinta: var(--nc-al-dia-ink);
-}
-
-.caida {
-  --estado: var(--nc-caida);
-  --sobre-estado: var(--nc-on-caida);
-  --estado-tinte: var(--nc-caida-tint);
-  --estado-tinta: var(--nc-caida-ink);
 }
 
 .summary-count {
@@ -139,15 +88,30 @@
 .info-cards {
   display: grid;
   grid-template-columns: minmax(0, 2fr) minmax(300px, 1fr);
+  grid-template-areas:
+    'pagar caidas'
+    'pagar ganancia'
+    'salas salas';
+  grid-template-rows: auto 1fr;
   gap: 16px;
   align-items: start;
   margin-top: 16px;
 }
 
-.columna {
-  display: grid;
-  gap: 16px;
-  min-width: 0;
+.caidas-card {
+  grid-area: caidas;
+}
+
+.renovar-card {
+  grid-area: pagar;
+}
+
+.ganancia-card {
+  grid-area: ganancia;
+}
+
+.inventario-card {
+  grid-area: salas;
 }
 
 .info-card {
@@ -159,7 +123,7 @@
     outline-color: var(--nc-focus);
   }
 
-  // Llegada desde el bloque "Cuentas caídas" de la barra de señal.
+  // Llegada desde la tarjeta de estado "Cuentas caídas".
   &.destacada {
     outline-color: var(--nc-caida);
     transition-duration: 0ms;
@@ -226,8 +190,7 @@
 }
 
 .renovar-row,
-.caida-row,
-.inventario-item {
+.caida-row {
   border-bottom: 1px solid var(--nc-rule);
 
   &:last-child {
@@ -250,19 +213,26 @@
   font-size: 0.8125rem;
 }
 
-// Cada fila abre con su "función": el cuándo, en letras de cartelera.
+// Fila de cuenta en dos renglones: arriba el cuándo (en letras de cartelera)
+// y los clientes; abajo el servicio y el correo. El ícono ocupa ambos. Si el
+// cuándo y los clientes no entran juntos, los clientes bajan de renglón:
+// nada se monta ni se corta.
 .renovar-item,
 .caida-item {
   display: grid;
   flex: 1 1 auto;
-  grid-template-columns: 8.5rem 28px minmax(0, 1fr) auto;
+  grid-template-columns: 28px minmax(0, 1fr);
   align-items: center;
-  gap: 10px;
+  gap: 1px 10px;
   min-width: 0;
   padding: 7px 14px;
   color: inherit;
   text-decoration: none;
   transition: background-color var(--nc-duration) var(--nc-ease);
+
+  app-service-icon {
+    grid-row: 1 / span 2;
+  }
 
   &:hover {
     background: var(--nc-surface-sunken);
@@ -276,6 +246,15 @@
   &.vencida .renovar-dias {
     color: var(--nc-vencida-ink);
   }
+}
+
+.fila-cuando {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0 10px;
+  min-width: 0;
 }
 
 .renovar-dias,
@@ -297,10 +276,14 @@
   color: var(--nc-caida-ink);
 }
 
+// Si el servicio (con su dueño) y el correo no entran juntos, el correo baja
+// de renglón en vez de recortarse.
 .renovar-info,
 .caida-info {
   display: flex;
-  flex-direction: column;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 6px;
   min-width: 0;
 }
 
@@ -312,6 +295,7 @@
 
 .renovar-correo,
 .caida-correo {
+  min-width: 0;
   overflow: hidden;
   color: var(--nc-ink-muted);
   font-size: 0.8125rem;
@@ -324,16 +308,43 @@
 .caida-clientes {
   color: var(--nc-ink-muted);
   font-size: 0.8125rem;
-  text-align: end;
 }
 
-.caidas-total {
-  color: var(--nc-caida-ink);
-  font-stretch: var(--nc-width-normal);
-  font-size: 0.8125rem;
-  font-weight: 700;
-  letter-spacing: 0;
-  text-transform: none;
+// Con ancho de sobra, "por pagar" pasa a un solo renglón en columnas:
+// cuándo | ícono | cuenta | clientes.
+@media (min-width: 1100px) {
+  .renovar-item {
+    grid-template-columns: 9.5rem 28px minmax(0, 1fr) auto;
+    gap: 10px;
+
+    app-service-icon {
+      grid-row: 1;
+      grid-column: 2;
+    }
+
+    .fila-cuando {
+      display: contents;
+    }
+
+    .renovar-dias {
+      grid-row: 1;
+      grid-column: 1;
+    }
+
+    .renovar-info {
+      grid-row: 1;
+      grid-column: 3;
+      flex-direction: column;
+      flex-wrap: nowrap;
+      align-items: stretch;
+    }
+
+    .renovar-clientes {
+      grid-row: 1;
+      grid-column: 4;
+      text-align: end;
+    }
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -412,65 +423,105 @@
 }
 
 // ---------------------------------------------------------------------------
-// Disponible para vender
+// Disponible para vender: la cartelera. Cada servicio es una sala.
 // ---------------------------------------------------------------------------
-.inventario-item {
-  display: flex;
+.leyenda {
+  display: inline-flex;
   align-items: center;
-  gap: 10px;
-  min-height: 40px;
-  padding: 5px 14px;
+  gap: 5px;
+  color: var(--nc-ink-muted);
+  font-stretch: var(--nc-width-normal);
+  font-size: 0.75rem;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
 
-  // Sin libres: la fila se apaga, pero el texto sigue siendo legible.
+  .butaca.ocupada {
+    margin-inline-start: 8px;
+  }
+}
+
+.salas-titulo {
+  margin: 0;
+  padding: 10px 14px 4px;
+  color: var(--nc-ink-muted);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+// Rejilla de salas: tantas columnas como entren.
+.inventario-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 0 20px;
+  padding: 0 14px 6px;
+}
+
+.inventario-item {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  align-items: center;
+  gap: 2px 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--nc-rule);
+
+  app-service-icon {
+    grid-row: 1 / span 2;
+    align-self: start;
+    margin-top: 2px;
+  }
+
+  // Sin libres: la sala se apaga, pero el texto sigue siendo legible.
   &.agotado {
-    color: var(--nc-ink-muted);
-
     app-service-icon {
       filter: grayscale(1);
       opacity: 0.5;
     }
 
-    .inventario-nombre {
-      font-weight: 400;
+    .inventario-nombre,
+    .inventario-libres {
+      color: var(--nc-ink-muted);
     }
   }
 }
 
 .inventario-nombre {
-  flex: 1 1 auto;
   min-width: 0;
   font-weight: 600;
   line-height: 1.25;
   overflow-wrap: anywhere;
 }
 
+.inventario-libres {
+  grid-column: 2;
+  font-size: 0.8125rem;
+  line-height: 1.3;
+}
+
 .butacas {
   display: flex;
-  flex-shrink: 0;
-  gap: 2px;
+  flex-wrap: wrap;
+  grid-column: 2;
+  gap: 3px;
+  margin-top: 3px;
 }
 
+// Butaca libre: turquesa. Ocupada: gris. Una cuenta completa es una butaca
+// ancha, para no confundirla con un perfil.
 .butaca {
-  width: 6px;
+  display: inline-block;
+  width: 9px;
   height: 14px;
-  border-radius: 1px;
+  border-radius: 2px 2px 1px 1px;
   background: var(--nc-libre);
-}
 
-.inventario-libres {
-  flex-shrink: 0;
-  min-width: 4.25rem;
-  font-stretch: var(--nc-width-condensed);
-  font-size: 1.25rem;
-  font-weight: 800;
-  line-height: 1;
-  text-align: end;
+  &.ocupada {
+    background: var(--nc-butaca-ocupada);
+  }
 
-  small {
-    color: var(--nc-ink-muted);
-    font-stretch: var(--nc-width-normal);
-    font-size: 0.75rem;
-    font-weight: 400;
+  .por-cuenta & {
+    width: 20px;
   }
 }
 
@@ -494,6 +545,12 @@
 @media (max-width: 1099.98px) {
   .info-cards {
     grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      'caidas'
+      'pagar'
+      'ganancia'
+      'salas';
+    grid-template-rows: none;
   }
 }
 
@@ -504,12 +561,6 @@
     gap: 6px;
   }
 
-  .senal-franja {
-    grid-column: 1 / -1;
-    height: 20px;
-  }
-
-  .senal-medida,
   .senal-ventas {
     display: contents;
   }
@@ -530,67 +581,18 @@
     font-size: 1.875rem;
   }
 
-  .info-cards,
-  .columna {
-    gap: 12px;
-  }
-
   .info-cards {
+    gap: 12px;
     margin-top: 12px;
-  }
-
-  // Dos renglones por fila: arriba el cuándo y los clientes; abajo el
-  // servicio y el correo. El ícono ocupa ambos.
-  .renovar-item,
-  .caida-item {
-    grid-template-columns: 28px minmax(0, 1fr) auto;
-    grid-template-areas:
-      'icono cuando clientes'
-      'icono cuenta cuenta';
-    gap: 1px 10px;
-  }
-
-  .renovar-item {
-    padding-inline-end: 4px;
-  }
-
-  .renovar-item app-service-icon,
-  .caida-item app-service-icon {
-    grid-area: icono;
-  }
-
-  .renovar-dias,
-  .caida-dias {
-    grid-area: cuando;
-    white-space: nowrap;
-  }
-
-  .renovar-clientes,
-  .caida-clientes {
-    grid-area: clientes;
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .renovar-info,
-  .caida-info {
-    grid-area: cuenta;
-    flex-direction: row;
-    align-items: baseline;
-    gap: 6px;
-  }
-
-  .renovar-servicio,
-  .caida-servicio {
-    flex-shrink: 0;
-    white-space: nowrap;
   }
 
   // Botón de 44 px solo con el ícono al final de la fila.
   .renovar-row {
     padding-inline-end: 8px;
+  }
+
+  .renovar-item {
+    padding-inline-end: 4px;
   }
 
   .renovar-accion {
@@ -610,9 +612,5 @@
     overflow: hidden;
     clip-path: inset(50%);
     white-space: nowrap;
-  }
-
-  .butaca {
-    width: 5px;
   }
 }

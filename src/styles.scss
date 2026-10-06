@@ -74,6 +74,7 @@ html {
   --nc-caida-ink: #7d2379;
   --nc-caida-tint: #f4e2f3;
   --nc-on-caida: #ffffff;
+  --nc-butaca-ocupada: #9a8f87; // butaca ocupada en "Disponible para vender"
   --nc-libre: #0d7c8c;
   --nc-libre-ink: #0a6876;
   --nc-libre-tint: #dcf0f3;
@@ -261,6 +262,37 @@ h1,
   line-height: 1.2;
   letter-spacing: 0.02em;
   text-transform: uppercase;
+}
+
+// Estados: fijan los colores de un bloque o etiqueta según su estado.
+// `--estado` y `--sobre-estado` para el relleno pleno; `--estado-tinte` y
+// `--estado-tinta` para la versión apagada.
+.nc-estado-vencida {
+  --estado: var(--nc-vencida);
+  --sobre-estado: var(--nc-on-vencida);
+  --estado-tinte: var(--nc-vencida-tint);
+  --estado-tinta: var(--nc-vencida-ink);
+}
+
+.nc-estado-por-vencer {
+  --estado: var(--nc-por-vencer);
+  --sobre-estado: var(--nc-on-por-vencer);
+  --estado-tinte: var(--nc-por-vencer-tint);
+  --estado-tinta: var(--nc-por-vencer-ink);
+}
+
+.nc-estado-al-dia {
+  --estado: var(--nc-al-dia);
+  --sobre-estado: var(--nc-on-al-dia);
+  --estado-tinte: var(--nc-al-dia-tint);
+  --estado-tinta: var(--nc-al-dia-ink);
+}
+
+.nc-estado-caida {
+  --estado: var(--nc-caida);
+  --sobre-estado: var(--nc-on-caida);
+  --estado-tinte: var(--nc-caida-tint);
+  --estado-tinta: var(--nc-caida-ink);
 }
 
 // Marcador de carga: ocupa el lugar del contenido mientras llega.
