@@ -46,6 +46,7 @@ Thumbs.db
 # Impeccable (instalado por `npx impeccable install`, se reinstala con ese comando)
 .claude/skills/impeccable/
 .claude/agents/
+.claude/settings.local.json
 
 # impeccable-ignore-start
 # Ephemeral output, runtime state, and per-dev overrides.
