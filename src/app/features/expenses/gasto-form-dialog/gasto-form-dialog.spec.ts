@@ -286,4 +286,19 @@ describe('GastoFormDialog', () => {
 
     expect(component.errorMessage()).toBe('No se pudo guardar el gasto. Inténtalo de nuevo.');
   });
+
+  it('con datos faltantes no guarda: marca los campos para que cada uno diga qué le falta', async () => {
+    await setup();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    const guardar: HTMLButtonElement = fixture.nativeElement.querySelector('button[type="submit"]');
+    expect(guardar.disabled).toBe(false);
+
+    await component.submit();
+    fixture.detectChanges();
+
+    expect(api.create).not.toHaveBeenCalled();
+    expect(component.form.controls.descripcion.touched).toBe(true);
+    expect(fixture.nativeElement.textContent).toContain('La descripción es obligatoria.');
+  });
 });

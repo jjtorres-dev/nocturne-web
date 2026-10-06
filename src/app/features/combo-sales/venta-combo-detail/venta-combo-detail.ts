@@ -4,10 +4,11 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTableModule } from '@angular/material/table';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { ServiceIcon } from '../../../shared/service-icon/service-icon';
+import { injectIsMobile } from '../../../shared/breakpoints';
 import { VentaCombosApi } from '../venta-combos-api';
 import { type VentaCombo } from '../venta-combo.model';
 import { Moneda, type AjusteVenta } from '../../sales/venta.model';
@@ -26,11 +27,14 @@ import {
   formatearDatosParaClienteCombo,
   type DatosParaCliente,
 } from '../../sales/copiar-datos.util';
-import { formatFechaCorta } from '../../../shared/fecha.util';
+import { diasEntre, formatFechaCorta, hoyIso } from '../../../shared/fecha.util';
 import { EstadoVentaChip } from '../../../shared/estado-venta/estado-venta';
 import { CuentaCaidaChip } from '../../../shared/cuenta-caida-chip/cuenta-caida-chip';
 import { AjustesVenta } from '../../../shared/ajustes-venta/ajustes-venta';
 import { extractErrorMessage } from '../../../shared/form-error';
+
+// Los mismos días de aviso que Ventas y la lista de Ventas de combos.
+const DIAS_AVISO = 3;
 
 @Component({
   imports: [
@@ -45,7 +49,7 @@ import { extractErrorMessage } from '../../../shared/form-error';
     MatButtonModule,
     MatIconModule,
     MatTableModule,
-    MatProgressSpinnerModule,
+    ServiceIcon,
     MatTooltipModule,
   ],
   selector: 'app-venta-combo-detail',
@@ -67,6 +71,7 @@ export class VentaComboDetail implements OnInit {
   protected readonly isAdmin = computed(
     () => this.auth.currentUser()?.role === UserRole.ADMIN,
   );
+  protected readonly isMobile = injectIsMobile();
   protected readonly displayedSaleColumns = [
     'servicio',
     'cuentaPerfil',
@@ -78,6 +83,9 @@ export class VentaComboDetail implements OnInit {
   readonly combo = signal<Combo | null>(null);
   readonly cliente = signal<Contacto | null>(null);
   readonly loading = signal(false);
+  // La última carga falló: en vez del detalle se muestra el aviso con
+  // "Reintentar".
+  readonly error = signal(false);
   // Días sumados al vencimiento por cuentas caídas. Si falla la carga, la
   // sección simplemente no se muestra.
   readonly ajustes = signal<AjusteVenta[]>([]);
@@ -91,6 +99,7 @@ export class VentaComboDetail implements OnInit {
 
   async refresh(): Promise<void> {
     this.loading.set(true);
+    this.error.set(false);
     try {
       const [ventaCombo, combos, clientes] = await Promise.all([
         this.api.findOne(this.ventaComboId),
@@ -103,9 +112,8 @@ export class VentaComboDetail implements OnInit {
         clientes.find((c) => c.id === ventaCombo.clienteId) ?? null,
       );
     } catch {
-      this.snackBar.open('No se pudo cargar la venta de combo.', 'Cerrar', {
-        duration: 4000,
-      });
+      // El aviso va en el lugar del detalle, con "Reintentar".
+      this.error.set(true);
     } finally {
       this.loading.set(false);
     }
@@ -189,6 +197,19 @@ export class VentaComboDetail implements OnInit {
         void this.reactivate();
       }
     });
+  }
+
+  // Igual que en la lista: en una venta sin finalizar, bermellón si ya
+  // venció y ámbar si vence dentro de los días de aviso.
+  protected venceClase(ventaCombo: VentaCombo): string {
+    if (!ventaCombo.activo) {
+      return '';
+    }
+    const dias = diasEntre(hoyIso(), ventaCombo.fechaFin.slice(0, 10));
+    if (dias < 0) {
+      return 'nc-estado-vencida vence-urgente';
+    }
+    return dias <= DIAS_AVISO ? 'nc-estado-por-vencer vence-urgente' : '';
   }
 
   protected cuentaPerfilLabel(cuenta?: { correo: string } | null, perfil?: { nombre: string } | null): string {

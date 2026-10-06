@@ -81,11 +81,14 @@ html {
   --nc-on-libre: #ffffff;
 
   // Series de dinero (Contabilidad y "Ganancia del mes"). Tintas propias:
-  // los colores de estado no se reutilizan para categorías de dinero. Solo
-  // lo que queda (la ganancia) lleva color.
-  --nc-serie-ingresos: #b5aba3;
+  // los colores de estado no se reutilizan para categorías de dinero. Lo que
+  // sale va en neutros (tinta y gris); lo que entra, en azul tinta; lo que
+  // queda (la ganancia), en verde. Las cuatro pasan 3:1 sobre blanco y se
+  // distinguen entre sí también con daltonismo (validadas par a par): un
+  // gris más oscuro para los gastos se confunde con el verde.
+  --nc-serie-ingresos: #3d4a8a;
   --nc-serie-inversion: #1c1615;
-  --nc-serie-gastos: #746a64;
+  --nc-serie-gastos: #9a8f87;
   --nc-serie-ganancia: #1f7a4d;
 
   // Avatares con inicial: tonos oscuros para iniciales en blanco.
@@ -536,7 +539,8 @@ html {
 }
 
 // Montos: a la derecha, encabezado incluido, en un renglón.
-.nc-celda-monto {
+// (Con `.mat-mdc-table` delante: Material alinea sus celdas al inicio.)
+.mat-mdc-table .nc-celda-monto {
   text-align: end;
   white-space: nowrap;
 }

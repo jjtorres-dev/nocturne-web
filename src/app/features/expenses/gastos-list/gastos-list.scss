@@ -1,35 +1,67 @@
-.page-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 16px;
-
-  h1 {
-    margin: 0;
-    font-size: 1.5rem;
-  }
-}
-
-.filters {
-  display: flex;
-  gap: 16px;
-  flex-wrap: wrap;
-  margin-bottom: 8px;
-}
+// Encabezado, filtros, tablero, estados y tarjetas: estilos compartidos de
+// listas en src/styles.scss. Acá, solo lo propio de Gastos.
 
 .expenses-table {
   width: 100%;
 }
 
-.loading {
-  display: flex;
-  justify-content: center;
-  padding: 48px 0;
+// Fecha, método, monto, estado y acciones miden lo que su contenido; lo que
+// sobra va a la descripción.
+.mat-column-fecha,
+.mat-column-metodoPago,
+.mat-column-monto,
+.mat-column-activo,
+.mat-column-acciones {
+  width: 1%;
+  white-space: nowrap;
 }
 
+td.mat-column-fecha,
+td.mat-column-metodoPago,
+td.mat-column-monto,
+th.mat-column-monto {
+  padding-inline-end: 20px;
+}
+
+// La descripción y el dueño se leen enteros: bajan por palabras si no entran.
+td.mat-column-descripcion,
+td.mat-column-dueno {
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+}
+
+td.mat-column-descripcion .nc-celda-principal {
+  white-space: normal;
+}
 
 .original-amount {
-  color: var(--mat-sys-on-surface-variant);
-  font-size: 0.85em;
-  margin-left: 4px;
+  justify-content: flex-end;
+  white-space: nowrap;
+}
+
+// El dueño no se queda con el ancho que sobra: ese va a la descripción.
+.mat-column-dueno {
+  width: 180px;
+}
+
+// Botones de acción de 36 px, a la medida de su casilla.
+.nc-acciones {
+  --mat-icon-button-state-layer-size: 36px;
+}
+
+// ---------------------------------------------------------------------------
+// Tarjetas (celular)
+// ---------------------------------------------------------------------------
+.nc-card-header .mat-mdc-chip {
+  flex-shrink: 0;
+}
+
+.monto {
+  font-weight: 600;
+}
+
+.nc-card .original-amount {
+  color: var(--nc-ink-muted);
+  font-size: 0.8125rem;
 }

@@ -36,4 +36,29 @@ describe('buildTimelineChartData', () => {
     expect(result.labels).toEqual([]);
     expect(result.datasets.every((d) => d.data.length === 0)).toBe(true);
   });
+
+  it('cada serie toma su color de su token, nunca un valor escrito en el código', () => {
+    const root = document.documentElement;
+    const tokens: Record<string, string> = {
+      '--nc-serie-ingresos': '#010203',
+      '--nc-serie-inversion': '#040506',
+      '--nc-serie-gastos': '#070809',
+      '--nc-serie-ganancia': '#0a0b0c',
+    };
+    for (const [name, value] of Object.entries(tokens)) {
+      root.style.setProperty(name, value);
+    }
+
+    try {
+      const result = buildTimelineChartData([
+        { periodo: '2026-01-01', ingresos: 1, inversion: 1, gastos: 1, ganancia: 1 },
+      ]);
+
+      expect(result.datasets.map((d) => d.backgroundColor)).toEqual(Object.values(tokens));
+    } finally {
+      for (const name of Object.keys(tokens)) {
+        root.style.removeProperty(name);
+      }
+    }
+  });
 });

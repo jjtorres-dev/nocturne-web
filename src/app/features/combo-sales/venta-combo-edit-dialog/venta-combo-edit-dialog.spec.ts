@@ -157,4 +157,17 @@ describe('VentaComboEditDialog', () => {
       'No se pudo guardar la venta de combo. Inténtalo de nuevo.',
     );
   });
+
+  it('con datos faltantes no guarda: marca los campos para que cada uno diga qué le falta', async () => {
+    const guardar: HTMLButtonElement = fixture.nativeElement.querySelector('button[type="submit"]');
+    expect(guardar.disabled).toBe(false);
+    component.form.controls.precio.setValue(null as unknown as number);
+
+    await component.submit();
+    fixture.detectChanges();
+
+    expect(api.update).not.toHaveBeenCalled();
+    expect(component.form.controls.precio.touched).toBe(true);
+    expect(fixture.nativeElement.textContent).toContain('Escribe cuánto te pagó el cliente.');
+  });
 });

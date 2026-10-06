@@ -1,82 +1,182 @@
+// Paneles, tablero y estados: estilos compartidos en src/styles.scss. Acá,
+// lo propio del detalle de una venta de combo.
+
 .back-link {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  color: var(--mat-sys-primary);
+  min-height: 32px;
+  margin-bottom: 4px;
+  color: var(--nc-ink-muted);
+  font-size: 0.875rem;
   text-decoration: none;
-  margin-bottom: 16px;
 
-  mat-icon {
-    font-size: 18px;
+  .mat-icon {
     width: 18px;
     height: 18px;
+    font-size: 18px;
+  }
+
+  &:hover {
+    color: var(--nc-ink);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--nc-focus);
+    outline-offset: 2px;
   }
 }
 
-.page-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 16px;
+.detalle-cargando {
+  display: grid;
+  gap: 12px;
 
-  h1 {
-    margin: 0;
-    font-size: 1.5rem;
+  .panel {
+    height: 180px;
   }
+}
+
+// ---------------------------------------------------------------------------
+// Cabecera: qué venta es, de quién, y lo que se puede hacer con ella
+// ---------------------------------------------------------------------------
+.detalle-cabeza {
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+
+.detalle-titulo {
+  min-width: 0;
+
+  // El código, en la letra de los códigos y sin las mayúsculas del título.
+  .nc-code {
+    font-size: 0.8em;
+    font-stretch: normal;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+  }
+}
+
+.detalle-cliente {
+  margin: 2px 0 0;
+  color: var(--nc-ink-muted);
+  font-size: 0.9375rem;
 }
 
 .header-actions {
   display: flex;
-  gap: 8px;
   flex-wrap: wrap;
+  gap: 8px;
 }
 
-.details-card {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  max-width: 480px;
-  padding: 16px 0;
-  margin-bottom: 24px;
-}
-
-.detail-row {
-  display: flex;
-  justify-content: space-between;
+// ---------------------------------------------------------------------------
+// Cuerpo: a la izquierda lo que el cliente recibe; a la derecha, la venta
+// ---------------------------------------------------------------------------
+.detalle-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(300px, 2fr);
+  align-items: start;
   gap: 16px;
 }
 
-.detail-label {
-  color: var(--mat-sys-on-surface-variant);
+.sales-section {
+  min-width: 0;
 }
 
-.original-amount {
-  color: var(--mat-sys-on-surface-variant);
-  font-size: 0.85em;
-  margin-left: 4px;
-}
-
-.sales-section h2 {
-  font-size: 1.1rem;
-  margin: 0 0 8px;
+.tabla-panel {
+  overflow-x: auto;
 }
 
 .sales-table {
   width: 100%;
 }
 
-.loading {
-  display: flex;
-  justify-content: center;
-  padding: 48px 0;
+// Cliente y fecha, en un renglón; lo que sobra va a la cuenta y el perfil.
+.mat-column-servicio,
+.mat-column-clienteAsignado,
+.mat-column-fechaFin {
+  width: 1%;
+  white-space: nowrap;
 }
 
-.empty-state {
-  color: var(--mat-sys-on-surface-variant);
-  padding: 24px 0;
-  text-align: center;
+td.mat-column-servicio,
+td.mat-column-clienteAsignado {
+  padding-inline-end: 20px;
+}
+
+td.mat-column-cuentaPerfil {
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+}
+
+.cuenta-perfil {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+}
+
+.panel-vacio {
+  margin: 0;
+  padding: 12px 14px;
+  color: var(--nc-ink-muted);
+  font-size: 0.875rem;
+}
+
+.detalle-datos {
+  margin: 0;
+  font-size: 0.875rem;
+}
+
+.detail-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 40px;
+  padding: 6px 14px;
+
+  & + .detail-row {
+    border-top: 1px solid var(--nc-rule);
+  }
+
+  dt,
+  dd {
+    margin: 0;
+  }
+
+  dd {
+    overflow-wrap: anywhere;
+    text-align: end;
+  }
+}
+
+.detail-label {
+  flex-shrink: 0;
+  max-width: 55%;
+  color: var(--nc-ink-muted);
+}
+
+.combo-nombre {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cobrado {
+  font-weight: 600;
+}
+
+.original-amount {
+  margin-left: 4px;
+  color: var(--nc-ink-muted);
+  font-size: 0.8125rem;
+}
+
+// Fecha de vencimiento que pide atención: tinta de su estado.
+.vence-urgente {
+  color: var(--estado-tinta);
+  font-weight: 600;
 }
 
 .estado-chips {
@@ -84,4 +184,84 @@
   flex-wrap: wrap;
   justify-content: flex-end;
   gap: 4px;
+}
+
+// Historial de días sumados por cuentas caídas, al pie de los datos.
+.ajustes:not(:empty) {
+  display: block;
+  padding: 10px 14px 12px;
+  border-top: 1px solid var(--nc-rule);
+}
+
+// ---------------------------------------------------------------------------
+// Servicios (celular)
+// ---------------------------------------------------------------------------
+.servicios-lista {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 14px;
+
+    & + li {
+      border-top: 1px solid var(--nc-rule);
+    }
+  }
+}
+
+.servicio-datos {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  min-width: 0;
+  line-height: 1.3;
+}
+
+.servicio-nombre {
+  font-weight: 600;
+}
+
+.servicio-cuenta {
+  overflow-wrap: anywhere;
+  font-size: 0.875rem;
+}
+
+.servicio-vence {
+  color: var(--nc-ink-muted);
+  font-size: 0.8125rem;
+}
+
+@media (max-width: 1099.98px) {
+  .detalle-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 767.98px) {
+  .detalle-grid {
+    gap: 12px;
+  }
+
+  .back-link {
+    min-height: 44px;
+  }
+
+  // Copiar ocupa el ancho; las otras acciones se reparten el renglón.
+  .header-actions {
+    width: 100%;
+
+    > * {
+      flex: 1 1 0;
+      min-width: 0;
+    }
+
+    > .mat-mdc-unelevated-button {
+      flex-basis: 100%;
+    }
+  }
 }

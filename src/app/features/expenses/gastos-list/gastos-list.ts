@@ -7,7 +7,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatCardModule } from '@angular/material/card';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -20,6 +20,7 @@ import { SolesPipe } from '../../../shared/soles.pipe';
 import { Auth, UserRole } from '../../../core/auth/auth';
 import { EmptyState } from '../../../shared/empty-state/empty-state';
 import { extractErrorMessage } from '../../../shared/form-error';
+import { injectIsMobile } from '../../../shared/breakpoints';
 
 type ActivoFilter = 'todos' | 'activos' | 'inactivos';
 
@@ -36,7 +37,7 @@ type ActivoFilter = 'todos' | 'activos' | 'inactivos';
     MatButtonModule,
     MatIconModule,
     MatChipsModule,
-    MatProgressSpinnerModule,
+    MatCardModule,
     MatTooltipModule,
   ],
   selector: 'app-gastos-list',
@@ -53,14 +54,18 @@ export class GastosList implements OnInit {
   protected readonly isAdmin = computed(
     () => this.auth.currentUser()?.role === UserRole.ADMIN,
   );
+  protected readonly isMobile = injectIsMobile();
   protected readonly displayedColumns = computed(() =>
     this.isAdmin()
-      ? ['descripcion', 'monto', 'metodoPago', 'fecha', 'dueno', 'activo', 'acciones']
-      : ['descripcion', 'monto', 'metodoPago', 'fecha', 'activo', 'acciones'],
+      ? ['descripcion', 'fecha', 'metodoPago', 'monto', 'dueno', 'activo', 'acciones']
+      : ['descripcion', 'fecha', 'metodoPago', 'monto', 'activo', 'acciones'],
   );
 
   readonly gastos = signal<Gasto[]>([]);
   readonly loading = signal(false);
+  // La última carga falló: en vez de la lista se muestra el aviso con
+  // "Reintentar".
+  readonly error = signal(false);
 
   activoFilter: ActivoFilter = 'activos';
 
@@ -70,6 +75,7 @@ export class GastosList implements OnInit {
 
   async refresh(): Promise<void> {
     this.loading.set(true);
+    this.error.set(false);
     try {
       const data = await this.api.list({
         activo:
@@ -79,9 +85,8 @@ export class GastosList implements OnInit {
       });
       this.gastos.set(data);
     } catch {
-      this.snackBar.open('No se pudieron cargar los gastos.', 'Cerrar', {
-        duration: 4000,
-      });
+      // El aviso va en el lugar de la lista, con "Reintentar".
+      this.error.set(true);
     } finally {
       this.loading.set(false);
     }

@@ -11,15 +11,12 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { MatCardModule } from '@angular/material/card';
 import { MatTableModule } from '@angular/material/table';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { Chart, registerables } from 'chart.js';
 import { AccountingApi } from './accounting-api';
 import {
@@ -41,6 +38,7 @@ import { InfoHint } from '../../shared/info-hint/info-hint';
 import { InfoToggle } from '../../shared/info-hint/info-toggle';
 import { FechaField } from '../../shared/fecha-field/fecha-field';
 import { cssToken } from '../../shared/css-token';
+import { injectIsMobile } from '../../shared/breakpoints';
 
 // Sentinel para "sin filtro de dueño" en el backend (ver
 // AccountingService.VIEW_ALL en nocturne-api) — nunca un id real.
@@ -56,14 +54,12 @@ Chart.register(...registerables);
     FechaField,
     SolesPipe,
     FormsModule,
-    MatCardModule,
     MatTableModule,
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
     MatButtonModule,
     MatIconModule,
-    MatProgressSpinnerModule,
     InfoHint,
     InfoToggle,
   ],
@@ -78,7 +74,6 @@ export class Accounting implements OnInit, AfterViewInit, OnDestroy {
   private readonly auth = inject(Auth);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
-  private readonly snackBar = inject(MatSnackBar);
 
   @ViewChild('timelineCanvas')
   private readonly canvasRef?: ElementRef<HTMLCanvasElement>;
@@ -109,6 +104,7 @@ export class Accounting implements OnInit, AfterViewInit, OnDestroy {
   protected readonly isAdmin = computed(
     () => this.auth.currentUser()?.role === UserRole.ADMIN,
   );
+  protected readonly isMobile = injectIsMobile();
   protected readonly VIEW_MINE = VIEW_MINE;
   protected readonly VIEW_ALL = VIEW_ALL;
 
@@ -118,6 +114,15 @@ export class Accounting implements OnInit, AfterViewInit, OnDestroy {
   readonly timeline = signal<TimelinePoint[]>([]);
   readonly usuarios = signal<Usuario[]>([]);
   readonly loading = signal(false);
+  // La última carga falló: en vez de los reportes se muestra el aviso con
+  // "Reintentar".
+  readonly error = signal(false);
+
+  // Lo que el gráfico dice, para quien no lo ve.
+  protected readonly chartLabel = computed(() => {
+    const puntos = this.timeline().length;
+    return `Gráfico de barras: cobrado, pagado a proveedores, gastos y ganancia por ${this.groupByLabels[this.groupBy].toLowerCase()} (${puntos} ${puntos === 1 ? 'periodo' : 'periodos'}).`;
+  });
 
   desde = '';
   hasta = '';
@@ -171,6 +176,7 @@ export class Accounting implements OnInit, AfterViewInit, OnDestroy {
   // usa su propio default (mes calendario actual).
   async refresh(): Promise<void> {
     this.loading.set(true);
+    this.error.set(false);
     try {
       const filters = {
         desde: this.desde || undefined,
@@ -195,9 +201,8 @@ export class Accounting implements OnInit, AfterViewInit, OnDestroy {
         this.renderChart();
       }
     } catch {
-      this.snackBar.open('No se pudo cargar la contabilidad.', 'Cerrar', {
-        duration: 4000,
-      });
+      // El aviso va en el lugar de los reportes, con "Reintentar".
+      this.error.set(true);
     } finally {
       this.loading.set(false);
     }
@@ -271,10 +276,12 @@ export class Accounting implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
     // Chart.js pinta en un <canvas> y no entiende `var(--nc-*)`: los colores
-    // se leen de los tokens ya resueltos al crear el gráfico.
+    // y la letra se leen de los tokens ya resueltos al crear el gráfico.
     const tinta = cssToken('--nc-ink');
     const tintaSuave = cssToken('--nc-ink-muted');
     const linea = cssToken('--nc-rule');
+    const sobreTinta = cssToken('--nc-on-ink');
+    const letra = { family: cssToken('--nc-font-sans'), size: 12 };
     this.chart = new Chart(ctx, {
       type: 'bar',
       data,
@@ -282,27 +289,67 @@ export class Accounting implements OnInit, AfterViewInit, OnDestroy {
         responsive: true,
         maintainAspectRatio: false,
         color: tintaSuave,
+        // El puntero muestra las cuatro series del periodo a la vez.
+        interaction: { mode: 'index', intersect: false },
+        datasets: {
+          bar: {
+            // Marca que mide: esquina de 1 px, con aire entre periodos.
+            borderRadius: 1,
+            categoryPercentage: 0.72,
+            barPercentage: 0.9,
+            maxBarThickness: 28,
+          },
+        },
         scales: {
           x: {
-            ticks: { color: tintaSuave },
-            grid: { color: linea },
+            ticks: { color: tintaSuave, font: letra },
+            grid: { display: false },
+            border: { display: false },
           },
           y: {
-            ticks: { color: tintaSuave },
-            grid: { color: linea },
+            ticks: {
+              color: tintaSuave,
+              font: letra,
+              callback: (value) => formatSoles(Number(value), 0),
+            },
+            // La línea del cero va en tinta: las pérdidas bajan de ella.
+            grid: { color: (ctx) => (ctx.tick.value === 0 ? tinta : linea) },
+            border: { display: false },
           },
         },
         plugins: {
-          legend: { labels: { color: tinta } },
+          legend: {
+            align: 'start',
+            labels: {
+              color: tinta,
+              font: { ...letra, size: 13 },
+              boxWidth: 12,
+              boxHeight: 12,
+              padding: 14,
+            },
+          },
           tooltip: {
             backgroundColor: tinta,
-            titleColor: cssToken('--nc-on-ink'),
-            bodyColor: cssToken('--nc-on-ink'),
+            titleColor: sobreTinta,
+            bodyColor: sobreTinta,
+            titleFont: letra,
+            bodyFont: letra,
             borderColor: tinta,
             borderWidth: 1,
+            cornerRadius: 3,
+            padding: 10,
+            callbacks: {
+              label: (item) => `${item.dataset.label}: ${formatSoles(Number(item.parsed.y), 2)}`,
+            },
           },
         },
       },
     });
   }
+}
+
+// Monto en soles para el eje y el globo del gráfico (el pipe `soles` solo
+// existe en plantillas).
+function formatSoles(value: number, decimals: number): string {
+  return `S/ ${value.toFixed(decimals)}`;
 }

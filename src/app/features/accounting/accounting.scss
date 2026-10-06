@@ -1,135 +1,219 @@
-.page-header {
-  margin-bottom: 16px;
+// Encabezado, filtros, paneles y estados: estilos compartidos en
+// src/styles.scss. Acá, solo lo propio de Contabilidad.
 
-  h1 {
-    margin: 0;
-    font-size: 1.5rem;
+// ---------------------------------------------------------------------------
+// De quién y entre qué fechas
+// ---------------------------------------------------------------------------
+.rango {
+  .rango-ver {
+    --mat-button-filled-container-height: 44px;
+
+    min-width: 88px;
+  }
+
+  // El campo de fecha es un componente: su mat-form-field va adentro.
+  app-fecha-field {
+    display: block;
+    width: 180px;
+
+    ::ng-deep .mat-mdc-form-field {
+      width: 100%;
+    }
   }
 }
 
-.filters {
-  display: flex;
+.rango-cargando {
+  color: var(--nc-ink-muted);
+  font-size: 0.875rem;
+}
+
+.reportes {
+  display: grid;
+  // Columna que puede achicarse: sin esto el gráfico (que mide a su
+  // contenedor) ensancha la página.
+  grid-template-columns: minmax(0, 1fr);
   gap: 16px;
-  align-items: flex-start;
-  flex-wrap: wrap;
-  margin-bottom: 16px;
+  transition: opacity var(--nc-duration) var(--nc-ease);
+
+  // Mientras llegan los números nuevos, los anteriores se atenúan.
+  &.actualizando {
+    opacity: 0.55;
+  }
+
+  &[hidden] {
+    display: none;
+  }
 }
 
-.loading {
-  display: flex;
-  justify-content: center;
-  padding: 48px 0;
-}
-
+// ---------------------------------------------------------------------------
+// La cuenta del periodo: cobrado − proveedores − otros gastos = ganancia
+// ---------------------------------------------------------------------------
 .summary-cards {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 16px;
-  margin-bottom: 24px;
-
-  @media (max-width: 767.98px) {
-    grid-template-columns: 1fr;
-  }
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto minmax(0, 1fr) auto minmax(0, 1.15fr);
+  align-items: stretch;
 }
 
 .summary-card {
-  mat-card-content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-    padding: 16px 0;
-  }
-}
-
-.summary-value {
-  font-size: 1.75rem;
-  font-weight: 600;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  padding: 12px 14px 14px;
 }
 
 .summary-label {
   display: inline-flex;
   align-items: center;
   gap: 2px;
-  color: var(--mat-sys-on-surface-variant);
+  min-height: 28px;
+  color: var(--nc-ink-muted);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.2;
 }
 
-.gastos .summary-value {
-  color: var(--mat-sys-error);
+.summary-value {
+  font-stretch: var(--nc-width-condensed);
+  font-size: 2.25rem;
+  font-weight: 800;
+  line-height: 0.95;
+  white-space: nowrap;
 }
 
-// Ganancia es el número que más importa: tarjeta destacada, más grande y
-// con color según el signo.
+// El signo de la cuenta, entre un monto y el siguiente.
+.operador {
+  align-self: center;
+  width: 20px;
+  color: var(--nc-ink-faint);
+  font-stretch: var(--nc-width-condensed);
+  font-size: 1.75rem;
+  font-weight: 800;
+  line-height: 1;
+  text-align: center;
+}
+
+// El resultado: en negativo de tablero (tinta con letras blancas). Si el
+// periodo dio pérdida, en bermellón.
 .ganancia {
-  border: 2px solid var(--mat-sys-primary);
+  --nc-info-toggle-color: var(--nc-on-ink);
+  --mat-icon-button-state-layer-color: var(--nc-on-ink);
 
-  .summary-value {
-    font-size: 2.25rem;
-    color: var(--mat-sys-primary);
+  // A ras del borde del panel, por dentro.
+  border-radius: 0 2px 2px 0;
+  background: var(--nc-ink);
+  color: var(--nc-on-ink);
+
+  .summary-label {
+    color: var(--nc-on-ink);
   }
 
-  &.negativa .summary-value {
-    color: var(--mat-sys-error);
+  &.negativa {
+    --nc-info-toggle-color: var(--nc-on-vencida);
+    --mat-icon-button-state-layer-color: var(--nc-on-vencida);
+
+    background: var(--nc-vencida);
+    color: var(--nc-on-vencida);
+
+    .summary-label {
+      color: var(--nc-on-vencida);
+    }
   }
+
 }
 
+// ---------------------------------------------------------------------------
+// Reportes por servicio y por método de pago
+// ---------------------------------------------------------------------------
 .tables-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr));
-  gap: 24px;
-  margin-bottom: 24px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: 16px;
 }
 
 .table-section {
-  // Sin esto el item del grid no se achica por debajo del ancho de su tabla
-  // y el scroll horizontal (.table-scroll) nunca se activa.
+  // Sin esto el panel no se achica por debajo del ancho de su tabla.
   min-width: 0;
 }
 
-.table-section-header {
-  display: flex;
+// Título del panel con una acción o un control a la derecha, que vuelve a
+// ancho normal, sin mayúsculas.
+.table-section-header,
+.timeline-header {
   align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 8px;
+  flex-wrap: wrap;
+  padding-block: 6px;
 
   h2 {
-    font-size: 1.1rem;
     margin: 0;
+    font: inherit;
+    letter-spacing: inherit;
   }
+
+  .mat-mdc-button-base,
+  .mat-mdc-form-field {
+    font-stretch: normal;
+    letter-spacing: normal;
+    text-transform: none;
+  }
+
+  @media (min-width: 768px) {
+    .mat-mdc-button-base {
+      --mat-button-outlined-container-height: 32px;
+      --mat-button-outlined-horizontal-padding: 10px;
+    }
+  }
+}
+
+.tabla-panel {
+  overflow-x: auto;
 }
 
 .breakdown-table {
   width: 100%;
-}
 
-.timeline-section {
-  margin-top: 8px;
-}
+  // Los encabezados largos ("Ganancia (sin otros gastos)") bajan a un
+  // segundo renglón en vez de sacar la tabla de su panel.
+  .mat-mdc-header-cell {
+    padding-block: 6px;
+    line-height: 1.15;
+    white-space: normal;
+  }
 
-.timeline-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  flex-wrap: wrap;
+  .mat-mdc-header-cell.nc-celda-monto .th-with-info {
+    justify-content: flex-end;
+  }
 
-  h2 {
-    font-size: 1.1rem;
-    margin: 0;
+  td.nc-celda-monto {
+    padding-inline-start: 12px;
+  }
+
+  // El nombre baja de renglón antes que sacar los montos del panel.
+  .nc-celda-principal {
+    overflow-wrap: anywhere;
+    white-space: normal;
+  }
+
+  td.mat-column-nombre,
+  td.mat-column-metodoPago {
+    padding-block: 6px;
+    line-height: 1.3;
+    white-space: normal;
   }
 }
 
-.chart-wrapper {
-  position: relative;
-  height: 320px;
-  width: 100%;
+// La última columna es el resultado de la fila.
+.resultado {
+  font-weight: 600;
 }
 
-.empty-state {
-  color: var(--mat-sys-on-surface-variant);
-  padding: 16px 0;
-  text-align: center;
+.negativa {
+  color: var(--nc-vencida-ink);
+}
+
+.ganancia.negativa {
+  color: var(--nc-on-vencida);
 }
 
 // Encabezado de tabla + botón ⓘ (InfoToggle).
@@ -139,7 +223,193 @@
   gap: 2px;
 }
 
-.summary-card app-info-hint {
-  align-self: stretch;
-  text-align: left;
+.panel-vacio {
+  margin: 0;
+  padding: 12px 14px;
+  color: var(--nc-ink-muted);
+  font-size: 0.875rem;
+}
+
+.panel-ayuda {
+  display: block;
+  padding-inline: 14px;
+}
+
+// En celular cada fila del reporte es un bloque: el nombre y sus tres montos
+// como pares, sin scroll horizontal.
+.desglose {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    padding: 10px 14px;
+
+    & + li {
+      border-top: 1px solid var(--nc-rule);
+    }
+  }
+
+  dl {
+    display: grid;
+    gap: 4px;
+    margin: 6px 0 0;
+    font-size: 0.875rem;
+  }
+
+  dl > div {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  dt {
+    color: var(--nc-ink-muted);
+  }
+
+  dd {
+    margin: 0;
+    white-space: nowrap;
+  }
+}
+
+.desglose-nombre {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.desglose-resultado dd {
+  font-weight: 600;
+}
+
+.desglose-nota {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin: 0;
+  padding: 2px 14px 4px;
+  border-top: 1px solid var(--nc-rule);
+  color: var(--nc-ink-muted);
+  font-size: 0.8125rem;
+}
+
+// ---------------------------------------------------------------------------
+// Línea de tiempo
+// ---------------------------------------------------------------------------
+// La etiqueta flotante del campo sobresale hacia arriba: el título le deja
+// lugar.
+.timeline-header {
+  padding-top: 12px;
+}
+
+.ver-por {
+  --mat-form-field-container-height: 40px;
+  --mat-form-field-container-vertical-padding: 8px;
+
+  width: 140px;
+}
+
+.timeline-section {
+  min-width: 0;
+}
+
+.chart-wrapper {
+  position: relative;
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  height: 320px;
+  padding: 12px 14px 10px;
+}
+
+// ---------------------------------------------------------------------------
+// Pantallas angostas
+// ---------------------------------------------------------------------------
+@media (max-width: 1099.98px) {
+  .tables-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .summary-value {
+    font-size: 1.75rem;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .reportes,
+  .tables-grid {
+    gap: 12px;
+  }
+
+  // Las dos fechas comparten renglón; "Ver" ocupa el ancho.
+  .rango {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+
+    .rango-dueno,
+    .rango-ver,
+    .rango-cargando {
+      grid-column: 1 / -1;
+    }
+
+    app-fecha-field {
+      width: auto;
+    }
+  }
+
+  // La cuenta, en renglones: el signo a la izquierda, el nombre y el monto
+  // a los extremos.
+  .summary-cards {
+    grid-template-columns: 28px minmax(0, 1fr);
+  }
+
+  .summary-card {
+    display: grid;
+    grid-column: 2;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 2px 12px;
+    padding: 8px 14px 8px 0;
+
+    app-info-hint {
+      grid-column: 1 / -1;
+    }
+  }
+
+  .summary-card.ingresos {
+    grid-column: 1 / -1;
+    padding-inline-start: 14px;
+  }
+
+  .summary-value {
+    font-size: 1.5rem;
+    line-height: 1;
+  }
+
+  .operador {
+    width: auto;
+    padding-inline-start: 8px;
+    font-size: 1.375rem;
+  }
+
+  // El resultado ocupa el ancho del panel; su signo va dentro del bloque.
+  .summary-cards > .operador:last-of-type {
+    display: none;
+  }
+
+  .summary-card.ganancia {
+    grid-column: 1 / -1;
+    padding: 12px 14px;
+    border-radius: 0 0 2px 2px;
+
+    .summary-value {
+      font-size: 1.875rem;
+    }
+  }
+
+  .chart-wrapper {
+    height: 300px;
+    padding-inline: 8px;
+  }
 }

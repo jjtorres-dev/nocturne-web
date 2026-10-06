@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
+import { BreakpointObserver } from '@angular/cdk/layout';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { GastosList } from './gastos-list';
@@ -35,7 +36,7 @@ describe('GastosList', () => {
   let dialog: { open: ReturnType<typeof vi.fn> };
   let auth: { currentUser: ReturnType<typeof vi.fn> };
 
-  async function setup(role: UserRole = UserRole.ADMIN) {
+  async function setup(role: UserRole = UserRole.ADMIN, mobile = false) {
     TestBed.resetTestingModule();
     api = {
       list: vi.fn().mockResolvedValue([gasto]),
@@ -52,6 +53,13 @@ describe('GastosList', () => {
         { provide: Auth, useValue: auth },
         { provide: MatDialog, useValue: dialog },
         { provide: MatSnackBar, useValue: { open: vi.fn() } },
+        {
+          provide: BreakpointObserver,
+          useValue: {
+            observe: () => of({ matches: mobile, breakpoints: {} }),
+            isMatched: () => mobile,
+          },
+        },
       ],
     }).compileComponents();
 
@@ -157,5 +165,70 @@ describe('GastosList', () => {
     fixture.detectChanges();
 
     expect(fixture.nativeElement.querySelector('.mat-column-dueno')).toBeNull();
+  });
+
+  it('mientras carga lo dice con una línea visible, sin indicador giratorio', () => {
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.nc-lista-cargando')?.textContent).toContain(
+      'Cargando gastos…',
+    );
+    expect(fixture.nativeElement.querySelector('mat-spinner')).toBeNull();
+  });
+
+  it('si la carga falla muestra el aviso con "Reintentar" en el lugar de la lista, y reintenta', async () => {
+    api.list.mockRejectedValueOnce(new Error('network down'));
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const aviso: HTMLElement | null = fixture.nativeElement.querySelector('.nc-lista-error');
+    expect(aviso?.textContent).toContain('No se pudieron cargar los gastos.');
+    expect(fixture.nativeElement.querySelector('app-empty-state')).toBeNull();
+    expect(fixture.nativeElement.querySelector('table')).toBeNull();
+
+    aviso?.querySelector('button')?.click();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(api.list).toHaveBeenCalledTimes(2);
+    expect(fixture.nativeElement.querySelector('.nc-lista-error')).toBeNull();
+    expect(fixture.nativeElement.querySelector('td.mat-column-descripcion')).not.toBeNull();
+  });
+
+  it('muestra el estado vacío cuando no hay resultados', async () => {
+    api.list.mockResolvedValue([]);
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('app-empty-state')?.textContent).toContain(
+      'No hay gastos con estos filtros.',
+    );
+    expect(fixture.nativeElement.querySelector('table')).toBeNull();
+  });
+
+  describe('en celular', () => {
+    it('muestra una tarjeta por gasto con su monto, su fecha y sus acciones escritas', async () => {
+      await setup(UserRole.ADMIN, true);
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      const tarjeta: HTMLElement = fixture.nativeElement.querySelector('mat-card.nc-card');
+      expect(fixture.nativeElement.querySelector('table')).toBeNull();
+      expect(tarjeta.querySelector('.nc-card-title')?.textContent?.trim().length).toBeGreaterThan(0);
+      expect(tarjeta.querySelector('.nc-card-subtitle')?.textContent).toContain('Dueño:');
+      expect(tarjeta.querySelector('.monto')?.textContent).toContain('S/');
+      expect(tarjeta.querySelector('.nc-card-footer')?.textContent).toContain('Editar');
+      expect(tarjeta.querySelector('.nc-card-footer')?.textContent).toContain('Desactivar');
+    });
+
+    it('no dice el dueño a un REVENDEDOR', async () => {
+      await setup(UserRole.REVENDEDOR, true);
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      expect(fixture.nativeElement.querySelector('.nc-card-subtitle')?.textContent).not.toContain(
+        'Dueño',
+      );
+    });
   });
 });

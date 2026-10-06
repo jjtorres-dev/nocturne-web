@@ -3,6 +3,7 @@
 }
 
 .info-toggle mat-icon {
-  // Tinta suave, no rojo: es una ayuda, no una alerta.
-  color: var(--nc-ink-muted);
+  // Tinta suave, no rojo: es una ayuda, no una alerta. Sobre un fondo
+  // oscuro, quien lo usa le da su color con `--nc-info-toggle-color`.
+  color: var(--nc-info-toggle-color, var(--nc-ink-muted));
 }

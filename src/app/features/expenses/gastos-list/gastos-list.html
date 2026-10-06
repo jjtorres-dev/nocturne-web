@@ -1,12 +1,12 @@
 <div class="page-header">
   <h1>Gastos</h1>
-  <button mat-flat-button color="primary" (click)="openCreate()">
+  <button mat-flat-button (click)="openCreate()">
     <mat-icon>add</mat-icon>
     Nuevo gasto
   </button>
 </div>
 
-<div class="filters">
+<div class="filters nc-filtros">
   <mat-form-field appearance="outline">
     <mat-label>Estado</mat-label>
     <mat-select [(ngModel)]="activoFilter" (selectionChange)="refresh()">
@@ -18,25 +18,89 @@
 </div>
 
 @if (loading()) {
-  <div class="loading">
-    <mat-spinner diameter="32" />
+  <div class="nc-lista-cargando" aria-busy="true">
+    <span class="nc-lista-cargando-texto">Cargando gastos…</span>
+    <span class="nc-skeleton"></span>
+    <span class="nc-skeleton"></span>
+    <span class="nc-skeleton"></span>
+    <span class="nc-skeleton"></span>
+  </div>
+} @else if (error()) {
+  <div class="nc-lista-error" role="alert">
+    <mat-icon aria-hidden="true">error</mat-icon>
+    <p>No se pudieron cargar los gastos. Revisa tu conexión e inténtalo de nuevo.</p>
+    <button mat-stroked-button type="button" (click)="refresh()">Reintentar</button>
+  </div>
+} @else if (gastos().length === 0) {
+  <app-empty-state icon="payments" mensaje="No hay gastos con estos filtros." submensaje="Prueba cambiando o quitando los filtros." />
+} @else if (isMobile()) {
+  <!-- Celular: una tarjeta por gasto. -->
+  <div class="nc-card-list">
+    @for (g of gastos(); track g.id) {
+      <mat-card class="nc-card">
+        <mat-card-content>
+          <div class="nc-card-header">
+            <span class="nc-card-title">{{ g.descripcion }}</span>
+            <mat-chip [highlighted]="g.activo" [class.chip-inactive]="!g.activo">
+              {{ g.activo ? 'Activo' : 'Inactivo' }}
+            </mat-chip>
+          </div>
+
+          <p class="nc-card-subtitle">
+            {{ g.fecha | date: 'dd/MM/yyyy' }}
+            @if (isAdmin()) {
+              <span> · Dueño: {{ g.owner.name }}</span>
+            }
+          </p>
+
+          <dl class="nc-card-fields">
+            <div>
+              <dt>Monto</dt>
+              <dd>
+                <span class="monto">{{ g.montoPEN | soles }}</span>
+                @if (g.moneda !== Moneda.PEN) {
+                  <span class="original-amount">({{ g.monto | number: '1.2-2' }} {{ g.moneda }})</span>
+                }
+              </dd>
+            </div>
+            <div>
+              <dt>Método de pago</dt>
+              <dd>{{ g.metodoPago }}</dd>
+            </div>
+          </dl>
+        </mat-card-content>
+
+        <div class="nc-card-footer nc-card-acciones">
+          <button mat-button (click)="openEdit(g)">
+            <mat-icon>edit</mat-icon>
+            <span>Editar</span>
+          </button>
+          @if (g.activo) {
+            <button mat-button (click)="confirmDeactivate(g)">
+              <mat-icon>block</mat-icon>
+              <span>Desactivar</span>
+            </button>
+          } @else {
+            <button mat-button (click)="confirmReactivate(g)">
+              <mat-icon>restart_alt</mat-icon>
+              <span>Reactivar</span>
+            </button>
+          }
+        </div>
+      </mat-card>
+    }
   </div>
 } @else {
   <div class="table-scroll">
     <table mat-table [dataSource]="gastos()" class="expenses-table">
       <ng-container matColumnDef="descripcion">
         <th mat-header-cell *matHeaderCellDef>Descripción</th>
-        <td mat-cell *matCellDef="let g">{{ g.descripcion }}</td>
+        <td mat-cell *matCellDef="let g"><span class="nc-celda-principal">{{ g.descripcion }}</span></td>
       </ng-container>
 
-      <ng-container matColumnDef="monto">
-        <th mat-header-cell *matHeaderCellDef>Monto</th>
-        <td mat-cell *matCellDef="let g">
-          {{ g.montoPEN | soles }}
-          @if (g.moneda !== Moneda.PEN) {
-            <span class="original-amount">({{ g.monto | number: '1.2-2' }} {{ g.moneda }})</span>
-          }
-        </td>
+      <ng-container matColumnDef="fecha">
+        <th mat-header-cell *matHeaderCellDef>Fecha</th>
+        <td mat-cell *matCellDef="let g">{{ g.fecha | date: 'dd/MM/yyyy' }}</td>
       </ng-container>
 
       <ng-container matColumnDef="metodoPago">
@@ -44,9 +108,16 @@
         <td mat-cell *matCellDef="let g">{{ g.metodoPago }}</td>
       </ng-container>
 
-      <ng-container matColumnDef="fecha">
-        <th mat-header-cell *matHeaderCellDef>Fecha</th>
-        <td mat-cell *matCellDef="let g">{{ g.fecha | date: 'dd/MM/yyyy' }}</td>
+      <ng-container matColumnDef="monto">
+        <th mat-header-cell *matHeaderCellDef class="nc-celda-monto">Monto</th>
+        <td mat-cell *matCellDef="let g" class="nc-celda-monto">
+          <div class="nc-celda">
+            <span class="nc-celda-principal">{{ g.montoPEN | soles }}</span>
+            @if (g.moneda !== Moneda.PEN) {
+              <span class="nc-celda-sub original-amount">({{ g.monto | number: '1.2-2' }} {{ g.moneda }})</span>
+            }
+          </div>
+        </td>
       </ng-container>
 
       <ng-container matColumnDef="dueno">
@@ -64,20 +135,22 @@
       </ng-container>
 
       <ng-container matColumnDef="acciones">
-        <th mat-header-cell *matHeaderCellDef></th>
+        <th mat-header-cell *matHeaderCellDef><span class="nc-sr-only">Acciones</span></th>
         <td mat-cell *matCellDef="let g">
-          <button mat-icon-button matTooltip="Editar" (click)="openEdit(g)">
-            <mat-icon>edit</mat-icon>
-          </button>
-          @if (g.activo) {
-            <button mat-icon-button matTooltip="Desactivar" (click)="confirmDeactivate(g)">
-              <mat-icon>block</mat-icon>
+          <div class="nc-acciones">
+            <button mat-icon-button matTooltip="Editar" aria-label="Editar" (click)="openEdit(g)">
+              <mat-icon>edit</mat-icon>
             </button>
-          } @else {
-            <button mat-icon-button matTooltip="Reactivar" (click)="confirmReactivate(g)">
-              <mat-icon>restart_alt</mat-icon>
-            </button>
-          }
+            @if (g.activo) {
+              <button mat-icon-button matTooltip="Desactivar" aria-label="Desactivar" (click)="confirmDeactivate(g)">
+                <mat-icon>block</mat-icon>
+              </button>
+            } @else {
+              <button mat-icon-button matTooltip="Reactivar" aria-label="Reactivar" (click)="confirmReactivate(g)">
+                <mat-icon>restart_alt</mat-icon>
+              </button>
+            }
+          </div>
         </td>
       </ng-container>
 
@@ -85,8 +158,4 @@
       <tr mat-row *matRowDef="let row; columns: displayedColumns()"></tr>
     </table>
   </div>
-
-  @if (gastos().length === 0) {
-    <app-empty-state icon="payments" mensaje="No hay gastos con estos filtros." submensaje="Prueba cambiando o quitando los filtros." />
-  }
 }

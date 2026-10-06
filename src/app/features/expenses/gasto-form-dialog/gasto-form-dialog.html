@@ -4,7 +4,7 @@
   <mat-dialog-content class="form-grid">
     <mat-form-field appearance="outline">
       <mat-label>¿En qué gastaste?</mat-label>
-      <input matInput formControlName="descripcion" />
+      <input matInput formControlName="descripcion" autocomplete="off" />
       <app-info-toggle matSuffix [for]="descripcionInfo" />
       @if (form.controls.descripcion.hasError('required')) {
         <mat-error>La descripción es obligatoria.</mat-error>
@@ -17,7 +17,7 @@
 
     <mat-form-field appearance="outline">
       <mat-label>Monto</mat-label>
-      <input matInput type="number" step="0.01" formControlName="monto" />
+      <input matInput type="number" inputmode="decimal" step="0.01" formControlName="monto" />
       @if (form.controls.monto.hasError('required')) {
         <mat-error>El monto es obligatorio.</mat-error>
       }
@@ -39,7 +39,7 @@
     @if (form.controls.moneda.value !== Moneda.PEN) {
       <mat-form-field appearance="outline">
         <mat-label>Tipo de cambio a soles</mat-label>
-        <input matInput type="number" step="0.0001" formControlName="tasaCambio" />
+        <input matInput type="number" inputmode="decimal" step="0.0001" formControlName="tasaCambio" />
         <app-info-toggle matSuffix [for]="tasaInfo" />
         @if (form.controls.tasaCambio.hasError('min')) {
           <mat-error>Debe ser un número positivo.</mat-error>
@@ -63,7 +63,7 @@
 
   <mat-dialog-actions align="end">
     <button mat-button type="button" (click)="cancel()">Cancelar</button>
-    <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid || saving()">
+    <button mat-flat-button type="submit" [disabled]="saving()">
       @if (saving()) {
         <mat-spinner diameter="20" />
       } @else {

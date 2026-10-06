@@ -1,4 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { of } from 'rxjs';
+import { BreakpointObserver } from '@angular/cdk/layout';
 import {
   ActivatedRoute,
   Router,
@@ -74,6 +76,7 @@ describe('Accounting', () => {
   async function setup(
     role: UserRole = UserRole.REVENDEDOR,
     queryParams: Record<string, string> = {},
+    mobile = false,
   ) {
     TestBed.resetTestingModule();
     api = {
@@ -97,6 +100,13 @@ describe('Accounting', () => {
           useValue: { currentUser: () => ({ id: 'admin-0', role }) },
         },
         { provide: MatSnackBar, useValue: { open: vi.fn() } },
+        {
+          provide: BreakpointObserver,
+          useValue: {
+            observe: () => of({ matches: mobile, breakpoints: {} }),
+            isMatched: () => mobile,
+          },
+        },
         {
           provide: ActivatedRoute,
           useValue: {
@@ -449,5 +459,98 @@ describe('Accounting', () => {
       vi.unstubAllGlobals();
       vi.useRealTimers();
     });
+  });
+
+  it('mientras carga por primera vez lo dice con una línea visible, sin indicador giratorio', () => {
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.nc-lista-cargando')?.textContent).toContain(
+      'Cargando la contabilidad…',
+    );
+    expect(fixture.nativeElement.querySelector('mat-spinner')).toBeNull();
+    expect(fixture.nativeElement.querySelector('.reportes').hidden).toBe(true);
+  });
+
+  it('si la carga falla muestra el aviso con "Reintentar" en el lugar de los reportes, y reintenta', async () => {
+    api.summary.mockRejectedValueOnce(new Error('network down'));
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const aviso: HTMLElement | null = fixture.nativeElement.querySelector('.nc-lista-error');
+    expect(aviso?.textContent).toContain('No se pudo cargar la contabilidad.');
+    expect(fixture.nativeElement.querySelector('.reportes').hidden).toBe(true);
+    // El <canvas> del gráfico sigue en la página: solo se oculta.
+    expect(fixture.nativeElement.querySelector('canvas')).not.toBeNull();
+
+    aviso?.querySelector('button')?.click();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(api.summary).toHaveBeenCalledTimes(2);
+    expect(fixture.nativeElement.querySelector('.nc-lista-error')).toBeNull();
+    expect(fixture.nativeElement.querySelector('.reportes').hidden).toBe(false);
+    expect(fixture.nativeElement.textContent).toContain('S/ 500.00');
+  });
+
+  it('los totales se leen como la cuenta: cobrado − proveedores − otros gastos = ganancia', async () => {
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const partes = Array.from(
+      fixture.nativeElement.querySelectorAll('.summary-cards > *'),
+    ).map((el) => {
+      const e = el as HTMLElement;
+      return e.classList.contains('operador')
+        ? e.textContent?.trim()
+        : e.querySelector('.summary-value')?.textContent?.trim();
+    });
+    expect(partes).toEqual(['S/ 500.00', '−', 'S/ 200.00', '−', 'S/ 50.00', '=', 'S/ 250.00']);
+    expect(fixture.nativeElement.querySelector('.summary-card.ganancia.negativa')).toBeNull();
+  });
+
+  it('una ganancia negativa marca el resultado como pérdida', async () => {
+    api.summary.mockResolvedValue({ ...summary, ganancia: -30 });
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.summary-card.ganancia.negativa')).not.toBeNull();
+  });
+
+  it('sin movimientos, cada reporte y la línea de tiempo lo dicen en su panel', async () => {
+    api.byService.mockResolvedValue([]);
+    api.byPaymentMethod.mockResolvedValue([]);
+    api.timeline.mockResolvedValue([]);
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const vacios = Array.from(fixture.nativeElement.querySelectorAll('.panel-vacio')).map((el) =>
+      (el as HTMLElement).textContent?.trim(),
+    );
+    expect(vacios).toEqual([
+      'No hay movimientos entre estas fechas.',
+      'No hay movimientos entre estas fechas.',
+      'No hay movimientos entre estas fechas.',
+    ]);
+    expect(fixture.nativeElement.querySelector('table')).toBeNull();
+    expect(fixture.nativeElement.querySelector('.chart-wrapper').hidden).toBe(true);
+  });
+
+  it('en celular cada fila de un reporte es un bloque con sus tres montos, sin tabla', async () => {
+    await setup(UserRole.REVENDEDOR, {}, true);
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('table')).toBeNull();
+    const [porServicio, porMetodo]: HTMLElement[] = Array.from(
+      fixture.nativeElement.querySelectorAll('.desglose'),
+    );
+    expect(porServicio.querySelector('.desglose-nombre')?.textContent).toBe('Netflix');
+    expect(porServicio.textContent).toContain('Pagado a proveedores');
+    expect(porServicio.textContent).toContain('S/ 100.00');
+    expect(porServicio.textContent).toContain('Ganancia (sin otros gastos)');
+    expect(porServicio.textContent).toContain('S/ 200.00');
+    expect(porMetodo.querySelector('.desglose-nombre')?.textContent).toBe('Yape');
+    expect(porMetodo.textContent).toContain('Te quedó');
+    expect(porMetodo.textContent).toContain('S/ 280.00');
   });
 });

@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, convertToParamMap, provideRouter } from '@angular/router';
 import { of } from 'rxjs';
+import { BreakpointObserver } from '@angular/cdk/layout';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { VentaComboDetail } from './venta-combo-detail';
@@ -102,7 +103,7 @@ describe('VentaComboDetail', () => {
   let snackBar: { open: ReturnType<typeof vi.fn> };
   let auth: { currentUser: ReturnType<typeof vi.fn> };
 
-  async function setup(role: UserRole = UserRole.ADMIN) {
+  async function setup(role: UserRole = UserRole.ADMIN, mobile = false) {
     TestBed.resetTestingModule();
     api = {
       findOne: vi.fn().mockResolvedValue(ventaCombo),
@@ -140,6 +141,13 @@ describe('VentaComboDetail', () => {
         { provide: Auth, useValue: auth },
         { provide: MatDialog, useValue: dialog },
         { provide: MatSnackBar, useValue: snackBar },
+        {
+          provide: BreakpointObserver,
+          useValue: {
+            observe: () => of({ matches: mobile, breakpoints: {} }),
+            isMatched: () => mobile,
+          },
+        },
         {
           provide: ActivatedRoute,
           useValue: {
@@ -351,5 +359,47 @@ describe('VentaComboDetail', () => {
         '+4 días por cuenta caída del 10/02',
       );
     });
+  });
+
+  it('mientras carga lo dice con una línea visible, sin indicador giratorio', () => {
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.detalle-cargando')?.textContent).toContain(
+      'Cargando la venta de combo…',
+    );
+    expect(fixture.nativeElement.querySelector('mat-spinner')).toBeNull();
+  });
+
+  it('si la carga falla muestra el aviso con "Reintentar" y el enlace para volver, y reintenta', async () => {
+    api.findOne.mockRejectedValueOnce(new Error('network down'));
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const aviso: HTMLElement | null = fixture.nativeElement.querySelector('.nc-lista-error');
+    expect(aviso?.textContent).toContain('No se pudo cargar la venta de combo.');
+    expect(fixture.nativeElement.querySelector('a.back-link')).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('.details-card')).toBeNull();
+
+    aviso?.querySelector('button')?.click();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(api.findOne).toHaveBeenCalledTimes(2);
+    expect(fixture.nativeElement.querySelector('.nc-lista-error')).toBeNull();
+    expect(fixture.nativeElement.querySelector('.details-card')).not.toBeNull();
+  });
+
+  it('en celular los servicios incluidos van en una lista, sin tabla ni botones por fila', async () => {
+    await setup(UserRole.ADMIN, true);
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('table')).toBeNull();
+    const filas: HTMLElement[] = Array.from(
+      fixture.nativeElement.querySelectorAll('.servicios-lista li'),
+    );
+    expect(filas).toHaveLength(ventaCombo.ventas?.length ?? 0);
+    expect(filas[0].textContent).toContain('Vence');
+    expect(fixture.nativeElement.querySelectorAll('.servicios-lista button')).toHaveLength(0);
   });
 });
