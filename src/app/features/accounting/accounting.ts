@@ -32,7 +32,7 @@ import {
   rangoPorDefecto,
   solesEje,
 } from './accounting-chart.util';
-import { SolesPipe } from '../../shared/soles.pipe';
+import { SolesPipe, formatSoles } from '../../shared/soles.pipe';
 import { Auth, UserRole } from '../../core/auth/auth';
 import { UsuariosApi } from '../users/usuarios-api';
 import type { Usuario } from '../users/usuario.model';
@@ -357,7 +357,7 @@ export class Accounting implements OnInit, AfterViewInit, OnDestroy {
               // La fecha completa del periodo, en el formato de la app.
               title: (items) =>
                 periodoLargo(this.timeline()[items[0].dataIndex]?.periodo ?? '', this.groupBy),
-              label: (item) => `${item.dataset.label}: S/ ${Number(item.parsed.y).toFixed(2)}`,
+              label: (item) => `${item.dataset.label}: ${formatSoles(Number(item.parsed.y))}`,
             },
           },
         },

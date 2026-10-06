@@ -3,8 +3,11 @@
 <form [formGroup]="form" (ngSubmit)="submit()">
   <mat-dialog-content class="form-grid">
     @if (loadingOptions()) {
-      <div class="loading">
-        <mat-spinner diameter="32" />
+      <div class="cargando" aria-busy="true">
+        <span class="nc-lista-cargando-texto">Cargando servicios y clientes…</span>
+        <span class="nc-skeleton"></span>
+        <span class="nc-skeleton"></span>
+        <span class="nc-skeleton"></span>
       </div>
     } @else {
       <mat-form-field appearance="outline">
