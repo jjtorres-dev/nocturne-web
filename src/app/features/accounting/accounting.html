@@ -123,12 +123,12 @@
                 <span class="desglose-nombre">{{ r.nombre }}</span>
                 <dl>
                   <div>
-                    <dt>Pagado a proveedores</dt>
-                    <dd>{{ r.inversion | soles }}</dd>
-                  </div>
-                  <div>
                     <dt>Cobrado</dt>
                     <dd>{{ r.ingresos | soles }}</dd>
+                  </div>
+                  <div>
+                    <dt>Pagado a proveedores</dt>
+                    <dd>{{ r.inversion | soles }}</dd>
                   </div>
                   <div class="desglose-resultado">
                     <dt>Ganancia (sin otros gastos)</dt>

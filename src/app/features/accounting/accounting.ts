@@ -26,7 +26,12 @@ import {
   type ServiceBreakdown,
   type TimelinePoint,
 } from './accounting.model';
-import { buildTimelineChartData } from './accounting-chart.util';
+import {
+  buildTimelineChartData,
+  periodoLargo,
+  rangoPorDefecto,
+  solesEje,
+} from './accounting-chart.util';
 import { SolesPipe } from '../../shared/soles.pipe';
 import { Auth, UserRole } from '../../core/auth/auth';
 import { UsuariosApi } from '../users/usuarios-api';
@@ -86,10 +91,12 @@ export class Accounting implements OnInit, AfterViewInit, OnDestroy {
     [TimelineGroupBy.WEEK]: 'Semana',
     [TimelineGroupBy.MONTH]: 'Mes',
   };
+  // En pantalla, el mismo orden que la cuenta de arriba: cobrado, pagado a
+  // proveedores, ganancia. (El CSV conserva su propio orden de columnas.)
   protected readonly byServiceColumns = [
     'nombre',
-    'inversion',
     'ingresos',
+    'inversion',
     'ganancia',
   ];
   protected readonly byPaymentMethodColumns = [
@@ -124,8 +131,13 @@ export class Accounting implements OnInit, AfterViewInit, OnDestroy {
     return `Gráfico de barras: cobrado, pagado a proveedores, gastos y ganancia por ${this.groupByLabels[this.groupBy].toLowerCase()} (${puntos} ${puntos === 1 ? 'periodo' : 'periodos'}).`;
   });
 
-  desde = '';
-  hasta = '';
+  // Sin elegir fechas, el backend usa el mes actual. Los campos arrancan
+  // mostrando ese rango para que se sepa de qué periodo son los números,
+  // pero mientras no se cambien no se manda nada: el rango por defecto lo
+  // sigue resolviendo el backend.
+  private rangoDefecto = rangoPorDefecto();
+  desde = this.rangoDefecto.desde;
+  hasta = this.rangoDefecto.hasta;
   groupBy: TimelineGroupBy = TimelineGroupBy.DAY;
   // 'mine' | 'all' | <userId> — persiste en el query param `viewOwnerId`
   // de la URL para sobrevivir un refresh de la página.
@@ -172,15 +184,18 @@ export class Accounting implements OnInit, AfterViewInit, OnDestroy {
     this.chart?.destroy();
   }
 
-  // Vacíos por defecto: si no se tocan, no se manda el param y el backend
-  // usa su propio default (mes calendario actual).
+  // Un extremo sin tocar (o vaciado) no se manda: el backend usa su propio
+  // default para ese extremo (mes calendario actual), y el campo lo muestra.
   async refresh(): Promise<void> {
     this.loading.set(true);
     this.error.set(false);
+    this.rangoDefecto = rangoPorDefecto();
+    this.desde ||= this.rangoDefecto.desde;
+    this.hasta ||= this.rangoDefecto.hasta;
     try {
       const filters = {
-        desde: this.desde || undefined,
-        hasta: this.hasta || undefined,
+        desde: this.desde === this.rangoDefecto.desde ? undefined : this.desde,
+        hasta: this.hasta === this.rangoDefecto.hasta ? undefined : this.hasta,
         viewOwnerId:
           this.isAdmin() && this.viewOwnerId !== VIEW_MINE
             ? this.viewOwnerId
@@ -269,7 +284,7 @@ export class Accounting implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
 
-    const data = buildTimelineChartData(this.timeline());
+    const data = buildTimelineChartData(this.timeline(), this.groupBy);
     if (this.chart) {
       this.chart.data = data;
       this.chart.update();
@@ -310,7 +325,7 @@ export class Accounting implements OnInit, AfterViewInit, OnDestroy {
             ticks: {
               color: tintaSuave,
               font: letra,
-              callback: (value) => formatSoles(Number(value), 0),
+              callback: (value) => solesEje(Number(value)),
             },
             // La línea del cero va en tinta: las pérdidas bajan de ella.
             grid: { color: (ctx) => (ctx.tick.value === 0 ? tinta : linea) },
@@ -339,7 +354,10 @@ export class Accounting implements OnInit, AfterViewInit, OnDestroy {
             cornerRadius: 3,
             padding: 10,
             callbacks: {
-              label: (item) => `${item.dataset.label}: ${formatSoles(Number(item.parsed.y), 2)}`,
+              // La fecha completa del periodo, en el formato de la app.
+              title: (items) =>
+                periodoLargo(this.timeline()[items[0].dataIndex]?.periodo ?? '', this.groupBy),
+              label: (item) => `${item.dataset.label}: S/ ${Number(item.parsed.y).toFixed(2)}`,
             },
           },
         },
@@ -348,8 +366,3 @@ export class Accounting implements OnInit, AfterViewInit, OnDestroy {
   }
 }
 
-// Monto en soles para el eje y el globo del gráfico (el pipe `soles` solo
-// existe en plantillas).
-function formatSoles(value: number, decimals: number): string {
-  return `S/ ${value.toFixed(decimals)}`;
-}

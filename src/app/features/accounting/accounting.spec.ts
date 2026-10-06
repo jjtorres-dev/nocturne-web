@@ -553,4 +553,78 @@ describe('Accounting', () => {
     expect(porMetodo.textContent).toContain('Te quedó');
     expect(porMetodo.textContent).toContain('S/ 280.00');
   });
+
+  describe('rango por defecto, a la vista', () => {
+    beforeEach(() => {
+      vi.useFakeTimers({ toFake: ['Date'] });
+      vi.setSystemTime(new Date('2026-10-06T15:00:00Z'));
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it('al entrar, "Desde" y "Hasta" muestran el mes actual, pero no se manda nada: lo resuelve el backend', async () => {
+      await setup();
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      expect(component.desde).toBe('2026-10-01');
+      expect(component.hasta).toBe('2026-10-31');
+      expect(api.summary).toHaveBeenCalledWith({
+        desde: undefined,
+        hasta: undefined,
+        viewOwnerId: undefined,
+      });
+    });
+
+    it('cambiar solo un extremo manda solo ese extremo', async () => {
+      await setup();
+      await fixture.whenStable();
+      api.summary.mockClear();
+
+      component.desde = '2026-09-15';
+      await component.refresh();
+
+      expect(api.summary).toHaveBeenCalledWith({
+        desde: '2026-09-15',
+        hasta: undefined,
+        viewOwnerId: undefined,
+      });
+    });
+
+    it('si se vacía un campo vuelve a mostrar el rango por defecto, sin mandarlo', async () => {
+      await setup();
+      await fixture.whenStable();
+      api.summary.mockClear();
+
+      component.desde = '';
+      component.hasta = '';
+      await component.refresh();
+
+      expect(component.desde).toBe('2026-10-01');
+      expect(component.hasta).toBe('2026-10-31');
+      expect(api.summary).toHaveBeenCalledWith({
+        desde: undefined,
+        hasta: undefined,
+        viewOwnerId: undefined,
+      });
+    });
+  });
+
+  it('"Por servicio" sigue el orden de la cuenta de arriba: cobrado, pagado a proveedores, ganancia', async () => {
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const encabezados = Array.from(
+      fixture.nativeElement.querySelectorAll('.table-section:first-child th'),
+    ).map((th) => (th as HTMLElement).textContent?.replace(/info_outline/g, '').trim());
+    expect(encabezados).toEqual([
+      'Servicio',
+      'Cobrado',
+      'Pagado a proveedores',
+      'Ganancia (sin otros gastos)',
+    ]);
+  });
+
 });
