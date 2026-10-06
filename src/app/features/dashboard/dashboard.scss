@@ -5,32 +5,29 @@
 // ---------------------------------------------------------------------------
 // Tarjetas de estado
 // ---------------------------------------------------------------------------
+// Las cuatro del mismo ancho, sin importar el número.
 .senal {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 8px;
 }
 
+// Solo agrupa las tres de ventas en el HTML; no aporta caja.
 .senal-ventas {
-  display: flex;
-  flex: 1 1 auto;
-  gap: 2px;
-  min-width: 0;
+  display: contents;
 }
 
 .senal-cargando {
-  flex: 1 1 auto;
-  height: 90px;
+  grid-column: span 3;
+  height: 72px;
 }
 
 .senal-bloque {
-  // Proporcional a su conteo (flex-grow inline) con un piso: el que vale
-  // cero o muy poco igual se lee y se puede tocar.
   display: flex;
-  flex: 0 0 auto;
   flex-direction: column;
   justify-content: center;
   gap: 2px;
-  min-width: max-content;
+  min-width: 0;
   min-height: 72px;
   padding: 10px 16px;
   border: 0;
@@ -64,9 +61,6 @@
 }
 
 // Los colores de cada estado vienen de las clases globales `.nc-estado-*`.
-.senal-ventas .senal-bloque {
-  flex-basis: 0;
-}
 
 .summary-count {
   font-stretch: var(--nc-width-condensed);
@@ -436,6 +430,12 @@
   letter-spacing: 0;
   text-transform: none;
 
+  // En la leyenda las butacas son una muestra: no crecen con las de las salas.
+  .butaca {
+    width: 9px;
+    height: 14px;
+  }
+
   .butaca.ocupada {
     margin-inline-start: 8px;
   }
@@ -503,17 +503,19 @@
   display: flex;
   flex-wrap: wrap;
   grid-column: 2;
-  gap: 3px;
-  margin-top: 3px;
+  gap: 4px;
+  margin-top: 4px;
 }
 
 // Butaca libre: turquesa. Ocupada: gris. Una cuenta completa es una butaca
-// ancha, para no confundirla con un perfil.
+// ancha, para no confundirla con un perfil. Tamaño fijo: si un servicio
+// tiene muchas, pasan a otra fila en vez de achicarse.
 .butaca {
   display: inline-block;
-  width: 9px;
-  height: 14px;
-  border-radius: 2px 2px 1px 1px;
+  flex: 0 0 auto;
+  width: 14px;
+  height: 21px;
+  border-radius: 3px 3px 1px 1px;
   background: var(--nc-libre);
 
   &.ocupada {
@@ -521,7 +523,7 @@
   }
 
   .por-cuenta & {
-    width: 20px;
+    width: 30px;
   }
 }
 
@@ -556,23 +558,16 @@
 
 @media (max-width: 767.98px) {
   .senal {
-    display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 6px;
   }
 
-  .senal-ventas {
-    display: contents;
-  }
-
   .senal-cargando {
     grid-column: 1 / -1;
-    height: 132px;
+    height: 126px;
   }
 
-  .senal-bloque,
-  .senal-ventas .senal-bloque {
-    min-width: 0;
+  .senal-bloque {
     min-height: 60px;
     padding: 8px 12px;
   }
@@ -584,6 +579,20 @@
   .info-cards {
     gap: 12px;
     margin-top: 12px;
+  }
+
+  // Butacas un poco menores que en escritorio, todavía fáciles de contar.
+  .butacas {
+    gap: 3px;
+  }
+
+  .butaca {
+    width: 11px;
+    height: 17px;
+
+    .por-cuenta & {
+      width: 24px;
+    }
   }
 
   // Botón de 44 px solo con el ícono al final de la fila.

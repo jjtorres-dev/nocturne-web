@@ -2,9 +2,9 @@
   <h1>Inicio</h1>
 </div>
 
-<!-- Tarjetas de estado en color plano. Las de ventas se reparten el ancho
-     según su conteo (con un piso para leerse) y llevan a Vencimientos ya
-     filtrado. Las cuentas caídas van aparte: se cuentan en otra unidad. -->
+<!-- Tarjetas de estado en color plano, las cuatro del mismo ancho. Las de
+     ventas llevan a Vencimientos ya filtrado; la de cuentas caídas, a su
+     lista en esta misma pantalla. -->
 <section class="senal" aria-label="Estado de tus ventas y cuentas">
   @if (loading()) {
     <div class="senal-cargando nc-skeleton" aria-busy="true">
@@ -16,7 +16,6 @@
         type="button"
         class="summary-card senal-bloque vencida nc-estado-vencida"
         [class.vacio]="s.vencidas === 0"
-        [style.flex-grow]="s.vencidas"
         (click)="goToVencimientos(VencimientoFiltro.VENCIDA)"
       >
         <span class="summary-count">{{ s.vencidas }}</span>
@@ -27,7 +26,6 @@
         type="button"
         class="summary-card senal-bloque por-vencer nc-estado-por-vencer"
         [class.vacio]="s.porVencer === 0"
-        [style.flex-grow]="s.porVencer"
         (click)="goToVencimientos(VencimientoFiltro.POR_VENCER)"
       >
         <span class="summary-count">{{ s.porVencer }}</span>
@@ -38,7 +36,6 @@
         type="button"
         class="summary-card senal-bloque al-dia nc-estado-al-dia"
         [class.vacio]="s.alDia === 0"
-        [style.flex-grow]="s.alDia"
         (click)="goToVencimientos(VencimientoFiltro.AL_DIA)"
       >
         <span class="summary-count">{{ s.alDia }}</span>
@@ -211,6 +208,10 @@
             <div>
               <dt><span class="muestra gastos" aria-hidden="true"></span>Otros gastos</dt>
               <dd>{{ d.gastos | soles }}</dd>
+            </div>
+            <div>
+              <dt><span class="muestra queda" aria-hidden="true"></span>Ganancia</dt>
+              <dd>{{ d.ganancia | soles }}</dd>
             </div>
           </dl>
         </div>

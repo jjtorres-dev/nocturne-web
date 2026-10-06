@@ -127,6 +127,14 @@ describe('Dashboard', () => {
     expect(component.summary()).toEqual(summary);
   });
 
+  it('las tarjetas de estado no llevan ancho proporcional a su conteo', async () => {
+    const el = await render();
+
+    const cards = Array.from(el.querySelectorAll<HTMLElement>('.senal-bloque'));
+    expect(cards).toHaveLength(4);
+    expect(cards.every((c) => c.style.flexGrow === '')).toBe(true);
+  });
+
   it('muestra los tres conteos en las tarjetas', async () => {
     await fixture.whenStable();
     fixture.detectChanges();
@@ -176,6 +184,22 @@ describe('Dashboard', () => {
       const card = el.querySelector('.ganancia-card')!;
       expect(card.textContent).toContain('S/ 350.00');
       expect(card.querySelector('.ganancia-value.negativa')).toBeNull();
+    });
+
+    it('la leyenda tiene un renglón por tramo de la franja: proveedores, otros gastos y ganancia', async () => {
+      const card = (await render()).querySelector('.ganancia-card')!;
+
+      const filas = Array.from(card.querySelectorAll('.ganancia-detalle div')).map((d) => [
+        d.querySelector('dt')?.textContent?.trim(),
+        d.querySelector('dd')?.textContent?.trim(),
+      ]);
+      expect(filas).toEqual([
+        ['Cobrado', 'S/ 500.00'],
+        ['Pagado a proveedores', 'S/ 120.00'],
+        ['Otros gastos', 'S/ 30.00'],
+        ['Ganancia', 'S/ 350.00'],
+      ]);
+      expect(card.querySelectorAll('.ganancia-detalle .muestra')).toHaveLength(3);
     });
 
     it('en negativo la marca como tal', async () => {

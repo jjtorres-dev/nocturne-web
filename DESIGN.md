@@ -214,19 +214,19 @@ components:
     rounded: "{rounded.base}"
   butaca:
     backgroundColor: "{colors.libre}"
-    rounded: "2px 2px 1px 1px"
-    width: "9px"
-    height: "14px"
+    rounded: "3px 3px 1px 1px"
+    width: "14px"
+    height: "21px"
   butaca-ocupada:
     backgroundColor: "{colors.butaca-ocupada}"
-    rounded: "2px 2px 1px 1px"
-    width: "9px"
-    height: "14px"
+    rounded: "3px 3px 1px 1px"
+    width: "14px"
+    height: "21px"
   butaca-cuenta:
     backgroundColor: "{colors.libre}"
-    rounded: "2px 2px 1px 1px"
-    width: "20px"
-    height: "14px"
+    rounded: "3px 3px 1px 1px"
+    width: "30px"
+    height: "21px"
 ---
 
 # Design System: Nocturne
@@ -328,7 +328,7 @@ Riel fijo de 232 px (`--nc-nav-width`) a la izquierda y, a su derecha, una barra
 
 Inicio abre con las tarjetas de estado a todo el ancho y debajo una rejilla de dos columnas `2fr / 1fr` (mínimo 300 px la derecha) con 16 px de separación, en tres filas de áreas: arriba, las cuentas por pagar al proveedor a la izquierda y las cuentas caídas a la derecha; bajo las caídas, la ganancia del mes (las cuentas por pagar ocupan las dos filas de su columna); y al pie, a todo el ancho, "Disponible para vender". Lo urgente a la izquierda, el negocio a la derecha, el inventario cerrando.
 
-Ritmo observado (no hay tokens de espaciado en el CSS; son los valores que se repiten): 2 px entre bloques y tramos contiguos, 3 px entre butacas, 4 y 8 px dentro de un grupo, 10 px entre columnas de una fila, 14 px de margen interno horizontal de panel, 16 px entre paneles, 20 px entre columnas de salas, 24 px de margen de página. Filas de 36 px en el menú y el buscador y alrededor de 50 px en las listas de cuentas. Material corre con densidad -1.
+Ritmo observado (no hay tokens de espaciado en el CSS; son los valores que se repiten): 2 px entre bloques y tramos contiguos, 4 px entre butacas (3 px en celular), 4 y 8 px dentro de un grupo, 10 px entre columnas de una fila, 14 px de margen interno horizontal de panel, 16 px entre paneles, 20 px entre columnas de salas, 24 px de margen de página. Filas de 36 px en el menú y el buscador y alrededor de 50 px en las listas de cuentas. Material corre con densidad -1.
 
 Cortes:
 - **Menos de 1400 px:** el botón de fila acorta su texto ("Renovar").
@@ -355,7 +355,7 @@ Plano. Nada apoyado en el tablero tiene sombra: los niveles 0 y 1 de Material es
 
 Una sola esquina: 3 px (`--nc-radius`), la de las letras del tablero. Todos los radios de Material (de extra-small a extra-large, botones, botones de ícono, chips, diálogos) están reasignados a ese valor. El riel de navegación y la barra inferior van a ras, sin radio.
 
-Las marcas pequeñas que miden algo (tramos de la franja de ganancia, muestras de leyenda) usan 1 px. La butaca tiene silueta propia: 2 px arriba y 1 px abajo, como un respaldo. El círculo queda para lo que es redondo en el mundo: avatares, íconos de servicio y la bombilla.
+Las marcas pequeñas que miden algo (tramos de la franja de ganancia, muestras de leyenda) usan 1 px. La butaca tiene silueta propia: 3 px arriba y 1 px abajo, como un respaldo. El círculo queda para lo que es redondo en el mundo: avatares, íconos de servicio y la bombilla.
 
 Las líneas tienen tres pesos con papel fijo: 1 px `rule` separa, 1 px `rule-field` delimita algo editable o pulsable, 2 px `rail` (`--nc-rail-width`) sostiene un título. La fila de bombillas bajo la marca es un borde punteado de 3 px en ámbar.
 
@@ -396,7 +396,7 @@ Las líneas tienen tres pesos con papel fijo: 1 px `rule` separa, 1 px `rule-fie
 - **Barra inferior (celular):** 60 px más área segura, fondo `nav`, cinco columnas iguales (Inicio, Ventas, Vencimientos, Cuentas, Menú) con ícono y etiqueta de 0.75rem en `on-nav-muted`; el activo va sobre `nav-active` en ámbar con ícono relleno.
 
 ### Tarjetas de estado
-La interacción firma de Inicio. Son botones: color plano del estado, cifra en Display y etiqueta en Label, mínimo 72 px de alto (60 px en celular). Las tres de ventas (vencidas, por vencer, al día) van juntas, separadas 2 px, y se reparten el ancho según su conteo con un piso (el ancho de su propio contenido) para que la que vale poco o cero igual se lea y se toque. Por ese piso el ancho es una señal aproximada, no una medida: el dato es la cifra. Las cuentas caídas van en un bloque aparte, separado 8 px, porque se cuentan en otra unidad. En cero la tarjeta se apaga a su tinte. Al pasar el puntero aparece el riel negro interior. Las tres de ventas llevan a Vencimientos ya filtrado; la de caídas lleva a su panel en la misma pantalla y lo resalta un momento con un contorno magenta de 2 px que se desvanece. En celular las cuatro pasan a una rejilla 2×2 de bloques iguales.
+La interacción firma de Inicio. Son botones: color plano del estado, cifra en Display y etiqueta en Label, mínimo 72 px de alto (60 px en celular). Las cuatro (vencidas, por vencer, al día y cuentas caídas) tienen el mismo ancho en escritorio, sin importar su número, separadas 8 px: el dato es la cifra, no el tamaño de la tarjeta. En cero la tarjeta se apaga a su tinte. Al pasar el puntero aparece el riel negro interior. Las tres de ventas llevan a Vencimientos ya filtrado; la de caídas lleva a su panel en la misma pantalla y lo resalta un momento con un contorno magenta de 2 px que se desvanece. En celular las cuatro pasan a una rejilla 2×2.
 
 ### Fila de función
 La fila de una lista urgente (cuentas caídas, cuentas por pagar) va en dos renglones, con el ícono del servicio (28 px) ocupando ambos. Arriba, el cuándo en el registro Función y en la tinta de su estado y, al otro extremo, el dato de clientes en tinta suave a 0.8125rem; si no entran juntos, los clientes bajan de renglón. Abajo, el servicio en 600 (con su dueño en pequeño) seguido del correo en tinta suave; si no entran juntos, el correo baja de renglón. Toda la fila es un enlace al detalle y cambia a ópalo hundido al pasar; la acción propia de la fila, si la hay, es un botón delineado al final. El dato de clientes se dice una sola vez, en la fila.
@@ -404,13 +404,13 @@ La fila de una lista urgente (cuentas caídas, cuentas por pagar) va en dos reng
 Desde 1100 px, la fila de cuentas por pagar pasa a un solo renglón en columnas: cuándo (9.5rem) | ícono | cuenta (servicio sobre correo) | clientes | acción. Las cuentas caídas viven en la columna angosta y conservan los dos renglones en todo ancho.
 
 ### Franja de ganancia
-Cifra del mes en condensada 800 a 1.875rem (bermellón si es negativa), una franja de 12 px que reparte lo cobrado en inversión, gastos y lo que queda con las tintas `--nc-serie-*`, y una lista de pares etiqueta y monto con una muestra cuadrada de 10 px como leyenda. La franja solo aparece si hubo cobros y la ganancia no es negativa.
+Cifra del mes en condensada 800 a 1.875rem (bermellón si es negativa), una franja de 12 px que reparte lo cobrado en inversión, gastos y lo que queda con las tintas `--nc-serie-*`, y una lista de pares etiqueta y monto con una muestra cuadrada de 10 px como leyenda: cada tramo de la franja tiene su renglón (pagado a proveedores, otros gastos y ganancia), más lo cobrado, que es el total. La franja solo aparece si hubo cobros y la ganancia no es negativa.
 
 ### Cartelera de salas
 "Disponible para vender" es la cartelera: un panel a todo el ancho con una rejilla de salas, una por servicio, en tantas columnas de 250 px mínimo como entren (`repeat(auto-fill, minmax(250px, 1fr))`, 20 px entre columnas) y una línea fina bajo cada sala. Cada sala lleva el ícono del servicio (24 px), su nombre en 600 (con su dueño en pequeño), una línea de texto a 0.8125rem como "Libres: 3 de 5 perfiles" y su mapa de butacas.
 
-- **Butacas:** una por perfil o por cuenta completa, primero las ocupadas (`butaca-ocupada`) y después las libres (turquesa `libre`), de 9×14 px con 3 px de separación; si no entran en un renglón, siguen en el siguiente. Se dibujan hasta 40 por sala; el texto siempre dice la cantidad real.
-- **Unidad:** la línea de texto escribe siempre la unidad (perfil, perfiles, cuenta, cuentas) y la concuerda con el total. Los servicios se separan bajo dos subtítulos, "Se venden por perfil" y "Se venden por cuenta completa", para que las dos unidades nunca se mezclen; el subtítulo solo aparece cuando existen los dos grupos. La butaca de cuenta completa es más ancha (20 px).
+- **Butacas:** una por perfil o por cuenta completa, primero las ocupadas (`butaca-ocupada`) y después las libres (turquesa `libre`), de 14×21 px con 4 px de separación en escritorio y 11×17 px con 3 px en celular. Su tamaño es fijo: si no entran en un renglón, siguen en el siguiente en vez de achicarse. En la leyenda del título son una muestra de 9×14 px. Se dibujan hasta 40 por sala; el texto siempre dice la cantidad real.
+- **Unidad:** la línea de texto escribe siempre la unidad (perfil, perfiles, cuenta, cuentas) y la concuerda con el total. Los servicios se separan bajo dos subtítulos, "Se venden por perfil" y "Se venden por cuenta completa", para que las dos unidades nunca se mezclen; el subtítulo solo aparece cuando existen los dos grupos. La butaca de cuenta completa es más ancha (30 px en escritorio, 24 px en celular).
 - **Leyenda:** en el título del panel, una butaca libre y una ocupada con su palabra, a 0.75rem en tinta suave.
 - **Agotado:** una sala sin libres se apaga: ícono en gris a media opacidad, nombre y texto en tinta suave.
 
@@ -437,7 +437,6 @@ Cifra del mes en condensada 800 a 1.875rem (bermellón si es negativa), una fran
 - **No:** uses el ámbar de bombilla fuera del riel de navegación y su barra inferior.
 - **No:** uses un color de estado para decorar, para distinguir categorías o como serie de dinero.
 - **No:** pongas sombra a un panel, una tarjeta o una fila; la sombra es solo de capas flotantes.
-- **No:** armes en escritorio una fila de tarjetas iguales con un número grande: las de ventas se reparten el ancho según su conteo, con un piso para leerse. La rejilla 2×2 de bloques iguales es solo del celular.
 - **No:** repitas el mismo dato en dos formas en la misma vista (una medida encima de las tarjetas que ya lo dicen, un total en el título de una lista que ya lo dice fila por fila).
 - **No:** uses degradados, vidrio ni esquinas redondeadas grandes.
 - **No:** agregues secuencias de entrada; solo transiciones de estado de 160 ms.
