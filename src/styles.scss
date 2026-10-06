@@ -349,6 +349,53 @@ h1,
 }
 
 // ---------------------------------------------------------------------------
+// Campos de formulario (toda la app)
+//
+// La ayuda y el error bajo un campo ocupan el alto que necesite su texto: si
+// pasan a dos renglones empujan al campo siguiente en vez de montarse sobre
+// su etiqueta. Es lo mismo que hace `subscriptSizing: 'dynamic'` de Material,
+// pero por CSS: declararlo como opción global en app.config.ts metía el
+// módulo de campos en el bundle inicial y lo pasaba del presupuesto.
+// Además: alto mínimo, para que los campos sin ayuda conserven el ritmo, y
+// aire abajo, para que el texto no toque la etiqueta flotante que sigue.
+// ---------------------------------------------------------------------------
+.mat-mdc-form-field .mat-mdc-form-field-subscript-wrapper {
+  min-height: 20px;
+}
+
+.mat-mdc-form-field .mat-mdc-form-field-hint-wrapper,
+.mat-mdc-form-field .mat-mdc-form-field-error-wrapper {
+  position: static;
+  padding-bottom: 8px;
+}
+
+// Material reserva el renglón de la ayuda con un pseudo-elemento, porque la
+// posiciona en absoluto. Con la ayuda en el flujo, sobra.
+.mat-mdc-form-field .mat-mdc-form-field-bottom-align::before {
+  display: none;
+}
+
+// ---------------------------------------------------------------------------
+// Diálogos (toda la app)
+// ---------------------------------------------------------------------------
+
+// El contenido hace scroll entre el título y los botones, que quedan fijos.
+// Aire arriba para que la etiqueta flotante del primer campo no se recorte y
+// abajo para que lo último no quede pegado a los botones; la línea sobre los
+// botones marca dónde termina la zona que se desplaza.
+// (Clase repetida: tiene que ganarle al padding que fijan Material y el
+// `.form-grid` de cada diálogo.)
+.mat-mdc-dialog-container .mat-mdc-dialog-content.mat-mdc-dialog-content.mat-mdc-dialog-content {
+  max-height: calc(100dvh - 220px);
+  padding-top: 10px;
+  padding-bottom: 16px;
+}
+
+.mat-mdc-dialog-container .mat-mdc-dialog-actions {
+  border-top: 1px solid var(--nc-rule);
+}
+
+// ---------------------------------------------------------------------------
 // Tarjetas y tablas de las pantallas que aún usan Material tal cual.
 // ---------------------------------------------------------------------------
 .mat-mdc-card {

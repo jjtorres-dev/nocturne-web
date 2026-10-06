@@ -83,8 +83,6 @@
         </button>
         @if (form.controls.password.hasError('required')) {
           <mat-error>La contraseña es obligatoria.</mat-error>
-        } @else if (form.controls.password.hasError('minlength')) {
-          <mat-error>La contraseña tiene al menos 8 caracteres.</mat-error>
         }
       </mat-form-field>
 

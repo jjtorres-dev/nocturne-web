@@ -145,6 +145,21 @@ describe('Login', () => {
   });
 
   describe('pantalla', () => {
+    it('la contraseña solo se valida como no vacía: una corta igual se envía al backend', async () => {
+      component.form.setValue({ email: 'rosa@nocturne.dev', password: 'abc' });
+      expect(component.form.valid).toBe(true);
+
+      const pending = component.submit();
+      const req = TestBed.inject(HttpTestingController).expectOne((r) =>
+        r.url.endsWith('/auth/login'),
+      );
+      expect(req.request.body).toEqual({ email: 'rosa@nocturne.dev', password: 'abc' });
+      req.flush({ message: 'x' }, { status: 401, statusText: 'Unauthorized' });
+      await pending;
+
+      expect(component.errorMessage()).toBe('Correo o contraseña incorrectos.');
+    });
+
     it('el botón Ingresar está disponible desde el inicio; con el formulario vacío marca los campos', async () => {
       fixture.detectChanges();
       const el: HTMLElement = fixture.nativeElement;

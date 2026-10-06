@@ -171,7 +171,8 @@
 .login-ayuda {
   margin: 16px 0 0;
   color: var(--nc-ink-muted);
-  font-size: 0.8125rem;
+  // 14 px: a 13 px la tilde de "Pídeselo" se confunde con el punto de la i.
+  font-size: 0.875rem;
   line-height: 1.4;
 }
 

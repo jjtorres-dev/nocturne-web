@@ -321,6 +321,8 @@ Blanco ópalo y tinta casi negra de tono cálido, un rojo vino para la marca y c
 
 **Regla del Foco en Tinta.** En todo campo de formulario, el contorno enfocado, la etiqueta enfocada y el cursor van en tinta (`--nc-focus` y `--nc-ink`, vía `--mat-form-field-outlined-focus-outline-color`, `--mat-form-field-outlined-focus-label-text-color` y `--mat-form-field-outlined-caret-color` en `src/styles.scss`). El rojo nunca significa foco: queda para la marca, y el bermellón para el error, así un campo enfocado no parece un campo con error. El autocompletado del navegador conserva el fondo del campo y su tinta en vez de pintar el suyo.
 
+**Regla de la Ayuda que Empuja.** El texto de ayuda o de error bajo un campo ocupa el alto que necesite (por CSS global en `styles.scss`, sin la opción global de Material, que engordaba el bundle inicial): si pasa a dos renglones empuja al campo siguiente, nunca se monta sobre su etiqueta. `styles.scss` le da un mínimo de 20 px, para que los campos sin ayuda conserven el ritmo, y 8 px de aire abajo. En los diálogos el contenido se desplaza entre el título y los botones, con 10 px arriba, 16 px abajo y una línea `rule` sobre los botones que marca el fin de la zona que se desplaza.
+
 **Regla de los Alias Heredados.** `--nc-bg`, `--nc-surface-elevated`, `--nc-border`, `--nc-text-primary`, `--nc-text-secondary` y `--nc-accent-solid` existen solo para las pantallas que todavía no se rediseñaron. No se usan en código nuevo; al rediseñar una pantalla se reemplazan por el token real y, cuando no quede ninguna, se borran.
 
 ## Typography

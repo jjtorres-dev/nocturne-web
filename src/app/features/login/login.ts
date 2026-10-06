@@ -72,7 +72,9 @@ export class Login {
 
   readonly form = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
-    password: ['', [Validators.required, Validators.minLength(8)]],
+    // Solo que no esté vacía: si es incorrecta, lo dice el backend con su
+    // error de credenciales (no se revela acá qué largo tiene una válida).
+    password: ['', [Validators.required]],
   });
 
   constructor() {
