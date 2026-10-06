@@ -53,7 +53,9 @@ export function injectFormError(): FormError {
         () => {
           host.nativeElement
             .querySelector('[role="alert"]')
-            ?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+            // Llamada opcional: jsdom (tests) no implementa scrollIntoView,
+            // y este callback corre fuera del test que lo disparó.
+            ?.scrollIntoView?.({ block: 'nearest', behavior: 'smooth' });
         },
         { injector },
       );

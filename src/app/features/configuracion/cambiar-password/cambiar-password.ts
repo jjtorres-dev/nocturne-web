@@ -6,7 +6,8 @@ import {
   Validators,
   type ValidationErrors,
 } from '@angular/forms';
-import { MatCardModule } from '@angular/material/card';
+import { HttpErrorResponse } from '@angular/common/http';
+import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatInputModule } from '@angular/material/input';
@@ -26,7 +27,7 @@ function matchesNewPassword(control: AbstractControl): ValidationErrors | null {
 @Component({
   imports: [
     ReactiveFormsModule,
-    MatCardModule,
+    MatIconModule,
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
@@ -44,6 +45,11 @@ export class CambiarPassword {
   protected readonly email = this.auth.currentUser()?.email ?? '';
 
   readonly saving = signal(false);
+  // El último error fue por demasiados intentos (429): el aviso lleva un
+  // reloj en vez del ícono de error.
+  readonly demasiadosIntentos = signal(false);
+  // Cada contraseña se escribe oculta; su ojo la deja ver, como en el login.
+  protected readonly ver = signal({ actual: false, nueva: false, confirmacion: false });
   private readonly formError = injectFormError();
   readonly errorMessage = this.formError.message;
 
@@ -61,6 +67,10 @@ export class CambiarPassword {
     );
   }
 
+  protected alternarVer(campo: 'actual' | 'nueva' | 'confirmacion'): void {
+    this.ver.update((v) => ({ ...v, [campo]: !v[campo] }));
+  }
+
   async submit(): Promise<void> {
     if (this.saving()) {
       return;
@@ -74,6 +84,7 @@ export class CambiarPassword {
 
     this.saving.set(true);
     this.formError.clear();
+    this.demasiadosIntentos.set(false);
     // El snackbar de un intento fallido anterior sigue en pantalla unos
     // segundos: si este reintento sale bien, no debe quedar sobre /login.
     this.snackBar.dismiss();
@@ -83,6 +94,7 @@ export class CambiarPassword {
     try {
       await this.auth.changePassword(currentPassword, newPassword);
     } catch (error) {
+      this.demasiadosIntentos.set(error instanceof HttpErrorResponse && error.status === 429);
       this.formError.show(extractErrorMessage(error, GENERIC_ERROR));
       this.saving.set(false);
       return;

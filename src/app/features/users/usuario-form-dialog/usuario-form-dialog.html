@@ -4,7 +4,15 @@
   <mat-dialog-content class="form-grid">
     <mat-form-field appearance="outline">
       <mat-label>Correo</mat-label>
-      <input matInput type="email" formControlName="email" />
+      <input
+        matInput
+        type="email"
+        formControlName="email"
+        autocomplete="off"
+        inputmode="email"
+        autocapitalize="none"
+        spellcheck="false"
+      />
       @if (isEdit) {
         <mat-hint>El correo no se puede cambiar.</mat-hint>
       }
@@ -18,7 +26,7 @@
 
     <mat-form-field appearance="outline">
       <mat-label>Nombre</mat-label>
-      <input matInput formControlName="name" />
+      <input matInput formControlName="name" autocomplete="off" />
       @if (form.controls.name.hasError('required')) {
         <mat-error>El nombre es obligatorio.</mat-error>
       }
@@ -38,7 +46,23 @@
 
     <mat-form-field appearance="outline">
       <mat-label>{{ isEdit ? 'Nueva contraseña (opcional)' : 'Contraseña' }}</mat-label>
-      <input matInput type="password" formControlName="password" />
+      <input
+        matInput
+        [type]="verPassword() ? 'text' : 'password'"
+        formControlName="password"
+        autocomplete="new-password"
+      />
+      <button
+        mat-icon-button
+        matSuffix
+        type="button"
+        class="ver-password"
+        [attr.aria-label]="verPassword() ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+        [attr.aria-pressed]="verPassword()"
+        (click)="verPassword.set(!verPassword())"
+      >
+        <mat-icon>{{ verPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+      </button>
       @if (isEdit) {
         <mat-hint>Déjala vacía para mantener la contraseña actual.</mat-hint>
       }
@@ -57,7 +81,7 @@
 
   <mat-dialog-actions align="end">
     <button mat-button type="button" (click)="cancel()">Cancelar</button>
-    <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid || saving()">
+    <button mat-flat-button type="submit" [disabled]="saving()">
       @if (saving()) {
         <mat-spinner diameter="20" />
       } @else {

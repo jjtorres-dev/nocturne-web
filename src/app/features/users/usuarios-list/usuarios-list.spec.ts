@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { HttpErrorResponse } from '@angular/common/http';
 import { of } from 'rxjs';
+import { BreakpointObserver } from '@angular/cdk/layout';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { UsuariosList } from './usuarios-list';
@@ -43,7 +44,7 @@ describe('UsuariosList', () => {
   let dialog: { open: ReturnType<typeof vi.fn> };
   let auth: { currentUser: ReturnType<typeof vi.fn> };
 
-  async function setup(loggedInUserId = 'admin-0') {
+  async function setup(loggedInUserId = 'admin-0', mobile = false) {
     api = {
       list: vi.fn().mockResolvedValue([admin, revendedor]),
       deactivate: vi.fn().mockResolvedValue({ ...revendedor, isActive: false }),
@@ -59,6 +60,13 @@ describe('UsuariosList', () => {
         { provide: Auth, useValue: auth },
         { provide: MatDialog, useValue: dialog },
         { provide: MatSnackBar, useValue: { open: vi.fn() } },
+        {
+          provide: BreakpointObserver,
+          useValue: {
+            observe: () => of({ matches: mobile, breakpoints: {} }),
+            isMatched: () => mobile,
+          },
+        },
       ],
     }).compileComponents();
 
@@ -113,8 +121,13 @@ describe('UsuariosList', () => {
       new HttpErrorResponse({ status: 403, error: { message: 'Forbidden' } }),
     );
     await component.refresh();
+    fixture.detectChanges();
 
     expect(component.forbidden()).toBe(true);
+    const panel: HTMLElement = fixture.nativeElement.querySelector('.forbidden-state');
+    expect(panel.textContent).toContain('Acceso restringido');
+    expect(panel.textContent).toContain('Solo un administrador puede gestionar usuarios.');
+    expect(fixture.nativeElement.querySelector('.page-header')).toBeNull();
   });
 
   it('un error que no es 403 muestra el mensaje genérico, no el panel de acceso restringido', async () => {
@@ -123,8 +136,13 @@ describe('UsuariosList', () => {
 
     api.list.mockRejectedValue(new Error('network error'));
     await component.refresh();
+    fixture.detectChanges();
 
     expect(component.forbidden()).toBe(false);
+    const aviso: HTMLElement = fixture.nativeElement.querySelector('.nc-lista-error');
+    expect(aviso.textContent).toContain('No se pudieron cargar los usuarios.');
+    expect(aviso.querySelector('button')?.textContent).toContain('Reintentar');
+    expect(fixture.nativeElement.querySelector('table')).toBeNull();
   });
 
   it('desactiva un usuario ajeno tras confirmar', async () => {
@@ -167,10 +185,65 @@ describe('UsuariosList', () => {
     const rows = fixture.nativeElement.querySelectorAll('tr.mat-mdc-row');
     // admin es la primera fila (orden de la respuesta mockeada).
     const adminRow = rows[0] as HTMLElement;
-    const deactivateButton = adminRow.querySelector(
-      'td.mat-column-acciones button:nth-of-type(2)',
-    ) as HTMLButtonElement;
+    const botones = Array.from(
+      adminRow.querySelectorAll('td.mat-column-acciones button'),
+    ) as HTMLButtonElement[];
 
-    expect(deactivateButton.disabled).toBe(true);
+    expect(botones).toHaveLength(2);
+    expect(botones[0].disabled).toBe(false);
+    expect(botones[1].disabled).toBe(true);
+    expect(botones[1].textContent).toContain('block');
+  });
+
+  it('mientras carga lo dice con una línea visible, sin indicador giratorio', async () => {
+    await setup();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.nc-lista-cargando')?.textContent).toContain(
+      'Cargando usuarios…',
+    );
+    expect(fixture.nativeElement.querySelector('mat-spinner')).toBeNull();
+  });
+
+  it('muestra el estado vacío cuando el filtro no deja a nadie', async () => {
+    await setup();
+    await fixture.whenStable();
+    component.activoFilter.set('inactivos');
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('app-empty-state')?.textContent).toContain(
+      'No hay usuarios con estos filtros.',
+    );
+    expect(fixture.nativeElement.querySelector('table')).toBeNull();
+  });
+
+  describe('en celular', () => {
+    it('muestra una tarjeta por usuario con su correo, su rol y sus acciones escritas', async () => {
+      await setup('admin-0', true);
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      const tarjetas: HTMLElement[] = Array.from(
+        fixture.nativeElement.querySelectorAll('mat-card.nc-card'),
+      );
+      expect(tarjetas).toHaveLength(2);
+      expect(fixture.nativeElement.querySelector('table')).toBeNull();
+      const ajena = tarjetas[1];
+      expect(ajena.querySelector('.nc-card-title')?.textContent).toContain('Revendedor');
+      expect(ajena.querySelector('.usuario-correo')?.textContent).toContain('revendedor@nocturne.dev');
+      expect(ajena.querySelector('.nc-card-footer')?.textContent).toContain('Editar');
+      expect(ajena.querySelector('.nc-card-footer')?.textContent).toContain('Desactivar');
+    });
+
+    it('la tarjeta del propio administrador no ofrece desactivarse y dice por qué', async () => {
+      await setup('admin-0', true);
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      const propia: HTMLElement = fixture.nativeElement.querySelector('mat-card.nc-card');
+      expect(propia.querySelector('.nc-card-footer')?.textContent).toContain('Editar');
+      expect(propia.querySelector('.nc-card-footer')?.textContent).not.toContain('Desactivar');
+      expect(propia.textContent).toContain('No puedes desactivarte a ti mismo.');
+    });
   });
 });

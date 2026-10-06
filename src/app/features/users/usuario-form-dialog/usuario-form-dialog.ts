@@ -10,6 +10,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatIconModule } from '@angular/material/icon';
 import { Auth } from '../../../core/auth/auth';
 import { UsuariosApi } from '../usuarios-api';
 import {
@@ -34,6 +35,7 @@ export interface UsuarioFormDialogData {
     MatSelectModule,
     MatButtonModule,
     MatProgressSpinnerModule,
+    MatIconModule,
   ],
   selector: 'app-usuario-form-dialog',
   styleUrl: './usuario-form-dialog.scss',
@@ -58,6 +60,8 @@ export class UsuarioFormDialog {
     this.isEdit && this.data.usuario!.id === this.auth.currentUser()?.id;
 
   readonly saving = signal(false);
+  // La contraseña se escribe oculta; el ojo la deja ver, como en el login.
+  protected readonly verPassword = signal(false);
   private readonly formError = injectFormError();
   readonly errorMessage = this.formError.message;
 
@@ -80,7 +84,13 @@ export class UsuarioFormDialog {
   });
 
   async submit(): Promise<void> {
-    if (this.form.invalid || this.saving()) {
+    if (this.saving()) {
+      return;
+    }
+    // El botón siempre se puede presionar: si falta algo, se marcan los
+    // campos para que cada uno diga qué le falta.
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
       return;
     }
 

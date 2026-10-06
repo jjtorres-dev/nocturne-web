@@ -1,55 +1,58 @@
-.page-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 16px;
-
-  h1 {
-    margin: 0;
-    font-size: 1.5rem;
-  }
-}
-
-.filters {
-  display: flex;
-  gap: 16px;
-  flex-wrap: wrap;
-  margin-bottom: 8px;
-}
+// Encabezado, filtros, tablero, estados y tarjetas: estilos compartidos de
+// listas en src/styles.scss. Acá, solo lo propio de Usuarios.
 
 .users-table {
   width: 100%;
 }
 
-.loading {
-  display: flex;
-  justify-content: center;
-  padding: 48px 0;
+// Rol, estado y acciones miden lo que su contenido; lo que sobra se reparte
+// entre el nombre y el correo.
+.mat-column-role,
+.mat-column-activo,
+.mat-column-acciones {
+  width: 1%;
+  white-space: nowrap;
 }
 
+td.mat-column-role {
+  padding-inline-end: 24px;
+}
 
-.forbidden-state {
+// Botones de acción de 36 px, a la medida de su casilla.
+.nc-acciones {
+  --mat-icon-button-state-layer-size: 36px;
+}
+
+.casilla-apagada {
+  display: inline-flex;
+}
+
+// ---------------------------------------------------------------------------
+// Tarjetas (celular)
+// ---------------------------------------------------------------------------
+.usuario-nombre {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 8px;
-  padding: 64px 16px;
-  text-align: center;
-  color: var(--mat-sys-on-surface-variant);
+  gap: 10px;
+  min-width: 0;
+}
 
-  mat-icon {
-    font-size: 48px;
-    width: 48px;
-    height: 48px;
-  }
+.nc-card-header {
+  // El chip se alinea con el nombre, no con el tope del avatar.
+  align-items: center;
 
-  h2 {
-    margin: 0;
-    color: var(--mat-sys-on-surface);
+  .mat-mdc-chip {
+    flex-shrink: 0;
   }
+}
 
-  p {
-    margin: 0;
-    max-width: 360px;
-  }
+.usuario-correo {
+  overflow-wrap: anywhere;
+}
+
+// Por qué esta tarjeta no tiene "Desactivar".
+.usuario-propio {
+  margin: 10px 0 0;
+  color: var(--nc-ink-muted);
+  font-size: 0.8125rem;
 }

@@ -7,7 +7,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatCardModule } from '@angular/material/card';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -16,6 +16,8 @@ import { UsuariosApi } from '../usuarios-api';
 import { USER_ROLE_LABELS, type Usuario, type UserRole } from '../usuario.model';
 import { UsuarioFormDialog } from '../usuario-form-dialog/usuario-form-dialog';
 import { ConfirmDialog } from '../../../shared/confirm-dialog/confirm-dialog';
+import { AvatarInicial } from '../../../shared/avatar-inicial/avatar-inicial';
+import { injectIsMobile } from '../../../shared/breakpoints';
 import { EmptyState } from '../../../shared/empty-state/empty-state';
 import { extractErrorMessage } from '../../../shared/form-error';
 
@@ -31,7 +33,8 @@ type ActivoFilter = 'todos' | 'activos' | 'inactivos';
     MatButtonModule,
     MatIconModule,
     MatChipsModule,
-    MatProgressSpinnerModule,
+    MatCardModule,
+    AvatarInicial,
     MatTooltipModule,
   ],
   selector: 'app-usuarios-list',
@@ -45,10 +48,14 @@ export class UsuariosList implements OnInit {
   private readonly snackBar = inject(MatSnackBar);
 
   private readonly roleLabels = USER_ROLE_LABELS;
-  protected readonly displayedColumns = ['email', 'name', 'role', 'activo', 'acciones'];
+  protected readonly isMobile = injectIsMobile();
+  protected readonly displayedColumns = ['name', 'email', 'role', 'activo', 'acciones'];
 
   private readonly usuarios = signal<Usuario[]>([]);
   readonly loading = signal(false);
+  // La última carga falló (y no por falta de permiso): en vez de la lista
+  // se muestra el aviso con "Reintentar".
+  readonly error = signal(false);
   // GET /api/users no admite RolesGuard más allá de admin-only: si un
   // REVENDEDOR llega acá manualmente (el link ya está oculto en el
   // sidebar), el backend da 403 — se muestra un panel dedicado en vez de
@@ -78,6 +85,7 @@ export class UsuariosList implements OnInit {
 
   async refresh(): Promise<void> {
     this.loading.set(true);
+    this.error.set(false);
     try {
       const data = await this.api.list();
       this.usuarios.set(data);
@@ -86,9 +94,8 @@ export class UsuariosList implements OnInit {
       if (error instanceof HttpErrorResponse && error.status === 403) {
         this.forbidden.set(true);
       } else {
-        this.snackBar.open('No se pudieron cargar los usuarios.', 'Cerrar', {
-          duration: 4000,
-        });
+        // El aviso va en el lugar de la lista, con "Reintentar".
+        this.error.set(true);
       }
     } finally {
       this.loading.set(false);

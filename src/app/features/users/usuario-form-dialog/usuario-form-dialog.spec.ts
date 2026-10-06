@@ -185,4 +185,33 @@ describe('UsuarioFormDialog', () => {
 
     expect(component.errorMessage()).toBe('No se pudo guardar el usuario. Inténtalo de nuevo.');
   });
+
+  it('con datos faltantes no guarda: marca los campos para que cada uno diga qué le falta', async () => {
+    await setup();
+    fixture.detectChanges();
+    const guardar: HTMLButtonElement = fixture.nativeElement.querySelector('button[type="submit"]');
+    expect(guardar.disabled).toBe(false);
+
+    await component.submit();
+    fixture.detectChanges();
+
+    expect(api.create).not.toHaveBeenCalled();
+    expect(fixture.nativeElement.textContent).toContain('Escribe el correo.');
+    expect(fixture.nativeElement.textContent).toContain('El nombre es obligatorio.');
+    expect(fixture.nativeElement.textContent).toContain('La contraseña es obligatoria.');
+  });
+
+  it('la contraseña se escribe oculta y el ojo la deja ver', async () => {
+    await setup();
+    fixture.detectChanges();
+    const campo: HTMLInputElement = fixture.nativeElement.querySelector(
+      'input[formcontrolname="password"]',
+    );
+    expect(campo.type).toBe('password');
+
+    fixture.nativeElement.querySelector('button.ver-password').click();
+    fixture.detectChanges();
+
+    expect(campo.type).toBe('text');
+  });
 });

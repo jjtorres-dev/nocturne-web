@@ -2,8 +2,13 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
-  min-width: 320px;
+  min-width: 360px;
   padding-top: 4px;
+}
+
+// El botón del ojo, con el mismo margen interior que el texto del campo.
+.ver-password {
+  margin-inline-end: 8px;
 }
 
 .error-message {

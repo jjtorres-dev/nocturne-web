@@ -1,19 +1,23 @@
 @if (forbidden()) {
+  <!-- Un revendedor que llega acá a mano: una línea en un panel, como los
+       demás estados de lista. -->
   <div class="forbidden-state">
-    <mat-icon>lock</mat-icon>
-    <h2>Acceso restringido</h2>
-    <p>No tienes permiso para ver esta sección. Solo un administrador puede gestionar usuarios.</p>
+    <app-empty-state
+      icon="lock"
+      mensaje="Acceso restringido"
+      submensaje="No tienes permiso para ver esta sección. Solo un administrador puede gestionar usuarios."
+    />
   </div>
 } @else {
   <div class="page-header">
     <h1>Usuarios</h1>
-    <button mat-flat-button color="primary" (click)="openCreate()">
+    <button mat-flat-button (click)="openCreate()">
       <mat-icon>add</mat-icon>
       Nuevo usuario
     </button>
   </div>
 
-  <div class="filters">
+  <div class="filters nc-filtros">
     <mat-form-field appearance="outline">
       <mat-label>Estado</mat-label>
       <mat-select
@@ -28,20 +32,89 @@
   </div>
 
   @if (loading()) {
-    <div class="loading">
-      <mat-spinner diameter="32" />
+    <div class="nc-lista-cargando" aria-busy="true">
+      <span class="nc-lista-cargando-texto">Cargando usuarios…</span>
+      <span class="nc-skeleton"></span>
+      <span class="nc-skeleton"></span>
+      <span class="nc-skeleton"></span>
+    </div>
+  } @else if (error()) {
+    <div class="nc-lista-error" role="alert">
+      <mat-icon aria-hidden="true">error</mat-icon>
+      <p>No se pudieron cargar los usuarios. Revisa tu conexión e inténtalo de nuevo.</p>
+      <button mat-stroked-button type="button" (click)="refresh()">Reintentar</button>
+    </div>
+  } @else if (usuariosFiltrados().length === 0) {
+    <app-empty-state icon="group" mensaje="No hay usuarios con estos filtros." submensaje="Prueba cambiando o quitando los filtros." />
+  } @else if (isMobile()) {
+    <!-- Celular: una tarjeta por usuario. El propio administrador no puede
+         desactivarse: su tarjeta lo dice escrito, porque acá no hay globos. -->
+    <div class="nc-card-list">
+      @for (u of usuariosFiltrados(); track u.id) {
+        <mat-card class="nc-card">
+          <mat-card-content>
+            <div class="nc-card-header">
+              <span class="usuario-nombre">
+                <app-avatar-inicial [nombre]="u.name" [size]="32" />
+                <span class="nc-card-title">{{ u.name }}</span>
+              </span>
+              <mat-chip [highlighted]="u.isActive" [class.chip-inactive]="!u.isActive">
+                {{ u.isActive ? 'Activo' : 'Inactivo' }}
+              </mat-chip>
+            </div>
+
+            <p class="nc-card-subtitle usuario-correo">{{ u.email }}</p>
+
+            <dl class="nc-card-fields">
+              <div>
+                <dt>Rol</dt>
+                <dd>{{ roleLabel(u.role) }}</dd>
+              </div>
+            </dl>
+
+            @if (isSelf(u)) {
+              <p class="usuario-propio">No puedes desactivarte a ti mismo.</p>
+            }
+          </mat-card-content>
+
+          <div class="nc-card-footer nc-card-acciones">
+            <button mat-button (click)="openEdit(u)">
+              <mat-icon>edit</mat-icon>
+              <span>Editar</span>
+            </button>
+            @if (u.isActive) {
+              @if (!isSelf(u)) {
+                <button mat-button (click)="confirmDeactivate(u)">
+                  <mat-icon>block</mat-icon>
+                  <span>Desactivar</span>
+                </button>
+              }
+            } @else {
+              <button mat-button (click)="confirmReactivate(u)">
+                <mat-icon>restart_alt</mat-icon>
+                <span>Reactivar</span>
+              </button>
+            }
+          </div>
+        </mat-card>
+      }
     </div>
   } @else {
     <div class="table-scroll">
       <table mat-table [dataSource]="usuariosFiltrados()" class="users-table">
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef>Nombre</th>
+          <td mat-cell *matCellDef="let u">
+            <span class="nc-name-cell">
+              <app-avatar-inicial [nombre]="u.name" />
+              <span class="nc-celda-principal">{{ u.name }}</span>
+            </span>
+          </td>
+        </ng-container>
+
         <ng-container matColumnDef="email">
           <th mat-header-cell *matHeaderCellDef>Correo</th>
           <td mat-cell *matCellDef="let u">{{ u.email }}</td>
-        </ng-container>
-
-        <ng-container matColumnDef="name">
-          <th mat-header-cell *matHeaderCellDef>Nombre</th>
-          <td mat-cell *matCellDef="let u">{{ u.name }}</td>
         </ng-container>
 
         <ng-container matColumnDef="role">
@@ -58,31 +131,40 @@
           </td>
         </ng-container>
 
+        <!-- Dos casillas fijas: editar y desactivar o reactivar. En la fila
+             del propio administrador, desactivar queda apagado y su globo
+             dice por qué. -->
         <ng-container matColumnDef="acciones">
-          <th mat-header-cell *matHeaderCellDef></th>
+          <th mat-header-cell *matHeaderCellDef><span class="nc-sr-only">Acciones</span></th>
           <td mat-cell *matCellDef="let u">
-            <button mat-icon-button matTooltip="Editar" (click)="openEdit(u)">
-              <mat-icon>edit</mat-icon>
-            </button>
-            @if (u.isActive) {
-              @if (isSelf(u)) {
-                <button
-                  mat-icon-button
-                  disabled
-                  matTooltip="No puedes desactivarte a ti mismo"
-                >
-                  <mat-icon>block</mat-icon>
-                </button>
+            <div class="nc-acciones">
+              <button mat-icon-button matTooltip="Editar" aria-label="Editar" (click)="openEdit(u)">
+                <mat-icon>edit</mat-icon>
+              </button>
+              @if (u.isActive) {
+                @if (isSelf(u)) {
+                  <!-- El globo va en un envoltorio: un botón deshabilitado
+                       no recibe el puntero. -->
+                  <span class="casilla-apagada" matTooltip="No puedes desactivarte a ti mismo">
+                    <button
+                      mat-icon-button
+                      disabled
+                      aria-label="Desactivar: no puedes desactivarte a ti mismo"
+                    >
+                      <mat-icon>block</mat-icon>
+                    </button>
+                  </span>
+                } @else {
+                  <button mat-icon-button matTooltip="Desactivar" aria-label="Desactivar" (click)="confirmDeactivate(u)">
+                    <mat-icon>block</mat-icon>
+                  </button>
+                }
               } @else {
-                <button mat-icon-button matTooltip="Desactivar" (click)="confirmDeactivate(u)">
-                  <mat-icon>block</mat-icon>
+                <button mat-icon-button matTooltip="Reactivar" aria-label="Reactivar" (click)="confirmReactivate(u)">
+                  <mat-icon>restart_alt</mat-icon>
                 </button>
               }
-            } @else {
-              <button mat-icon-button matTooltip="Reactivar" (click)="confirmReactivate(u)">
-                <mat-icon>restart_alt</mat-icon>
-              </button>
-            }
+            </div>
           </td>
         </ng-container>
 
@@ -90,9 +172,5 @@
         <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
       </table>
     </div>
-
-    @if (usuariosFiltrados().length === 0) {
-      <app-empty-state icon="group" mensaje="No hay usuarios con estos filtros." submensaje="Prueba cambiando o quitando los filtros." />
-    }
   }
 }

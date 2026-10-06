@@ -58,7 +58,10 @@ describe('CambiarPassword', () => {
   }
 
   function alertText(): string | null {
-    return fixture.nativeElement.querySelector('[role="alert"]')?.textContent?.trim() ?? null;
+    // El texto del aviso, sin el nombre de su ícono.
+    return (
+      fixture.nativeElement.querySelector('[role="alert"] > span')?.textContent?.trim() ?? null
+    );
   }
 
   it('tiene los tres campos y avisa que se cerrarán todas las sesiones', () => {
@@ -204,7 +207,8 @@ describe('CambiarPassword', () => {
     expect(component.saving()).toBe(false);
     expect(component.form.controls.confirmPassword.hasError('mismatch')).toBe(true);
     expect(fixture.nativeElement.textContent).toContain('Las contraseñas no coinciden.');
-    expect(submitButton().disabled).toBe(true);
+    // El botón sigue respondiendo: al presionarlo, el campo dice qué falta.
+    expect(submitButton().disabled).toBe(false);
   });
 
   it('revalida la confirmación cuando cambia la nueva contraseña', () => {
@@ -225,5 +229,50 @@ describe('CambiarPassword', () => {
 
     httpMock.expectNone(CHANGE_URL);
     expect(router.navigate).not.toHaveBeenCalled();
+  });
+
+  it('el aviso de demasiados intentos lleva un reloj; los demás errores, el ícono de error', async () => {
+    const icono = () =>
+      fixture.nativeElement.querySelector('[role="alert"] mat-icon')?.textContent?.trim();
+
+    fill('vieja-1234', 'nueva-5678');
+    void component.submit();
+    httpMock
+      .expectOne(CHANGE_URL)
+      .flush(
+        { statusCode: 429, message: 'Demasiados intentos.' },
+        { status: 429, statusText: 'Too Many Requests' },
+      );
+    await vi.waitFor(() => expect(component.saving()).toBe(false));
+    fixture.detectChanges();
+    expect(icono()).toBe('timer');
+
+    void component.submit();
+    httpMock
+      .expectOne(CHANGE_URL)
+      .flush(
+        { statusCode: 400, message: 'La contraseña actual no es correcta' },
+        { status: 400, statusText: 'Bad Request' },
+      );
+    await vi.waitFor(() => expect(component.saving()).toBe(false));
+    fixture.detectChanges();
+    expect(icono()).toBe('error');
+  });
+
+  it('cada contraseña se escribe oculta y su ojo la deja ver', () => {
+    const campos = () =>
+      Array.from(fixture.nativeElement.querySelectorAll('input[formcontrolname]')).map(
+        (i) => (i as HTMLInputElement).type,
+      );
+    expect(campos()).toEqual(['password', 'password', 'password']);
+
+    const ojos: HTMLButtonElement[] = Array.from(
+      fixture.nativeElement.querySelectorAll('button.ver-password'),
+    );
+    ojos[1].click();
+    fixture.detectChanges();
+
+    expect(campos()).toEqual(['password', 'text', 'password']);
+    expect(ojos[1].getAttribute('aria-pressed')).toBe('true');
   });
 });

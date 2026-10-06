@@ -687,8 +687,64 @@ html {
 // Menú del usuario (pie del sidebar): el panel se renderiza en un overlay,
 // fuera del encapsulamiento del layout.
 // (Doble clase: Material fija `min-width: 112px` en `.mat-mdc-menu-panel`.)
+// Como toda capa flotante: borde fino y la sombra de capa, no la de Material.
+.mat-mdc-menu-panel {
+  --mat-menu-container-elevation-shadow: var(--nc-shadow-overlay);
+
+  border: 1px solid var(--nc-rule);
+}
+
+// Dos renglones del tablero: 40 px (44 px en celular), ícono de 20 px en
+// tinta suave, y una línea que separa "Cerrar sesión" de lo demás.
 .mat-mdc-menu-panel.nc-user-menu {
-  min-width: 208px;
+  --mat-menu-item-label-text-size: 0.875rem;
+  --mat-menu-item-label-text-tracking: 0;
+  --mat-menu-item-label-text-color: var(--nc-ink);
+  --mat-menu-item-icon-color: var(--nc-ink-muted);
+  --mat-menu-item-icon-size: 20px;
+  --mat-menu-item-spacing: 10px;
+  --mat-menu-item-leading-spacing: 12px;
+  --mat-menu-item-with-icon-leading-spacing: 12px;
+  --mat-menu-item-hover-state-layer-color: var(--nc-surface-sunken);
+  --mat-menu-item-focus-state-layer-color: var(--nc-surface-sunken);
+
+  // El ancho del riel menos su margen: el menú sale de la tarjeta del
+  // usuario y mide lo mismo.
+  min-width: 216px;
+
+  .mat-mdc-menu-content {
+    padding-block: 4px;
+  }
+
+  .mat-mdc-menu-item {
+    min-height: 40px;
+
+    &:focus-visible {
+      outline: 2px solid var(--nc-focus);
+      outline-offset: -2px;
+    }
+  }
+
+  .mat-mdc-menu-item + .mat-mdc-menu-item {
+    border-top: 1px solid var(--nc-rule);
+  }
+
+  // La sección en la que ya se está.
+  .mat-mdc-menu-item.nc-menu-actual {
+    --mat-menu-item-icon-color: var(--nc-ink);
+
+    font-weight: 600;
+
+    .mat-icon {
+      font-variation-settings: 'FILL' 1;
+    }
+  }
+
+  @media (max-width: 767.98px) {
+    .mat-mdc-menu-item {
+      min-height: 44px;
+    }
+  }
 }
 
 // Ícono/avatar (shared/service-icon, shared/avatar-inicial) junto al nombre

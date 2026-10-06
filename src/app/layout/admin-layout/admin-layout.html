@@ -39,7 +39,12 @@
           </button>
 
           <mat-menu #userMenu="matMenu" class="nc-user-menu" yPosition="above">
-            <a mat-menu-item routerLink="/configuracion" (click)="closeIfMobile(sidenav)">
+            <a
+              mat-menu-item
+              routerLink="/configuracion"
+              routerLinkActive="nc-menu-actual"
+              (click)="closeIfMobile(sidenav)"
+            >
               <mat-icon>settings</mat-icon>
               <span>Configuración</span>
             </a>
