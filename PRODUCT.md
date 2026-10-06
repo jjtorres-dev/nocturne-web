@@ -92,10 +92,6 @@ Terminología del producto (en español, tal como aparece en la interfaz):
 servicio, cuenta, perfil, pantallas, proveedor, cliente, revendedor, venta,
 combo, vencimiento, renovación, cuenta caída, reposición, gasto.
 
-Sin decidir:
-
-- Qué permisos exactos debería tener un revendedor más allá de los actuales.
-
 ## Brand Commitments
 
 - El nombre **Nocturne** es fijo (confirmado).
@@ -121,5 +117,5 @@ Sin decidir:
    se piden, fáciles de copiar sin exponerlas de más.
 4. **Lo que vence manda.** Vencimientos y cuentas caídas son lo que cuesta
    dinero si se pasa por alto; deben ser imposibles de ignorar.
-5. **Cada rol ve lo suyo.** El revendedor no debe encontrarse con acciones
-   que no puede ejecutar.
+5. **Cada negocio es privado.** Un revendedor nunca ve datos de otro; el
+   administrador siempre sabe de quién es cada registro.
