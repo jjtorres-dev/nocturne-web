@@ -172,4 +172,28 @@ describe('ComboFormDialog', () => {
 
     expect(component.errorMessage()).toBe('No se pudo guardar el combo. Inténtalo de nuevo.');
   });
+
+  it('con datos faltantes no guarda: marca los campos para que cada uno diga qué le falta', async () => {
+    await setup();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    const guardar: HTMLButtonElement = fixture.nativeElement.querySelector('button[type="submit"]');
+    expect(guardar.disabled).toBe(false);
+
+    await component.submit();
+    fixture.detectChanges();
+
+    expect(api.create).not.toHaveBeenCalled();
+    expect(fixture.nativeElement.textContent).toContain('El nombre es obligatorio.');
+    expect(fixture.nativeElement.textContent).toContain('Selecciona al menos 2 servicios.');
+  });
+
+  it('mientras cargan los servicios lo dice con una línea visible', async () => {
+    await setup();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.cargando')?.textContent).toContain(
+      'Cargando servicios…',
+    );
+  });
 });

@@ -131,4 +131,17 @@ describe('ServicioFormDialog', () => {
     fixture.detectChanges();
     expect(fixture.nativeElement.textContent).not.toContain('No es lo que pagas al proveedor');
   });
+
+  it('con datos faltantes no guarda: marca los campos para que cada uno diga qué le falta', async () => {
+    fixture.detectChanges();
+    const guardar: HTMLButtonElement = fixture.nativeElement.querySelector('button[type="submit"]');
+    expect(guardar.disabled).toBe(false);
+
+    await component.submit();
+    fixture.detectChanges();
+
+    expect(api.create).not.toHaveBeenCalled();
+    expect(component.form.controls.nombre.touched).toBe(true);
+    expect(fixture.nativeElement.textContent).toContain('El nombre es obligatorio.');
+  });
 });

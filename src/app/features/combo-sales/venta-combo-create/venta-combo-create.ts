@@ -36,6 +36,7 @@ import { Auth } from '../../../core/auth/auth';
 import { InfoHint } from '../../../shared/info-hint/info-hint';
 import { InfoToggle } from '../../../shared/info-hint/info-toggle';
 import { FechaField } from '../../../shared/fecha-field/fecha-field';
+import { ServiceIcon } from '../../../shared/service-icon/service-icon';
 
 // Sentinel para la opción "+ Nuevo cliente" del selector — nunca un id real.
 const NUEVO_CLIENTE = '__nuevo_cliente__';
@@ -76,6 +77,7 @@ function fechaFinPosteriorValidator(
     MatButtonModule,
     MatIconModule,
     MatProgressSpinnerModule,
+    ServiceIcon,
     MetodoPagoSelect,
   ],
   selector: 'app-venta-combo-create',
@@ -290,7 +292,13 @@ export class VentaComboCreate implements OnInit {
   }
 
   async submit(): Promise<void> {
-    if (this.form.invalid || this.saving() || !this.selectedCombo()) {
+    if (this.saving() || this.loadingOptions()) {
+      return;
+    }
+    // El botón siempre se puede presionar: si falta algo, se marcan los
+    // campos para que cada uno diga qué le falta.
+    if (this.form.invalid || !this.selectedCombo()) {
+      this.form.markAllAsTouched();
       return;
     }
 

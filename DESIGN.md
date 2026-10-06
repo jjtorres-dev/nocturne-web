@@ -359,9 +359,9 @@ Nocturne es la cartelera de un cine de barrio a plena luz: cada cuenta es una sa
 
 Es una superficie de operación, densa y plana: filas de 36 a 50 px, paneles pegados a 16 px, color plano sin degradados y sin sombras en nada que esté apoyado en el tablero. El color fuerte se reserva para lo que cuesta dinero si se pasa por alto (vencidas, por vencer, caídas); todo lo demás es tinta sobre blanco. Celular y escritorio valen lo mismo: el mismo tablero se pliega a una columna con una barra inferior de cinco destinos.
 
-**Alcance actual.** Están rediseñados en este mundo el layout del panel (riel, barra superior, barra inferior en celular), el buscador global, Inicio, el login (la fachada del mismo cine: a un lado el letrero, al otro la taquilla; con él se rehízo el favicon) las dos listas de uso diario, Ventas y Vencimientos, con los diálogos que se abren desde ellas (nueva venta, editar, renovar, finalizar), Cuentas (la lista, el detalle y sus diálogos) y Clientes y proveedores (la lista y el diálogo de contacto).
+**Alcance actual.** Están rediseñados en este mundo el layout del panel (riel, barra superior, barra inferior en celular), el buscador global, Inicio, el login (la fachada del mismo cine: a un lado el letrero, al otro la taquilla; con él se rehízo el favicon) las dos listas de uso diario, Ventas y Vencimientos, con los diálogos que se abren desde ellas (nueva venta, editar, renovar, finalizar), Cuentas (la lista, el detalle y sus diálogos), Clientes y proveedores (la lista y el diálogo de contacto), Servicios y Combos (cada lista y su diálogo) y Ventas de combos (la lista y la página "Nueva venta de combo").
 
-Con Ventas y Vencimientos llegaron reglas que son GLOBALES y viven en `src/styles.scss`: el tablero de las listas, las reglas de diálogos, las de campos y las de botones. Las que se enganchan a Material (tablero blanco con borde, encabezados sobre el riel, margen de celdas, alto de filas, título y zonas de los diálogos, botones de texto en tinta) y el vacío compartido (`app-empty-state`) ya cambian el aspecto de todas las demás listas y diálogos de la app sin que nadie los haya tocado. Las pantallas que todavía no se rediseñaron las reciben sin revisar. Las piezas que se piden por clase (celda de dos renglones, casillas de acción, el cuándo, filtros compactos, carga y error de lista, tarjetas de celular) las usan Ventas, Vencimientos, Cuentas y Clientes y proveedores. Las demás pantallas (Ventas de combos, Servicios, Combos, Gastos, Contabilidad, Usuarios, Configuración) todavía cargan con el indicador giratorio de Material y deben su propio rediseño dentro de la Cartelera; de ellas, Ventas de combos y Servicios ya guardan sus filtros tras el botón "Filtros" en celular.
+Con Ventas y Vencimientos llegaron reglas que son GLOBALES y viven en `src/styles.scss`: el tablero de las listas, las reglas de diálogos, las de campos y las de botones. Las que se enganchan a Material (tablero blanco con borde, encabezados sobre el riel, margen de celdas, alto de filas, título y zonas de los diálogos, botones de texto en tinta) y el vacío compartido (`app-empty-state`) ya cambian el aspecto de todas las demás listas y diálogos de la app sin que nadie los haya tocado. Las pantallas que todavía no se rediseñaron las reciben sin revisar. Las piezas que se piden por clase (celda de dos renglones, casillas de acción, el cuándo, filtros compactos, carga y error de lista, tarjetas de celular) las usan Ventas, Vencimientos, Cuentas, Clientes y proveedores, Servicios, Combos y Ventas de combos. Las demás pantallas (el detalle de una venta de combo y su diálogo de edición, Gastos, Contabilidad, Usuarios, Configuración) todavía cargan con el indicador giratorio de Material y deben su propio rediseño dentro de la Cartelera.
 
 **Key Characteristics:**
 - Tablero claro: fondo ópalo cálido, paneles blancos, líneas finas, riel negro de 2 px bajo cada título.
@@ -467,7 +467,7 @@ Cortes:
 - **Menos de 900 px (solo el login):** una columna. El letrero pasa a ser una banda arriba con la marca, su fila de bombillas y la línea que dice qué es Nocturne; debajo, la misma columna del formulario, centrada, con 20 px a los lados.
 - **Menos de 1400 px:** el botón de fila de Inicio acorta su texto ("Renovar").
 - **Desde 1100 px:** la fila de cuentas por pagar pasa a un solo renglón en columnas. **Menos de 1100 px:** la rejilla de Inicio pasa a una columna en este orden: cuentas caídas, cuentas por pagar, ganancia, salas.
-- **Menos de 768 px** (el mismo corte de `shared/breakpoints.ts`): el riel se vuelve un panel lateral sobre el contenido (hasta 288 px o 86 % del ancho) y aparece la barra inferior de 60 px más el área segura, con cuatro destinos diarios y "Menú". Las tarjetas de estado pasan a una rejilla 2×2 con 6 px de separación; los paneles se separan 12 px; los objetivos táctiles suben a 44 px; el margen de página baja a 16 px. Ventas, Vencimientos, Cuentas y Clientes y proveedores cambian su tablero por una lista de tarjetas (12 px entre ellas); las demás tablas hacen scroll horizontal dentro de `.table-scroll`, con las celdas en un renglón. El encabezado de página se pliega, los filtros de toda lista con más de uno se guardan tras un botón "Filtros" a todo el ancho (`app-filtros-plegables`, que dice cuántos están aplicando) y los diálogos ocupan el ancho menos 32 px.
+- **Menos de 768 px** (el mismo corte de `shared/breakpoints.ts`): el riel se vuelve un panel lateral sobre el contenido (hasta 288 px o 86 % del ancho) y aparece la barra inferior de 60 px más el área segura, con cuatro destinos diarios y "Menú". Las tarjetas de estado pasan a una rejilla 2×2 con 6 px de separación; los paneles se separan 12 px; los objetivos táctiles suben a 44 px; el margen de página baja a 16 px. Ventas, Vencimientos, Cuentas, Clientes y proveedores, Servicios, Combos y Ventas de combos cambian su tablero por una lista de tarjetas (12 px entre ellas); las demás tablas hacen scroll horizontal dentro de `.table-scroll`, con las celdas en un renglón. El encabezado de página se pliega, los filtros de toda lista con más de uno se guardan tras un botón "Filtros" a todo el ancho (`app-filtros-plegables`, que dice cuántos están aplicando) y los diálogos ocupan el ancho menos 32 px.
 
 **Regla del Teclado.** En el login en celular, los campos y el botón tienen que seguir a la vista con el teclado abierto. Cuando el área visible se achica (`visualViewport` por debajo del 75 % del alto de la ventana) o la ventana mide menos de 520 px de alto, la banda se compacta a un renglón (marca a 1.5rem sobre bombillas de 2 px), se ocultan la línea que dice qué es Nocturne y la línea de ayuda, el título baja a 1.375rem y el formulario sube hasta el borde de lo visible.
 
@@ -508,7 +508,7 @@ Las líneas tienen tres pesos con papel fijo: 1 px `rule` separa, 1 px `rule-fie
 - **Text:** texto en tinta, con capa de estado y onda en tinta (`--mat-button-text-*`). Es "Cancelar" y toda acción secundaria de un diálogo. Nunca rojo.
 - **Icon:** ícono en tinta suave (`--mat-icon-button-icon-color`). Son las acciones de fila de Ventas y el ícono de ayuda (ⓘ) junto a un campo o una casilla, que es una ayuda y no una alerta.
 - **Hover / Focus:** capa de estado de Material; foco con anillo de 2 px en `focus`.
-- **Botón que responde:** en los diálogos de venta (nueva, editar, renovar), en los de Cuentas y en el de contacto el botón principal está habilitado en reposo. Al presionarlo con datos faltantes se marcan todos los campos y cada uno dice qué le falta; solo deja de responder mientras guarda (y, en "Nueva venta", mientras cargan las opciones). Los demás formularios de la app todavía lo deshabilitan mientras el formulario no es válido: es deuda, no la regla.
+- **Botón que responde:** en los diálogos de venta (nueva, editar, renovar), en los de Cuentas, en los de contacto, servicio y combo y en "Nueva venta de combo" el botón principal está habilitado en reposo. Al presionarlo con datos faltantes se marcan todos los campos y cada uno dice qué le falta; solo deja de responder mientras guarda (y, en "Nueva venta", mientras cargan las opciones). Los demás formularios de la app todavía lo deshabilitan mientras el formulario no es válido: es deuda, no la regla.
 
 ### Chips
 - **Style:** `mat-chip` con fondo `-tint`, texto `-ink` y contorno del estado, esquina de 3 px.
@@ -519,7 +519,7 @@ Las líneas tienen tres pesos con papel fijo: 1 px `rule` separa, 1 px `rule-fie
 - **Título de panel** (`.nc-panel-title`): registro Title, margen `10px 14px 8px`, riel negro de 2 px debajo. Puede llevar a la derecha un enlace o una leyenda en ancho normal. No lleva totales: el conteo ya está en su tarjeta de estado y cada fila dice lo suyo.
 - **Vacío y error dentro de un panel de Inicio:** una línea dentro del panel, margen `12px 14px`; el vacío bueno lleva un ícono en verde al día, el error va en tinta bermellón. Los de una lista entera están en "Estados de una lista".
 - **Barra de carga** (`.nc-skeleton`, clase global de `src/styles.scss`): bloque de 36 px en ópalo hundido que ocupa el lugar de una fila; pulsa, salvo con movimiento reducido.
-- **Tarjeta de lista** (`.nc-card`, celular): blanca, borde de 1 px `rule`, sin sombra. Arriba el título en 600 a 1.05rem con su estado al otro extremo; debajo un renglón secundario a 0.8125rem en tinta suave; después los datos como pares etiqueta y valor (etiqueta de 104 px en tinta suave, 8 px entre renglones); al pie, tras una línea `rule`, las acciones.
+- **Tarjeta de lista** (`.nc-card`, celular): blanca, borde de 1 px `rule`, sin sombra. Arriba el título en 600 a 1.05rem con su estado al otro extremo; debajo un renglón secundario a 0.8125rem en tinta suave; después los datos como pares etiqueta y valor (etiqueta de 104 px en tinta suave, 8 px entre renglones); al pie, tras una línea `rule`, las acciones. Cuando son varias y ninguna es la principal van en casillas iguales de 48 px, con el ícono en tinta suave arriba y el nombre escrito debajo a 0.75rem (`.nc-card-acciones`).
 
 ### Inputs / Fields
 - **Buscador:** 36 px de alto, fondo ópalo hundido, borde de 1 px `rule-field`, esquina de 3 px, lupa en tinta suave.
@@ -547,13 +547,13 @@ El tablero: toda tabla de la app, por reglas globales de `src/styles.scss`.
 - **Encabezado:** 40 px, registro Encabezado en tinta, en un renglón, sobre el riel negro de 2 px. La columna de acciones no lleva texto visible, solo su nombre para lectores de pantalla.
 - **Filas:** 48 px como mínimo, línea fina entre filas y ninguna bajo la última; al pasar el puntero cambian a ópalo hundido en 160 ms. Celdas con 8 px a cada lado (14 px la primera, al borde del tablero).
 - **Celda de dos renglones** (`.nc-celda`): el dato principal en 600 y en un solo renglón (`.nc-celda-principal`) y debajo el secundario a 0.8125rem en tinta suave (`.nc-celda-sub`), que puede partirse sin dejar una palabra suelta pero nunca se recorta. Margen vertical de 6 px, 1 px entre renglones. Con un ícono de servicio, este mide 28 px y va a la izquierda, a 10 px.
-- **Montos:** alineados a la derecha, encabezado incluido, en un renglón; el monto en otra moneda va debajo, entre paréntesis.
+- **Montos:** alineados a la derecha, encabezado incluido, en un renglón (`.nc-celda-monto`); el monto en otra moneda va debajo, entre paréntesis.
 - **Casillas de acción** (`.nc-acciones`): Regla de las Casillas Fijas; cada casilla es un botón de ícono con su nombre en un globo y para lectores de pantalla.
 - **El cuándo** (`.nc-cuando`): registro Función en la tinta del estado que le da su clase `.nc-estado-*`; sin clase de estado, en tinta.
 - **Enlace de combo** (`.combo-badge`): "Parte de combo C-00001" con un ícono de eslabón de 16 px, registro Label en rojo butaca, en un renglón. Lleva a la venta de combo.
-- **En celular:** Ventas, Vencimientos, Cuentas y Clientes y proveedores pasan a tarjetas de lista; las demás tablas siguen en su tablero con scroll horizontal.
+- **En celular:** Ventas, Vencimientos, Cuentas, Clientes y proveedores, Servicios, Combos y Ventas de combos pasan a tarjetas de lista; las demás tablas siguen en su tablero con scroll horizontal.
 
-Las celdas de dos renglones, las casillas, el cuándo y el enlace de combo se piden por clase: los usan Ventas, Vencimientos, Cuentas y Clientes y proveedores (el cuándo y el enlace de combo, solo las dos primeras). Lo demás de esta lista ya se aplica solo a toda tabla.
+Las celdas de dos renglones, las casillas, el cuándo y el enlace de combo se piden por clase: los usan Ventas, Vencimientos, Cuentas, Clientes y proveedores, Servicios, Combos y Ventas de combos (el cuándo y el enlace de combo, solo las dos primeras). Lo demás de esta lista ya se aplica solo a toda tabla.
 
 ### Estados de una lista
 Los tres son globales. Reemplazan al indicador giratorio y al ícono grande centrado.
@@ -562,7 +562,7 @@ Los tres son globales. Reemplazan al indicador giratorio y al ícono grande cent
 - **Error de carga** (`.nc-lista-error`): un aviso sobre tinte vencida, sin borde, margen interno de 14 px: ícono en tinta bermellón, una frase en tinta que dice qué pasó y cómo seguir, y un botón delineado "Reintentar". Si no entra en un renglón, el botón baja.
 - **Vacío** (`app-empty-state`): una línea dentro de un panel de tablero (blanco, borde `rule`, margen interno de 14 px): ícono de 24 px en tinta tenue, el mensaje en tinta y, si hay algo que hacer, una segunda línea a 0.8125rem en tinta suave ("Prueba cambiando o quitando los filtros."). El ícono pasa a verde al día solo cuando el vacío es una buena noticia (opción `bueno`: "Ningún cliente tiene una venta vencida."). Sin ilustración ni ícono gigante.
 
-La carga y el error los usan Ventas, Vencimientos, Cuentas y Clientes y proveedores; el vacío es un componente compartido y ya se ve así en todas las listas y en el buscador.
+La carga y el error los usan Ventas, Vencimientos, Cuentas, Clientes y proveedores, Servicios, Combos y Ventas de combos; el vacío es un componente compartido y ya se ve así en todas las listas y en el buscador.
 
 ### Ventas
 El tablero de todas las ventas: encontrar una y actuar sin abrir nada más.
@@ -593,6 +593,33 @@ La agenda del negocio: encontrar a alguien y escribirle.
 - **Acciones:** abrir el chat es la acción de la pantalla y va con su nombre: "WhatsApp", delineado de 36 px con ícono, un enlace que abre el chat en otra pestaña. Después, tres casillas fijas: copiar número, editar y desactivar o reactivar.
 - **Celular:** una tarjeta por contacto: avatar y nombre arriba con su chip de estado; tipo y dueño en el renglón secundario. El número es un botón de 48 px con borde `rule-field` que lo copia al tocarlo: a un lado el número en 600, al otro "Copiar número" con su ícono en tinta suave. Al pie, "Abrir WhatsApp" de 48 px, relleno en tinta, toma el ancho libre; "Editar" y "Desactivar" o "Reactivar" van en casillas de 72 px con el ícono arriba y el nombre debajo.
 - **Número:** se muestra y se copia tal como está guardado; solo el enlace del chat lo limpia.
+
+### Servicios
+El catálogo de lo que se vende.
+
+- **Encabezado y filtros:** "Servicios que vendes" con "Nuevo servicio" a la derecha; dos filtros compactos: Cómo se vende y Estado.
+- **Columnas:** Nombre (ícono del servicio y el nombre en 600), Cómo se vende, Duración, Perfiles por cuenta, Precio de venta, Dueño (solo el administrador), Estado y dos casillas fijas: editar y desactivar o reactivar. "Cómo se vende" es una frase y puede partirse en dos renglones; las demás miden lo que su contenido y lo que sobra va al nombre. El precio va a la derecha, en 600.
+- **Celular:** una tarjeta por servicio: ícono y nombre arriba con su chip de estado; cómo se vende y el dueño en el renglón secundario; Duración, Perfiles por cuenta y Precio de venta como pares. "Perfiles por cuenta" solo aparece en lo que se vende por perfil y, en el plan familiar, se llama "Cupos del plan", igual que en el formulario. Al pie, "Editar" y "Desactivar" o "Reactivar" en casillas iguales.
+- **Diálogo:** las etiquetas siguen al tipo elegido ("Precio de venta por perfil", "por cupo" o "de la cuenta"; "Perfiles por cuenta" o "Cupos del plan" solo cuando aplica), cada una con su ícono de ayuda.
+
+### Combos
+Los paquetes de servicios que se venden juntos.
+
+- **Encabezado y filtro:** "Combos" con "Nuevo combo" a la derecha; un solo filtro compacto, Estado, que no se pliega en celular.
+- **Columnas:** Nombre en 600, Descripción en tinta suave, Servicios, Precio de venta a la derecha, Dueño (solo el administrador), Estado y dos casillas fijas.
+- **Servicios:** la pila de íconos (`app-service-icon-stack`, 28 px, superpuestos 8 px con un anillo blanco) y, al lado, los nombres escritos en tinta suave unidos con " + ". No se usan chips: un chip es un estado.
+- **Celular:** una tarjeta por combo: nombre y chip de estado; descripción y dueño debajo; la pila de íconos con los nombres; Precio de venta; al pie, "Editar" y "Desactivar" o "Reactivar".
+- **Diálogo:** mientras cargan los servicios lo dice con una línea y barras. Los servicios elegidos se listan debajo del selector como fichas con su ícono y un botón para quitarlos.
+
+### Ventas de combos
+El mismo tablero que Ventas, para lo que se vende en paquete.
+
+- **Encabezado y filtros:** "Ventas de combos" con "Nueva venta de combo" a la derecha; tres filtros compactos: Cliente, Combo y Estado.
+- **Columnas:** Cliente (nombre sobre el código de venta en Code y rojo butaca, que es el enlace al detalle), Combo (la pila de íconos de sus servicios y el nombre en 600), Vence (la fecha sobre "desde" y su fecha de inicio), Cobrado, Dueño (solo el administrador), Estado (chip, más "Cuenta caída" si corresponde) y acciones. Las mismas medidas que Ventas.
+- **Vence:** como en Ventas: tinta bermellón si ya pasó y tinta ámbar si vence dentro de 3 días, solo en una venta sin finalizar.
+- **Acciones:** tres casillas fijas: ver detalle, renovar y finalizar. Una venta finalizada lleva ver y reactivar, y deja la tercera vacía.
+- **Celular:** una tarjeta por venta: cliente y chips de estado arriba; código (enlace) y dueño; Combo con su pila de íconos, Desde y Vence, Cobrado. Al pie, "Ver detalle", "Renovar" y "Finalizar" en casillas iguales; la finalizada lleva "Ver detalle" y "Reactivar".
+- **Nueva venta de combo:** es una página, no un diálogo. Dos paneles a la par desde 1100 px (hasta 1040 px en total): a la izquierda los datos de la venta; a la derecha "¿Qué le das de cada servicio?" sobre su riel, con un tramo por servicio (ícono, nombre, cuenta y perfil) separado por una línea `rule`. Antes de elegir el combo ese panel dice "Elige un combo para ver sus servicios." Por debajo de 1100 px, una columna de 560 px como máximo. Las acciones van al pie, tras una línea `rule`; en celular se reparten el ancho.
 
 ### Vencimientos
 La lista de cobro: quién vence, cuándo, y el recordatorio a un toque.

@@ -6,7 +6,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatCardModule } from '@angular/material/card';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -19,6 +19,7 @@ import { Auth, UserRole } from '../../../core/auth/auth';
 import { EmptyState } from '../../../shared/empty-state/empty-state';
 import { ServiceIconStack } from '../../../shared/service-icon-stack/service-icon-stack';
 import { extractErrorMessage } from '../../../shared/form-error';
+import { injectIsMobile } from '../../../shared/breakpoints';
 
 type ActivoFilter = 'todos' | 'activos' | 'inactivos';
 
@@ -34,7 +35,7 @@ type ActivoFilter = 'todos' | 'activos' | 'inactivos';
     MatButtonModule,
     MatIconModule,
     MatChipsModule,
-    MatProgressSpinnerModule,
+    MatCardModule,
     MatTooltipModule,
   ],
   selector: 'app-combos-list',
@@ -50,6 +51,7 @@ export class CombosList implements OnInit {
   protected readonly isAdmin = computed(
     () => this.auth.currentUser()?.role === UserRole.ADMIN,
   );
+  protected readonly isMobile = injectIsMobile();
   protected readonly displayedColumns = computed(() =>
     this.isAdmin()
       ? ['nombre', 'descripcion', 'servicios', 'precioCombo', 'dueno', 'activo', 'acciones']
@@ -58,6 +60,9 @@ export class CombosList implements OnInit {
 
   readonly combos = signal<Combo[]>([]);
   readonly loading = signal(false);
+  // La última carga falló: en vez de la lista se muestra el aviso con
+  // "Reintentar".
+  readonly error = signal(false);
 
   activoFilter: ActivoFilter = 'activos';
 
@@ -67,6 +72,7 @@ export class CombosList implements OnInit {
 
   async refresh(): Promise<void> {
     this.loading.set(true);
+    this.error.set(false);
     try {
       const data = await this.api.list({
         activo:
@@ -76,9 +82,8 @@ export class CombosList implements OnInit {
       });
       this.combos.set(data);
     } catch {
-      this.snackBar.open('No se pudieron cargar los combos.', 'Cerrar', {
-        duration: 4000,
-      });
+      // El aviso va en el lugar de la lista, con "Reintentar".
+      this.error.set(true);
     } finally {
       this.loading.set(false);
     }
@@ -132,6 +137,11 @@ export class CombosList implements OnInit {
         void this.reactivate(combo);
       }
     });
+  }
+
+  // Los nombres de los servicios, escritos junto a su pila de íconos.
+  protected serviciosLabel(combo: Combo): string {
+    return combo.servicios.map((s) => s.nombre).join(' + ');
   }
 
   private async deactivate(combo: Combo): Promise<void> {

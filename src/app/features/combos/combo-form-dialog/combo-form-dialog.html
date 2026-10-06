@@ -3,13 +3,16 @@
 <form [formGroup]="form" (ngSubmit)="submit()">
   <mat-dialog-content class="form-grid">
     @if (loadingOptions()) {
-      <div class="loading">
-        <mat-spinner diameter="32" />
+      <div class="cargando" aria-busy="true">
+        <span class="nc-lista-cargando-texto">Cargando servicios…</span>
+        <span class="nc-skeleton"></span>
+        <span class="nc-skeleton"></span>
+        <span class="nc-skeleton"></span>
       </div>
     } @else {
       <mat-form-field appearance="outline">
         <mat-label>Nombre</mat-label>
-        <input matInput formControlName="nombre" />
+        <input matInput formControlName="nombre" autocomplete="off" />
         @if (form.controls.nombre.hasError('required')) {
           <mat-error>El nombre es obligatorio.</mat-error>
         }
@@ -36,8 +39,9 @@
         <mat-chip-set class="selected-servicios">
           @for (id of form.controls.servicioIds.value; track id) {
             <mat-chip (removed)="removeServicio(id)">
+              <app-service-icon matChipAvatar [nombre]="servicioNombre(id)" [size]="20" />
               {{ servicioNombre(id) }}
-              <button matChipRemove>
+              <button matChipRemove [attr.aria-label]="'Quitar ' + servicioNombre(id)">
                 <mat-icon>cancel</mat-icon>
               </button>
             </mat-chip>
@@ -47,7 +51,7 @@
 
       <mat-form-field appearance="outline">
         <mat-label>Precio de venta del combo</mat-label>
-        <input matInput type="number" step="0.01" formControlName="precioCombo" />
+        <input matInput type="number" inputmode="decimal" step="0.01" formControlName="precioCombo" />
         <mat-hint>Lo que cobras a tu cliente por todo el combo junto.</mat-hint>
         @if (form.controls.precioCombo.hasError('required')) {
           <mat-error>El precio es obligatorio.</mat-error>
@@ -65,7 +69,7 @@
 
   <mat-dialog-actions align="end">
     <button mat-button type="button" (click)="cancel()">Cancelar</button>
-    <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid || saving() || loadingOptions()">
+    <button mat-flat-button type="submit" [disabled]="saving() || loadingOptions()">
       @if (saving()) {
         <mat-spinner diameter="20" />
       } @else {

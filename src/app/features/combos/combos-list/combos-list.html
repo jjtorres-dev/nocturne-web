@@ -1,12 +1,12 @@
 <div class="page-header">
   <h1>Combos</h1>
-  <button mat-flat-button color="primary" (click)="openCreate()">
+  <button mat-flat-button (click)="openCreate()">
     <mat-icon>add</mat-icon>
     Nuevo combo
   </button>
 </div>
 
-<div class="filters">
+<div class="filters nc-filtros">
   <mat-form-field appearance="outline">
     <mat-label>Estado</mat-label>
     <mat-select [(ngModel)]="activoFilter" (selectionChange)="refresh()">
@@ -18,15 +18,87 @@
 </div>
 
 @if (loading()) {
-  <div class="loading">
-    <mat-spinner diameter="32" />
+  <div class="nc-lista-cargando" aria-busy="true">
+    <span class="nc-lista-cargando-texto">Cargando combos…</span>
+    <span class="nc-skeleton"></span>
+    <span class="nc-skeleton"></span>
+    <span class="nc-skeleton"></span>
+    <span class="nc-skeleton"></span>
+  </div>
+} @else if (error()) {
+  <div class="nc-lista-error" role="alert">
+    <mat-icon aria-hidden="true">error</mat-icon>
+    <p>No se pudieron cargar los combos. Revisa tu conexión e inténtalo de nuevo.</p>
+    <button mat-stroked-button type="button" (click)="refresh()">Reintentar</button>
+  </div>
+} @else if (combos().length === 0) {
+  <app-empty-state icon="inventory_2" mensaje="No hay combos con estos filtros." submensaje="Prueba cambiando o quitando los filtros." />
+} @else if (isMobile()) {
+  <!-- Celular: una tarjeta por combo, con la pila de íconos de sus servicios
+       y sus nombres escritos. -->
+  <div class="nc-card-list">
+    @for (c of combos(); track c.id) {
+      <mat-card class="nc-card">
+        <mat-card-content>
+          <div class="nc-card-header">
+            <span class="nc-card-title">{{ c.nombre }}</span>
+            <mat-chip [highlighted]="c.activo" [class.chip-inactive]="!c.activo">
+              {{ c.activo ? 'Activo' : 'Inactivo' }}
+            </mat-chip>
+          </div>
+
+          @if (c.descripcion || isAdmin()) {
+            <p class="nc-card-subtitle">
+              @if (c.descripcion) {
+                <span>{{ c.descripcion }}</span>
+              }
+              @if (isAdmin()) {
+                <span class="combo-dueno">Dueño: {{ c.owner.name }}</span>
+              }
+            </p>
+          }
+
+          <div class="combo-servicios">
+            <app-service-icon-stack [servicios]="c.servicios" />
+            <span class="combo-servicios-nombres">{{ serviciosLabel(c) }}</span>
+          </div>
+
+          <dl class="nc-card-fields">
+            <div>
+              <dt>Precio de venta</dt>
+              <dd class="precio">{{ c.precioCombo | soles }}</dd>
+            </div>
+          </dl>
+        </mat-card-content>
+
+        <div class="nc-card-footer nc-card-acciones">
+          <button mat-button (click)="openEdit(c)">
+            <mat-icon>edit</mat-icon>
+            <span>Editar</span>
+          </button>
+          @if (c.activo) {
+            <button mat-button (click)="confirmDeactivate(c)">
+              <mat-icon>block</mat-icon>
+              <span>Desactivar</span>
+            </button>
+          } @else {
+            <button mat-button (click)="confirmReactivate(c)">
+              <mat-icon>restart_alt</mat-icon>
+              <span>Reactivar</span>
+            </button>
+          }
+        </div>
+      </mat-card>
+    }
   </div>
 } @else {
   <div class="table-scroll">
     <table mat-table [dataSource]="combos()" class="combos-table">
       <ng-container matColumnDef="nombre">
         <th mat-header-cell *matHeaderCellDef>Nombre</th>
-        <td mat-cell *matCellDef="let c">{{ c.nombre }}</td>
+        <td mat-cell *matCellDef="let c">
+          <span class="nc-celda-principal">{{ c.nombre }}</span>
+        </td>
       </ng-container>
 
       <ng-container matColumnDef="descripcion">
@@ -34,23 +106,21 @@
         <td mat-cell *matCellDef="let c">{{ c.descripcion ?? '—' }}</td>
       </ng-container>
 
+      <!-- La pila de íconos y, al lado, los nombres escritos: los íconos
+           solos no dicen qué servicio es cuando no tiene marca. -->
       <ng-container matColumnDef="servicios">
         <th mat-header-cell *matHeaderCellDef>Servicios</th>
         <td mat-cell *matCellDef="let c">
-          <span class="nc-name-cell">
+          <div class="combo-servicios">
             <app-service-icon-stack [servicios]="c.servicios" />
-            <mat-chip-set>
-              @for (s of c.servicios; track s.id) {
-                <mat-chip>{{ s.nombre }}</mat-chip>
-              }
-            </mat-chip-set>
-          </span>
+            <span class="combo-servicios-nombres">{{ serviciosLabel(c) }}</span>
+          </div>
         </td>
       </ng-container>
 
       <ng-container matColumnDef="precioCombo">
-        <th mat-header-cell *matHeaderCellDef>Precio de venta</th>
-        <td mat-cell *matCellDef="let c">{{ c.precioCombo | soles }}</td>
+        <th mat-header-cell *matHeaderCellDef class="nc-celda-monto">Precio de venta</th>
+        <td mat-cell *matCellDef="let c" class="nc-celda-monto precio">{{ c.precioCombo | soles }}</td>
       </ng-container>
 
       <ng-container matColumnDef="dueno">
@@ -68,20 +138,22 @@
       </ng-container>
 
       <ng-container matColumnDef="acciones">
-        <th mat-header-cell *matHeaderCellDef></th>
+        <th mat-header-cell *matHeaderCellDef><span class="nc-sr-only">Acciones</span></th>
         <td mat-cell *matCellDef="let c">
-          <button mat-icon-button matTooltip="Editar" (click)="openEdit(c)">
-            <mat-icon>edit</mat-icon>
-          </button>
-          @if (c.activo) {
-            <button mat-icon-button matTooltip="Desactivar" (click)="confirmDeactivate(c)">
-              <mat-icon>block</mat-icon>
+          <div class="nc-acciones">
+            <button mat-icon-button matTooltip="Editar" aria-label="Editar" (click)="openEdit(c)">
+              <mat-icon>edit</mat-icon>
             </button>
-          } @else {
-            <button mat-icon-button matTooltip="Reactivar" (click)="confirmReactivate(c)">
-              <mat-icon>restart_alt</mat-icon>
-            </button>
-          }
+            @if (c.activo) {
+              <button mat-icon-button matTooltip="Desactivar" aria-label="Desactivar" (click)="confirmDeactivate(c)">
+                <mat-icon>block</mat-icon>
+              </button>
+            } @else {
+              <button mat-icon-button matTooltip="Reactivar" aria-label="Reactivar" (click)="confirmReactivate(c)">
+                <mat-icon>restart_alt</mat-icon>
+              </button>
+            }
+          </div>
         </td>
       </ng-container>
 
@@ -89,8 +161,4 @@
       <tr mat-row *matRowDef="let row; columns: displayedColumns()"></tr>
     </table>
   </div>
-
-  @if (combos().length === 0) {
-    <app-empty-state icon="inventory_2" mensaje="No hay combos con estos filtros." submensaje="Prueba cambiando o quitando los filtros." />
-  }
 }

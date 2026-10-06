@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { HttpErrorResponse } from '@angular/common/http';
 import { provideRouter, Router } from '@angular/router';
 import { of } from 'rxjs';
+import { BreakpointObserver } from '@angular/cdk/layout';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { VentaCombosList } from './venta-combos-list';
@@ -86,7 +87,7 @@ describe('VentaCombosList', () => {
   let snackBar: { open: ReturnType<typeof vi.fn> };
   let auth: { currentUser: ReturnType<typeof vi.fn> };
 
-  async function setup(role: UserRole = UserRole.ADMIN) {
+  async function setup(role: UserRole = UserRole.ADMIN, mobile = false) {
     TestBed.resetTestingModule();
     api = {
       list: vi.fn().mockResolvedValue([ventaCombo]),
@@ -109,6 +110,13 @@ describe('VentaCombosList', () => {
         { provide: Auth, useValue: auth },
         { provide: MatDialog, useValue: dialog },
         { provide: MatSnackBar, useValue: (snackBar = { open: vi.fn() }) },
+        {
+          provide: BreakpointObserver,
+          useValue: {
+            observe: () => of({ matches: mobile, breakpoints: {} }),
+            isMatched: () => mobile,
+          },
+        },
       ],
     }).compileComponents();
 
@@ -253,5 +261,126 @@ describe('VentaCombosList', () => {
     fixture.detectChanges();
 
     expect(fixture.nativeElement.querySelector('.mat-column-dueno')).toBeNull();
+  });
+
+  it('mientras carga lo dice con una línea visible, sin indicador giratorio', () => {
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.nc-lista-cargando')?.textContent).toContain(
+      'Cargando ventas de combo…',
+    );
+    expect(fixture.nativeElement.querySelector('mat-spinner')).toBeNull();
+  });
+
+  it('si la carga falla muestra el aviso con "Reintentar" en el lugar de la lista, y reintenta', async () => {
+    api.list.mockRejectedValueOnce(new Error('network down'));
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const aviso: HTMLElement | null = fixture.nativeElement.querySelector('.nc-lista-error');
+    expect(aviso?.textContent).toContain('No se pudieron cargar las ventas de combo.');
+    expect(fixture.nativeElement.querySelector('app-empty-state')).toBeNull();
+    expect(fixture.nativeElement.querySelector('table')).toBeNull();
+
+    aviso?.querySelector('button')?.click();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(api.list).toHaveBeenCalledTimes(2);
+    expect(fixture.nativeElement.querySelector('.nc-lista-error')).toBeNull();
+    expect(fixture.nativeElement.querySelector('td.mat-column-cliente')).not.toBeNull();
+  });
+
+  it('el código lleva al detalle y el combo muestra la pila de íconos de sus servicios', async () => {
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const link: HTMLAnchorElement = fixture.nativeElement.querySelector(
+      'td.mat-column-cliente a.codigo-enlace',
+    );
+    expect(link.textContent?.trim()).toBe('C-00001');
+    expect(link.getAttribute('href')).toBe('/combo-sales/vc-1');
+    expect(
+      fixture.nativeElement.querySelectorAll('td.mat-column-combo app-service-icon-stack .item'),
+    ).toHaveLength(combo.servicios.length);
+  });
+
+  it('una venta finalizada lleva ver y reactivar, y deja vacía la tercera casilla', async () => {
+    api.list.mockResolvedValue([ventaCombo, ventaComboInactiva]);
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const filas: HTMLElement[] = Array.from(
+      fixture.nativeElement.querySelectorAll('td.mat-column-acciones .nc-acciones'),
+    );
+    const iconos = (fila: HTMLElement) =>
+      Array.from(fila.querySelectorAll('mat-icon')).map((i) => i.textContent?.trim());
+    expect(iconos(filas[0])).toEqual(['visibility', 'autorenew', 'block']);
+    expect(iconos(filas[1])).toEqual(['visibility', 'restart_alt']);
+    expect(filas[0].children).toHaveLength(3);
+    expect(filas[1].children).toHaveLength(3);
+  });
+
+  describe('vence: la fecha toma la tinta de su urgencia, como en Ventas', () => {
+    beforeEach(() => {
+      vi.useFakeTimers({ toFake: ['Date'] });
+      vi.setSystemTime(new Date(2026, 0, 15, 12, 0));
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it('bermellón si ya pasó, ámbar si vence en 3 días o menos, tinta si falta más o está finalizada', async () => {
+      api.list.mockResolvedValue([
+        { ...ventaCombo, id: 'a', fechaFin: '2026-01-10' },
+        { ...ventaCombo, id: 'b', fechaFin: '2026-01-17' },
+        { ...ventaCombo, id: 'c', fechaFin: '2026-03-01' },
+        { ...ventaCombo, id: 'd', fechaFin: '2026-01-10', activo: false },
+      ]);
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      const clases = Array.from(
+        fixture.nativeElement.querySelectorAll('td.mat-column-fechaFin .nc-celda-principal'),
+      ).map((el) => (el as HTMLElement).className);
+      expect(clases[0]).toContain('nc-estado-vencida');
+      expect(clases[1]).toContain('nc-estado-por-vencer');
+      expect(clases[2]).not.toContain('nc-estado');
+      expect(clases[3]).not.toContain('nc-estado');
+    });
+  });
+
+  describe('en celular', () => {
+    it('muestra una tarjeta por venta de combo, con la estructura de las de Ventas', async () => {
+      await setup(UserRole.ADMIN, true);
+      api.list.mockResolvedValue([ventaCombo, ventaComboInactiva]);
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      const tarjetas: HTMLElement[] = Array.from(
+        fixture.nativeElement.querySelectorAll('mat-card.nc-card'),
+      );
+      expect(tarjetas).toHaveLength(2);
+      expect(fixture.nativeElement.querySelector('table')).toBeNull();
+      expect(tarjetas[0].querySelector('.nc-card-title')?.textContent).toContain('Cliente Uno');
+      expect(tarjetas[0].querySelector('.nc-card-subtitle')?.textContent).toContain('C-00001');
+      expect(tarjetas[0].querySelector('.nc-card-subtitle')?.textContent).toContain('Dueño: Admin');
+      expect(tarjetas[0].textContent).toContain('Combo Netflix + Disney');
+      const pie = (t: HTMLElement) =>
+        Array.from(t.querySelectorAll('.nc-card-footer button .mdc-button__label > span')).map((s) => s.textContent?.trim());
+      expect(pie(tarjetas[0])).toEqual(['Ver detalle', 'Renovar', 'Finalizar']);
+      expect(pie(tarjetas[1])).toEqual(['Ver detalle', 'Reactivar']);
+    });
+
+    it('no dice el dueño a un REVENDEDOR', async () => {
+      await setup(UserRole.REVENDEDOR, true);
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      expect(fixture.nativeElement.querySelector('.nc-card-subtitle')?.textContent).not.toContain(
+        'Dueño',
+      );
+    });
   });
 });

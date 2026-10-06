@@ -1,6 +1,6 @@
 <div class="page-header">
   <h1>Servicios que vendes</h1>
-  <button mat-flat-button color="primary" (click)="openCreate()">
+  <button mat-flat-button (click)="openCreate()">
     <mat-icon>add</mat-icon>
     Nuevo servicio
   </button>
@@ -28,8 +28,82 @@
 </app-filtros-plegables>
 
 @if (loading()) {
-  <div class="loading">
-    <mat-spinner diameter="32" />
+  <div class="nc-lista-cargando" aria-busy="true">
+    <span class="nc-lista-cargando-texto">Cargando servicios…</span>
+    <span class="nc-skeleton"></span>
+    <span class="nc-skeleton"></span>
+    <span class="nc-skeleton"></span>
+    <span class="nc-skeleton"></span>
+  </div>
+} @else if (error()) {
+  <div class="nc-lista-error" role="alert">
+    <mat-icon aria-hidden="true">error</mat-icon>
+    <p>No se pudieron cargar los servicios. Revisa tu conexión e inténtalo de nuevo.</p>
+    <button mat-stroked-button type="button" (click)="refresh()">Reintentar</button>
+  </div>
+} @else if (servicios().length === 0) {
+  <app-empty-state icon="subscriptions" mensaje="No hay servicios con estos filtros." submensaje="Prueba cambiando o quitando los filtros." />
+} @else if (isMobile()) {
+  <!-- Celular: una tarjeta por servicio. "Perfiles por cuenta" (o los cupos
+       del plan familiar) solo aparece en lo que se vende por perfil. -->
+  <div class="nc-card-list">
+    @for (s of servicios(); track s.id) {
+      <mat-card class="nc-card">
+        <mat-card-content>
+          <div class="nc-card-header">
+            <span class="servicio-nombre">
+              <app-service-icon [nombre]="s.nombre" [size]="32" />
+              <span class="nc-card-title">{{ s.nombre }}</span>
+            </span>
+            <mat-chip [highlighted]="s.activo" [class.chip-inactive]="!s.activo">
+              {{ s.activo ? 'Activo' : 'Inactivo' }}
+            </mat-chip>
+          </div>
+
+          <p class="nc-card-subtitle">
+            {{ typeLabel(s.tipo) }}
+            @if (isAdmin()) {
+              <span> · Dueño: {{ s.owner.name }}</span>
+            }
+          </p>
+
+          <dl class="nc-card-fields">
+            <div>
+              <dt>Duración</dt>
+              <dd>{{ duracionLabel(s) }}</dd>
+            </div>
+            @if (vendePorPerfil(s)) {
+              <div>
+                <dt>{{ perfilesEtiqueta(s) }}</dt>
+                <dd>{{ s.pantallasMax ?? '—' }}</dd>
+              </div>
+            }
+            <div>
+              <dt>Precio de venta</dt>
+              <dd class="precio">{{ s.precioBase | soles }}</dd>
+            </div>
+          </dl>
+        </mat-card-content>
+
+        <div class="nc-card-footer nc-card-acciones">
+          <button mat-button (click)="openEdit(s)">
+            <mat-icon>edit</mat-icon>
+            <span>Editar</span>
+          </button>
+          @if (s.activo) {
+            <button mat-button (click)="confirmDeactivate(s)">
+              <mat-icon>block</mat-icon>
+              <span>Desactivar</span>
+            </button>
+          } @else {
+            <button mat-button (click)="confirmReactivate(s)">
+              <mat-icon>restart_alt</mat-icon>
+              <span>Reactivar</span>
+            </button>
+          }
+        </div>
+      </mat-card>
+    }
   </div>
 } @else {
   <div class="table-scroll">
@@ -39,7 +113,7 @@
         <td mat-cell *matCellDef="let s">
           <span class="nc-name-cell">
             <app-service-icon [nombre]="s.nombre" />
-            {{ s.nombre }}
+            <span class="nc-celda-principal">{{ s.nombre }}</span>
           </span>
         </td>
       </ng-container>
@@ -51,7 +125,7 @@
 
       <ng-container matColumnDef="duracionMeses">
         <th mat-header-cell *matHeaderCellDef>Duración</th>
-        <td mat-cell *matCellDef="let s">{{ s.duracionMeses }} {{ s.duracionMeses === 1 ? 'mes' : 'meses' }}</td>
+        <td mat-cell *matCellDef="let s">{{ duracionLabel(s) }}</td>
       </ng-container>
 
       <ng-container matColumnDef="pantallasMax">
@@ -60,8 +134,8 @@
       </ng-container>
 
       <ng-container matColumnDef="precioBase">
-        <th mat-header-cell *matHeaderCellDef>Precio de venta</th>
-        <td mat-cell *matCellDef="let s">{{ s.precioBase | soles }}</td>
+        <th mat-header-cell *matHeaderCellDef class="nc-celda-monto">Precio de venta</th>
+        <td mat-cell *matCellDef="let s" class="nc-celda-monto precio">{{ s.precioBase | soles }}</td>
       </ng-container>
 
       <ng-container matColumnDef="dueno">
@@ -79,20 +153,22 @@
       </ng-container>
 
       <ng-container matColumnDef="acciones">
-        <th mat-header-cell *matHeaderCellDef></th>
+        <th mat-header-cell *matHeaderCellDef><span class="nc-sr-only">Acciones</span></th>
         <td mat-cell *matCellDef="let s">
-          <button mat-icon-button matTooltip="Editar" (click)="openEdit(s)">
-            <mat-icon>edit</mat-icon>
-          </button>
-          @if (s.activo) {
-            <button mat-icon-button matTooltip="Desactivar" (click)="confirmDeactivate(s)">
-              <mat-icon>block</mat-icon>
+          <div class="nc-acciones">
+            <button mat-icon-button matTooltip="Editar" aria-label="Editar" (click)="openEdit(s)">
+              <mat-icon>edit</mat-icon>
             </button>
-          } @else {
-            <button mat-icon-button matTooltip="Reactivar" (click)="confirmReactivate(s)">
-              <mat-icon>restart_alt</mat-icon>
-            </button>
-          }
+            @if (s.activo) {
+              <button mat-icon-button matTooltip="Desactivar" aria-label="Desactivar" (click)="confirmDeactivate(s)">
+                <mat-icon>block</mat-icon>
+              </button>
+            } @else {
+              <button mat-icon-button matTooltip="Reactivar" aria-label="Reactivar" (click)="confirmReactivate(s)">
+                <mat-icon>restart_alt</mat-icon>
+              </button>
+            }
+          </div>
         </td>
       </ng-container>
 
@@ -100,8 +176,4 @@
       <tr mat-row *matRowDef="let row; columns: displayedColumns()"></tr>
     </table>
   </div>
-
-  @if (servicios().length === 0) {
-    <app-empty-state icon="subscriptions" mensaje="No hay servicios con estos filtros." submensaje="Prueba cambiando o quitando los filtros." />
-  }
 }

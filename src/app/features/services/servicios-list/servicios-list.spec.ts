@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
+import { BreakpointObserver } from '@angular/cdk/layout';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ServiciosList } from './servicios-list';
@@ -32,7 +33,7 @@ describe('ServiciosList', () => {
   let dialog: { open: ReturnType<typeof vi.fn> };
   let auth: { currentUser: ReturnType<typeof vi.fn> };
 
-  async function setup(role: UserRole = UserRole.ADMIN) {
+  async function setup(role: UserRole = UserRole.ADMIN, mobile = false) {
     TestBed.resetTestingModule();
     api = {
       list: vi.fn().mockResolvedValue([servicio]),
@@ -51,6 +52,13 @@ describe('ServiciosList', () => {
         {
           provide: MatSnackBar,
           useValue: { open: vi.fn() },
+        },
+        {
+          provide: BreakpointObserver,
+          useValue: {
+            observe: () => of({ matches: mobile, breakpoints: {} }),
+            isMatched: () => mobile,
+          },
         },
       ],
     }).compileComponents();
@@ -184,5 +192,73 @@ describe('ServiciosList', () => {
     fixture.detectChanges();
 
     expect(fixture.nativeElement.querySelector('app-empty-state')).toBeNull();
+  });
+
+  it('mientras carga lo dice con una línea visible, sin indicador giratorio', () => {
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.nc-lista-cargando')?.textContent).toContain(
+      'Cargando servicios…',
+    );
+    expect(fixture.nativeElement.querySelector('mat-spinner')).toBeNull();
+  });
+
+  it('si la carga falla muestra el aviso con "Reintentar" en el lugar de la lista, y reintenta', async () => {
+    api.list.mockRejectedValueOnce(new Error('network down'));
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const aviso: HTMLElement | null = fixture.nativeElement.querySelector('.nc-lista-error');
+    expect(aviso?.textContent).toContain('No se pudieron cargar los servicios.');
+    expect(fixture.nativeElement.querySelector('app-empty-state')).toBeNull();
+    expect(fixture.nativeElement.querySelector('table')).toBeNull();
+
+    aviso?.querySelector('button')?.click();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(api.list).toHaveBeenCalledTimes(2);
+    expect(fixture.nativeElement.querySelector('.nc-lista-error')).toBeNull();
+    expect(fixture.nativeElement.querySelector('td.mat-column-nombre')).not.toBeNull();
+  });
+
+  describe('en celular', () => {
+    it('muestra una tarjeta por servicio con sus acciones escritas', async () => {
+      await setup(UserRole.ADMIN, true);
+      api.list.mockResolvedValue([servicio, servicioInactivo]);
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      const tarjetas: HTMLElement[] = Array.from(
+        fixture.nativeElement.querySelectorAll('mat-card.nc-card'),
+      );
+      expect(tarjetas).toHaveLength(2);
+      expect(fixture.nativeElement.querySelector('table')).toBeNull();
+      expect(tarjetas[0].querySelector('.nc-card-title')?.textContent).toContain('Netflix');
+      expect(tarjetas[0].querySelector('.nc-card-subtitle')?.textContent).toContain('Dueño: Admin');
+      expect(tarjetas[0].textContent).toContain('S/');
+      expect(tarjetas[0].querySelector('.nc-card-footer')?.textContent).toContain('Desactivar');
+      expect(tarjetas[1].querySelector('.nc-card-footer')?.textContent).toContain('Reactivar');
+    });
+
+    it('"Perfiles por cuenta" solo aparece en lo que se vende por perfil; en el plan familiar son cupos', async () => {
+      await setup(UserRole.REVENDEDOR, true);
+      api.list.mockResolvedValue([
+        servicio,
+        { ...servicio, id: '3', tipo: ServiceType.SIN_PERFILES, pantallasMax: null },
+        { ...servicio, id: '4', tipo: ServiceType.FAMILIAR, pantallasMax: 6 },
+      ]);
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      const [porPerfil, completa, familiar]: HTMLElement[] = Array.from(
+        fixture.nativeElement.querySelectorAll('mat-card.nc-card'),
+      );
+      expect(porPerfil.textContent).toContain('Perfiles por cuenta');
+      expect(completa.textContent).not.toContain('Perfiles por cuenta');
+      expect(completa.textContent).not.toContain('Cupos del plan');
+      expect(familiar.textContent).toContain('Cupos del plan');
+      expect(porPerfil.querySelector('.nc-card-subtitle')?.textContent).not.toContain('Dueño');
+    });
   });
 });

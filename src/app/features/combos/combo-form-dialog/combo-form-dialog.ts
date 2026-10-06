@@ -23,6 +23,7 @@ import { CombosApi } from '../combos-api';
 import type { Combo } from '../combo.model';
 import { ServiciosApi } from '../../services/servicios-api';
 import { type Servicio } from '../../services/servicio.model';
+import { ServiceIcon } from '../../../shared/service-icon/service-icon';
 import { extractErrorMessage, injectFormError } from '../../../shared/form-error';
 
 export interface ComboFormDialogData {
@@ -40,6 +41,7 @@ export interface ComboFormDialogData {
     MatIconModule,
     MatButtonModule,
     MatProgressSpinnerModule,
+    ServiceIcon,
   ],
   selector: 'app-combo-form-dialog',
   styleUrl: './combo-form-dialog.scss',
@@ -103,7 +105,13 @@ export class ComboFormDialog implements OnInit {
   }
 
   async submit(): Promise<void> {
-    if (this.form.invalid || this.saving()) {
+    if (this.saving() || this.loadingOptions()) {
+      return;
+    }
+    // El botón siempre se puede presionar: si falta algo, se marcan los
+    // campos para que cada uno diga qué le falta.
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
       return;
     }
 

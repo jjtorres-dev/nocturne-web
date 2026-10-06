@@ -1,67 +1,97 @@
+// Página de alta: a la izquierda los datos de la venta; a la derecha, una
+// sala por servicio del combo. En pantallas angostas, una sola columna.
+
 .back-link {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  color: var(--mat-sys-primary);
+  min-height: 32px;
+  margin-bottom: 4px;
+  color: var(--nc-ink-muted);
+  font-size: 0.875rem;
   text-decoration: none;
-  margin-bottom: 16px;
 
-  mat-icon {
-    font-size: 18px;
+  .mat-icon {
     width: 18px;
     height: 18px;
+    font-size: 18px;
+  }
+
+  &:hover {
+    color: var(--nc-ink);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--nc-focus);
+    outline-offset: 2px;
   }
 }
 
-h1 {
-  margin: 0 0 16px;
-  font-size: 1.5rem;
+form {
+  max-width: 1040px;
+}
+
+.cargando {
+  max-width: 512px;
+}
+
+.venta-combo-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: start;
+  gap: 16px;
 }
 
 .form-grid {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  max-width: 480px;
+  padding: 18px 14px 6px;
 }
 
-.asignaciones {
-  margin-top: 24px;
-  max-width: 480px;
-
-  h2 {
-    font-size: 1.1rem;
-    margin: 0 0 8px;
-  }
+.asignaciones-vacio,
+.asignaciones-cargando {
+  margin: 0;
+  padding: 12px 14px;
 }
 
+.asignaciones-vacio {
+  color: var(--nc-ink-muted);
+  font-size: 0.875rem;
+}
+
+.asignaciones-cargando {
+  display: grid;
+  gap: 8px;
+}
+
+// Cada servicio del combo: su nombre con el ícono y, debajo, qué cuenta y
+// qué perfil se le da. Una línea fina separa un servicio del siguiente.
 .asignacion-card {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  padding: 16px;
-  margin-bottom: 12px;
-  border: 1px solid var(--mat-sys-outline-variant);
-  border-radius: 8px;
+  padding: 12px 14px 4px;
+
+  & + .asignacion-card {
+    border-top: 1px solid var(--nc-rule);
+  }
 
   h3 {
-    margin: 0 0 4px;
-    font-size: 0.95rem;
-    color: var(--mat-sys-on-surface-variant);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 12px;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    line-height: 1.3;
   }
 }
 
-.loading {
-  display: flex;
-  justify-content: center;
-  padding: 24px 0;
-}
-
 .error-message {
-  color: var(--mat-sys-error);
   margin: 8px 0;
+  color: var(--mat-sys-error);
   font-size: 0.875rem;
-  max-width: 480px;
 }
 
 .actions {
@@ -69,5 +99,31 @@ h1 {
   justify-content: flex-end;
   gap: 8px;
   margin-top: 16px;
-  max-width: 480px;
+  padding-top: 12px;
+  border-top: 1px solid var(--nc-rule);
+}
+
+@media (max-width: 1099.98px) {
+  .venta-combo-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  form {
+    max-width: 560px;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .venta-combo-grid {
+    gap: 12px;
+  }
+
+  .back-link {
+    min-height: 44px;
+  }
+
+  // Los dos botones se reparten el ancho: se tocan con el pulgar.
+  .actions > * {
+    flex: 1 1 0;
+  }
 }

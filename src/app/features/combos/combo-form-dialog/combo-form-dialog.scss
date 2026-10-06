@@ -2,12 +2,17 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
-  min-width: 320px;
+  min-width: 360px;
   padding-top: 4px;
 }
 
 .selected-servicios {
   margin: -4px 0 8px;
+}
+
+.cargando {
+  display: grid;
+  gap: 8px;
 }
 
 .error-message {

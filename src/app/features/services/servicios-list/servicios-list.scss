@@ -1,28 +1,80 @@
-.page-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 16px;
-
-  h1 {
-    margin: 0;
-    font-size: 1.5rem;
-  }
-}
-
-.filters {
-  display: flex;
-  gap: 16px;
-  flex-wrap: wrap;
-  margin-bottom: 8px;
-}
+// Encabezado, filtros, tablero, estados y tarjetas: estilos compartidos de
+// listas en src/styles.scss. Acá, solo lo propio de Servicios.
 
 .services-table {
   width: 100%;
 }
 
-.loading {
+// Duración, perfiles, precio, estado y acciones miden lo que su contenido,
+// en un renglón; lo que sobra va al nombre.
+.mat-column-duracionMeses,
+.mat-column-pantallasMax,
+.mat-column-precioBase,
+.mat-column-activo,
+.mat-column-acciones {
+  width: 1%;
+  white-space: nowrap;
+}
+
+td.mat-column-duracionMeses,
+td.mat-column-pantallasMax,
+td.mat-column-precioBase {
+  padding-inline-end: 20px;
+}
+
+th.mat-column-precioBase {
+  padding-inline-end: 20px;
+}
+
+// "Cómo se vende" es una frase: puede partirse en dos renglones, nunca en
+// cuatro.
+td.mat-column-tipo {
+  min-width: 200px;
+  padding-block: 6px;
+  padding-inline-end: 20px;
+  overflow: visible;
+  line-height: 1.3;
+  text-overflow: clip;
+  text-wrap: pretty;
+  white-space: normal;
+}
+
+// El nombre del dueño se ve entero; baja por palabras si no entra.
+td.mat-column-dueno {
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+}
+
+.precio {
+  font-weight: 600;
+}
+
+// Botones de acción de 36 px, a la medida de su casilla.
+.nc-acciones {
+  --mat-icon-button-state-layer-size: 36px;
+}
+
+// ---------------------------------------------------------------------------
+// Tarjetas (celular)
+// ---------------------------------------------------------------------------
+.servicio-nombre {
   display: flex;
-  justify-content: center;
-  padding: 48px 0;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.nc-card-header {
+  // El chip se alinea con el nombre, no con el tope del ícono.
+  align-items: center;
+
+  .mat-mdc-chip {
+    flex-shrink: 0;
+  }
+}
+
+// "Perfiles por cuenta" entra en un renglón.
+.nc-card-fields > div {
+  grid-template-columns: 132px minmax(0, 1fr);
 }

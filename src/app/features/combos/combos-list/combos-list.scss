@@ -1,28 +1,77 @@
-.page-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 16px;
-
-  h1 {
-    margin: 0;
-    font-size: 1.5rem;
-  }
-}
-
-.filters {
-  display: flex;
-  gap: 16px;
-  flex-wrap: wrap;
-  margin-bottom: 8px;
-}
+// Encabezado, filtros, tablero, estados y tarjetas: estilos compartidos de
+// listas en src/styles.scss. Acá, solo lo propio de Combos.
 
 .combos-table {
   width: 100%;
 }
 
-.loading {
+// Precio, estado y acciones miden lo que su contenido; lo que sobra se
+// reparte entre el nombre, la descripción y los servicios.
+.mat-column-precioCombo,
+.mat-column-activo,
+.mat-column-acciones {
+  width: 1%;
+  white-space: nowrap;
+}
+
+td.mat-column-precioCombo,
+th.mat-column-precioCombo {
+  padding-inline-end: 20px;
+}
+
+// La descripción y el dueño se leen enteros: bajan por palabras si no entran.
+td.mat-column-descripcion,
+td.mat-column-dueno {
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+}
+
+td.mat-column-descripcion {
+  color: var(--nc-ink-muted);
+  text-wrap: pretty;
+}
+
+// La pila de íconos y los nombres de los servicios al lado.
+.combo-servicios {
   display: flex;
-  justify-content: center;
-  padding: 48px 0;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  padding-block: 6px;
+}
+
+.combo-servicios-nombres {
+  min-width: 0;
+  color: var(--nc-ink-muted);
+  font-size: 0.8125rem;
+  line-height: 1.3;
+  text-wrap: pretty;
+}
+
+.precio {
+  font-weight: 600;
+}
+
+// Botones de acción de 36 px, a la medida de su casilla.
+.nc-acciones {
+  --mat-icon-button-state-layer-size: 36px;
+}
+
+// ---------------------------------------------------------------------------
+// Tarjetas (celular)
+// ---------------------------------------------------------------------------
+.nc-card-header .mat-mdc-chip {
+  flex-shrink: 0;
+}
+
+.nc-card-subtitle {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.nc-card .combo-servicios {
+  margin-top: 10px;
+  padding-block: 0;
 }

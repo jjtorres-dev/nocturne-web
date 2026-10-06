@@ -1,6 +1,6 @@
 <div class="page-header">
   <h1>Ventas de combos</h1>
-  <button mat-flat-button color="primary" (click)="openCreate()">
+  <button mat-flat-button (click)="openCreate()">
     <mat-icon>add</mat-icon>
     Nueva venta de combo
   </button>
@@ -38,46 +38,146 @@
 </app-filtros-plegables>
 
 @if (loading()) {
-  <div class="loading">
-    <mat-spinner diameter="32" />
+  <div class="nc-lista-cargando" aria-busy="true">
+    <span class="nc-lista-cargando-texto">Cargando ventas de combo…</span>
+    <span class="nc-skeleton"></span>
+    <span class="nc-skeleton"></span>
+    <span class="nc-skeleton"></span>
+    <span class="nc-skeleton"></span>
+  </div>
+} @else if (error()) {
+  <div class="nc-lista-error" role="alert">
+    <mat-icon aria-hidden="true">error</mat-icon>
+    <p>No se pudieron cargar las ventas de combo. Revisa tu conexión e inténtalo de nuevo.</p>
+    <button mat-stroked-button type="button" (click)="refresh()">Reintentar</button>
+  </div>
+} @else if (ventasCombo().length === 0) {
+  <app-empty-state icon="shopping_cart" mensaje="No hay ventas de combo con estos filtros." submensaje="Prueba cambiando o quitando los filtros." />
+} @else if (isMobile()) {
+  <!-- Celular: una tarjeta por venta de combo, con la misma estructura que
+       las de Ventas. -->
+  <div class="nc-card-list">
+    @for (v of ventasCombo(); track v.id) {
+      <mat-card class="nc-card">
+        <mat-card-content>
+          <div class="nc-card-header">
+            <span class="nc-card-title">{{ clienteNombre(v.clienteId) }}</span>
+            <span class="estado-chips">
+              <app-estado-venta [venta]="v" />
+              @if (v.cuentaCaida && v.activo) {
+                <app-cuenta-caida-chip />
+              }
+            </span>
+          </div>
+
+          <p class="nc-card-subtitle">
+            <a class="nc-code codigo-enlace" [routerLink]="['/combo-sales', v.id]">{{ v.codigoVenta }}</a>
+            @if (isAdmin()) {
+              <span> · Dueño: {{ v.owner.name }}</span>
+            }
+          </p>
+
+          <dl class="nc-card-fields">
+            <div>
+              <dt>Combo</dt>
+              <dd class="combo-en-tarjeta">
+                <app-service-icon-stack [servicios]="comboServicios(v.comboId)" [size]="24" />
+                <span>{{ comboNombre(v.comboId) }}</span>
+              </dd>
+            </div>
+            <div>
+              <dt>Desde – Vence</dt>
+              <dd>
+                {{ v.fechaInicio | date: 'dd/MM/yyyy' }} →
+                <span [class]="venceClase(v)">{{ v.fechaFin | date: 'dd/MM/yyyy' }}</span>
+              </dd>
+            </div>
+            <div>
+              <dt>Cobrado</dt>
+              <dd>
+                {{ v.precioPEN | soles }}
+                @if (v.moneda !== Moneda.PEN) {
+                  <span class="original-amount">({{ v.precio | number: '1.2-2' }} {{ v.moneda }})</span>
+                }
+              </dd>
+            </div>
+          </dl>
+        </mat-card-content>
+
+        <div class="nc-card-footer nc-card-acciones">
+          <button mat-button (click)="openDetail(v)">
+            <mat-icon>visibility</mat-icon>
+            <span>Ver detalle</span>
+          </button>
+          @if (v.activo) {
+            <button mat-button (click)="confirmRenew(v)">
+              <mat-icon>autorenew</mat-icon>
+              <span>Renovar</span>
+            </button>
+            <button mat-button (click)="confirmDeactivate(v)">
+              <mat-icon>block</mat-icon>
+              <span>Finalizar</span>
+            </button>
+          } @else {
+            <button mat-button (click)="confirmReactivate(v)">
+              <mat-icon>restart_alt</mat-icon>
+              <span>Reactivar</span>
+            </button>
+          }
+        </div>
+      </mat-card>
+    }
   </div>
 } @else {
   <div class="table-scroll">
     <table mat-table [dataSource]="ventasCombo()" class="combo-sales-table">
-      <ng-container matColumnDef="codigoVenta">
-        <th mat-header-cell *matHeaderCellDef>Código</th>
-        <td mat-cell *matCellDef="let v">
-          <a class="nc-code" [routerLink]="['/combo-sales', v.id]">{{ v.codigoVenta }}</a>
-        </td>
-      </ng-container>
-
       <ng-container matColumnDef="cliente">
         <th mat-header-cell *matHeaderCellDef>Cliente</th>
-        <td mat-cell *matCellDef="let v">{{ clienteNombre(v.clienteId) }}</td>
+        <td mat-cell *matCellDef="let v">
+          <div class="nc-celda">
+            <span class="nc-celda-principal">{{ clienteNombre(v.clienteId) }}</span>
+            <span class="nc-celda-sub">
+              <a
+                class="nc-code codigo-enlace"
+                [routerLink]="['/combo-sales', v.id]"
+                matTooltip="Ver detalle"
+              >{{ v.codigoVenta }}</a>
+            </span>
+          </div>
+        </td>
       </ng-container>
 
       <ng-container matColumnDef="combo">
         <th mat-header-cell *matHeaderCellDef>Combo</th>
-        <td mat-cell *matCellDef="let v">{{ comboNombre(v.comboId) }}</td>
-      </ng-container>
-
-      <ng-container matColumnDef="fechaInicio">
-        <th mat-header-cell *matHeaderCellDef>Desde</th>
-        <td mat-cell *matCellDef="let v">{{ v.fechaInicio | date: 'dd/MM/yyyy' }}</td>
+        <td mat-cell *matCellDef="let v">
+          <div class="celda-combo">
+            <app-service-icon-stack [servicios]="comboServicios(v.comboId)" />
+            <span class="nc-celda-principal">{{ comboNombre(v.comboId) }}</span>
+          </div>
+        </td>
       </ng-container>
 
       <ng-container matColumnDef="fechaFin">
         <th mat-header-cell *matHeaderCellDef>Vence</th>
-        <td mat-cell *matCellDef="let v">{{ v.fechaFin | date: 'dd/MM/yyyy' }}</td>
+        <td mat-cell *matCellDef="let v">
+          <div class="nc-celda">
+            <span class="nc-celda-principal" [class]="venceClase(v)">
+              {{ v.fechaFin | date: 'dd/MM/yyyy' }}
+            </span>
+            <span class="nc-celda-sub">desde {{ v.fechaInicio | date: 'dd/MM/yyyy' }}</span>
+          </div>
+        </td>
       </ng-container>
 
       <ng-container matColumnDef="precio">
-        <th mat-header-cell *matHeaderCellDef>Cobrado</th>
-        <td mat-cell *matCellDef="let v">
-          {{ v.precioPEN | soles }}
-          @if (v.moneda !== Moneda.PEN) {
-            <span class="original-amount">({{ v.precio | number: '1.2-2' }} {{ v.moneda }})</span>
-          }
+        <th mat-header-cell *matHeaderCellDef class="nc-celda-monto">Cobrado</th>
+        <td mat-cell *matCellDef="let v" class="nc-celda-monto">
+          <div class="nc-celda">
+            <span class="nc-celda-principal">{{ v.precioPEN | soles }}</span>
+            @if (v.moneda !== Moneda.PEN) {
+              <span class="nc-celda-sub original-amount">({{ v.precio | number: '1.2-2' }} {{ v.moneda }})</span>
+            }
+          </div>
         </td>
       </ng-container>
 
@@ -89,31 +189,38 @@
       <ng-container matColumnDef="activo">
         <th mat-header-cell *matHeaderCellDef>Estado</th>
         <td mat-cell *matCellDef="let v">
-          <app-estado-venta [venta]="v" />
-          @if (v.cuentaCaida && v.activo) {
-            <app-cuenta-caida-chip />
-          }
+          <span class="estado-chips">
+            <app-estado-venta [venta]="v" />
+            @if (v.cuentaCaida && v.activo) {
+              <app-cuenta-caida-chip />
+            }
+          </span>
         </td>
       </ng-container>
 
+      <!-- Tres casillas fijas: ver detalle, renovar y finalizar. Una venta
+           finalizada lleva ver y reactivar, y deja la tercera vacía. -->
       <ng-container matColumnDef="acciones">
-        <th mat-header-cell *matHeaderCellDef></th>
+        <th mat-header-cell *matHeaderCellDef><span class="nc-sr-only">Acciones</span></th>
         <td mat-cell *matCellDef="let v">
-          <button mat-icon-button matTooltip="Ver detalle" (click)="openDetail(v)">
-            <mat-icon>visibility</mat-icon>
-          </button>
-          @if (v.activo) {
-            <button mat-icon-button matTooltip="Renovar" (click)="confirmRenew(v)">
-              <mat-icon>autorenew</mat-icon>
+          <div class="nc-acciones">
+            <button mat-icon-button matTooltip="Ver detalle" aria-label="Ver detalle" (click)="openDetail(v)">
+              <mat-icon>visibility</mat-icon>
             </button>
-            <button mat-icon-button matTooltip="Finalizar venta" (click)="confirmDeactivate(v)">
-              <mat-icon>block</mat-icon>
-            </button>
-          } @else {
-            <button mat-icon-button matTooltip="Reactivar" (click)="confirmReactivate(v)">
-              <mat-icon>restart_alt</mat-icon>
-            </button>
-          }
+            @if (v.activo) {
+              <button mat-icon-button matTooltip="Renovar" aria-label="Renovar" (click)="confirmRenew(v)">
+                <mat-icon>autorenew</mat-icon>
+              </button>
+              <button mat-icon-button matTooltip="Finalizar venta" aria-label="Finalizar venta" (click)="confirmDeactivate(v)">
+                <mat-icon>block</mat-icon>
+              </button>
+            } @else {
+              <button mat-icon-button matTooltip="Reactivar" aria-label="Reactivar" (click)="confirmReactivate(v)">
+                <mat-icon>restart_alt</mat-icon>
+              </button>
+              <span></span>
+            }
+          </div>
         </td>
       </ng-container>
 
@@ -121,8 +228,4 @@
       <tr mat-row *matRowDef="let row; columns: displayedColumns()"></tr>
     </table>
   </div>
-
-  @if (ventasCombo().length === 0) {
-    <app-empty-state icon="shopping_cart" mensaje="No hay ventas de combo con estos filtros." submensaje="Prueba cambiando o quitando los filtros." />
-  }
 }

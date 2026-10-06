@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
+import { BreakpointObserver } from '@angular/cdk/layout';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { CombosList } from './combos-list';
@@ -46,7 +47,7 @@ describe('CombosList', () => {
   let dialog: { open: ReturnType<typeof vi.fn> };
   let auth: { currentUser: ReturnType<typeof vi.fn> };
 
-  async function setup(role: UserRole = UserRole.ADMIN) {
+  async function setup(role: UserRole = UserRole.ADMIN, mobile = false) {
     TestBed.resetTestingModule();
     api = {
       list: vi.fn().mockResolvedValue([combo]),
@@ -63,6 +64,13 @@ describe('CombosList', () => {
         { provide: Auth, useValue: auth },
         { provide: MatDialog, useValue: dialog },
         { provide: MatSnackBar, useValue: { open: vi.fn() } },
+        {
+          provide: BreakpointObserver,
+          useValue: {
+            observe: () => of({ matches: mobile, breakpoints: {} }),
+            isMatched: () => mobile,
+          },
+        },
       ],
     }).compileComponents();
 
@@ -192,5 +200,75 @@ describe('CombosList', () => {
     fixture.detectChanges();
 
     expect(fixture.nativeElement.querySelector('app-empty-state')).toBeNull();
+  });
+
+  it('mientras carga lo dice con una línea visible, sin indicador giratorio', () => {
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.nc-lista-cargando')?.textContent).toContain(
+      'Cargando combos…',
+    );
+    expect(fixture.nativeElement.querySelector('mat-spinner')).toBeNull();
+  });
+
+  it('si la carga falla muestra el aviso con "Reintentar" en el lugar de la lista, y reintenta', async () => {
+    api.list.mockRejectedValueOnce(new Error('network down'));
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const aviso: HTMLElement | null = fixture.nativeElement.querySelector('.nc-lista-error');
+    expect(aviso?.textContent).toContain('No se pudieron cargar los combos.');
+    expect(fixture.nativeElement.querySelector('app-empty-state')).toBeNull();
+    expect(fixture.nativeElement.querySelector('table')).toBeNull();
+
+    aviso?.querySelector('button')?.click();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(api.list).toHaveBeenCalledTimes(2);
+    expect(fixture.nativeElement.querySelector('.nc-lista-error')).toBeNull();
+    expect(fixture.nativeElement.querySelector('td.mat-column-nombre')).not.toBeNull();
+  });
+
+  it('escribe los nombres de los servicios junto a su pila de íconos', async () => {
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const cell: HTMLElement = fixture.nativeElement.querySelector('td.mat-column-servicios');
+    expect(cell.querySelector('app-service-icon-stack')).not.toBeNull();
+    expect(cell.querySelector('.combo-servicios-nombres')?.textContent).toBe(
+      combo.servicios.map((s) => s.nombre).join(' + '),
+    );
+  });
+
+  describe('en celular', () => {
+    it('muestra una tarjeta por combo con la pila de íconos, el precio y sus acciones', async () => {
+      await setup(UserRole.ADMIN, true);
+      api.list.mockResolvedValue([combo, comboInactivo]);
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      const tarjetas: HTMLElement[] = Array.from(
+        fixture.nativeElement.querySelectorAll('mat-card.nc-card'),
+      );
+      expect(tarjetas).toHaveLength(2);
+      expect(fixture.nativeElement.querySelector('table')).toBeNull();
+      expect(tarjetas[0].querySelector('.nc-card-title')?.textContent).toContain(combo.nombre);
+      expect(tarjetas[0].querySelectorAll('app-service-icon-stack .item')).toHaveLength(
+        combo.servicios.length,
+      );
+      expect(tarjetas[0].textContent).toContain('S/');
+      expect(tarjetas[0].textContent).toContain('Dueño: Admin');
+      expect(tarjetas[0].querySelector('.nc-card-footer')?.textContent).toContain('Desactivar');
+      expect(tarjetas[1].querySelector('.nc-card-footer')?.textContent).toContain('Reactivar');
+    });
+
+    it('no dice el dueño a un REVENDEDOR', async () => {
+      await setup(UserRole.REVENDEDOR, true);
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      expect(fixture.nativeElement.textContent).not.toContain('Dueño');
+    });
   });
 });

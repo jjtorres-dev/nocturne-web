@@ -524,4 +524,29 @@ describe('VentaComboCreate', () => {
       [],
     ]);
   });
+
+  it('con datos faltantes no guarda: marca los campos y dice qué falta', async () => {
+    await setup();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    const guardar: HTMLButtonElement = fixture.nativeElement.querySelector('button[type="submit"]');
+    expect(guardar.disabled).toBe(false);
+
+    await component.submit();
+    fixture.detectChanges();
+
+    expect(api.create).not.toHaveBeenCalled();
+    expect(fixture.nativeElement.textContent).toContain('El cliente es obligatorio.');
+    expect(fixture.nativeElement.textContent).toContain('El combo es obligatorio.');
+  });
+
+  it('antes de elegir un combo, el panel de servicios dice qué hacer', async () => {
+    await setup();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.asignaciones')?.textContent).toContain(
+      'Elige un combo para ver sus servicios.',
+    );
+  });
 });

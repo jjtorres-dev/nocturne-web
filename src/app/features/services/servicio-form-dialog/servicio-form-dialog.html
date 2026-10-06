@@ -4,7 +4,7 @@
   <mat-dialog-content class="form-grid">
     <mat-form-field appearance="outline">
       <mat-label>Nombre</mat-label>
-      <input matInput formControlName="nombre" />
+      <input matInput formControlName="nombre" autocomplete="off" />
       <mat-hint>Ej.: Netflix, Disney+, Spotify</mat-hint>
       @if (form.controls.nombre.hasError('required')) {
         <mat-error>El nombre es obligatorio.</mat-error>
@@ -27,7 +27,7 @@
 
     <mat-form-field appearance="outline">
       <mat-label>Duración de cada venta (meses)</mat-label>
-      <input matInput type="number" step="0.1" formControlName="duracionMeses" />
+      <input matInput type="number" inputmode="decimal" step="0.1" formControlName="duracionMeses" />
       <app-info-toggle matSuffix [for]="duracionInfo" />
       @if (form.controls.duracionMeses.hasError('required')) {
         <mat-error>La duración es obligatoria.</mat-error>
@@ -44,7 +44,7 @@
     @if (usaPerfiles()) {
       <mat-form-field appearance="outline">
         <mat-label>{{ esFamiliar() ? 'Cupos del plan' : 'Perfiles por cuenta' }}</mat-label>
-        <input matInput type="number" step="1" formControlName="pantallasMax" />
+        <input matInput type="number" inputmode="numeric" step="1" formControlName="pantallasMax" />
         <app-info-toggle matSuffix [for]="pantallasInfo" />
         @if (form.controls.pantallasMax.hasError('required')) {
           <mat-error>
@@ -67,7 +67,7 @@
 
     <mat-form-field appearance="outline">
       <mat-label>{{ precioLabel() }}</mat-label>
-      <input matInput type="number" step="0.01" formControlName="precioBase" />
+      <input matInput type="number" inputmode="decimal" step="0.01" formControlName="precioBase" />
       <app-info-toggle matSuffix [for]="precioInfo" />
       @if (form.controls.precioBase.hasError('required')) {
         <mat-error>Escribe tu precio de venta.</mat-error>
@@ -88,7 +88,7 @@
 
   <mat-dialog-actions align="end">
     <button mat-button type="button" (click)="cancel()">Cancelar</button>
-    <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid || saving()">
+    <button mat-flat-button type="submit" [disabled]="saving()">
       @if (saving()) {
         <mat-spinner diameter="20" />
       } @else {

@@ -6,7 +6,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatCardModule } from '@angular/material/card';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -15,6 +15,7 @@ import {
   SERVICE_TYPE_LABELS,
   ServiceType,
   type Servicio,
+  usaPerfiles,
 } from '../servicio.model';
 import { ServicioFormDialog } from '../servicio-form-dialog/servicio-form-dialog';
 import { ConfirmDialog } from '../../../shared/confirm-dialog/confirm-dialog';
@@ -24,6 +25,7 @@ import { EmptyState } from '../../../shared/empty-state/empty-state';
 import { ServiceIcon } from '../../../shared/service-icon/service-icon';
 import { extractErrorMessage } from '../../../shared/form-error';
 import { FiltrosPlegables } from '../../../shared/filtros-plegables/filtros-plegables';
+import { injectIsMobile } from '../../../shared/breakpoints';
 
 type ActivoFilter = 'todos' | 'activos' | 'inactivos';
 
@@ -40,7 +42,7 @@ type ActivoFilter = 'todos' | 'activos' | 'inactivos';
     MatButtonModule,
     MatIconModule,
     MatChipsModule,
-    MatProgressSpinnerModule,
+    MatCardModule,
     MatTooltipModule,
   ],
   selector: 'app-servicios-list',
@@ -61,6 +63,7 @@ export class ServiciosList implements OnInit {
   protected readonly isAdmin = computed(
     () => this.auth.currentUser()?.role === UserRole.ADMIN,
   );
+  protected readonly isMobile = injectIsMobile();
   protected readonly displayedColumns = computed(() =>
     this.isAdmin()
       ? [
@@ -86,6 +89,9 @@ export class ServiciosList implements OnInit {
 
   readonly servicios = signal<Servicio[]>([]);
   readonly loading = signal(false);
+  // La última carga falló: en vez de la lista se muestra el aviso con
+  // "Reintentar".
+  readonly error = signal(false);
 
   tipoFilter: ServiceType | 'todos' = 'todos';
   activoFilter: ActivoFilter = 'activos';
@@ -102,6 +108,7 @@ export class ServiciosList implements OnInit {
 
   async refresh(): Promise<void> {
     this.loading.set(true);
+    this.error.set(false);
     try {
       const data = await this.api.list({
         tipo: this.tipoFilter === 'todos' ? undefined : this.tipoFilter,
@@ -112,9 +119,8 @@ export class ServiciosList implements OnInit {
       });
       this.servicios.set(data);
     } catch {
-      this.snackBar.open('No se pudieron cargar los servicios.', 'Cerrar', {
-        duration: 4000,
-      });
+      // El aviso va en el lugar de la lista, con "Reintentar".
+      this.error.set(true);
     } finally {
       this.loading.set(false);
     }
@@ -174,6 +180,21 @@ export class ServiciosList implements OnInit {
 
   protected typeLabel(tipo: ServiceType): string {
     return this.typeLabels[tipo];
+  }
+
+  protected duracionLabel(servicio: Servicio): string {
+    return `${servicio.duracionMeses} ${servicio.duracionMeses === 1 ? 'mes' : 'meses'}`;
+  }
+
+  // En la tarjeta del celular, "Perfiles por cuenta" solo aparece en lo que
+  // se vende por perfil; en el plan familiar son los cupos del plan, igual
+  // que en el formulario.
+  protected vendePorPerfil(servicio: Servicio): boolean {
+    return usaPerfiles(servicio.tipo);
+  }
+
+  protected perfilesEtiqueta(servicio: Servicio): string {
+    return servicio.tipo === ServiceType.FAMILIAR ? 'Cupos del plan' : 'Perfiles por cuenta';
   }
 
   private async deactivate(servicio: Servicio): Promise<void> {

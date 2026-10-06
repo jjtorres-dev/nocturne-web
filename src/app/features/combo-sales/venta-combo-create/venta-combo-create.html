@@ -3,15 +3,22 @@
   Volver a Ventas de combos
 </a>
 
-<h1>Nueva venta de combo</h1>
+<div class="page-header">
+  <h1>Nueva venta de combo</h1>
+</div>
 
 <form [formGroup]="form" (ngSubmit)="submit()">
   @if (loadingOptions()) {
-    <div class="loading">
-      <mat-spinner diameter="32" />
+    <div class="nc-lista-cargando cargando" aria-busy="true">
+      <span class="nc-lista-cargando-texto">Cargando combos y clientes…</span>
+      <span class="nc-skeleton"></span>
+      <span class="nc-skeleton"></span>
+      <span class="nc-skeleton"></span>
+      <span class="nc-skeleton"></span>
     </div>
   } @else {
-    <section class="form-grid">
+    <div class="venta-combo-grid">
+    <section class="nc-panel form-grid">
       <mat-form-field appearance="outline">
         <mat-label>Cliente</mat-label>
         <mat-select
@@ -45,7 +52,7 @@
 
       <mat-form-field appearance="outline">
         <mat-label>Duración (meses)</mat-label>
-        <input matInput type="number" step="0.1" formControlName="duracionMeses" />
+        <input matInput type="number" inputmode="decimal" step="0.1" formControlName="duracionMeses" />
         <mat-hint>Cuánto tiempo recibe tu cliente. Ej.: 1 = un mes.</mat-hint>
         @if (form.controls.duracionMeses.hasError('required')) {
           <mat-error>La duración es obligatoria.</mat-error>
@@ -73,7 +80,7 @@
 
       <mat-form-field appearance="outline">
         <mat-label>Precio cobrado</mat-label>
-        <input matInput type="number" step="0.01" formControlName="precio" />
+        <input matInput type="number" inputmode="decimal" step="0.01" formControlName="precio" />
         <app-info-toggle matSuffix [for]="precioInfo" />
         @if (form.controls.precio.hasError('required')) {
           <mat-error>Escribe cuánto te pagó el cliente.</mat-error>
@@ -97,7 +104,7 @@
       @if (form.controls.moneda.value !== Moneda.PEN) {
         <mat-form-field appearance="outline">
           <mat-label>Tipo de cambio a soles</mat-label>
-          <input matInput type="number" step="0.0001" formControlName="tasaCambio" />
+          <input matInput type="number" inputmode="decimal" step="0.0001" formControlName="tasaCambio" />
           <app-info-toggle matSuffix [for]="tasaInfo" />
           @if (form.controls.tasaCambio.hasError('min')) {
             <mat-error>Debe ser un número positivo.</mat-error>
@@ -118,19 +125,28 @@
       />
     </section>
 
-    @if (form.controls.comboId.value) {
-      <section class="asignaciones">
-        <h2>¿Qué le das de cada servicio?</h2>
+    <!-- Una sala por servicio del combo: qué cuenta (y qué perfil) le toca
+         al cliente. -->
+    <section class="nc-panel asignaciones">
+      <h2 class="nc-panel-title">¿Qué le das de cada servicio?</h2>
 
+      @if (!form.controls.comboId.value) {
+        <p class="asignaciones-vacio">Elige un combo para ver sus servicios.</p>
+      } @else {
         @if (asignaciones().length === 0 && loadingAsignaciones()) {
-          <div class="loading">
-            <mat-spinner diameter="32" />
+          <div class="asignaciones-cargando" aria-busy="true">
+            <span class="nc-lista-cargando-texto">Cargando los servicios del combo…</span>
+            <span class="nc-skeleton"></span>
+            <span class="nc-skeleton"></span>
           </div>
         }
 
         @for (section of asignaciones(); track section.servicio.id; let i = $index) {
           <div class="asignacion-card">
-            <h3>{{ section.servicio.nombre }}</h3>
+            <h3>
+              <app-service-icon [nombre]="section.servicio.nombre" [size]="28" />
+              {{ section.servicio.nombre }}
+            </h3>
 
             <mat-form-field appearance="outline">
               <mat-label>Cuenta (correo)</mat-label>
@@ -169,8 +185,9 @@
             }
           </div>
         }
-      </section>
-    }
+      }
+    </section>
+    </div>
 
     @if (errorMessage()) {
       <p class="error-message" role="alert">{{ errorMessage() }}</p>
@@ -178,12 +195,7 @@
 
     <div class="actions">
       <button mat-button type="button" routerLink="/combo-sales">Cancelar</button>
-      <button
-        mat-flat-button
-        color="primary"
-        type="submit"
-        [disabled]="form.invalid || saving() || loadingOptions() || !form.controls.comboId.value"
-      >
+      <button mat-flat-button type="submit" [disabled]="saving()">
         @if (saving()) {
           <mat-spinner diameter="20" />
         } @else {

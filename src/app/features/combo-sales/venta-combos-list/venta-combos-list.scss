@@ -1,35 +1,100 @@
-.page-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 16px;
-
-  h1 {
-    margin: 0;
-    font-size: 1.5rem;
-  }
-}
-
-.filters {
-  display: flex;
-  gap: 16px;
-  flex-wrap: wrap;
-  margin-bottom: 8px;
-}
+// Encabezado, filtros, tablero, estados y tarjetas: estilos compartidos de
+// listas en src/styles.scss. Acá, solo lo propio de Ventas de combos, con
+// las mismas medidas que Ventas.
 
 .combo-sales-table {
   width: 100%;
 }
 
-.loading {
-  display: flex;
-  justify-content: center;
-  padding: 48px 0;
+// Botones de acción de 36 px, a la medida de su casilla.
+.nc-acciones {
+  --mat-icon-button-state-layer-size: 36px;
 }
 
+// Estado, vence, cobrado y acciones miden lo que su contenido; lo que sobra
+// se reparte entre el cliente y el combo.
+.mat-column-activo,
+.mat-column-acciones,
+.mat-column-precio,
+.mat-column-fechaFin {
+  width: 1%;
+}
+
+.mat-column-fechaFin .nc-celda-sub {
+  white-space: nowrap;
+}
+
+// El código lleva al detalle de la venta de combo.
+.codigo-enlace {
+  color: var(--nc-brand);
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+
+  &:hover {
+    text-decoration: underline;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--nc-focus);
+    outline-offset: 2px;
+  }
+}
+
+// La pila de íconos de los servicios del combo y su nombre.
+.celda-combo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+// El nombre del dueño se ve entero; baja por palabras si no entra.
+td.mat-column-dueno {
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+}
+
+// Fecha de vencimiento que pide atención: tinta de su estado (en la tabla
+// y en la tarjeta del celular).
+.vence-urgente {
+  color: var(--estado-tinta);
+  font-weight: 600;
+}
 
 .original-amount {
-  color: var(--mat-sys-on-surface-variant);
-  font-size: 0.85em;
-  margin-left: 4px;
+  justify-content: flex-end;
+}
+
+// Estado + "Cuenta caída": uno al lado del otro, o apilados si no entran.
+.estado-chips {
+  display: inline-flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 4px;
+}
+
+td .estado-chips {
+  justify-content: flex-start;
+}
+
+// ---------------------------------------------------------------------------
+// Tarjetas (celular)
+// ---------------------------------------------------------------------------
+.combo-en-tarjeta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  span {
+    min-width: 0;
+  }
+}
+
+// El código se toca con el dedo: área de 44 px sin mover el renglón.
+.nc-card-subtitle .codigo-enlace {
+  display: inline-block;
+  margin-block: -12px;
+  padding-block: 12px;
 }

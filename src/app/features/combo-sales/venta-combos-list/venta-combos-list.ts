@@ -7,7 +7,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatCardModule } from '@angular/material/card';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -22,13 +22,19 @@ import { ConfirmDialog } from '../../../shared/confirm-dialog/confirm-dialog';
 import { SolesPipe } from '../../../shared/soles.pipe';
 import { Auth, UserRole } from '../../../core/auth/auth';
 import { EmptyState } from '../../../shared/empty-state/empty-state';
-import { formatFechaCorta } from '../../../shared/fecha.util';
+import { diasEntre, formatFechaCorta, hoyIso } from '../../../shared/fecha.util';
+import { injectIsMobile } from '../../../shared/breakpoints';
+import { ServiceIconStack } from '../../../shared/service-icon-stack/service-icon-stack';
+import { type Servicio } from '../../services/servicio.model';
 import { EstadoVentaChip } from '../../../shared/estado-venta/estado-venta';
 import { CuentaCaidaChip } from '../../../shared/cuenta-caida-chip/cuenta-caida-chip';
 import { extractErrorMessage } from '../../../shared/form-error';
 import { FiltrosPlegables } from '../../../shared/filtros-plegables/filtros-plegables';
 
 type ActivoFilter = 'todos' | 'activos' | 'inactivos';
+
+// Los mismos días de aviso que Ventas y, por defecto, Vencimientos.
+const DIAS_AVISO = 3;
 
 @Component({
   imports: [
@@ -46,7 +52,8 @@ type ActivoFilter = 'todos' | 'activos' | 'inactivos';
     MatSelectModule,
     MatButtonModule,
     MatIconModule,
-    MatProgressSpinnerModule,
+    MatCardModule,
+    ServiceIconStack,
     MatTooltipModule,
   ],
   selector: 'app-venta-combos-list',
@@ -66,13 +73,12 @@ export class VentaCombosList implements OnInit {
   protected readonly isAdmin = computed(
     () => this.auth.currentUser()?.role === UserRole.ADMIN,
   );
+  protected readonly isMobile = injectIsMobile();
   protected readonly displayedColumns = computed(() =>
     this.isAdmin()
       ? [
-          'codigoVenta',
           'cliente',
           'combo',
-          'fechaInicio',
           'fechaFin',
           'precio',
           'dueno',
@@ -80,10 +86,8 @@ export class VentaCombosList implements OnInit {
           'acciones',
         ]
       : [
-          'codigoVenta',
           'cliente',
           'combo',
-          'fechaInicio',
           'fechaFin',
           'precio',
           'activo',
@@ -95,6 +99,9 @@ export class VentaCombosList implements OnInit {
   readonly combos = signal<Combo[]>([]);
   readonly clientes = signal<Contacto[]>([]);
   readonly loading = signal(false);
+  // La última carga falló: en vez de la lista se muestra el aviso con
+  // "Reintentar".
+  readonly error = signal(false);
 
   clienteFilter = 'todos';
   comboFilter = 'todos';
@@ -122,6 +129,7 @@ export class VentaCombosList implements OnInit {
 
   async refresh(): Promise<void> {
     this.loading.set(true);
+    this.error.set(false);
     try {
       const data = await this.api.list({
         clienteId: this.clienteFilter === 'todos' ? undefined : this.clienteFilter,
@@ -133,9 +141,8 @@ export class VentaCombosList implements OnInit {
       });
       this.ventasCombo.set(data);
     } catch {
-      this.snackBar.open('No se pudieron cargar las ventas de combo.', 'Cerrar', {
-        duration: 4000,
-      });
+      // El aviso va en el lugar de la lista, con "Reintentar".
+      this.error.set(true);
     } finally {
       this.loading.set(false);
     }
@@ -198,6 +205,24 @@ export class VentaCombosList implements OnInit {
 
   protected comboNombre(comboId: string): string {
     return this.combos().find((c) => c.id === comboId)?.nombre ?? '—';
+  }
+
+  // Los servicios del combo, para su pila de íconos.
+  protected comboServicios(comboId: string): Servicio[] {
+    return this.combos().find((c) => c.id === comboId)?.servicios ?? [];
+  }
+
+  // Igual que en Ventas: en una venta sin finalizar, bermellón si ya venció
+  // y ámbar si vence dentro de los días de aviso.
+  protected venceClase(ventaCombo: VentaCombo): string {
+    if (!ventaCombo.activo) {
+      return '';
+    }
+    const dias = diasEntre(hoyIso(), ventaCombo.fechaFin.slice(0, 10));
+    if (dias < 0) {
+      return 'nc-estado-vencida vence-urgente';
+    }
+    return dias <= DIAS_AVISO ? 'nc-estado-por-vencer vence-urgente' : '';
   }
 
   protected clienteNombre(clienteId: string): string {
