@@ -237,7 +237,14 @@ describe('CuentaReponerDialog', () => {
 
   it('al terminar no se cierra: dice qué pasó y ofrece "Copiar datos" para avisar a los clientes', async () => {
     const writeText = vi.fn().mockResolvedValue(undefined);
-    Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true });
+    // `writable`: otros specs que comparten el mismo worker reemplazan
+    // navigator.clipboard con una asignación directa; sin esto fallan de
+    // forma intermitente según el orden en que corran.
+    Object.defineProperty(navigator, 'clipboard', {
+      value: { writeText },
+      configurable: true,
+      writable: true,
+    });
     component.form.controls.correo.setValue('nueva@nocturne.dev');
 
     await component.submit();
