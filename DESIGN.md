@@ -598,8 +598,8 @@ La agenda del negocio: encontrar a alguien y escribirle.
 El catálogo de lo que se vende.
 
 - **Encabezado y filtros:** "Servicios que vendes" con "Nuevo servicio" a la derecha; dos filtros compactos: Cómo se vende y Estado.
-- **Columnas:** Nombre (ícono del servicio y el nombre en 600), Cómo se vende, Duración, Perfiles por cuenta, Precio de venta, Dueño (solo el administrador), Estado y dos casillas fijas: editar y desactivar o reactivar. "Cómo se vende" es una frase y puede partirse en dos renglones; las demás miden lo que su contenido y lo que sobra va al nombre. El precio va a la derecha, en 600.
-- **Celular:** una tarjeta por servicio: ícono y nombre arriba con su chip de estado; cómo se vende y el dueño en el renglón secundario; Duración, Perfiles por cuenta y Precio de venta como pares. "Perfiles por cuenta" solo aparece en lo que se vende por perfil y, en el plan familiar, se llama "Cupos del plan", igual que en el formulario. Al pie, "Editar" y "Desactivar" o "Reactivar" en casillas iguales.
+- **Columnas:** Nombre (ícono del servicio y el nombre en 600), Cómo se vende, Duración, Perfiles por cuenta, Precio de venta, Dueño (solo el administrador), Estado y dos casillas fijas: editar y desactivar o reactivar. "Cómo se vende" va en corto ("Por perfiles", "Cuenta completa", "Plan familiar", "IPTV"); la explicación entre paréntesis queda en el filtro y en el diálogo. Todas miden lo que su contenido y lo que sobra va al nombre. El precio va a la derecha, en 600.
+- **Celular:** una tarjeta por servicio: ícono y nombre arriba con su chip de estado; cómo se vende (en corto) y el dueño en el renglón secundario; Duración, Perfiles por cuenta y Precio de venta como pares. "Perfiles por cuenta" solo aparece en lo que se vende por perfil y, en el plan familiar, se llama "Cupos del plan", igual que en el formulario. Al pie, "Editar" y "Desactivar" o "Reactivar" en casillas iguales.
 - **Diálogo:** las etiquetas siguen al tipo elegido ("Precio de venta por perfil", "por cupo" o "de la cuenta"; "Perfiles por cuenta" o "Cupos del plan" solo cuando aplica), cada una con su ícono de ayuda.
 
 ### Combos

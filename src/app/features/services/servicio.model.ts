@@ -14,6 +14,15 @@ export const SERVICE_TYPE_LABELS: Record<ServiceType, string> = {
   [ServiceType.IPTV]: 'IPTV (cuenta completa)',
 };
 
+// El mismo dato en corto, sin la explicación: para la lista, donde va en
+// una columna. La explicación completa queda en el formulario.
+export const SERVICE_TYPE_SHORT_LABELS: Record<ServiceType, string> = {
+  [ServiceType.CON_PERFILES]: 'Por perfiles',
+  [ServiceType.SIN_PERFILES]: 'Cuenta completa',
+  [ServiceType.FAMILIAR]: 'Plan familiar',
+  [ServiceType.IPTV]: 'IPTV',
+};
+
 // Tipos que se venden por perfil (en FAMILIAR cada cupo del plan es un
 // perfil): son los únicos con pantallasMax — mismo criterio que el backend
 // para `usaPerfiles`.

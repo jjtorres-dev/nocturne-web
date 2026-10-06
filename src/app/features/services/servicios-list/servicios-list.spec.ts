@@ -261,4 +261,30 @@ describe('ServiciosList', () => {
       expect(porPerfil.querySelector('.nc-card-subtitle')?.textContent).not.toContain('Dueño');
     });
   });
+
+  it('muestra "Cómo se vende" en corto, sin la explicación entre paréntesis', async () => {
+    api.list.mockResolvedValue([
+      servicio,
+      { ...servicio, id: '3', tipo: ServiceType.SIN_PERFILES, pantallasMax: null },
+      { ...servicio, id: '4', tipo: ServiceType.FAMILIAR, pantallasMax: 6 },
+      { ...servicio, id: '5', tipo: ServiceType.IPTV, pantallasMax: null },
+    ]);
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const celdas = Array.from(fixture.nativeElement.querySelectorAll('td.mat-column-tipo')).map(
+      (el) => (el as HTMLElement).textContent?.trim(),
+    );
+    expect(celdas).toEqual(['Por perfiles', 'Cuenta completa', 'Plan familiar', 'IPTV']);
+  });
+
+  it('en la tarjeta del celular también va en corto', async () => {
+    await setup(UserRole.REVENDEDOR, true);
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.nc-card-subtitle')?.textContent?.trim()).toBe(
+      'Por perfiles',
+    );
+  });
 });

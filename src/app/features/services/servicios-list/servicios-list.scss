@@ -5,8 +5,9 @@
   width: 100%;
 }
 
-// Duración, perfiles, precio, estado y acciones miden lo que su contenido,
-// en un renglón; lo que sobra va al nombre.
+// Cómo se vende, duración, perfiles, precio, estado y acciones miden lo que
+// su contenido, en un renglón; lo que sobra va al nombre.
+.mat-column-tipo,
 .mat-column-duracionMeses,
 .mat-column-pantallasMax,
 .mat-column-precioBase,
@@ -16,6 +17,7 @@
   white-space: nowrap;
 }
 
+td.mat-column-tipo,
 td.mat-column-duracionMeses,
 td.mat-column-pantallasMax,
 td.mat-column-precioBase {
@@ -24,19 +26,6 @@ td.mat-column-precioBase {
 
 th.mat-column-precioBase {
   padding-inline-end: 20px;
-}
-
-// "Cómo se vende" es una frase: puede partirse en dos renglones, nunca en
-// cuatro.
-td.mat-column-tipo {
-  min-width: 200px;
-  padding-block: 6px;
-  padding-inline-end: 20px;
-  overflow: visible;
-  line-height: 1.3;
-  text-overflow: clip;
-  text-wrap: pretty;
-  white-space: normal;
 }
 
 // El nombre del dueño se ve entero; baja por palabras si no entra.

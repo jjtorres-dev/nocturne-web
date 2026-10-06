@@ -13,6 +13,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { ServiciosApi } from '../servicios-api';
 import {
   SERVICE_TYPE_LABELS,
+  SERVICE_TYPE_SHORT_LABELS,
   ServiceType,
   type Servicio,
   usaPerfiles,
@@ -178,8 +179,10 @@ export class ServiciosList implements OnInit {
     });
   }
 
+  // En corto ("Por perfiles"): la explicación completa queda en el filtro
+  // y en el formulario.
   protected typeLabel(tipo: ServiceType): string {
-    return this.typeLabels[tipo];
+    return SERVICE_TYPE_SHORT_LABELS[tipo];
   }
 
   protected duracionLabel(servicio: Servicio): string {
