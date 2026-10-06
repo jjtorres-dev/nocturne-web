@@ -1,6 +1,6 @@
 <div class="page-header">
   <h1>Clientes y proveedores</h1>
-  <button mat-flat-button color="primary" (click)="openCreate()">
+  <button mat-flat-button (click)="openCreate()">
     <mat-icon>add</mat-icon>
     Nuevo contacto
   </button>
@@ -28,8 +28,88 @@
 </app-filtros-plegables>
 
 @if (loading()) {
-  <div class="loading">
-    <mat-spinner diameter="32" />
+  <div class="nc-lista-cargando" aria-busy="true">
+    <span class="nc-lista-cargando-texto">Cargando contactos…</span>
+    <span class="nc-skeleton"></span>
+    <span class="nc-skeleton"></span>
+    <span class="nc-skeleton"></span>
+    <span class="nc-skeleton"></span>
+  </div>
+} @else if (error()) {
+  <div class="nc-lista-error" role="alert">
+    <mat-icon aria-hidden="true">error</mat-icon>
+    <p>No se pudieron cargar los contactos. Revisa tu conexión e inténtalo de nuevo.</p>
+    <button mat-stroked-button type="button" (click)="refresh()">Reintentar</button>
+  </div>
+} @else if (contactos().length === 0) {
+  <app-empty-state icon="contacts" mensaje="No hay contactos con estos filtros." submensaje="Prueba cambiando o quitando los filtros." />
+} @else if (isMobile()) {
+  <!-- Celular: una tarjeta por contacto. El número es un botón que lo copia;
+       abrir el chat es la acción principal del pie. -->
+  <div class="nc-card-list">
+    @for (c of contactos(); track c.id) {
+      <mat-card class="nc-card">
+        <mat-card-content>
+          <div class="nc-card-header">
+            <span class="contacto-nombre">
+              <app-avatar-inicial [nombre]="c.nombre" [size]="32" />
+              <span class="nc-card-title">{{ c.nombre }}</span>
+            </span>
+            <mat-chip [highlighted]="c.activo" [class.chip-inactive]="!c.activo">
+              {{ c.activo ? 'Activo' : 'Inactivo' }}
+            </mat-chip>
+          </div>
+
+          <p class="nc-card-subtitle">
+            {{ typeLabel(c.tipo) }}
+            @if (isAdmin()) {
+              <span> · Dueño: {{ c.owner.name }}</span>
+            }
+          </p>
+
+          <button
+            type="button"
+            class="numero-copiar"
+            [attr.aria-label]="'Copiar el número ' + c.whatsapp"
+            (click)="copiarNumero(c)"
+          >
+            <span class="numero">{{ c.whatsapp }}</span>
+            <span class="numero-accion">
+              <mat-icon aria-hidden="true">content_copy</mat-icon>
+              Copiar número
+            </span>
+          </button>
+        </mat-card-content>
+
+        <div class="nc-card-footer tarjeta-acciones">
+          <a
+            mat-flat-button
+            class="whatsapp-button"
+            target="_blank"
+            rel="noopener"
+            [href]="whatsappUrl(c)"
+          >
+            <mat-icon>chat</mat-icon>
+            Abrir WhatsApp
+          </a>
+          <button mat-button class="accion" (click)="openEdit(c)">
+            <mat-icon>edit</mat-icon>
+            <span>Editar</span>
+          </button>
+          @if (c.activo) {
+            <button mat-button class="accion" (click)="confirmDeactivate(c)">
+              <mat-icon>block</mat-icon>
+              <span>Desactivar</span>
+            </button>
+          } @else {
+            <button mat-button class="accion" (click)="confirmReactivate(c)">
+              <mat-icon>restart_alt</mat-icon>
+              <span>Reactivar</span>
+            </button>
+          }
+        </div>
+      </mat-card>
+    }
   </div>
 } @else {
   <div class="table-scroll">
@@ -39,7 +119,7 @@
         <td mat-cell *matCellDef="let c">
           <span class="nc-name-cell">
             <app-avatar-inicial [nombre]="c.nombre" />
-            {{ c.nombre }}
+            <span class="nc-celda-principal">{{ c.nombre }}</span>
           </span>
         </td>
       </ng-container>
@@ -68,21 +148,43 @@
         </td>
       </ng-container>
 
+      <!-- Abrir el chat es la acción de esta pantalla: va con su nombre
+           escrito. Después, tres casillas fijas: copiar el número, editar y
+           desactivar o reactivar. -->
       <ng-container matColumnDef="acciones">
-        <th mat-header-cell *matHeaderCellDef></th>
+        <th mat-header-cell *matHeaderCellDef><span class="nc-sr-only">Acciones</span></th>
         <td mat-cell *matCellDef="let c">
-          <button mat-icon-button matTooltip="Editar" (click)="openEdit(c)">
-            <mat-icon>edit</mat-icon>
-          </button>
-          @if (c.activo) {
-            <button mat-icon-button matTooltip="Desactivar" (click)="confirmDeactivate(c)">
-              <mat-icon>block</mat-icon>
-            </button>
-          } @else {
-            <button mat-icon-button matTooltip="Reactivar" (click)="confirmReactivate(c)">
-              <mat-icon>restart_alt</mat-icon>
-            </button>
-          }
+          <div class="contacto-acciones">
+            <a
+              mat-stroked-button
+              class="whatsapp-accion"
+              target="_blank"
+              rel="noopener"
+              matTooltip="Abrir el chat de WhatsApp"
+              [href]="whatsappUrl(c)"
+              [attr.aria-label]="'Abrir el chat de WhatsApp con ' + c.nombre"
+            >
+              <mat-icon>chat</mat-icon>
+              WhatsApp
+            </a>
+            <div class="nc-acciones">
+              <button mat-icon-button matTooltip="Copiar número" aria-label="Copiar número" (click)="copiarNumero(c)">
+                <mat-icon>content_copy</mat-icon>
+              </button>
+              <button mat-icon-button matTooltip="Editar" aria-label="Editar" (click)="openEdit(c)">
+                <mat-icon>edit</mat-icon>
+              </button>
+              @if (c.activo) {
+                <button mat-icon-button matTooltip="Desactivar" aria-label="Desactivar" (click)="confirmDeactivate(c)">
+                  <mat-icon>block</mat-icon>
+                </button>
+              } @else {
+                <button mat-icon-button matTooltip="Reactivar" aria-label="Reactivar" (click)="confirmReactivate(c)">
+                  <mat-icon>restart_alt</mat-icon>
+                </button>
+              }
+            </div>
+          </div>
         </td>
       </ng-container>
 
@@ -90,8 +192,4 @@
       <tr mat-row *matRowDef="let row; columns: displayedColumns()"></tr>
     </table>
   </div>
-
-  @if (contactos().length === 0) {
-    <app-empty-state icon="contacts" mensaje="No hay contactos con estos filtros." submensaje="Prueba cambiando o quitando los filtros." />
-  }
 }

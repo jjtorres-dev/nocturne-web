@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
+import { BreakpointObserver } from '@angular/cdk/layout';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ContactosList } from './contactos-list';
@@ -29,8 +30,12 @@ describe('ContactosList', () => {
   };
   let dialog: { open: ReturnType<typeof vi.fn> };
   let auth: { currentUser: ReturnType<typeof vi.fn> };
+  let snackBar: { open: ReturnType<typeof vi.fn> };
 
-  async function setup(role: UserRole = UserRole.ADMIN) {
+  async function setup(
+    role: UserRole = UserRole.ADMIN,
+    { mobile = false }: { mobile?: boolean } = {},
+  ) {
     TestBed.resetTestingModule();
     api = {
       list: vi.fn().mockResolvedValue([contacto]),
@@ -39,6 +44,7 @@ describe('ContactosList', () => {
     };
     dialog = { open: vi.fn() };
     auth = { currentUser: vi.fn().mockReturnValue({ id: 'admin-0', role }) };
+    snackBar = { open: vi.fn() };
 
     await TestBed.configureTestingModule({
       imports: [ContactosList],
@@ -46,9 +52,13 @@ describe('ContactosList', () => {
         { provide: ContactosApi, useValue: api },
         { provide: Auth, useValue: auth },
         { provide: MatDialog, useValue: dialog },
+        { provide: MatSnackBar, useValue: snackBar },
         {
-          provide: MatSnackBar,
-          useValue: { open: vi.fn() },
+          provide: BreakpointObserver,
+          useValue: {
+            observe: () => of({ matches: mobile, breakpoints: {} }),
+            isMatched: () => mobile,
+          },
         },
       ],
     }).compileComponents();
@@ -110,7 +120,10 @@ describe('ContactosList', () => {
       fixture.nativeElement.querySelectorAll('td.mat-column-acciones mat-icon'),
     ).map((el) => (el as HTMLElement).textContent?.trim());
 
-    expect(iconNames).toEqual(['edit', 'block', 'edit', 'restart_alt']);
+    expect(iconNames).toEqual([
+      'chat', 'content_copy', 'edit', 'block',
+      'chat', 'content_copy', 'edit', 'restart_alt',
+    ]);
   });
 
   it('muestra la columna Dueño para un ADMIN', async () => {
@@ -154,5 +167,113 @@ describe('ContactosList', () => {
     fixture.detectChanges();
 
     expect(fixture.nativeElement.querySelector('app-empty-state')).toBeNull();
+  });
+
+  it('mientras carga lo dice con una línea visible, sin indicador giratorio', () => {
+    fixture.detectChanges();
+
+    const carga: HTMLElement | null = fixture.nativeElement.querySelector('.nc-lista-cargando');
+    expect(carga?.textContent).toContain('Cargando contactos…');
+    expect(fixture.nativeElement.querySelector('mat-spinner')).toBeNull();
+  });
+
+  it('si la carga falla muestra el aviso con "Reintentar" en el lugar de la lista, y reintenta', async () => {
+    api.list.mockRejectedValueOnce(new Error('network down'));
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const aviso: HTMLElement | null = fixture.nativeElement.querySelector('.nc-lista-error');
+    expect(aviso?.textContent).toContain('No se pudieron cargar los contactos.');
+    expect(fixture.nativeElement.querySelector('app-empty-state')).toBeNull();
+    expect(fixture.nativeElement.querySelector('table')).toBeNull();
+
+    aviso?.querySelector('button')?.click();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(api.list).toHaveBeenCalledTimes(2);
+    expect(fixture.nativeElement.querySelector('.nc-lista-error')).toBeNull();
+    expect(fixture.nativeElement.querySelector('td.mat-column-nombre')?.textContent).toContain('Juan');
+  });
+
+  it('el enlace "WhatsApp" de la fila abre el chat del contacto en otra pestaña', async () => {
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const link: HTMLAnchorElement = fixture.nativeElement.querySelector('a.whatsapp-accion');
+    expect(link.getAttribute('href')).toBe('https://wa.me/51999999999');
+    expect(link.target).toBe('_blank');
+    expect(link.rel).toContain('noopener');
+  });
+
+  it('copiarNumero: copia el número tal como está guardado y lo avisa', async () => {
+    await fixture.whenStable();
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.assign(navigator, { clipboard: { writeText } });
+
+    await component.copiarNumero(contacto);
+
+    expect(writeText).toHaveBeenCalledWith('+51999999999');
+    expect(snackBar.open).toHaveBeenCalledWith('Número copiado.', 'Cerrar', { duration: 3000 });
+  });
+
+  it('copiarNumero: avisa si el navegador no deja copiar', async () => {
+    await fixture.whenStable();
+    Object.assign(navigator, {
+      clipboard: { writeText: vi.fn().mockRejectedValue(new Error('denied')) },
+    });
+
+    await component.copiarNumero(contacto);
+
+    expect(snackBar.open).toHaveBeenCalledWith('No se pudo copiar el número.', 'Cerrar', {
+      duration: 4000,
+    });
+  });
+
+  describe('en celular', () => {
+    it('muestra una tarjeta por contacto con el número como botón de copiar y el chat en el pie', async () => {
+      await setup(UserRole.ADMIN, { mobile: true });
+      api.list.mockResolvedValue([contacto, contactoInactivo]);
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      const tarjetas: HTMLElement[] = Array.from(
+        fixture.nativeElement.querySelectorAll('mat-card.nc-card'),
+      );
+      expect(tarjetas).toHaveLength(2);
+      expect(fixture.nativeElement.querySelector('table')).toBeNull();
+
+      const [activa, inactiva] = tarjetas;
+      expect(activa.querySelector('.nc-card-title')?.textContent).toContain('Juan');
+      expect(activa.querySelector('.nc-card-subtitle')?.textContent).toContain('Dueño: Admin');
+      expect(activa.querySelector('.numero-copiar')?.textContent).toContain('+51999999999');
+      expect(activa.querySelector('a.whatsapp-button')?.getAttribute('href')).toBe(
+        'https://wa.me/51999999999',
+      );
+      expect(activa.querySelector('.nc-card-footer')?.textContent).toContain('Desactivar');
+      expect(inactiva.querySelector('.nc-card-footer')?.textContent).toContain('Reactivar');
+    });
+
+    it('tocar el número lo copia', async () => {
+      await setup(UserRole.ADMIN, { mobile: true });
+      await fixture.whenStable();
+      fixture.detectChanges();
+      const writeText = vi.fn().mockResolvedValue(undefined);
+      Object.assign(navigator, { clipboard: { writeText } });
+
+      fixture.nativeElement.querySelector('.numero-copiar').click();
+
+      expect(writeText).toHaveBeenCalledWith('+51999999999');
+    });
+
+    it('no dice el dueño a un REVENDEDOR', async () => {
+      await setup(UserRole.REVENDEDOR, { mobile: true });
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      expect(fixture.nativeElement.querySelector('.nc-card-subtitle')?.textContent).not.toContain(
+        'Dueño',
+      );
+    });
   });
 });

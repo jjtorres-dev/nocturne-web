@@ -43,3 +43,8 @@ export function whatsappRenewalUrl(
   const mensaje = mensajeRenovacion(vencimiento, params);
   return `https://wa.me/${limpiarNumeroWhatsapp(numero)}?text=${encodeURIComponent(mensaje)}`;
 }
+
+// Chat con un contacto, sin mensaje escrito de antemano.
+export function whatsappChatUrl(numero: string): string {
+  return `https://wa.me/${limpiarNumeroWhatsapp(numero)}`;
+}

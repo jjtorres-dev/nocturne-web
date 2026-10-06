@@ -4,18 +4,18 @@
   <mat-dialog-content class="form-grid">
     <mat-form-field appearance="outline">
       <mat-label>Nombre</mat-label>
-      <input matInput formControlName="nombre" />
+      <input matInput formControlName="nombre" autocomplete="off" />
       @if (form.controls.nombre.hasError('required')) {
-        <mat-error>El nombre es obligatorio.</mat-error>
+        <mat-error>Escribe el nombre.</mat-error>
       }
     </mat-form-field>
 
     <mat-form-field appearance="outline">
       <mat-label>WhatsApp</mat-label>
-      <input matInput formControlName="whatsapp" />
+      <input matInput formControlName="whatsapp" type="tel" inputmode="tel" autocomplete="off" />
       <mat-hint>Con código de país, sin espacios. Ej.: +51987654321</mat-hint>
       @if (form.controls.whatsapp.hasError('required')) {
-        <mat-error>El WhatsApp es obligatorio.</mat-error>
+        <mat-error>Escribe el número de WhatsApp.</mat-error>
       }
     </mat-form-field>
 
@@ -36,7 +36,7 @@
 
   <mat-dialog-actions align="end">
     <button mat-button type="button" (click)="cancel()">Cancelar</button>
-    <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid || saving()">
+    <button mat-flat-button type="submit" [disabled]="saving()">
       @if (saving()) {
         <mat-spinner diameter="20" />
       } @else {

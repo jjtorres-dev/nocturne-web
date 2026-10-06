@@ -1,28 +1,156 @@
-.page-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 16px;
-
-  h1 {
-    margin: 0;
-    font-size: 1.5rem;
-  }
-}
-
-.filters {
-  display: flex;
-  gap: 16px;
-  flex-wrap: wrap;
-  margin-bottom: 8px;
-}
+// Encabezado, filtros, tablero, estados y tarjetas: estilos compartidos de
+// listas en src/styles.scss. Acá, solo lo propio de Clientes y proveedores.
 
 .contacts-table {
   width: 100%;
 }
 
-.loading {
+// Número, tipo, estado y acciones miden lo que su contenido; lo que sobra va
+// al nombre.
+.mat-column-whatsapp,
+.mat-column-tipo,
+.mat-column-activo,
+.mat-column-acciones {
+  width: 1%;
+  white-space: nowrap;
+}
+
+td.mat-column-whatsapp,
+td.mat-column-tipo {
+  padding-inline-end: 24px;
+}
+
+// El nombre del dueño se ve entero; baja por palabras si no entra.
+td.mat-column-dueno {
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+}
+
+// "WhatsApp" con su nombre y, después, las tres casillas fijas.
+.contacto-acciones {
   display: flex;
-  justify-content: center;
-  padding: 48px 0;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.whatsapp-accion {
+  --mat-button-outlined-container-height: 36px;
+  --mat-button-outlined-horizontal-padding: 12px;
+}
+
+// Botones de acción de 36 px, a la medida de su casilla.
+.nc-acciones {
+  --mat-icon-button-state-layer-size: 36px;
+}
+
+// ---------------------------------------------------------------------------
+// Tarjetas (celular)
+// ---------------------------------------------------------------------------
+.contacto-nombre {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.nc-card-header {
+  // El chip se alinea con el nombre, no con el tope del avatar.
+  align-items: center;
+
+  .mat-mdc-chip {
+    flex-shrink: 0;
+  }
+}
+
+// El número es un botón: tocarlo lo copia. A un lado el número, al otro lo
+// que hace.
+.numero-copiar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  min-height: 48px;
+  margin-top: 12px;
+  padding: 6px 12px;
+  border: 1px solid var(--nc-rule-field);
+  border-radius: var(--nc-radius);
+  background: transparent;
+  color: var(--nc-ink);
+  font: inherit;
+  cursor: pointer;
+  transition: background-color var(--nc-duration) var(--nc-ease);
+
+  &:hover,
+  &:active {
+    background-color: var(--nc-surface-sunken);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--nc-focus);
+    outline-offset: 2px;
+  }
+}
+
+.numero {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-size: 1rem;
+  font-weight: 600;
+  text-align: start;
+}
+
+.numero-accion {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 4px;
+  color: var(--nc-ink-muted);
+  font-size: 0.8125rem;
+  font-weight: 600;
+
+  .mat-icon {
+    width: 18px;
+    height: 18px;
+    font-size: 18px;
+  }
+}
+
+// Pie: abrir el chat se queda con el ancho libre; editar y desactivar o
+// reactivar, en casillas iguales con el ícono arriba y el nombre abajo.
+.tarjeta-acciones {
+  .whatsapp-button {
+    --mat-button-filled-container-height: 48px;
+    --mat-button-filled-horizontal-padding: 12px;
+
+    flex: 1 1 0;
+    min-width: 0;
+    font-size: 0.9375rem;
+    white-space: nowrap;
+  }
+
+  // (Doble clase: el pie compartido reparte el ancho entre sus botones.)
+  .accion.accion {
+    --mat-button-text-container-height: 48px;
+    --mat-button-text-horizontal-padding: 2px;
+    --mat-button-text-label-text-color: var(--nc-ink);
+    --mat-button-text-icon-spacing: 0;
+    --mat-button-text-icon-offset: 0;
+
+    display: flex;
+    flex: 0 0 72px;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    font-size: 0.75rem;
+    line-height: 1.1;
+    white-space: nowrap;
+
+    .mat-icon {
+      margin: 0;
+      color: var(--nc-ink-muted);
+    }
+  }
 }

@@ -58,4 +58,18 @@ describe('ContactoFormDialog', () => {
 
     expect(component.errorMessage()).toBe('No se pudo guardar el contacto. Inténtalo de nuevo.');
   });
+
+  it('con datos faltantes no guarda: marca los campos para que cada uno diga qué le falta', async () => {
+    fixture.detectChanges();
+    const guardar: HTMLButtonElement = fixture.nativeElement.querySelector('button[type="submit"]');
+    expect(guardar.disabled).toBe(false);
+
+    await component.submit();
+    fixture.detectChanges();
+
+    expect(api.create).not.toHaveBeenCalled();
+    expect(component.form.controls.nombre.touched).toBe(true);
+    expect(fixture.nativeElement.textContent).toContain('Escribe el nombre.');
+    expect(fixture.nativeElement.textContent).toContain('Escribe el número de WhatsApp.');
+  });
 });

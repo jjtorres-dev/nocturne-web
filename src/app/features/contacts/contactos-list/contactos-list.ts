@@ -6,7 +6,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatCardModule } from '@angular/material/card';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -23,6 +23,8 @@ import { EmptyState } from '../../../shared/empty-state/empty-state';
 import { AvatarInicial } from '../../../shared/avatar-inicial/avatar-inicial';
 import { extractErrorMessage } from '../../../shared/form-error';
 import { FiltrosPlegables } from '../../../shared/filtros-plegables/filtros-plegables';
+import { injectIsMobile } from '../../../shared/breakpoints';
+import { whatsappChatUrl } from '../../sales/whatsapp.util';
 
 type ActivoFilter = 'todos' | 'activos' | 'inactivos';
 
@@ -38,7 +40,7 @@ type ActivoFilter = 'todos' | 'activos' | 'inactivos';
     MatButtonModule,
     MatIconModule,
     MatChipsModule,
-    MatProgressSpinnerModule,
+    MatCardModule,
     MatTooltipModule,
   ],
   selector: 'app-contactos-list',
@@ -56,6 +58,7 @@ export class ContactosList implements OnInit {
   protected readonly isAdmin = computed(
     () => this.auth.currentUser()?.role === UserRole.ADMIN,
   );
+  protected readonly isMobile = injectIsMobile();
   protected readonly displayedColumns = computed(() =>
     this.isAdmin()
       ? ['nombre', 'whatsapp', 'tipo', 'dueno', 'activo', 'acciones']
@@ -64,6 +67,9 @@ export class ContactosList implements OnInit {
 
   readonly contactos = signal<Contacto[]>([]);
   readonly loading = signal(false);
+  // La última carga falló: en vez de la lista se muestra el aviso con
+  // "Reintentar".
+  readonly error = signal(false);
 
   tipoFilter: ContactType | 'todos' = 'todos';
   activoFilter: ActivoFilter = 'activos';
@@ -80,6 +86,7 @@ export class ContactosList implements OnInit {
 
   async refresh(): Promise<void> {
     this.loading.set(true);
+    this.error.set(false);
     try {
       const data = await this.api.list({
         tipo: this.tipoFilter === 'todos' ? undefined : this.tipoFilter,
@@ -90,9 +97,8 @@ export class ContactosList implements OnInit {
       });
       this.contactos.set(data);
     } catch {
-      this.snackBar.open('No se pudieron cargar los contactos.', 'Cerrar', {
-        duration: 4000,
-      });
+      // El aviso va en el lugar de la lista, con "Reintentar".
+      this.error.set(true);
     } finally {
       this.loading.set(false);
     }
@@ -152,6 +158,22 @@ export class ContactosList implements OnInit {
 
   protected typeLabel(tipo: ContactType): string {
     return this.typeLabels[tipo];
+  }
+
+  protected whatsappUrl(contacto: Contacto): string {
+    return whatsappChatUrl(contacto.whatsapp);
+  }
+
+  // Copia el número tal como está guardado, para pegarlo donde haga falta.
+  async copiarNumero(contacto: Contacto): Promise<void> {
+    try {
+      await navigator.clipboard.writeText(contacto.whatsapp);
+      this.snackBar.open('Número copiado.', 'Cerrar', { duration: 3000 });
+    } catch {
+      this.snackBar.open('No se pudo copiar el número.', 'Cerrar', {
+        duration: 4000,
+      });
+    }
   }
 
   private async deactivate(contacto: Contacto): Promise<void> {
