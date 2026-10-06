@@ -89,6 +89,17 @@ html {
   --nc-libre-tint: #dcf0f3;
   --nc-on-libre: #ffffff;
 
+  // Relleno de las tarjetas de estado de Inicio y su texto. En claro es el
+  // sólido del estado; en oscuro, una versión más apagada.
+  --nc-vencida-bloque: var(--nc-vencida);
+  --nc-on-vencida-bloque: var(--nc-on-vencida);
+  --nc-por-vencer-bloque: var(--nc-por-vencer);
+  --nc-on-por-vencer-bloque: var(--nc-on-por-vencer);
+  --nc-al-dia-bloque: var(--nc-al-dia);
+  --nc-on-al-dia-bloque: var(--nc-on-al-dia);
+  --nc-caida-bloque: var(--nc-caida);
+  --nc-on-caida-bloque: var(--nc-on-caida);
+
   // Series de dinero (Contabilidad y "Ganancia del mes"). Tintas propias:
   // los colores de estado no se reutilizan para categorías de dinero. Lo que
   // sale va en neutros (tinta y gris); lo que entra, en azul tinta; lo que
@@ -205,6 +216,18 @@ html {
   --nc-libre-ink: #5fd0e0;
   --nc-libre-tint: #0f2c31;
   --nc-on-libre: #140e0f;
+
+  // Tarjetas de estado de Inicio: el sólido pleno encandila sobre el fondo
+  // oscuro. Rellenos más hondos, con texto claro (oscuro sobre el ámbar) a
+  // 4.5:1 o más, y todavía cuatro colores distintos.
+  --nc-vencida-bloque: #b53a19;
+  --nc-on-vencida-bloque: #fbf1ee;
+  --nc-por-vencer-bloque: #c99508;
+  --nc-on-por-vencer-bloque: #140e0f;
+  --nc-al-dia-bloque: #23744b;
+  --nc-on-al-dia-bloque: #fbf1ee;
+  --nc-caida-bloque: #8e3a8a;
+  --nc-on-caida-bloque: #fbf1ee;
 
   // Series de dinero: los mismos papeles que en claro (lo que sale en
   // neutros, lo que entra en azul, lo que queda en verde), a 3:1 o más
@@ -395,11 +418,14 @@ h1,
 }
 
 // Estados: fijan los colores de un bloque o etiqueta según su estado.
-// `--estado` y `--sobre-estado` para el relleno pleno; `--estado-tinte` y
+// `--estado` y `--sobre-estado` para el relleno pleno; `--estado-bloque` y
+// `--sobre-estado-bloque` para las tarjetas de estado de Inicio; `--estado-tinte` y
 // `--estado-tinta` para la versión apagada.
 .nc-estado-vencida {
   --estado: var(--nc-vencida);
   --sobre-estado: var(--nc-on-vencida);
+  --estado-bloque: var(--nc-vencida-bloque);
+  --sobre-estado-bloque: var(--nc-on-vencida-bloque);
   --estado-tinte: var(--nc-vencida-tint);
   --estado-tinta: var(--nc-vencida-ink);
 }
@@ -407,6 +433,8 @@ h1,
 .nc-estado-por-vencer {
   --estado: var(--nc-por-vencer);
   --sobre-estado: var(--nc-on-por-vencer);
+  --estado-bloque: var(--nc-por-vencer-bloque);
+  --sobre-estado-bloque: var(--nc-on-por-vencer-bloque);
   --estado-tinte: var(--nc-por-vencer-tint);
   --estado-tinta: var(--nc-por-vencer-ink);
 }
@@ -414,6 +442,8 @@ h1,
 .nc-estado-al-dia {
   --estado: var(--nc-al-dia);
   --sobre-estado: var(--nc-on-al-dia);
+  --estado-bloque: var(--nc-al-dia-bloque);
+  --sobre-estado-bloque: var(--nc-on-al-dia-bloque);
   --estado-tinte: var(--nc-al-dia-tint);
   --estado-tinta: var(--nc-al-dia-ink);
 }
@@ -421,6 +451,8 @@ h1,
 .nc-estado-caida {
   --estado: var(--nc-caida);
   --sobre-estado: var(--nc-on-caida);
+  --estado-bloque: var(--nc-caida-bloque);
+  --sobre-estado-bloque: var(--nc-on-caida-bloque);
   --estado-tinte: var(--nc-caida-tint);
   --estado-tinta: var(--nc-caida-ink);
 }

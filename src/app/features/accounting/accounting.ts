@@ -372,7 +372,16 @@ export class Accounting implements OnInit, AfterViewInit, OnDestroy {
             borderWidth: 1,
             cornerRadius: 3,
             padding: 10,
+            // La muestra de cada serie lleva un filo del color del texto: la
+            // de "Pagado a proveedores" es del mismo color que el globo y sin
+            // filo no se ve.
+            multiKeyBackground: tinta,
             callbacks: {
+              labelColor: (item) => ({
+                backgroundColor: String(item.dataset.backgroundColor),
+                borderColor: sobreTinta,
+                borderWidth: 1,
+              }),
               // La fecha completa del periodo, en el formato de la app.
               title: (items) =>
                 periodoLargo(this.timeline()[items[0].dataIndex]?.periodo ?? '', this.groupBy),
