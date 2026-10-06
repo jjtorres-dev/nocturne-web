@@ -149,6 +149,15 @@ describe('VentaComboCreate', () => {
     router = TestBed.inject(Router);
   }
 
+  // Timeout propio (15 s en vez de 5 s), igual que su par de
+  // venta-create-dialog.spec.ts: es el primer test del archivo, así que paga
+  // el arranque en frío (TestBed + primer render de la página), y además
+  // abre un overlay real con MatSelectHarness. En reposo tarda entre 1 y
+  // 1.1 s, pero con la suite completa en paralelo y la máquina cargada (esa
+  // corrida tardó unas tres veces lo normal) pasó los 5 s dos veces. No se
+  // reprodujo con 16 procesos ocupando la CPU ni con el servidor de
+  // desarrollo recompilando: no hay timers reales ni un orden entre tests
+  // que corregir, solo poco margen.
   it('el método de pago usa el selector reusable: elegir una opción fija guarda su etiqueta', async () => {
     await setup();
     await fixture.whenStable();
@@ -164,7 +173,7 @@ describe('VentaComboCreate', () => {
     await select.clickOptions({ text: 'Zelle' });
 
     expect(component.form.controls.metodoPago.value).toBe('Zelle');
-  });
+  }, 15_000);
 
   it('tasaCambio: oculta el campo en PEN, aparece con otra moneda, y vuelve a 1 al volver a PEN', async () => {
     await setup();

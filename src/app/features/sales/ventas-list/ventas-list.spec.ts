@@ -216,6 +216,12 @@ describe('VentasList', () => {
       }));
     }
 
+    // Timeout propio (15 s en vez de 5 s): es el primer test del archivo y
+    // paga el arranque en frío de la lista más pesada de la app (TestBed +
+    // primer render de la tabla con sus chips, casillas e íconos). En reposo
+    // llegó a tardar 2 s, menos de la mitad del límite por defecto: con la
+    // máquina cargada no deja margen. No falló todavía; se sube por lo mismo
+    // que venta-create-dialog.spec.ts y venta-combo-create.spec.ts.
     it('en la tabla: vigente si vence hoy o después, vencida (en rojo) si ya pasó, finalizada si no está activa', async () => {
       api.list.mockResolvedValue([vigente, vencida, finalizada]);
       await fixture.whenStable();
@@ -226,7 +232,7 @@ describe('VentasList', () => {
         { texto: 'Vencida', vencida: true, inactiva: false },
         { texto: 'Finalizada', vencida: false, inactiva: true },
       ]);
-    });
+    }, 15_000);
 
     it('en las tarjetas de celular muestra lo mismo', async () => {
       await setup(UserRole.ADMIN, { mobile: true });

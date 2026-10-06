@@ -144,6 +144,12 @@ describe('VencimientosList', () => {
     component = fixture.componentInstance;
   }
 
+  // Timeout propio (15 s en vez de 5 s): es el primer test del archivo y
+  // paga el arranque en frío (TestBed + primer render de la lista con sus
+  // pestañas, tabla y campos de Material). En reposo tarda entre 1 y 1.6 s;
+  // con la suite completa en paralelo y la máquina cargada pasó los 5 s dos
+  // veces (las mismas dos corridas que venta-combo-create.spec.ts). El test
+  // en sí no espera nada: no hay timers reales que acortar.
   it('usa "vencida" como estado por defecto y pide diasAlerta=3', async () => {
     await setup();
     await fixture.whenStable();
@@ -153,7 +159,7 @@ describe('VencimientosList', () => {
       vencimiento: VencimientoFiltro.VENCIDA,
       diasAlerta: 3,
     });
-  });
+  }, 15_000);
 
   it('las pestañas de estado son el resumen: cada una muestra su conteo, con los días de aviso', async () => {
     await setup();
