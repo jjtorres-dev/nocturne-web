@@ -91,10 +91,10 @@ export class Login {
   private readInfoMessage(): string | null {
     const params = this.route.snapshot.queryParamMap;
     if (params.get('passwordChanged')) {
-      return 'Contraseña actualizada. Inicia sesión de nuevo.';
+      return 'Contraseña actualizada. Vuelve a ingresar.';
     }
     if (params.get('sessionExpired')) {
-      return 'Tu sesión expiró, inicia sesión de nuevo.';
+      return 'Tu sesión expiró. Vuelve a ingresar.';
     }
     return null;
   }

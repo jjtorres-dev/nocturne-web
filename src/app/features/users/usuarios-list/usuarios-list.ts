@@ -127,7 +127,7 @@ export class UsuariosList implements OnInit {
     const ref = this.dialog.open(ConfirmDialog, {
       data: {
         title: 'Desactivar usuario',
-        message: `¿Desactivar a "${usuario.name}"? No podrá iniciar sesión hasta que lo reactives.`,
+        message: `¿Desactivar a "${usuario.name}"? No podrá ingresar hasta que lo reactives.`,
         confirmLabel: 'Desactivar',
       },
     });
@@ -142,7 +142,7 @@ export class UsuariosList implements OnInit {
     const ref = this.dialog.open(ConfirmDialog, {
       data: {
         title: 'Reactivar usuario',
-        message: `¿Reactivar a "${usuario.name}"? Vuelve a poder iniciar sesión.`,
+        message: `¿Reactivar a "${usuario.name}"? Podrá ingresar de nuevo.`,
         confirmLabel: 'Reactivar',
       },
     });

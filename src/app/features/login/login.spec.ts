@@ -245,7 +245,7 @@ describe('Login con sesión expirada', () => {
   });
 
   it('muestra el aviso de sesión expirada cuando llega el query param', () => {
-    expect(component.infoMessage()).toBe('Tu sesión expiró, inicia sesión de nuevo.');
+    expect(component.infoMessage()).toBe('Tu sesión expiró. Vuelve a ingresar.');
   });
 });
 
@@ -273,12 +273,12 @@ describe('Login tras cambiar la contraseña', () => {
     fixture.detectChanges();
   }
 
-  it('muestra "Contraseña actualizada. Inicia sesión de nuevo." con ?passwordChanged=1', async () => {
+  it('muestra "Contraseña actualizada. Vuelve a ingresar." con ?passwordChanged=1', async () => {
     await setup({ passwordChanged: '1' });
 
-    expect(component.infoMessage()).toBe('Contraseña actualizada. Inicia sesión de nuevo.');
+    expect(component.infoMessage()).toBe('Contraseña actualizada. Vuelve a ingresar.');
     expect(fixture.nativeElement.querySelector('.info-message').textContent).toContain(
-      'Contraseña actualizada. Inicia sesión de nuevo.',
+      'Contraseña actualizada. Vuelve a ingresar.',
     );
   });
 
@@ -289,7 +289,7 @@ describe('Login tras cambiar la contraseña', () => {
 
     await setup({ sessionExpired: '1' });
 
-    expect(component.infoMessage()).toBe('Tu sesión expiró, inicia sesión de nuevo.');
+    expect(component.infoMessage()).toBe('Tu sesión expiró. Vuelve a ingresar.');
     expect(component.infoMessage()).not.toBe(passwordChanged);
   });
 });
