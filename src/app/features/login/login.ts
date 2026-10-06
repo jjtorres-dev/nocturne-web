@@ -55,8 +55,11 @@ export class Login {
   protected readonly verPassword = signal(false);
 
   // Segundos que faltan para poder reintentar tras un 429 (0 = sin bloqueo).
+  // Se calculan contra la hora en que termina el bloqueo, no restando de a
+  // uno: en una pestaña en segundo plano los timers corren más lento.
   readonly espera = signal(0);
   readonly bloqueado = computed(() => this.espera() > 0);
+  private bloqueoHasta = 0;
   private esperaTimer: ReturnType<typeof setInterval> | null = null;
 
   // true cuando public/login-marca.jpg ya es una imagen real y no el
@@ -114,7 +117,14 @@ export class Login {
   }
 
   async submit(): Promise<void> {
-    if (this.form.invalid || this.loading() || this.bloqueado()) {
+    if (this.loading() || this.bloqueado()) {
+      return;
+    }
+    // El botón siempre se puede tocar: si falta algo, se marca y se lleva el
+    // foco al primer campo con problema.
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      this.formEl()?.nativeElement.querySelector<HTMLElement>('input.ng-invalid')?.focus();
       return;
     }
 
@@ -153,15 +163,16 @@ export class Login {
   // Cuenta regresiva del bloqueo: el botón se rehabilita solo al terminar.
   private iniciarEspera(): void {
     this.detenerEspera();
+    this.bloqueoHasta = Date.now() + ESPERA_SEGUNDOS * 1000;
     this.espera.set(ESPERA_SEGUNDOS);
-    this.errorMessage.set(
-      'Demasiados intentos. Espera un minuto antes de volver a intentar.',
-    );
+    this.errorMessage.set('Demasiados intentos.');
     this.esperaTimer = setInterval(() => {
-      this.espera.update((s) => s - 1);
-      if (this.espera() <= 0) {
+      const faltan = Math.ceil((this.bloqueoHasta - Date.now()) / 1000);
+      if (faltan <= 0) {
         this.detenerEspera();
         this.errorMessage.set(null);
+      } else {
+        this.espera.set(faltan);
       }
     }, 1000);
   }

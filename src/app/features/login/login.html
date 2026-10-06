@@ -31,11 +31,19 @@
       @if (errorMessage(); as error) {
         <p class="aviso aviso--error error-message" role="alert">
           <mat-icon aria-hidden="true">{{ bloqueado() ? 'timer' : 'error' }}</mat-icon>
-          <span>{{ error }}</span>
+          <span>
+            {{ error }}
+            @if (bloqueado()) {
+              <!-- La cuenta cambia cada segundo: se ve, pero el lector de
+                   pantalla anuncia una sola vez la frase fija de al lado. -->
+              <span aria-hidden="true">Podrás intentar de nuevo en {{ espera() }} s.</span>
+              <span class="nc-sr-only">Espera un minuto antes de volver a intentar.</span>
+            }
+          </span>
         </p>
       }
 
-      <mat-form-field appearance="outline">
+      <mat-form-field appearance="outline" hideRequiredMarker>
         <mat-label>Correo</mat-label>
         <input
           matInput
@@ -54,7 +62,7 @@
         }
       </mat-form-field>
 
-      <mat-form-field appearance="outline">
+      <mat-form-field appearance="outline" hideRequiredMarker>
         <mat-label>Contraseña</mat-label>
         <input
           matInput
@@ -84,7 +92,9 @@
         mat-flat-button
         type="submit"
         class="submit-button"
-        [disabled]="form.invalid || loading() || bloqueado()"
+        [class.submit-button--ocupado]="loading()"
+        [attr.aria-busy]="loading()"
+        [disabled]="bloqueado()"
       >
         <span class="submit-contenido">
           @if (loading()) {

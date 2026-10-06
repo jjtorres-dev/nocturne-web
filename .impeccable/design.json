@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-05T00:00:00Z",
+  "generatedAt": "2026-10-06T00:00:00Z",
   "title": "Design System: Nocturne",
   "extensions": {
     "colorMeta": {
@@ -892,7 +892,7 @@
       },
       "headline": {
         "displayName": "Headline",
-        "purpose": "h1 de pantalla y marca del riel."
+        "purpose": "h1 de pantalla y marca del riel; en el letrero del login la marca crece a 6rem (3rem en la banda de celular, 1.5rem en la compacta)."
       },
       "title": {
         "displayName": "Title",
@@ -946,6 +946,11 @@
         "name": "duration",
         "value": "160ms",
         "purpose": "Duración de las transiciones de estado; no hay secuencias de entrada. Token --nc-duration."
+      },
+      {
+        "name": "aviso-entra",
+        "value": "opacity 0 → 1, translate 0 -4px → 0, var(--nc-duration) var(--nc-ease)",
+        "purpose": "Entrada de un aviso del login al aparecer; no corre con movimiento reducido."
       }
     ],
     "breakpoints": [
@@ -964,6 +969,14 @@
       {
         "name": "boton-corto",
         "value": "1399.98px"
+      },
+      {
+        "name": "login-banda",
+        "value": "899.98px"
+      },
+      {
+        "name": "login-compacto-alto",
+        "value": "520px (max-height, junto con login-banda)"
       }
     ],
     "darkModeProposal": {
@@ -1010,6 +1023,42 @@
         "--nc-butaca-ocupada": "#5a4a47",
         "--nc-focus": "#ffc83d",
         "--nc-selection": "#5a4410"
+      },
+      "loginAndFavicon": "**Login y favicon (propuesta, sin revisar).** El letrero del login y el favicon conservan el rojo butaca y el ámbar de bombilla también en modo oscuro: la fachada no se apaga. El favicon ya es así porque sus colores son literales. El letrero hoy pinta con `--nc-nav`, que en la tabla de abajo se oscurece; conservar su rojo va a pedir un token propio o una excepción al construirlo. Nada de esto se ha renderizado."
+    },
+    "brandAssets": {
+      "note": "Excepción \"Archivos de marca\" de la Regla del Token Único: estos archivos llevan colores literales (valores de nav, on-nav y bulb) y se actualizan a mano si el token cambia.",
+      "literals": {
+        "nav": "#6e1423",
+        "on-nav": "#fbf1ee",
+        "bulb": "#ffc83d"
+      },
+      "favicon": [
+        {
+          "file": "public/favicon.svg",
+          "detail": "Lienzo de 64, N condensada clara sobre rojo butaca del riel, cinco bombillas redondas, esquina de 10 de 64."
+        },
+        {
+          "file": "public/favicon.ico",
+          "detail": "Cuadros de 48, 32 y 16 px; el de 16 px está dibujado aparte con tres bombillas más grandes."
+        },
+        {
+          "file": "public/apple-touch-icon.png",
+          "detail": "180×180 px."
+        },
+        {
+          "file": "src/index.html",
+          "detail": "meta theme-color #6e1423 (valor de --nc-nav)."
+        }
+      ],
+      "loginImage": {
+        "file": "public/login-marca.jpg",
+        "status": "placeholder-1x1",
+        "behavior": "Con una imagen real del mismo nombre, cubre el letrero con object-fit: cover centrado, recibe alt \"Nocturne\" y reemplaza la marca tipográfica, sus bombillas y la línea que dice qué es Nocturne.",
+        "recommendedSource": "1600x2000 px, vertical 4:5",
+        "safeArea": "Franja horizontal central: alrededor del 30 % central del alto y el 60 % central del ancho.",
+        "mobileBand": "132 px de alto (cerca de 360x132 del centro); 48 px con el teclado abierto (360x48).",
+        "reviewed": "Solo con una imagen sintética de prueba."
       }
     }
   },
@@ -1085,11 +1134,27 @@
       "description": "Lo cobrado repartido en inversión, gastos y lo que queda, con las tintas de serie de dinero. La leyenda tiene un renglón por tramo, con su muestra y su monto.",
       "html": "<div class=\"ds-gan\"><span class=\"ds-gan-valor\">S/ 2,034.50</span><div class=\"ds-gan-franja\" aria-hidden=\"true\"><span class=\"ds-gan-inv\" style=\"flex-grow:1260\"></span><span class=\"ds-gan-gas\" style=\"flex-grow:185.5\"></span><span class=\"ds-gan-queda\" style=\"flex-grow:2034.5\"></span></div></div>",
       "css": ".ds-gan { font-family: var(--nc-font-sans); display: grid; gap: 10px; padding: 12px 14px 14px; background: var(--nc-surface); border: 1px solid var(--nc-rule); border-radius: var(--nc-radius); color: var(--nc-ink); font-variant-numeric: tabular-nums; } .ds-gan-valor { font-stretch: var(--nc-width-condensed); font-size: 1.875rem; font-weight: 800; line-height: 1; } .ds-gan-franja { display: flex; gap: 2px; height: 12px; } .ds-gan-franja span { flex: 0 0 0; border-radius: 1px; } .ds-gan-inv { background: var(--nc-serie-inversion); } .ds-gan-gas { background: var(--nc-serie-gastos); } .ds-gan-queda { background: var(--nc-serie-ganancia); }"
+    },
+    {
+      "name": "Login: letrero y taquilla",
+      "kind": "custom",
+      "refersTo": "letrero",
+      "description": "La fachada en dos mitades, sin tarjeta: letrero rojo con la marca sobre su fila de bombillas y taquilla con el título sobre riel negro, campos con foco en tinta y botón en tinta habilitado en reposo. Por debajo de 900 px el letrero es una banda superior.",
+      "html": "<div class=\"ds-login\"><div class=\"ds-letrero\"><p class=\"ds-letrero-marca\">Nocturne</p><p class=\"ds-letrero-lema\">Cuentas, ventas y vencimientos de tu negocio de streaming.</p></div><form class=\"ds-taquilla\" onsubmit=\"return false\"><h1 class=\"ds-login-titulo\">Ingresar</h1><label class=\"ds-campo\"><span class=\"ds-campo-label\">Correo</span><input class=\"ds-campo-input\" type=\"email\" autocomplete=\"username\"></label><label class=\"ds-campo\"><span class=\"ds-campo-label\">Contraseña</span><input class=\"ds-campo-input\" type=\"password\" autocomplete=\"current-password\"><button class=\"ds-campo-ojo\" type=\"button\" aria-label=\"Mostrar contraseña\" aria-pressed=\"false\"><svg viewBox=\"0 0 24 24\" width=\"24\" height=\"24\" aria-hidden=\"true\"><path fill=\"currentColor\" d=\"M12 6.5c3.79 0 7.17 2.13 8.82 5.5-1.65 3.37-5.02 5.5-8.82 5.5S4.83 15.37 3.18 12C4.83 8.63 8.21 6.5 12 6.5m0-2C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zm0 5c1.38 0 2.5 1.12 2.5 2.5s-1.12 2.5-2.5 2.5-2.5-1.12-2.5-2.5 1.12-2.5 2.5-2.5m0-2c-2.48 0-4.5 2.02-4.5 4.5s2.02 4.5 4.5 4.5 4.5-2.02 4.5-4.5-2.02-4.5-4.5-4.5z\"/></svg></button></label><button class=\"ds-login-submit\" type=\"submit\">Ingresar</button><p class=\"ds-login-ayuda\">¿No tienes acceso? Pídeselo a tu administrador.</p></form></div>",
+      "css": ".ds-login { font-family: var(--nc-font-sans); display: grid; grid-template-columns: minmax(0, 9fr) minmax(0, 11fr); min-height: 420px; background: var(--nc-ground); color: var(--nc-ink); font-size: 0.875rem; } .ds-letrero { padding: 72px 32px 32px; background: var(--nc-nav); color: var(--nc-on-nav); } .ds-letrero-marca { margin: -4px 0 0; padding-bottom: 12px; border-bottom: 4px dotted var(--nc-bulb); font-stretch: var(--nc-width-condensed); text-transform: uppercase; font-size: 3rem; font-weight: 800; letter-spacing: 0.04em; line-height: 0.9; } .ds-letrero-lema { max-width: 28ch; margin: 14px 0 0; color: var(--nc-on-nav-muted); font-size: 0.875rem; line-height: 1.4; } .ds-taquilla { display: flex; flex-direction: column; gap: 16px; max-width: 360px; padding: 72px 32px 32px; } .ds-login-titulo { margin: 0 0 4px; padding-bottom: 10px; border-bottom: var(--nc-rail-width) solid var(--nc-rail); font-stretch: var(--nc-width-condensed); text-transform: uppercase; font-size: 1.75rem; font-weight: 800; letter-spacing: 0.01em; line-height: 1; } .ds-campo { position: relative; display: flex; align-items: center; height: 52px; padding: 0 8px 0 15px; border: 1px solid var(--nc-rule-field); border-radius: var(--nc-radius); } .ds-campo:hover { border-color: var(--nc-ink); } .ds-campo:focus-within { border-color: var(--nc-focus); outline: 1px solid var(--nc-focus); } .ds-campo-label { position: absolute; top: -8px; left: 11px; padding: 0 4px; background: var(--nc-ground); color: var(--nc-ink-muted); font-size: 0.75rem; line-height: 1.3; } .ds-campo:focus-within .ds-campo-label { color: var(--nc-ink); } .ds-campo-input { flex: 1 1 auto; min-width: 0; border: 0; background: transparent; color: var(--nc-ink); caret-color: var(--nc-ink); font: inherit; font-size: 1rem; outline: none; } .ds-campo-ojo { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border: 0; border-radius: var(--nc-radius); background: transparent; color: var(--nc-ink-muted); cursor: pointer; transition: background-color var(--nc-duration) var(--nc-ease); } .ds-campo-ojo:hover { background: var(--nc-surface-sunken); } .ds-campo-ojo:focus-visible { outline: 2px solid var(--nc-focus); } .ds-login-submit { height: 48px; border: 0; border-radius: var(--nc-radius); background: var(--nc-ink); color: var(--nc-on-ink); font: inherit; font-size: 1rem; font-weight: 600; cursor: pointer; transition: opacity var(--nc-duration) var(--nc-ease); } .ds-login-submit:hover { opacity: 0.88; } .ds-login-submit:focus-visible { outline: 2px solid var(--nc-focus); outline-offset: 2px; } .ds-login-ayuda { margin: 0; color: var(--nc-ink-muted); font-size: 0.8125rem; line-height: 1.4; }"
+    },
+    {
+      "name": "Avisos del login y botón en espera",
+      "kind": "custom",
+      "refersTo": "aviso-error",
+      "description": "Avisos sobre el formulario en tintes de estado con ícono: por vencer (sesión expirada), al día (contraseña cambiada) y vencida (errores). Con demasiados intentos el aviso cuenta los segundos y el botón, solo entonces, se deshabilita en ópalo hundido.",
+      "html": "<div class=\"ds-avisos\"><p class=\"ds-aviso\"><svg class=\"ds-aviso-icono\" viewBox=\"0 0 24 24\" width=\"20\" height=\"20\" aria-hidden=\"true\"><path fill=\"currentColor\" d=\"M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z\"/></svg><span>Tu sesión expiró, inicia sesión de nuevo.</span></p><p class=\"ds-aviso ds-aviso--ok\"><svg class=\"ds-aviso-icono\" viewBox=\"0 0 24 24\" width=\"20\" height=\"20\" aria-hidden=\"true\"><path fill=\"currentColor\" d=\"M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z\"/></svg><span>Contraseña actualizada. Inicia sesión de nuevo.</span></p><p class=\"ds-aviso ds-aviso--error\"><svg class=\"ds-aviso-icono\" viewBox=\"0 0 24 24\" width=\"20\" height=\"20\" aria-hidden=\"true\"><path fill=\"currentColor\" d=\"M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z\"/></svg><span>Correo o contraseña incorrectos.</span></p><p class=\"ds-aviso ds-aviso--error\"><svg class=\"ds-aviso-icono\" viewBox=\"0 0 24 24\" width=\"20\" height=\"20\" aria-hidden=\"true\"><path fill=\"currentColor\" d=\"M15 1H9v2h6V1zm-4 13h2V8h-2v6zm8.03-6.61 1.42-1.42c-.43-.51-.9-.99-1.41-1.41l-1.42 1.42A8.962 8.962 0 0 0 12 4c-4.97 0-9 4.03-9 9s4.02 9 9 9a8.994 8.994 0 0 0 7.03-14.61zM12 20c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z\"/></svg><span>Demasiados intentos. Podrás intentar de nuevo en 59 s.</span></p><button class=\"ds-espera\" type=\"button\" disabled>Espera 59 s</button></div>",
+      "css": ".ds-avisos { font-family: var(--nc-font-sans); display: grid; gap: 10px; max-width: 360px; font-variant-numeric: tabular-nums; } .ds-aviso { display: flex; align-items: flex-start; gap: 10px; margin: 0; padding: 10px 12px; border-radius: var(--nc-radius); background: var(--nc-por-vencer-tint); color: var(--nc-ink); font-size: 0.875rem; line-height: 1.4; } .ds-aviso-icono { flex-shrink: 0; color: var(--nc-por-vencer-ink); } .ds-aviso--ok { background: var(--nc-al-dia-tint); } .ds-aviso--ok .ds-aviso-icono { color: var(--nc-al-dia-ink); } .ds-aviso--error { background: var(--nc-vencida-tint); } .ds-aviso--error .ds-aviso-icono { color: var(--nc-vencida-ink); } .ds-espera { height: 48px; border: 0; border-radius: var(--nc-radius); background: var(--nc-surface-sunken); color: var(--nc-ink-muted); font: inherit; font-size: 1rem; font-weight: 600; cursor: default; }"
     }
   ],
   "narrative": {
     "northStar": "Cartelera",
-    "overview": "Nocturne es la cartelera de un cine de barrio a plena luz: cada cuenta es una sala y cada venta una función con hora de término. El panel se lee como un tablero de letras blanco ópalo con rieles negros bajo cada título, un riel de navegación rojo butaca a la izquierda y el ámbar de una bombilla encendida marcando dónde estás. Rechaza la rejilla de tarjetas iguales con un número grande sobre fondo azul oscuro.\n\nEs una superficie de operación, densa y plana: filas de 36 a 50 px, paneles pegados a 16 px, color plano sin degradados y sin sombras en nada que esté apoyado en el tablero. El color fuerte se reserva para lo que cuesta dinero si se pasa por alto (vencidas, por vencer, caídas); todo lo demás es tinta sobre blanco. Celular y escritorio valen lo mismo: el mismo tablero se pliega a una columna con una barra inferior de cinco destinos.\n\n**Alcance actual.** Solo están rediseñados en este mundo el layout del panel (riel, barra superior, barra inferior en celular), el buscador global e Inicio. Las demás pantallas (Ventas, Ventas de combos, Vencimientos, Clientes y proveedores, Servicios, Cuentas, Combos, Gastos, Contabilidad, Usuarios, Configuración) y el login hoy solo heredan los tokens a través de Material; cada una todavía debe su propio rediseño dentro de la Cartelera.",
+    "overview": "Nocturne es la cartelera de un cine de barrio a plena luz: cada cuenta es una sala y cada venta una función con hora de término. El panel se lee como un tablero de letras blanco ópalo con rieles negros bajo cada título, un riel de navegación rojo butaca a la izquierda y el ámbar de una bombilla encendida marcando dónde estás. Rechaza la rejilla de tarjetas iguales con un número grande sobre fondo azul oscuro.\n\nEs una superficie de operación, densa y plana: filas de 36 a 50 px, paneles pegados a 16 px, color plano sin degradados y sin sombras en nada que esté apoyado en el tablero. El color fuerte se reserva para lo que cuesta dinero si se pasa por alto (vencidas, por vencer, caídas); todo lo demás es tinta sobre blanco. Celular y escritorio valen lo mismo: el mismo tablero se pliega a una columna con una barra inferior de cinco destinos.\n\n**Alcance actual.** Están rediseñados en este mundo el layout del panel (riel, barra superior, barra inferior en celular), el buscador global, Inicio y el login, que es la fachada del mismo cine: a un lado el letrero, al otro la taquilla; con él se rehízo el favicon. Las demás pantallas (Ventas, Ventas de combos, Vencimientos, Clientes y proveedores, Servicios, Cuentas, Combos, Gastos, Contabilidad, Usuarios, Configuración) hoy solo heredan los tokens a través de Material; cada una todavía debe su propio rediseño dentro de la Cartelera.",
     "keyCharacteristics": [
       "Tablero claro: fondo ópalo cálido, paneles blancos, líneas finas, riel negro de 2 px bajo cada título.",
       "Riel de navegación rojo butaca con la sección actual en ámbar de bombilla.",
@@ -1103,7 +1168,7 @@
     "rules": [
       {
         "name": "Regla del Token Único",
-        "body": "Todo color es un token CSS definido en el bloque `:root` de `src/styles.scss`. Ningún componente escribe un color literal (ni hex, ni `rgb()`, ni nombre): usa `var(--nc-*)` o un `--mat-sys-*`, que también apunta a ese bloque. La única excepción son los colores de marca de los servicios de streaming en `src/app/shared/service-icon/service-icons.data.ts`, que son datos de terceros y no parte de la paleta.",
+        "body": "Todo color es un token CSS definido en el bloque `:root` de `src/styles.scss`. Ningún componente escribe un color literal (ni hex, ni `rgb()`, ni nombre): usa `var(--nc-*)` o un `--mat-sys-*`, que también apunta a ese bloque. Hay dos excepciones con nombre. **Datos de terceros:** los colores de marca de los servicios de streaming en `src/app/shared/service-icon/service-icons.data.ts`, que no son parte de la paleta. **Archivos de marca:** lo que el navegador lee antes o fuera del CSS no puede usar `var()` y lleva el valor literal de su token: `public/favicon.svg`, `public/favicon.ico`, `public/apple-touch-icon.png` y el `<meta name=\"theme-color\">` de `src/index.html` (rojo butaca del riel `#6e1423`, claro `#fbf1ee` y ámbar de bombilla `#ffc83d`, los valores de `nav`, `on-nav` y `bulb`). Si uno de esos tokens cambia, esos archivos se actualizan a mano.",
         "section": "colors"
       },
       {
@@ -1118,12 +1183,17 @@
       },
       {
         "name": "Regla de la Bombilla",
-        "body": "El ámbar de bombilla solo se enciende dentro del riel rojo (y su barra inferior) para decir \"estás acá\". Fuera del riel, el ámbar que se ve es el estado \"por vencer\", que es otro token.",
+        "body": "El ámbar de bombilla se enciende dentro del riel rojo (y su barra inferior) para decir \"estás acá\" y, por pedido expreso del usuario, en la fila de bombillas de la marca en dos lugares más: el letrero del login y el favicon. No es un acento general: siempre va sobre rojo butaca y nunca sobre el tablero claro. Fuera de esos lugares, el ámbar que se ve es el estado \"por vencer\", que es otro token.",
         "section": "colors"
       },
       {
         "name": "Regla del Estado",
-        "body": "Bermellón, ámbar, verde, magenta y turquesa significan estados y nada más. No decoran, no distinguen categorías, no son series de dinero: para eso existen `--nc-serie-*`. En cero, un bloque de estado se apaga a su `-tint` con texto `-ink`: color solo donde hay algo que atender. Un bloque o etiqueta toma los cuatro colores de su estado de las clases globales `.nc-estado-vencida`, `.nc-estado-por-vencer`, `.nc-estado-al-dia` y `.nc-estado-caida` (en `src/styles.scss`), que fijan `--estado`, `--sobre-estado`, `--estado-tinte` y `--estado-tinta`.",
+        "body": "Bermellón, ámbar, verde, magenta y turquesa significan estados y nada más. No decoran, no distinguen categorías, no son series de dinero: para eso existen `--nc-serie-*`. En cero, un bloque de estado se apaga a su `-tint` con texto `-ink`: color solo donde hay algo que atender. Un bloque o etiqueta toma los cuatro colores de su estado de las clases globales `.nc-estado-vencida`, `.nc-estado-por-vencer`, `.nc-estado-al-dia` y `.nc-estado-caida` (en `src/styles.scss`), que fijan `--estado`, `--sobre-estado`, `--estado-tinte` y `--estado-tinta`. Los avisos del login usan tres de esos tintes como fondo de un mensaje, con texto en tinta y el ícono en la `-ink` del estado: por vencer para la sesión expirada, al día para la contraseña cambiada y vencida para un error.",
+        "section": "colors"
+      },
+      {
+        "name": "Regla del Foco en Tinta",
+        "body": "En todo campo de formulario, el contorno enfocado, la etiqueta enfocada y el cursor van en tinta (`--nc-focus` y `--nc-ink`, vía `--mat-form-field-outlined-focus-outline-color`, `--mat-form-field-outlined-focus-label-text-color` y `--mat-form-field-outlined-caret-color` en `src/styles.scss`). El rojo nunca significa foco: queda para la marca, y el bermellón para el error, así un campo enfocado no parece un campo con error. El autocompletado del navegador conserva el fondo del campo y su tinta en vez de pintar el suyo.",
         "section": "colors"
       },
       {
@@ -1140,6 +1210,11 @@
         "name": "Regla de la Cifra Tabular",
         "body": "`font-variant-numeric: tabular-nums` está puesto en `body`: toda cifra se alinea en columna sin pedirlo.",
         "section": "typography"
+      },
+      {
+        "name": "Regla del Teclado",
+        "body": "En el login en celular, los campos y el botón tienen que seguir a la vista con el teclado abierto. Cuando el área visible se achica (`visualViewport` por debajo del 75 % del alto de la ventana) o la ventana mide menos de 520 px de alto, la banda se compacta a un renglón (marca a 1.5rem sobre bombillas de 2 px), se ocultan la línea que dice qué es Nocturne y la línea de ayuda, el título baja a 1.375rem y el formulario sube hasta el borde de lo visible.",
+        "section": "layout"
       },
       {
         "name": "Regla del Tablero Plano",
@@ -1164,19 +1239,24 @@
       "**Sí:** escribe siempre la unidad junto a una cantidad de inventario (perfiles o cuentas) y no mezcles las dos en una misma lista.",
       "**Sí:** mantén 3 px en toda esquina y 1 px en las marcas que miden.",
       "**Sí:** da 44 px a todo lo que se toca por debajo de 768 px.",
-      "**Sí:** agrega cada sección nueva al menú dentro de uno de los grupos existentes."
+      "**Sí:** agrega cada sección nueva al menú dentro de uno de los grupos existentes.",
+      "**Sí:** enfoca todo campo de formulario en tinta: contorno, etiqueta y cursor.",
+      "**Sí:** al reemplazar `public/login-marca.jpg`, usa 1600×2000 px (4:5) y deja el sujeto y las letras en la franja horizontal central.",
+      "**Sí:** cuando cambie `nav`, `on-nav` o `bulb`, actualiza a mano el favicon (SVG, ICO, PNG) y el `theme-color`."
     ],
     "donts": [
       "**No:** escribas un color literal en un componente, ni copies el valor de un token a TypeScript.",
       "**No:** uses los alias heredados (`--nc-bg`, `--nc-surface-elevated`, `--nc-border`, `--nc-text-primary`, `--nc-text-secondary`, `--nc-accent-solid`) en código nuevo.",
       "**No:** rellenes un botón con rojo butaca ni con un color de estado.",
-      "**No:** uses el ámbar de bombilla fuera del riel de navegación y su barra inferior.",
+      "**No:** uses el ámbar de bombilla fuera del riel de navegación, su barra inferior, la fila de bombillas del letrero del login y el favicon; no es un acento general.",
       "**No:** uses un color de estado para decorar, para distinguir categorías o como serie de dinero.",
       "**No:** pongas sombra a un panel, una tarjeta o una fila; la sombra es solo de capas flotantes.",
       "**No:** repitas el mismo dato en dos formas en la misma vista (una medida encima de las tarjetas que ya lo dicen, un total en el título de una lista que ya lo dice fila por fila).",
       "**No:** uses degradados, vidrio ni esquinas redondeadas grandes.",
       "**No:** agregues secuencias de entrada; solo transiciones de estado de 160 ms.",
-      "**No:** cambies la terminología del producto (servicio, cuenta, perfil, venta, vencimiento, cuenta caída)."
+      "**No:** cambies la terminología del producto (servicio, cuenta, perfil, venta, vencimiento, cuenta caída).",
+      "**No:** uses el rojo para marcar el foco de un campo.",
+      "**No:** deshabilites el botón principal de un formulario en reposo ni mientras carga; en el login solo se deshabilita durante la espera por demasiados intentos."
     ]
   }
 }

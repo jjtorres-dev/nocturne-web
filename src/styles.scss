@@ -197,6 +197,12 @@ html {
   --mat-button-outlined-label-text-color: var(--nc-ink);
   --mat-button-outlined-outline-color: var(--nc-rule-field);
 
+  // Campos: el foco va en tinta. El rojo queda para la marca y el bermellón
+  // para el error, así un campo enfocado nunca parece un campo con error.
+  --mat-form-field-outlined-focus-outline-color: var(--nc-focus);
+  --mat-form-field-outlined-focus-label-text-color: var(--nc-ink);
+  --mat-form-field-outlined-caret-color: var(--nc-ink);
+
   --mat-dialog-container-color: var(--nc-surface);
   --mat-sidenav-scrim-color: var(--nc-scrim);
 }
@@ -208,7 +214,7 @@ body {
   font: var(--mat-sys-body-medium);
   font-family: var(--nc-font-sans);
   font-variant-numeric: tabular-nums;
-  caret-color: var(--nc-brand);
+  caret-color: var(--nc-ink);
   scrollbar-color: var(--nc-rule-field) transparent;
   margin: 0;
   height: 100%;
@@ -217,6 +223,19 @@ body {
 ::selection {
   background: var(--nc-selection);
   color: var(--nc-ink);
+}
+
+// Autocompletado del navegador: el campo conserva su fondo y su tinta en vez
+// del amarillo o celeste del navegador. La transición eterna es el modo de
+// impedir que pinte su propio fondo, esté el campo sobre el color que esté.
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--nc-ink);
+  caret-color: var(--nc-ink);
+  transition:
+    background-color 600000s 0s,
+    color 600000s 0s;
 }
 
 a {

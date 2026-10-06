@@ -71,12 +71,15 @@ describe('Login', () => {
       vi.useRealTimers();
     });
 
-    it('mientras ingresa, el botón dice "Ingresando…" y queda deshabilitado', async () => {
+    it('mientras ingresa, el botón dice "Ingresando…" y no vuelve a enviar', async () => {
       const { pending, req } = enviar();
 
       expect(component.loading()).toBe(true);
       expect(boton().textContent).toContain('Ingresando…');
-      expect(boton().disabled).toBe(true);
+      expect(boton().getAttribute('aria-busy')).toBe('true');
+      await component.submit();
+      // No sale un segundo POST mientras el primero sigue pendiente.
+      TestBed.inject(HttpTestingController).expectNone((r) => r.url.endsWith('/auth/login'));
 
       req.flush({ message: 'x' }, { status: 401, statusText: 'Unauthorized' });
       await pending;
@@ -96,7 +99,9 @@ describe('Login', () => {
       vi.useFakeTimers();
       await fallar(429);
 
-      expect(el().querySelector('.error-message')!.textContent).toContain('Demasiados intentos');
+      const aviso = el().querySelector('.error-message')!;
+      expect(aviso.textContent).toContain('Demasiados intentos');
+      expect(aviso.textContent).toContain('Podrás intentar de nuevo en 60 s.');
       expect(component.espera()).toBe(60);
       expect(boton().disabled).toBe(true);
       expect(boton().textContent).toContain('Espera 60 s');
@@ -104,6 +109,7 @@ describe('Login', () => {
       vi.advanceTimersByTime(10_000);
       fixture.detectChanges();
       expect(boton().textContent).toContain('Espera 50 s');
+      expect(el().querySelector('.error-message')!.textContent).toContain('en 50 s.');
 
       vi.advanceTimersByTime(50_000);
       fixture.detectChanges();
@@ -139,6 +145,20 @@ describe('Login', () => {
   });
 
   describe('pantalla', () => {
+    it('el botón Ingresar está disponible desde el inicio; con el formulario vacío marca los campos', async () => {
+      fixture.detectChanges();
+      const el: HTMLElement = fixture.nativeElement;
+      const boton = el.querySelector<HTMLButtonElement>('.submit-button')!;
+      expect(boton.disabled).toBe(false);
+
+      await component.submit();
+      fixture.detectChanges();
+
+      expect(component.form.controls.email.touched).toBe(true);
+      expect(el.textContent).toContain('Escribe tu correo.');
+      TestBed.inject(HttpTestingController).expectNone((r) => r.url.endsWith('/auth/login'));
+    });
+
     it('no ofrece crear una cuenta', () => {
       const texto: string = fixture.nativeElement.textContent.toLowerCase();
       expect(texto).not.toContain('crear cuenta');

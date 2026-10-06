@@ -1,7 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <!-- Marquesina de Nocturne: tablero rojo butaca, N de cartelera y fila de bombillas. -->
+  <!-- Marquesina de Nocturne: tablero rojo butaca, N condensada de cartelera
+       y fila de bombillas. -->
   <rect width="64" height="64" rx="10" fill="#6e1423" />
-  <path fill="#fbf1ee" d="M16 11h9l14 19V11h9v32h-9L25 24v19h-9z" />
+  <path fill="#fbf1ee" d="M20 8h9.5l5 15V8H44v35h-9.5l-5-15v15H20z" />
   <g fill="#ffc83d">
     <circle cx="13" cy="53" r="3" />
     <circle cx="22.5" cy="53" r="3" />

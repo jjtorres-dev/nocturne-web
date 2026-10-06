@@ -1,5 +1,9 @@
-// Dos mitades: a un lado el letrero, al otro la taquilla.
+// Dos mitades: a un lado el letrero, al otro la taquilla. Las dos arrancan a
+// la misma altura (--login-arriba), así la marca y el título comparten línea
+// y el título no se mueve cuando aparece o desaparece un aviso.
 .login-page {
+  --login-arriba: clamp(48px, 28vh, 300px);
+
   display: grid;
   grid-template-columns: minmax(0, 9fr) minmax(0, 11fr);
   min-height: 100vh;
@@ -13,8 +17,6 @@
 // ---------------------------------------------------------------------------
 .letrero {
   position: relative;
-  display: flex;
-  align-items: center;
   overflow: hidden;
   background: var(--nc-nav);
   color: var(--nc-on-nav);
@@ -37,13 +39,14 @@
 }
 
 .letrero-texto {
-  width: 100%;
-  padding: 48px clamp(32px, 6vw, 96px);
+  padding: var(--login-arriba) clamp(32px, 6vw, 96px) 48px;
 }
 
 // Letras de marquesina sobre una fila de bombillas, como en el riel del panel.
 .letrero-marca {
-  margin: 0;
+  // -4px: iguala el tope de las mayúsculas con el del título de la taquilla
+  // (las dos letras tienen distinto tamaño y alto de línea).
+  margin: -4px 0 0;
   padding-bottom: 20px;
   border-bottom: 6px dotted var(--nc-bulb);
   font-stretch: var(--nc-width-condensed);
@@ -67,9 +70,7 @@
 // La taquilla
 // ---------------------------------------------------------------------------
 .taquilla {
-  display: flex;
-  align-items: center;
-  padding: 48px clamp(32px, 8vw, 128px);
+  padding: var(--login-arriba) clamp(32px, 8vw, 128px) 48px;
 }
 
 .login-form {
@@ -84,6 +85,8 @@
   margin-bottom: 20px;
   padding-bottom: 10px;
   border-bottom: var(--nc-rail-width) solid var(--nc-rail);
+  // Misma altura de letra que la marca del letrero, en chico.
+  line-height: 1;
 }
 
 // Aviso sobre el formulario: sesión expirada (neutro), contraseña cambiada
@@ -99,6 +102,7 @@
   color: var(--nc-ink);
   font-size: 0.875rem;
   line-height: 1.4;
+  animation: aviso-entra var(--nc-duration) var(--nc-ease);
 
   .mat-icon {
     flex-shrink: 0;
@@ -125,8 +129,23 @@
   }
 }
 
+@keyframes aviso-entra {
+  from {
+    opacity: 0;
+    translate: 0 -4px;
+  }
+}
+
+// El botón del ojo, con el mismo margen interior que el texto del campo.
+.ver-password {
+  margin-inline-end: 8px;
+}
+
 .submit-button {
   --mat-button-filled-container-height: 48px;
+  // En espera (demasiados intentos): apagado, pero legible.
+  --mat-button-filled-disabled-container-color: var(--nc-surface-sunken);
+  --mat-button-filled-disabled-label-text-color: var(--nc-ink-muted);
 
   margin-top: 4px;
   font-size: 1rem;
@@ -134,6 +153,11 @@
 
   mat-spinner {
     --mat-progress-spinner-active-indicator-color: currentColor;
+  }
+
+  // Ingresando: sigue en tinta; solo deja de responder.
+  &--ocupado {
+    cursor: progress;
   }
 }
 
@@ -154,6 +178,42 @@
 // ---------------------------------------------------------------------------
 // Pantallas angostas: el letrero pasa a ser una banda arriba.
 // ---------------------------------------------------------------------------
+
+// Con poco alto visible (teclado en pantalla) la banda se reduce a la marca
+// en un renglón y el formulario sube: campos y botón quedan a la vista.
+@mixin compacto {
+  .letrero-texto {
+    padding-block: 10px 8px;
+  }
+
+  .letrero-marca {
+    padding-bottom: 5px;
+    border-bottom-width: 2px;
+    font-size: 1.5rem;
+    line-height: 1;
+  }
+
+  .letrero-lema,
+  .login-ayuda {
+    display: none;
+  }
+
+  .taquilla {
+    padding-top: 12px;
+  }
+
+  .login-titulo {
+    margin-bottom: 10px;
+    padding-bottom: 6px;
+    font-size: 1.375rem;
+  }
+
+  .aviso {
+    margin-bottom: 10px;
+    padding-block: 6px;
+  }
+}
+
 @media (max-width: 899.98px) {
   .login-page {
     grid-template-columns: minmax(0, 1fr);
@@ -161,26 +221,33 @@
   }
 
   .letrero {
+    // Con imagen de marca la banda necesita un alto propio.
+    min-height: 48px;
+  }
+
+  .letrero--imagen {
     height: 132px;
-    transition: height var(--nc-duration) var(--nc-ease);
   }
 
   .letrero-texto {
-    padding: 0 20px;
+    padding: 22px 20px 18px;
   }
 
   .letrero-marca {
+    margin-top: 0;
     padding-bottom: 10px;
     border-bottom-width: 4px;
     font-size: 3rem;
   }
 
   .letrero-lema {
-    display: none;
+    max-width: none;
+    margin-top: 12px;
+    font-size: 0.875rem;
   }
 
   .taquilla {
-    align-items: flex-start;
+    display: flex;
     justify-content: center;
     padding: 24px 20px 32px;
   }
@@ -189,37 +256,30 @@
     margin-bottom: 16px;
   }
 
-  // Con el teclado abierto la banda se reduce a la marca en un renglón.
+  // El componente detecta el teclado por el área visible (visualViewport)…
   .teclado {
-    .letrero {
+    @include compacto;
+
+    .letrero--imagen {
       height: 48px;
-    }
-
-    .letrero-marca {
-      padding-bottom: 0;
-      border-bottom: 0;
-      font-size: 1.5rem;
-      line-height: 1;
-    }
-
-    .taquilla {
-      padding-top: 12px;
-    }
-
-    .login-titulo {
-      margin-bottom: 10px;
-      padding-bottom: 6px;
-      font-size: 1.375rem;
-    }
-
-    .login-ayuda {
-      display: none;
     }
   }
 }
 
+// …y, donde el navegador achica la ventana al abrir el teclado, alcanza con
+// el alto.
+@media (max-width: 899.98px) and (max-height: 520px) {
+  .login-page {
+    @include compacto;
+  }
+
+  .letrero--imagen {
+    height: 48px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .letrero {
-    transition: none;
+  .aviso {
+    animation: none;
   }
 }
