@@ -1,6 +1,9 @@
 @if (loading()) {
-  <div class="loading">
-    <mat-spinner diameter="32" />
+  <div class="cuenta-cargando" aria-busy="true">
+    <span class="nc-lista-cargando-texto">Cargando la cuenta…</span>
+    <span class="nc-skeleton"></span>
+    <span class="nc-skeleton nc-skeleton--panel"></span>
+    <span class="nc-skeleton nc-skeleton--panel"></span>
   </div>
 } @else if (cuenta(); as c) {
   <a routerLink="/accounts" class="back-link">
@@ -8,11 +11,26 @@
     Volver a cuentas
   </a>
 
-  <div class="page-header">
-    <h1>{{ servicio()?.nombre ?? 'Cuenta' }}</h1>
+  <div class="page-header cuenta-cabeza">
+    <div class="cuenta-titulo">
+      <app-service-icon [nombre]="servicio()?.nombre ?? 'Cuenta'" [size]="40" />
+      <div>
+        <h1>{{ servicio()?.nombre ?? 'Cuenta' }}</h1>
+        <!-- El correo distingue esta cuenta de otras del mismo servicio. -->
+        <p class="cuenta-correo">{{ c.correo }}</p>
+        <span class="estado-chips">
+          <mat-chip [highlighted]="c.activo" [class.chip-inactive]="!c.activo">
+            {{ c.activo ? 'Activo' : 'Inactivo' }}
+          </mat-chip>
+          @if (c.fechaCaida) {
+            <app-cuenta-caida-chip />
+          }
+        </span>
+      </div>
+    </div>
     <div class="header-actions">
       @if (c.activo) {
-        <button mat-flat-button color="primary" (click)="openRenovarProveedor()">
+        <button mat-flat-button (click)="openRenovarProveedor()">
           <mat-icon>autorenew</mat-icon>
           Renovar con el proveedor
         </button>
@@ -22,18 +40,18 @@
         Editar
       </button>
       @if (!c.fechaCaida) {
-        <button mat-stroked-button color="warn" (click)="openMarcarCaida()">
+        <button mat-stroked-button (click)="openMarcarCaida()">
           <mat-icon>report</mat-icon>
           Marcar como caída
         </button>
       }
       @if (c.activo) {
-        <button mat-stroked-button color="warn" (click)="confirmDeactivate()">
+        <button mat-stroked-button (click)="confirmDeactivate()">
           <mat-icon>block</mat-icon>
           Desactivar
         </button>
       } @else {
-        <button mat-stroked-button color="primary" (click)="confirmReactivate()">
+        <button mat-stroked-button (click)="confirmReactivate()">
           <mat-icon>restart_alt</mat-icon>
           Reactivar
         </button>
@@ -56,7 +74,7 @@
       </div>
       <div class="caida-acciones">
         <button mat-button (click)="confirmQuitarMarcaCaida()">Quitar marca de caída</button>
-        <button mat-flat-button color="primary" (click)="openReponer()">
+        <button mat-flat-button (click)="openReponer()">
           <mat-icon>published_with_changes</mat-icon>
           Reponer cuenta
         </button>
@@ -64,233 +82,280 @@
     </section>
   }
 
-  <section class="details-card">
-    @if (isAdmin()) {
-      <div class="detail-row">
-        <span class="detail-label">Dueño</span>
-        <span>{{ c.owner.name }}</span>
-      </div>
-    }
-    <div class="detail-row">
-      <span class="detail-label">Servicio</span>
-      <span>{{ servicio()?.nombre ?? '—' }}</span>
-    </div>
-    <div class="detail-row">
-      <span class="detail-label">Proveedor</span>
-      <span>{{ proveedor()?.nombre ?? '—' }}</span>
-    </div>
-    <div class="detail-row">
-      <span class="detail-label">Correo de la cuenta</span>
-      <span>{{ c.correo }}</span>
-    </div>
-    <div class="detail-row">
-      <span class="detail-label">Contraseña de la cuenta</span>
-      <app-secret-value [value]="c.claveServicio" label="Contraseña" mensajeCopiado="Contraseña copiada." />
-    </div>
-    <div class="detail-row">
-      <span class="detail-label">Contraseña del correo</span>
-      <app-secret-value [value]="c.claveCorreo" label="Contraseña" mensajeCopiado="Contraseña copiada." />
-    </div>
-    <div class="detail-row">
-      <span class="detail-label">Fecha de compra</span>
-      <span>{{ c.fechaInicio | date: 'dd/MM/yyyy' }}</span>
-    </div>
-    <div class="detail-row">
-      <span class="detail-label">Vence con el proveedor</span>
-      <span>{{ c.fechaFin | date: 'dd/MM/yyyy' }}</span>
-    </div>
-    <div class="detail-row">
-      <span class="detail-label">Costo de la cuenta</span>
-      <span>{{ c.costo | soles }}</span>
-    </div>
-    <div class="detail-row">
-      <span class="detail-label">Método de pago</span>
-      <span>{{ c.metodoPago }}</span>
-    </div>
-    <div class="detail-row">
-      <span class="detail-label">Enlace de acceso</span>
-      <span>{{ c.url ?? '—' }}</span>
-    </div>
-    <div class="detail-row">
-      <span class="detail-label">El proveedor la renueva solo</span>
-      <span>{{ c.renovacionAutomatica ? 'Sí' : 'No' }}</span>
-    </div>
-    <div class="detail-row">
-      <span class="detail-label">Estado</span>
-      <mat-chip [highlighted]="c.activo" [class.chip-inactive]="!c.activo">
-        {{ c.activo ? 'Activo' : 'Inactivo' }}
-      </mat-chip>
-    </div>
-  </section>
+  <div class="cuenta-rejilla">
+    <div class="columna">
+      <!-- Las llaves de la sala: lo que más se usa desde el celular. Ocultas
+           por defecto; cada una se revela y se copia con un toque. -->
+      <section class="nc-panel details-card credenciales" aria-label="Credenciales">
+        <h2 class="nc-panel-title">Credenciales</h2>
+        <div class="credencial">
+          <span class="detail-label">Correo de la cuenta</span>
+          <app-secret-value [value]="c.correo" label="Correo" [visible]="true" />
+        </div>
+        <div class="credencial">
+          <span class="detail-label">Contraseña de la cuenta</span>
+          <app-secret-value [value]="c.claveServicio" label="Contraseña" mensajeCopiado="Contraseña copiada." />
+        </div>
+        <div class="credencial">
+          <span class="detail-label">Contraseña del correo</span>
+          <app-secret-value [value]="c.claveCorreo" label="Contraseña" mensajeCopiado="Contraseña copiada." />
+        </div>
+        <div class="credencial">
+          <span class="detail-label">Enlace de acceso</span>
+          <span class="credencial-valor">{{ c.url ?? '—' }}</span>
+        </div>
+      </section>
 
-  @if (rentabilidad(); as r) {
-    <section class="rentabilidad-card" aria-label="Cuánto te deja esta cuenta">
-      <h2>¿Cuánto te deja esta cuenta?</h2>
-      <div class="recuperado">
-        <span>Cobraste {{ r.ingresos | soles }} de los {{ r.costo | soles }} que pagaste</span>
-        <span class="desglose-costo">
-          Compra: {{ r.desgloseCosto.compraInicial | soles }}
-          @if (r.desgloseCosto.cantidadRenovaciones > 0) {
-            · {{ r.desgloseCosto.cantidadRenovaciones }}
-            {{ r.desgloseCosto.cantidadRenovaciones === 1 ? 'renovación' : 'renovaciones' }}:
-            {{ r.desgloseCosto.renovaciones | soles }}
-          } @else {
-            · Sin renovaciones todavía
+      <section class="nc-panel profiles-section" [class.sala-caida]="c.fechaCaida">
+        <h2 class="nc-panel-title">
+          Perfiles
+          @if (butacas().length > 0) {
+            <span class="leyenda" aria-hidden="true">
+              <span class="butaca"></span> libre <span class="butaca ocupada"></span> ocupada
+            </span>
           }
-        </span>
-        <mat-progress-bar
-          mode="determinate"
-          [value]="porcentajeRecuperado()"
-          [attr.aria-label]="'Recuperaste el ' + porcentajeRecuperado().toFixed(0) + '% de lo que pagaste'"
-        />
-      </div>
-      <div class="rentabilidad-stats">
-        @if (r.usaPerfiles) {
-          <span class="perfiles-vendidos">
-            Perfiles vendidos: <strong>{{ r.perfilesVendidos }} de {{ r.perfilesTotal }}</strong>
-          </span>
+        </h2>
+
+        @if (loadingPerfiles()) {
+          <div class="panel-cargando" aria-busy="true">
+            <span class="nc-lista-cargando-texto">Cargando perfiles…</span>
+            <span class="nc-skeleton"></span>
+            <span class="nc-skeleton"></span>
+          </div>
         } @else {
-          <span class="perfiles-vendidos">
-            Cuenta completa: <strong>{{ c.clienteId ? 'vendida' : 'sin vender' }}</strong>
-          </span>
-        }
-        <span class="potencial">Si vendes todo: {{ r.potencial | soles }}</span>
-      </div>
-      @if (r.ganancia > 0) {
-        <p class="ganancia positiva">Ya ganaste {{ r.ganancia | soles }}</p>
-      } @else if (r.ganancia === 0) {
-        <p class="ganancia cubierto">Ya recuperaste lo que pagaste</p>
-      } @else {
-        <p class="ganancia faltante">Te faltan {{ -r.ganancia | soles }} para recuperar lo que pagaste</p>
-      }
-      @if (r.ventasCombo > 0) {
-        <p class="nota-combo">Aquí no se cuentan las ventas de combos.</p>
-      }
-    </section>
-  }
+          <!-- La sala: una butaca por perfil, con su nombre y quién la ocupa.
+               Un servicio sin perfiles es una sola butaca: la cuenta entera. -->
+          @if (butacas().length > 0) {
+            <ul class="sala" aria-label="Butacas de la cuenta">
+              @for (b of butacas(); track b.id) {
+                <li class="sala-butaca" [class.ocupada]="b.estado === 'ocupada'" [class.inactiva]="b.estado === 'inactiva'">
+                  <span class="butaca-forma" aria-hidden="true"></span>
+                  <span class="sala-nombre">{{ b.nombre }}</span>
+                  <span class="sala-quien">{{ b.quien }}</span>
+                </li>
+              }
+            </ul>
+          }
+          @if (c.fechaCaida && butacas().length > 0) {
+            <p class="sala-aviso">La cuenta está caída: por ahora nadie puede usar estas butacas.</p>
+          }
 
-  <section class="pagos-section" aria-label="Pagos al proveedor">
-    <h2>Pagos al proveedor</h2>
-    @if (pagosProveedor(); as pagos) {
-      @if (pagos.length === 0) {
-        <p class="empty-state">Todavía no hay pagos al proveedor de esta cuenta.</p>
-      } @else {
+          <div class="perfiles-barra">
+            @if (!canAddPerfil()) {
+              <p class="limit-reached">{{ addPerfilDisabledReason() }}</p>
+            } @else if (perfiles().length === 0) {
+              <p class="limit-reached">Esta cuenta todavía no tiene perfiles. Agrégalos para poder venderlos.</p>
+            }
+            <button
+              mat-stroked-button
+              class="agregar-perfil"
+              [disabled]="!canAddPerfil()"
+              [matTooltip]="addPerfilDisabledReason() ?? ''"
+              [matTooltipDisabled]="canAddPerfil()"
+              (click)="openCreatePerfil()"
+            >
+              <mat-icon>add</mat-icon>
+              Agregar perfil
+            </button>
+          </div>
+
+          @if (perfiles().length > 0) {
         <div class="table-scroll">
-          <table mat-table [dataSource]="pagos" class="pagos-table">
-            <ng-container matColumnDef="fecha">
-              <th mat-header-cell *matHeaderCellDef>Fecha de pago</th>
-              <td mat-cell *matCellDef="let p">{{ p.fecha | date: 'dd/MM/yyyy' }}</td>
+          <table mat-table [dataSource]="perfiles()" class="profiles-table nc-tabla-fichas">
+            <ng-container matColumnDef="nombre">
+              <th mat-header-cell *matHeaderCellDef>Nombre</th>
+              <td mat-cell *matCellDef="let p">{{ p.nombre }}</td>
             </ng-container>
 
-            <ng-container matColumnDef="tipo">
-              <th mat-header-cell *matHeaderCellDef>Tipo</th>
-              <td mat-cell *matCellDef="let p">{{ pagoTipoLabel(p) }}</td>
-            </ng-container>
-
-            <ng-container matColumnDef="monto">
-              <th mat-header-cell *matHeaderCellDef>Pagaste</th>
+            <ng-container matColumnDef="pin">
+              <th mat-header-cell *matHeaderCellDef>PIN</th>
               <td mat-cell *matCellDef="let p">
-                {{ p.montoPEN | soles }}
-                @if (p.moneda !== Moneda.PEN) {
-                  <small class="monto-original">({{ p.monto.toFixed(2) }} {{ p.moneda }})</small>
+                <app-secret-value [value]="p.pin" label="PIN" />
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="cliente">
+              <th mat-header-cell *matHeaderCellDef>Cliente</th>
+              <td mat-cell *matCellDef="let p">{{ clienteNombre(p.clienteId) }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="activo">
+              <th mat-header-cell *matHeaderCellDef>Estado</th>
+              <td mat-cell *matCellDef="let p">
+                <mat-chip [highlighted]="p.activo" [class.chip-inactive]="!p.activo">
+                  {{ p.activo ? 'Activo' : 'Inactivo' }}
+                </mat-chip>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="acciones">
+              <th mat-header-cell *matHeaderCellDef></th>
+              <td mat-cell *matCellDef="let p">
+                <button mat-icon-button matTooltip="Editar" (click)="openEditPerfil(p)">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                @if (p.activo) {
+                  <button mat-icon-button matTooltip="Desactivar" (click)="confirmDeactivatePerfil(p)">
+                    <mat-icon>block</mat-icon>
+                  </button>
+                } @else {
+                  <button mat-icon-button matTooltip="Reactivar" (click)="confirmReactivatePerfil(p)">
+                    <mat-icon>restart_alt</mat-icon>
+                  </button>
                 }
               </td>
             </ng-container>
 
-            <ng-container matColumnDef="metodoPago">
-              <th mat-header-cell *matHeaderCellDef>Método de pago</th>
-              <td mat-cell *matCellDef="let p">{{ p.metodoPago }}</td>
-            </ng-container>
-
-            <tr mat-header-row *matHeaderRowDef="displayedPagoColumns"></tr>
-            <tr mat-row *matRowDef="let row; columns: displayedPagoColumns"></tr>
+            <tr mat-header-row *matHeaderRowDef="displayedProfileColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedProfileColumns"></tr>
           </table>
         </div>
-      }
-    } @else {
-      <p class="empty-state">No se pudieron cargar los pagos al proveedor.</p>
-    }
-  </section>
-
-  <section class="profiles-section">
-    <div class="page-header">
-      <h2>Perfiles</h2>
-      <button
-        mat-flat-button
-        color="primary"
-        [disabled]="!canAddPerfil()"
-        [matTooltip]="addPerfilDisabledReason() ?? ''"
-        [matTooltipDisabled]="canAddPerfil()"
-        (click)="openCreatePerfil()"
-      >
-        <mat-icon>add</mat-icon>
-        Agregar perfil
-      </button>
+          }
+        }
+      </section>
     </div>
 
-    @if (!canAddPerfil()) {
-      <p class="limit-reached">{{ addPerfilDisabledReason() }}</p>
+    <div class="columna">
+      <section class="nc-panel datos-cuenta" aria-label="Datos de la cuenta">
+        <h2 class="nc-panel-title">Datos de la cuenta</h2>
+        <dl class="datos">
+          @if (isAdmin()) {
+            <div class="detail-row">
+              <dt class="detail-label">Dueño</dt>
+              <dd>{{ c.owner.name }}</dd>
+            </div>
+          }
+          <div class="detail-row">
+            <dt class="detail-label">Servicio</dt>
+            <dd>{{ servicio()?.nombre ?? '—' }}</dd>
+          </div>
+          <div class="detail-row">
+            <dt class="detail-label">Proveedor</dt>
+            <dd>{{ proveedor()?.nombre ?? '—' }}</dd>
+          </div>
+          <div class="detail-row">
+            <dt class="detail-label">Fecha de compra</dt>
+            <dd>{{ c.fechaInicio | date: 'dd/MM/yyyy' }}</dd>
+          </div>
+          <div class="detail-row">
+            <dt class="detail-label">Vence con el proveedor</dt>
+            <dd>{{ c.fechaFin | date: 'dd/MM/yyyy' }}</dd>
+          </div>
+          <div class="detail-row">
+            <dt class="detail-label">Costo de la cuenta</dt>
+            <dd>{{ c.costo | soles }}</dd>
+          </div>
+          <div class="detail-row">
+            <dt class="detail-label">Método de pago</dt>
+            <dd>{{ c.metodoPago }}</dd>
+          </div>
+          <div class="detail-row">
+            <dt class="detail-label">El proveedor la renueva solo</dt>
+            <dd>{{ c.renovacionAutomatica ? 'Sí' : 'No' }}</dd>
+          </div>
+        </dl>
+      </section>
+
+    @if (rentabilidad(); as r) {
+      <section class="nc-panel rentabilidad-card" aria-label="Cuánto te deja esta cuenta">
+        <h2 class="nc-panel-title">¿Cuánto te deja esta cuenta?</h2>
+        <div class="panel-cuerpo">
+        <div class="recuperado">
+          <span>Cobraste {{ r.ingresos | soles }} de los {{ r.costo | soles }} que pagaste</span>
+          <span class="desglose-costo">
+            Compra: {{ r.desgloseCosto.compraInicial | soles }}
+            @if (r.desgloseCosto.cantidadRenovaciones > 0) {
+              · {{ r.desgloseCosto.cantidadRenovaciones }}
+              {{ r.desgloseCosto.cantidadRenovaciones === 1 ? 'renovación' : 'renovaciones' }}:
+              {{ r.desgloseCosto.renovaciones | soles }}
+            } @else {
+              · Sin renovaciones todavía
+            }
+          </span>
+          <mat-progress-bar
+            mode="determinate"
+            [value]="porcentajeRecuperado()"
+            [attr.aria-label]="'Recuperaste el ' + porcentajeRecuperado().toFixed(0) + '% de lo que pagaste'"
+          />
+        </div>
+        <div class="rentabilidad-stats">
+          @if (r.usaPerfiles) {
+            <span class="perfiles-vendidos">
+              Perfiles vendidos: <strong>{{ r.perfilesVendidos }} de {{ r.perfilesTotal }}</strong>
+            </span>
+          } @else {
+            <span class="perfiles-vendidos">
+              Cuenta completa: <strong>{{ c.clienteId ? 'vendida' : 'sin vender' }}</strong>
+            </span>
+          }
+          <span class="potencial">Si vendes todo: {{ r.potencial | soles }}</span>
+        </div>
+        @if (r.ganancia > 0) {
+          <p class="ganancia positiva">Ya ganaste {{ r.ganancia | soles }}</p>
+        } @else if (r.ganancia === 0) {
+          <p class="ganancia cubierto">Ya recuperaste lo que pagaste</p>
+        } @else {
+          <p class="ganancia faltante">Te faltan {{ -r.ganancia | soles }} para recuperar lo que pagaste</p>
+        }
+        @if (r.ventasCombo > 0) {
+          <p class="nota-combo">Aquí no se cuentan las ventas de combos.</p>
+        }
+        </div>
+      </section>
     }
 
-    @if (loadingPerfiles()) {
-      <div class="loading">
-        <mat-spinner diameter="32" />
-      </div>
-    } @else {
-      <div class="table-scroll">
-        <table mat-table [dataSource]="perfiles()" class="profiles-table">
-          <ng-container matColumnDef="nombre">
-            <th mat-header-cell *matHeaderCellDef>Nombre</th>
-            <td mat-cell *matCellDef="let p">{{ p.nombre }}</td>
-          </ng-container>
+    <section class="nc-panel pagos-section" aria-label="Pagos al proveedor">
+      <h2 class="nc-panel-title">Pagos al proveedor</h2>
+      @if (pagosProveedor(); as pagos) {
+        @if (pagos.length === 0) {
+          <p class="empty-state">Todavía no hay pagos al proveedor de esta cuenta.</p>
+        } @else {
+          <div class="table-scroll">
+            <table mat-table [dataSource]="pagos" class="pagos-table">
+              <ng-container matColumnDef="fecha">
+                <th mat-header-cell *matHeaderCellDef>Fecha de pago</th>
+                <td mat-cell *matCellDef="let p">{{ p.fecha | date: 'dd/MM/yyyy' }}</td>
+              </ng-container>
 
-          <ng-container matColumnDef="pin">
-            <th mat-header-cell *matHeaderCellDef>PIN</th>
-            <td mat-cell *matCellDef="let p">
-              <app-secret-value [value]="p.pin" label="PIN" />
-            </td>
-          </ng-container>
+              <ng-container matColumnDef="tipo">
+                <th mat-header-cell *matHeaderCellDef>Tipo</th>
+                <td mat-cell *matCellDef="let p">{{ pagoTipoLabel(p) }}</td>
+              </ng-container>
 
-          <ng-container matColumnDef="cliente">
-            <th mat-header-cell *matHeaderCellDef>Cliente</th>
-            <td mat-cell *matCellDef="let p">{{ clienteNombre(p.clienteId) }}</td>
-          </ng-container>
+              <ng-container matColumnDef="monto">
+                <th mat-header-cell *matHeaderCellDef>Pagaste</th>
+                <td mat-cell *matCellDef="let p">
+                  {{ p.montoPEN | soles }}
+                  @if (p.moneda !== Moneda.PEN) {
+                    <small class="monto-original">({{ p.monto.toFixed(2) }} {{ p.moneda }})</small>
+                  }
+                </td>
+              </ng-container>
 
-          <ng-container matColumnDef="activo">
-            <th mat-header-cell *matHeaderCellDef>Estado</th>
-            <td mat-cell *matCellDef="let p">
-              <mat-chip [highlighted]="p.activo" [class.chip-inactive]="!p.activo">
-                {{ p.activo ? 'Activo' : 'Inactivo' }}
-              </mat-chip>
-            </td>
-          </ng-container>
+              <ng-container matColumnDef="metodoPago">
+                <th mat-header-cell *matHeaderCellDef>Método de pago</th>
+                <td mat-cell *matCellDef="let p">{{ p.metodoPago }}</td>
+              </ng-container>
 
-          <ng-container matColumnDef="acciones">
-            <th mat-header-cell *matHeaderCellDef></th>
-            <td mat-cell *matCellDef="let p">
-              <button mat-icon-button matTooltip="Editar" (click)="openEditPerfil(p)">
-                <mat-icon>edit</mat-icon>
-              </button>
-              @if (p.activo) {
-                <button mat-icon-button matTooltip="Desactivar" (click)="confirmDeactivatePerfil(p)">
-                  <mat-icon>block</mat-icon>
-                </button>
-              } @else {
-                <button mat-icon-button matTooltip="Reactivar" (click)="confirmReactivatePerfil(p)">
-                  <mat-icon>restart_alt</mat-icon>
-                </button>
-              }
-            </td>
-          </ng-container>
-
-          <tr mat-header-row *matHeaderRowDef="displayedProfileColumns"></tr>
-          <tr mat-row *matRowDef="let row; columns: displayedProfileColumns"></tr>
-        </table>
-      </div>
-
-      @if (perfiles().length === 0) {
-        <p class="empty-state">Esta cuenta todavía no tiene perfiles. Agrégalos para poder venderlos.</p>
+              <tr mat-header-row *matHeaderRowDef="displayedPagoColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedPagoColumns"></tr>
+            </table>
+          </div>
+        }
+      } @else {
+        <p class="pagos-error" role="alert">
+        <span>No se pudieron cargar los pagos al proveedor.</span>
+        <button mat-stroked-button type="button" (click)="refreshPagosProveedor()">Reintentar</button>
+      </p>
       }
-    }
-  </section>
+    </section>
+    </div>
+  </div>
+} @else if (error()) {
+  <div class="nc-lista-error" role="alert">
+    <mat-icon aria-hidden="true">error</mat-icon>
+    <p>No se pudo cargar la cuenta. Revisa tu conexión e inténtalo de nuevo.</p>
+    <a mat-button routerLink="/accounts">Volver a cuentas</a>
+    <button mat-stroked-button type="button" (click)="refresh()">Reintentar</button>
+  </div>
 }

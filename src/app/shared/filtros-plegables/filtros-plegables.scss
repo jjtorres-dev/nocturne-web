@@ -1,0 +1,14 @@
+:host {
+  display: block;
+}
+
+.filters-toggle {
+  --mat-button-outlined-container-height: 44px;
+
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+.filters-count {
+  margin-left: 4px;
+}

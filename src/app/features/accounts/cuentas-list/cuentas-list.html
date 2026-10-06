@@ -1,12 +1,12 @@
 <div class="page-header">
   <h1>Cuentas compradas</h1>
-  <button mat-flat-button color="primary" (click)="openCreate()">
+  <button mat-flat-button (click)="openCreate()">
     <mat-icon>add</mat-icon>
     Nueva cuenta
   </button>
 </div>
 
-<div class="filters">
+<app-filtros-plegables [activos]="filtrosActivos()">
   <mat-form-field appearance="outline">
     <mat-label>Servicio</mat-label>
     <mat-select [(ngModel)]="servicioFilter" (selectionChange)="refresh()">
@@ -35,28 +35,81 @@
       <mat-option value="inactivos">Inactivos</mat-option>
     </mat-select>
   </mat-form-field>
-</div>
+</app-filtros-plegables>
 
 @if (loading()) {
-  <div class="loading">
-    <mat-spinner diameter="32" />
+  <div class="nc-lista-cargando" aria-busy="true">
+    <span class="nc-lista-cargando-texto">Cargando cuentas…</span>
+    <span class="nc-skeleton"></span>
+    <span class="nc-skeleton"></span>
+    <span class="nc-skeleton"></span>
+    <span class="nc-skeleton"></span>
+  </div>
+} @else if (error()) {
+  <div class="nc-lista-error" role="alert">
+    <mat-icon aria-hidden="true">error</mat-icon>
+    <p>No se pudieron cargar las cuentas. Revisa tu conexión e inténtalo de nuevo.</p>
+    <button mat-stroked-button type="button" (click)="refresh()">Reintentar</button>
+  </div>
+} @else if (cuentas().length === 0) {
+  <app-empty-state icon="account_circle" mensaje="No hay cuentas con estos filtros." submensaje="Prueba cambiando o quitando los filtros." />
+} @else if (isMobile()) {
+  <!-- Celular: una tarjeta por cuenta; toda la tarjeta lleva al detalle. -->
+  <div class="nc-card-list">
+    @for (c of cuentas(); track c.id) {
+      <a class="cuenta-tarjeta" [class.caida]="c.fechaCaida" [routerLink]="['/accounts', c.id]">
+        <span class="cuenta-tarjeta-cabeza">
+          <app-service-icon [nombre]="servicioNombre(c.servicioId)" [size]="32" />
+          <span class="nc-celda">
+            <span class="nc-celda-principal">{{ servicioNombre(c.servicioId) }}</span>
+            <span class="nc-celda-sub cuenta-correo">{{ c.correo }}</span>
+          </span>
+          <span class="estado-chips">
+            <mat-chip [highlighted]="c.activo" [class.chip-inactive]="!c.activo">
+              {{ c.activo ? 'Activo' : 'Inactivo' }}
+            </mat-chip>
+            @if (c.fechaCaida) {
+              <app-cuenta-caida-chip />
+            }
+          </span>
+        </span>
+        <span class="cuenta-tarjeta-datos">
+          <span>
+            <span class="dato-etiqueta">Vence (proveedor)</span>
+            <span [class]="venceClase(c)">{{ c.fechaFin | date: 'dd/MM/yyyy' }}</span>
+          </span>
+          <span>
+            <span class="dato-etiqueta">Perfiles creados</span>
+            <span>{{ perfilesLabel(c) }}</span>
+          </span>
+          <span>
+            <span class="dato-etiqueta">Proveedor</span>
+            <span>{{ proveedorNombre(c.proveedorId) }}</span>
+          </span>
+          @if (isAdmin()) {
+            <span>
+              <span class="dato-etiqueta">Dueño</span>
+              <span>{{ c.owner.name }}</span>
+            </span>
+          }
+        </span>
+      </a>
+    }
   </div>
 } @else {
   <div class="table-scroll">
     <table mat-table [dataSource]="cuentas()" class="accounts-table">
       <ng-container matColumnDef="servicio">
-        <th mat-header-cell *matHeaderCellDef>Servicio</th>
+        <th mat-header-cell *matHeaderCellDef>Servicio y cuenta</th>
         <td mat-cell *matCellDef="let c">
-          <span class="nc-name-cell">
-            <app-service-icon [nombre]="servicioNombre(c.servicioId)" />
-            {{ servicioNombre(c.servicioId) }}
-          </span>
+          <div class="celda-servicio">
+            <app-service-icon [nombre]="servicioNombre(c.servicioId)" [size]="28" />
+            <div class="nc-celda">
+              <span class="nc-celda-principal">{{ servicioNombre(c.servicioId) }}</span>
+              <span class="nc-celda-sub cuenta-correo">{{ c.correo }}</span>
+            </div>
+          </div>
         </td>
-      </ng-container>
-
-      <ng-container matColumnDef="correo">
-        <th mat-header-cell *matHeaderCellDef>Correo de la cuenta</th>
-        <td mat-cell *matCellDef="let c">{{ c.correo }}</td>
       </ng-container>
 
       <ng-container matColumnDef="proveedor">
@@ -64,14 +117,16 @@
         <td mat-cell *matCellDef="let c">{{ proveedorNombre(c.proveedorId) }}</td>
       </ng-container>
 
-      <ng-container matColumnDef="fechaInicio">
-        <th mat-header-cell *matHeaderCellDef>Comprada</th>
-        <td mat-cell *matCellDef="let c">{{ c.fechaInicio | date: 'dd/MM/yyyy' }}</td>
-      </ng-container>
-
       <ng-container matColumnDef="fechaFin">
         <th mat-header-cell *matHeaderCellDef>Vence (proveedor)</th>
-        <td mat-cell *matCellDef="let c">{{ c.fechaFin | date: 'dd/MM/yyyy' }}</td>
+        <td mat-cell *matCellDef="let c">
+          <div class="nc-celda">
+            <span class="nc-celda-principal" [class]="venceClase(c)">
+              {{ c.fechaFin | date: 'dd/MM/yyyy' }}
+            </span>
+            <span class="nc-celda-sub">comprada {{ c.fechaInicio | date: 'dd/MM/yyyy' }}</span>
+          </div>
+        </td>
       </ng-container>
 
       <ng-container matColumnDef="perfiles">
@@ -87,9 +142,30 @@
       <ng-container matColumnDef="activo">
         <th mat-header-cell *matHeaderCellDef>Estado</th>
         <td mat-cell *matCellDef="let c">
-          <mat-chip [highlighted]="c.activo" [class.chip-inactive]="!c.activo">
-            {{ c.activo ? 'Activo' : 'Inactivo' }}
-          </mat-chip>
+          <span class="estado-chips">
+            <mat-chip [highlighted]="c.activo" [class.chip-inactive]="!c.activo">
+              {{ c.activo ? 'Activo' : 'Inactivo' }}
+            </mat-chip>
+            @if (c.fechaCaida) {
+              <app-cuenta-caida-chip />
+            }
+          </span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="ir">
+        <th mat-header-cell *matHeaderCellDef><span class="nc-sr-only">Abrir</span></th>
+        <td mat-cell *matCellDef="let c">
+          <!-- Enlace real al detalle: el clic en la fila sirve con el
+               puntero; esto, con el teclado y el lector de pantalla. -->
+          <a
+            mat-icon-button
+            [routerLink]="['/accounts', c.id]"
+            [attr.aria-label]="'Abrir la cuenta ' + c.correo"
+            (click)="$event.stopPropagation()"
+          >
+            <mat-icon>chevron_right</mat-icon>
+          </a>
         </td>
       </ng-container>
 
@@ -98,12 +174,9 @@
         mat-row
         *matRowDef="let row; columns: displayedColumns()"
         class="clickable-row"
+        [class.fila-caida]="row.fechaCaida"
         (click)="goToDetail(row)"
       ></tr>
     </table>
   </div>
-
-  @if (cuentas().length === 0) {
-    <app-empty-state icon="account_circle" mensaje="No hay cuentas con estos filtros." submensaje="Prueba cambiando o quitando los filtros." />
-  }
 }

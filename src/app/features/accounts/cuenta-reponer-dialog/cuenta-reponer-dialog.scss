@@ -38,8 +38,9 @@
     min-width: 0;
   }
 
+  // Angosto: el nombre del perfil necesita el ancho para verse entero.
   .pin {
-    flex: 0 1 140px;
+    flex: 0 0 92px;
   }
 }
 

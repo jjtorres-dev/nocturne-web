@@ -23,11 +23,13 @@ import { Auth, UserRole } from '../../../core/auth/auth';
 import { EmptyState } from '../../../shared/empty-state/empty-state';
 import { ServiceIcon } from '../../../shared/service-icon/service-icon';
 import { extractErrorMessage } from '../../../shared/form-error';
+import { FiltrosPlegables } from '../../../shared/filtros-plegables/filtros-plegables';
 
 type ActivoFilter = 'todos' | 'activos' | 'inactivos';
 
 @Component({
   imports: [
+    FiltrosPlegables,
     ServiceIcon,
     EmptyState,
     FormsModule,
@@ -87,6 +89,12 @@ export class ServiciosList implements OnInit {
 
   tipoFilter: ServiceType | 'todos' = 'todos';
   activoFilter: ActivoFilter = 'activos';
+
+  // Cuántos filtros están aplicando (distintos de "Todos"): lo dice el botón
+  // "Filtros" en celular.
+  protected filtrosActivos(): number {
+    return [this.tipoFilter, this.activoFilter].filter((f) => f !== 'todos').length;
+  }
 
   ngOnInit(): void {
     void this.refresh();

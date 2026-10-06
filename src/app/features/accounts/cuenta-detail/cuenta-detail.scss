@@ -1,33 +1,57 @@
+// Paneles, títulos, tablero y esqueletos: estilos compartidos en
+// src/styles.scss. Acá, lo propio del detalle de una cuenta.
+
 .back-link {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  color: var(--mat-sys-primary);
-  text-decoration: none;
-  font-size: 0.875rem;
   margin-bottom: 8px;
+  color: var(--nc-ink-muted);
+  font-size: 0.875rem;
+  text-decoration: none;
+
+  .mat-icon {
+    width: 18px;
+    height: 18px;
+    font-size: 18px;
+  }
+
+  &:hover {
+    color: var(--nc-ink);
+  }
 }
 
-.page-header {
+// ---------------------------------------------------------------------------
+// Cabecera: la sala y lo que se puede hacer con ella
+// ---------------------------------------------------------------------------
+.cuenta-cabeza {
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+
+.cuenta-titulo {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  margin-bottom: 16px;
-  flex-wrap: wrap;
-  gap: 8px;
-
-  h1,
-  h2 {
-    margin: 0;
-  }
+  gap: 12px;
+  min-width: 0;
 
   h1 {
-    font-size: 1.5rem;
+    overflow-wrap: anywhere;
   }
+}
 
-  h2 {
-    font-size: 1.125rem;
-  }
+.cuenta-correo {
+  margin: 2px 0 0;
+  color: var(--nc-ink-muted);
+  font-size: 0.9375rem;
+  overflow-wrap: anywhere;
+}
+
+.estado-chips {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 6px;
 }
 
 .header-actions {
@@ -36,102 +60,267 @@
   gap: 8px;
 }
 
-.details-card {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 16px;
-  padding: 16px;
-  border-radius: 8px;
-  background: var(--mat-sys-surface-container);
-  margin-bottom: 24px;
-}
-
-.detail-row {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.detail-label {
-  font-size: 0.75rem;
-  color: var(--mat-sys-on-surface-variant);
-}
-
-.rentabilidad-card {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  padding: 16px;
-  border-radius: 8px;
-  background: var(--mat-sys-surface-container);
-  margin-bottom: 24px;
-
-  h2 {
-    margin: 0;
-    font-size: 1.125rem;
-  }
-
-  p {
-    margin: 0;
-  }
-}
-
-.recuperado {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.rentabilidad-stats {
+// ---------------------------------------------------------------------------
+// Aviso de cuenta caída: antes que nada, a todo el ancho, en magenta (el del
+// chip "Cuenta caída", ver .chip-caida en styles.scss).
+// ---------------------------------------------------------------------------
+.caida-banner {
   display: flex;
   flex-wrap: wrap;
-  justify-content: space-between;
-  gap: 8px;
-  font-size: 0.875rem;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding: 14px 16px;
+  border: 1px solid var(--nc-caida);
+  border-radius: var(--nc-radius);
+  background: var(--nc-caida-tint);
+
+  > mat-icon {
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    color: var(--nc-caida);
+    font-size: 28px;
+  }
+
+  strong {
+    color: var(--nc-caida-ink);
+    font-stretch: var(--nc-width-condensed);
+    font-size: 1.125rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
 }
 
-.potencial,
-.desglose-costo {
-  color: var(--mat-sys-on-surface-variant);
+.caida-texto {
+  display: flex;
+  // Base chica: el texto queda al lado del ícono también a 360 px.
+  flex: 1 1 180px;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
 }
 
-.desglose-costo {
+.caida-nota {
+  color: var(--nc-ink-muted);
   font-size: 0.8125rem;
 }
 
-.ganancia {
-  font-weight: 600;
+.caida-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
 
-  &.positiva,
-  &.cubierto {
-    color: var(--nc-al-dia-ink);
-  }
+// ---------------------------------------------------------------------------
+// Rejilla: a la izquierda las llaves y la sala; a la derecha la boletería.
+// ---------------------------------------------------------------------------
+.cuenta-rejilla {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(320px, 2fr);
+  gap: 16px;
+  align-items: start;
+}
 
-  &.faltante {
-    color: var(--mat-sys-error);
+.columna {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+
+  // Un panel nunca ensancha su columna (una tabla ancha hace scroll dentro).
+  > * {
+    min-width: 0;
   }
 }
 
-.nota-combo {
+.panel-cuerpo {
+  display: grid;
+  gap: 10px;
+  padding: 12px 14px 14px;
+}
+
+.panel-cargando {
+  display: grid;
+  gap: 8px;
+  padding: 12px 14px;
+}
+
+.cuenta-cargando {
+  display: grid;
+  gap: 12px;
+}
+
+.nc-skeleton--panel {
+  height: 160px;
+}
+
+.detail-label {
+  color: var(--nc-ink-muted);
+  font-size: 0.8125rem;
+}
+
+// ---------------------------------------------------------------------------
+// Credenciales
+// ---------------------------------------------------------------------------
+.credencial {
+  display: grid;
+  gap: 2px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--nc-rule);
+
+  &:last-child {
+    border-bottom: 0;
+  }
+}
+
+.credencial-valor {
+  overflow-wrap: anywhere;
+}
+
+// ---------------------------------------------------------------------------
+// La sala: una butaca por perfil
+// ---------------------------------------------------------------------------
+.leyenda {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--nc-ink-muted);
+  font-stretch: var(--nc-width-normal);
   font-size: 0.75rem;
-  color: var(--mat-sys-on-surface-variant);
-}
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
 
-.profiles-section {
-  margin-top: 8px;
-}
-
-.pagos-section {
-  margin-bottom: 24px;
-
-  h2 {
-    font-size: 1.125rem;
+  .butaca {
+    display: inline-block;
+    width: 9px;
+    height: 14px;
+    border-radius: 3px 3px 1px 1px;
+    background: var(--nc-libre);
   }
 
-  .empty-state {
-    padding: 8px 0;
-    text-align: start;
+  .butaca.ocupada {
+    margin-inline-start: 8px;
+    background: var(--nc-butaca-ocupada);
   }
+}
+
+.sala {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
+  gap: 10px;
+  margin: 0;
+  padding: 14px;
+  list-style: none;
+}
+
+// Cada butaca: su forma a la izquierda, el nombre del perfil y quién la
+// ocupa. Libre en turquesa; ocupada en gris; inactiva, solo el contorno.
+.sala-butaca {
+  display: grid;
+  grid-template-columns: 26px minmax(0, 1fr);
+  align-items: center;
+  gap: 0 10px;
+}
+
+.butaca-forma {
+  grid-row: 1 / span 2;
+  width: 26px;
+  height: 38px;
+  border-radius: 3px 3px 1px 1px;
+  background: var(--nc-libre);
+
+  .ocupada & {
+    background: var(--nc-butaca-ocupada);
+  }
+
+  .inactiva & {
+    border: 2px dashed var(--nc-rule-field);
+    background: transparent;
+  }
+}
+
+.sala-nombre {
+  overflow: hidden;
+  font-weight: 600;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sala-quien {
+  color: var(--nc-libre-ink);
+  font-size: 0.8125rem;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+
+  .ocupada &,
+  .inactiva & {
+    color: var(--nc-ink-muted);
+  }
+}
+
+// Cuenta caída: el panel toma el contorno magenta y lo dice con una frase.
+// Las butacas conservan su color: sigue importando cuáles están ocupadas
+// (son los clientes sin servicio).
+.sala-caida {
+  border-color: var(--nc-caida);
+}
+
+.sala-aviso {
+  margin: -4px 14px 12px;
+  color: var(--nc-caida-ink);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.perfiles-barra {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px 12px;
+  padding: 0 14px 10px;
+  border-bottom: 1px solid var(--nc-rule);
+}
+
+.limit-reached {
+  flex: 1 1 200px;
+  margin: 0;
+  color: var(--nc-ink-muted);
+  font-size: 0.8125rem;
+}
+
+.empty-state {
+  margin: 0;
+  padding: 14px;
+  color: var(--nc-ink-muted);
+}
+
+// Los pagos no cargaron: se dice como error, con cómo reintentar.
+.pagos-error {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 12px;
+  margin: 0;
+  padding: 12px 14px;
+  color: var(--nc-vencida-ink);
+}
+
+// Encabezados de la tabla de pagos: pueden partirse en dos renglones antes
+// que recortarse en un panel angosto.
+.pagos-table .mat-mdc-header-cell {
+  white-space: normal;
+}
+
+// Las tablas van dentro de un panel que ya tiene borde.
+.nc-panel .table-scroll {
+  border: 0;
+  border-radius: 0;
 }
 
 .profiles-table,
@@ -140,62 +329,214 @@
 }
 
 .monto-original {
-  color: var(--mat-sys-on-surface-variant);
+  margin-left: 4px;
+  color: var(--nc-ink-muted);
 }
 
-.loading {
+// ---------------------------------------------------------------------------
+// Datos de la cuenta
+// ---------------------------------------------------------------------------
+.datos {
+  margin: 0;
+}
+
+.detail-row {
   display: flex;
-  justify-content: center;
-  padding: 48px 0;
-}
-
-.empty-state {
-  color: var(--mat-sys-on-surface-variant);
-  padding: 24px 0;
-  text-align: center;
-}
-
-.limit-reached {
-  color: var(--mat-sys-error);
-  font-size: 0.875rem;
-  margin: 0 0 8px;
-}
-
-// Aviso de cuenta caída: arriba de todo, en magenta (mismo color que el chip
-// "Cuenta caída", ver .chip-caida en styles.scss).
-.caida-banner {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
   gap: 12px;
-  padding: 12px 16px;
-  margin-bottom: 16px;
-  border: 1px solid var(--nc-caida);
-  border-radius: 8px;
-  background: color-mix(in srgb, var(--nc-caida) 12%, transparent);
+  padding: 7px 14px;
+  border-bottom: 1px solid var(--nc-rule);
 
-  > mat-icon {
-    color: var(--nc-caida);
-    flex-shrink: 0;
+  &:last-child {
+    border-bottom: 0;
+  }
+
+  dd {
+    margin: 0;
+    font-weight: 600;
+    text-align: end;
+    overflow-wrap: anywhere;
   }
 }
 
-.caida-texto {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  flex: 1 1 220px;
-  min-width: 0;
+// ---------------------------------------------------------------------------
+// ¿Cuánto te deja esta cuenta?
+// ---------------------------------------------------------------------------
+.recuperado {
+  display: grid;
+  gap: 6px;
+
+  mat-progress-bar {
+    --mat-progress-bar-active-indicator-color: var(--nc-serie-ganancia);
+    --mat-progress-bar-track-color: var(--nc-surface-sunken);
+    --mat-progress-bar-active-indicator-height: 12px;
+    --mat-progress-bar-track-height: 12px;
+    --mat-progress-bar-track-shape: 1px;
+  }
 }
 
-.caida-nota {
+.desglose-costo {
+  color: var(--nc-ink-muted);
   font-size: 0.8125rem;
-  color: var(--mat-sys-on-surface-variant);
 }
 
-.caida-acciones {
+.rentabilidad-stats {
   display: flex;
-  align-items: center;
   flex-wrap: wrap;
-  gap: 8px;
+  justify-content: space-between;
+  gap: 4px 16px;
+  font-size: 0.875rem;
+}
+
+.potencial {
+  color: var(--nc-ink-muted);
+}
+
+.ganancia {
+  margin: 0;
+  font-stretch: var(--nc-width-condensed);
+  font-size: 1.25rem;
+  font-weight: 800;
+
+  &.positiva,
+  &.cubierto {
+    color: var(--nc-al-dia-ink);
+  }
+
+  &.faltante {
+    color: var(--nc-ink);
+  }
+}
+
+.nota-combo {
+  margin: 0;
+  color: var(--nc-ink-muted);
+  font-size: 0.8125rem;
+}
+
+// ---------------------------------------------------------------------------
+// Pantallas medianas y celular
+// ---------------------------------------------------------------------------
+@media (max-width: 1099.98px) {
+  .cuenta-rejilla {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 767.98px) {
+  .cuenta-rejilla,
+  .columna {
+    gap: 12px;
+  }
+
+  // Acciones en dos columnas; la principal ocupa el ancho.
+  .header-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
+
+    button:first-child {
+      grid-column: 1 / -1;
+    }
+  }
+
+  .caida-acciones {
+    width: 100%;
+
+    button {
+      flex: 1 1 auto;
+    }
+  }
+
+  .sala {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  // Los botones secundarios van sin ícono: así su nombre entra en un renglón.
+  .header-actions .mat-mdc-outlined-button {
+    --mat-button-outlined-horizontal-padding: 8px;
+
+    white-space: nowrap;
+
+    .mat-icon {
+      display: none;
+    }
+  }
+
+  // Perfiles: cada fila de la tabla se vuelve una ficha. Arriba el nombre y
+  // su estado; debajo el cliente; al final el PIN con sus botones y las
+  // acciones.
+  .profiles-table {
+    display: block;
+
+    .mat-mdc-header-row {
+      display: none;
+    }
+
+    // (El <tbody> lo crea mat-table, fuera del alcance de estos estilos: su
+    // regla está en styles.scss, `.nc-tabla-fichas`.)
+
+    tr.mat-mdc-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      grid-template-areas:
+        'nombre estado'
+        'cliente cliente'
+        'pin acciones';
+      align-items: center;
+      gap: 6px 10px;
+      width: 100%;
+      height: auto;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--nc-rule);
+      box-sizing: border-box;
+
+      &:last-child {
+        border-bottom: 0;
+      }
+    }
+
+    td.mat-mdc-cell {
+      display: block;
+      padding: 0;
+      border: 0;
+      overflow: visible;
+      white-space: normal;
+    }
+
+    td.mat-column-nombre {
+      grid-area: nombre;
+      font-weight: 600;
+    }
+
+    td.mat-column-activo {
+      grid-area: estado;
+    }
+
+    td.mat-column-cliente {
+      grid-area: cliente;
+
+      &::before {
+        content: 'Cliente: ';
+        color: var(--nc-ink-muted);
+      }
+    }
+
+    td.mat-column-pin {
+      grid-area: pin;
+
+      &::before {
+        content: 'PIN ';
+        color: var(--nc-ink-muted);
+        font-size: 0.8125rem;
+      }
+    }
+
+    td.mat-column-acciones {
+      grid-area: acciones;
+      justify-self: end;
+      white-space: nowrap;
+    }
+  }
 }

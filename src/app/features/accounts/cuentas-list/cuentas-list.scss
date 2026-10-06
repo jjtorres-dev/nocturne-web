@@ -1,21 +1,5 @@
-.page-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 16px;
-
-  h1 {
-    margin: 0;
-    font-size: 1.5rem;
-  }
-}
-
-.filters {
-  display: flex;
-  gap: 16px;
-  flex-wrap: wrap;
-  margin-bottom: 8px;
-}
+// Encabezado, filtros, tablero y celdas: estilos compartidos de listas en
+// src/styles.scss. Acá, solo lo propio de Cuentas.
 
 .accounts-table {
   width: 100%;
@@ -25,8 +9,116 @@
   cursor: pointer;
 }
 
-.loading {
+.celda-servicio {
   display: flex;
-  justify-content: center;
-  padding: 48px 0;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+// El correo identifica la cuenta: entero, en un renglón.
+.cuenta-correo {
+  white-space: nowrap;
+}
+
+.mat-column-fechaFin .nc-celda-sub,
+td.mat-column-proveedor,
+td.mat-column-perfiles {
+  white-space: nowrap;
+}
+
+// El nombre del dueño se ve entero; baja por palabras si no entra.
+td.mat-column-dueno {
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+}
+
+.mat-column-ir {
+  width: 1%;
+}
+
+// Fecha que pide atención: tinta de su estado.
+.vence-urgente {
+  color: var(--estado-tinta);
+  font-weight: 600;
+}
+
+.estado-chips {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+// Cuenta caída: la fila entera toma el tinte magenta, además de su chip.
+.fila-caida,
+.fila-caida:hover {
+  background-color: var(--nc-caida-tint);
+}
+
+// ---------------------------------------------------------------------------
+// Tarjetas (celular)
+// ---------------------------------------------------------------------------
+.cuenta-tarjeta {
+  display: grid;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1px solid var(--nc-rule);
+  border-radius: var(--nc-radius);
+  background: var(--nc-surface);
+  color: inherit;
+  text-decoration: none;
+
+  &:focus-visible {
+    outline: 2px solid var(--nc-focus);
+    outline-offset: 2px;
+  }
+
+  &.caida {
+    border-color: var(--nc-caida);
+    background: var(--nc-caida-tint);
+  }
+}
+
+.cuenta-tarjeta-cabeza {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+
+  .nc-celda {
+    flex: 1 1 auto;
+    padding-block: 0;
+  }
+
+  .cuenta-correo {
+    overflow-wrap: anywhere;
+    white-space: normal;
+  }
+
+  // El estado, junto al nombre (como en las tarjetas de Ventas).
+  .estado-chips {
+    flex-shrink: 0;
+    flex-direction: column;
+    align-items: flex-end;
+    align-self: flex-start;
+  }
+}
+
+.cuenta-tarjeta-datos {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 12px;
+  font-size: 0.875rem;
+
+  > span {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+}
+
+.dato-etiqueta {
+  color: var(--nc-ink-muted);
+  font-size: 0.75rem;
 }

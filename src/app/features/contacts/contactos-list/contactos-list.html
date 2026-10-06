@@ -6,7 +6,7 @@
   </button>
 </div>
 
-<div class="filters">
+<app-filtros-plegables [activos]="filtrosActivos()">
   <mat-form-field appearance="outline">
     <mat-label>Tipo</mat-label>
     <mat-select [(ngModel)]="tipoFilter" (selectionChange)="refresh()">
@@ -25,7 +25,7 @@
       <mat-option value="inactivos">Inactivos</mat-option>
     </mat-select>
   </mat-form-field>
-</div>
+</app-filtros-plegables>
 
 @if (loading()) {
   <div class="loading">

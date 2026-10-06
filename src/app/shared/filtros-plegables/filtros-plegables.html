@@ -1,0 +1,23 @@
+@if (isMobile()) {
+  <button
+    mat-stroked-button
+    type="button"
+    class="filters-toggle"
+    [attr.aria-controls]="panelId"
+    [attr.aria-expanded]="abierto()"
+    (click)="abierto.set(!abierto())"
+  >
+    <mat-icon>filter_list</mat-icon>
+    Filtros
+    @if (activos() > 0) {
+      <span class="filters-count">({{ activos() }})</span>
+    }
+    <mat-icon iconPositionEnd>{{ abierto() ? 'expand_less' : 'expand_more' }}</mat-icon>
+  </button>
+}
+
+@if (!isMobile() || abierto()) {
+  <div class="filters nc-filtros" [id]="panelId">
+    <ng-content />
+  </div>
+}

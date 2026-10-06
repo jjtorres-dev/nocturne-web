@@ -67,7 +67,13 @@ export class CuentaMarcarCaidaDialog {
   });
 
   async submit(): Promise<void> {
-    if (this.form.invalid || this.saving()) {
+    if (this.saving()) {
+      return;
+    }
+    // El botón siempre se puede presionar: si falta algo, se marcan los
+    // campos para que cada uno diga qué le falta.
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
       return;
     }
 

@@ -26,11 +26,13 @@ import { formatFechaCorta } from '../../../shared/fecha.util';
 import { EstadoVentaChip } from '../../../shared/estado-venta/estado-venta';
 import { CuentaCaidaChip } from '../../../shared/cuenta-caida-chip/cuenta-caida-chip';
 import { extractErrorMessage } from '../../../shared/form-error';
+import { FiltrosPlegables } from '../../../shared/filtros-plegables/filtros-plegables';
 
 type ActivoFilter = 'todos' | 'activos' | 'inactivos';
 
 @Component({
   imports: [
+    FiltrosPlegables,
     CuentaCaidaChip,
     EstadoVentaChip,
     EmptyState,
@@ -97,6 +99,12 @@ export class VentaCombosList implements OnInit {
   clienteFilter = 'todos';
   comboFilter = 'todos';
   activoFilter: ActivoFilter = 'activos';
+
+  // Cuántos filtros están aplicando (distintos de "Todos"): lo dice el botón
+  // "Filtros" en celular.
+  protected filtrosActivos(): number {
+    return [this.clienteFilter, this.comboFilter, this.activoFilter].filter((f) => f !== 'todos').length;
+  }
 
   ngOnInit(): void {
     void this.loadOptions();

@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Router } from '@angular/router';
+import { Router, provideRouter } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { CuentasList } from './cuentas-list';
@@ -60,7 +60,7 @@ describe('CuentasList', () => {
   let api: { list: ReturnType<typeof vi.fn> };
   let serviciosApi: { list: ReturnType<typeof vi.fn> };
   let contactosApi: { list: ReturnType<typeof vi.fn> };
-  let router: { navigate: ReturnType<typeof vi.fn> };
+  let router: Router;
   let auth: { currentUser: ReturnType<typeof vi.fn> };
 
   async function setup(role: UserRole = UserRole.ADMIN) {
@@ -68,7 +68,6 @@ describe('CuentasList', () => {
     api = { list: vi.fn().mockResolvedValue([cuenta]) };
     serviciosApi = { list: vi.fn().mockResolvedValue([servicio]) };
     contactosApi = { list: vi.fn().mockResolvedValue([proveedor]) };
-    router = { navigate: vi.fn() };
     auth = { currentUser: vi.fn().mockReturnValue({ id: 'admin-0', role }) };
 
     await TestBed.configureTestingModule({
@@ -80,10 +79,13 @@ describe('CuentasList', () => {
         { provide: Auth, useValue: auth },
         { provide: MatDialog, useValue: { open: vi.fn() } },
         { provide: MatSnackBar, useValue: { open: vi.fn() } },
-        { provide: Router, useValue: router },
+        // Enrutador real: cada fila lleva un enlace (routerLink) al detalle.
+        provideRouter([{ path: '**', children: [] }]),
       ],
     }).compileComponents();
 
+    router = TestBed.inject(Router);
+    vi.spyOn(router, 'navigate').mockResolvedValue(true);
     fixture = TestBed.createComponent(CuentasList);
     component = fixture.componentInstance;
   }
@@ -178,5 +180,38 @@ describe('CuentasList', () => {
     fixture.detectChanges();
 
     expect(fixture.nativeElement.querySelector('app-empty-state')).toBeNull();
+  });
+
+  it('una cuenta caída lleva su chip y la fila marcada', async () => {
+    await setup();
+    api.list.mockResolvedValue([{ ...cuenta, fechaCaida: '2026-10-01' }]);
+    await fixture.whenStable();
+    await component.refresh();
+    fixture.detectChanges();
+
+    const fila: HTMLElement = fixture.nativeElement.querySelector('tr.clickable-row');
+    expect(fila.classList).toContain('fila-caida');
+    expect(fila.querySelector('app-cuenta-caida-chip')?.textContent).toContain('Cuenta caída');
+  });
+
+  it('cada fila tiene un enlace real al detalle, además del clic', async () => {
+    await setup();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const enlace = fixture.nativeElement.querySelector('tr.clickable-row a[mat-icon-button]');
+    expect(enlace.getAttribute('href')).toBe('/accounts/cta-1');
+  });
+
+  it('si la carga falla muestra el aviso con "Reintentar"', async () => {
+    await setup();
+    api.list.mockRejectedValue(new Error('sin red'));
+    await fixture.whenStable();
+    await component.refresh();
+    fixture.detectChanges();
+
+    const aviso: HTMLElement = fixture.nativeElement.querySelector('.nc-lista-error');
+    expect(aviso.textContent).toContain('No se pudieron cargar las cuentas.');
+    expect(aviso.querySelector('button')?.textContent).toContain('Reintentar');
   });
 });

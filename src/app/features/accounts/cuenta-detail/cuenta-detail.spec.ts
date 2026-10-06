@@ -205,6 +205,57 @@ describe('CuentaDetail', () => {
     expect(component.perfiles()).toEqual([perfilActivo]);
   });
 
+  it('la sala muestra una butaca por perfil: libre, ocupada (con su cliente) o inactiva', async () => {
+    await setup();
+    perfilesApi.list.mockResolvedValue([
+      { ...perfilActivo, id: 'p-libre', nombre: 'Perfil 1', clienteId: null },
+      { ...perfilActivo, id: 'p-ocupado', nombre: 'Perfil 2', clienteId: 'no-existe' },
+      { ...perfilActivo, id: 'p-inactivo', nombre: 'Perfil 3', activo: false },
+    ]);
+    await fixture.whenStable();
+    await component.refreshPerfiles();
+    fixture.detectChanges();
+
+    const butacas = Array.from(
+      fixture.nativeElement.querySelectorAll('.sala-butaca') as NodeListOf<HTMLElement>,
+    );
+    expect(butacas.map((b) => b.querySelector('.sala-nombre')?.textContent?.trim())).toEqual([
+      'Perfil 1',
+      'Perfil 2',
+      'Perfil 3',
+    ]);
+    expect(butacas[0].querySelector('.sala-quien')?.textContent).toContain('Libre');
+    expect(butacas[0].classList).not.toContain('ocupada');
+    expect(butacas[1].classList).toContain('ocupada');
+    expect(butacas[2].classList).toContain('inactiva');
+    expect(butacas[2].querySelector('.sala-quien')?.textContent).toContain('Inactivo');
+  });
+
+  it('el correo de la cuenta se ve siempre y se puede copiar, sin botón Mostrar', async () => {
+    await setup();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const correo: HTMLElement = fixture.nativeElement.querySelector('.credencial');
+    expect(correo.textContent).toContain('cuenta@correo.com');
+    const botones = Array.from(correo.querySelectorAll('button')).map((b) => b.textContent?.trim());
+    expect(botones.some((t) => t?.includes('Copiar'))).toBe(true);
+    expect(botones.some((t) => t?.includes('Mostrar'))).toBe(false);
+  });
+
+  it('si la cuenta no carga, muestra el aviso con "Reintentar" y cómo volver', async () => {
+    await setup();
+    api.findOne.mockRejectedValue(new Error('sin red'));
+    await fixture.whenStable();
+    await component.refresh();
+    fixture.detectChanges();
+
+    const aviso: HTMLElement = fixture.nativeElement.querySelector('.nc-lista-error');
+    expect(aviso.textContent).toContain('No se pudo cargar la cuenta.');
+    expect(aviso.textContent).toContain('Reintentar');
+    expect(aviso.textContent).toContain('Volver a cuentas');
+  });
+
   it('formatea el costo en soles (S/), no como decimal crudo', async () => {
     await setup();
     await fixture.whenStable();

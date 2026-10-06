@@ -17,6 +17,8 @@ export class SecretValue {
   // Confirmación al copiar. Por defecto "<label> copiado.", que no concuerda
   // con etiquetas femeninas ("Contraseña") — ahí se pasa explícito.
   readonly mensajeCopiado = input<string>();
+  // true: el valor no es secreto (un correo): se ve siempre y solo se copia.
+  readonly visible = input(false);
 
   readonly revealed = signal(false);
 

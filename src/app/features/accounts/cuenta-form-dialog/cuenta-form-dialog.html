@@ -169,7 +169,7 @@
       mat-flat-button
       color="primary"
       type="submit"
-      [disabled]="form.invalid || saving() || loadingOptions()"
+      [disabled]="saving() || loadingOptions()"
     >
       @if (saving()) {
         <mat-spinner diameter="20" />

@@ -199,6 +199,8 @@ html {
   // tinta: en la app el rojo es marca o error, nunca una acción neutra.
   --mat-button-text-label-text-color: var(--nc-ink);
   --mat-button-text-state-layer-color: var(--nc-ink);
+  --mat-button-outlined-state-layer-color: var(--nc-ink);
+  --mat-button-outlined-ripple-color: color-mix(in srgb, var(--nc-ink) 12%, transparent);
   --mat-button-text-ripple-color: color-mix(in srgb, var(--nc-ink) 12%, transparent);
   --mat-icon-button-icon-color: var(--nc-ink-muted);
   --mat-button-outlined-outline-color: var(--nc-rule-field);
@@ -566,6 +568,39 @@ html {
 
   .mat-mdc-form-field-subscript-wrapper {
     display: none;
+  }
+}
+
+// En celular todo botón se toca con el pulgar: 44 px de alto como mínimo.
+// (Un componente puede pedir más, nunca menos.)
+@media (max-width: 767.98px) {
+  html {
+    --mat-button-filled-container-height: 44px;
+    --mat-button-outlined-container-height: 44px;
+    --mat-button-text-container-height: 44px;
+    --mat-button-tonal-container-height: 44px;
+  }
+}
+
+// En celular los filtros se apilan a todo el ancho, con aire entre ellos
+// (sin renglón de ayuda, las etiquetas flotantes se tocarían).
+@media (max-width: 767.98px) {
+  .nc-filtros.nc-filtros {
+    gap: 10px;
+
+    .mat-mdc-form-field {
+      width: 100%;
+    }
+  }
+}
+
+// Tabla cuyas filas se vuelven fichas en celular (el componente arma cada
+// ficha con rejilla en su <tr>). El <tbody> lo crea mat-table, así que solo
+// desde acá se le puede quitar el comportamiento de tabla.
+@media (max-width: 767.98px) {
+  .nc-tabla-fichas tbody {
+    display: block;
+    width: 100%;
   }
 }
 
