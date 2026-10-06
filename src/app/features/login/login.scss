@@ -1,67 +1,225 @@
+// Dos mitades: a un lado el letrero, al otro la taquilla.
 .login-page {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 24px;
+  display: grid;
+  grid-template-columns: minmax(0, 9fr) minmax(0, 11fr);
   min-height: 100vh;
-  padding: 16px;
-  overflow: hidden;
+  // En móvil 100vh incluye la barra de URL y desborda; dvh la descuenta.
+  min-height: 100dvh;
+  background: var(--nc-ground);
 }
 
-.login-brand {
+// ---------------------------------------------------------------------------
+// El letrero
+// ---------------------------------------------------------------------------
+.letrero {
   position: relative;
-  z-index: 1;
   display: flex;
   align-items: center;
-  gap: 10px;
+  overflow: hidden;
+  background: var(--nc-nav);
+  color: var(--nc-on-nav);
 }
 
-.brand-icon {
-  font-size: 2rem;
-  width: 2rem;
-  height: 2rem;
-  color: var(--nc-brand);
-}
-
-.brand-text {
-  font-size: 2.5rem;
-  // El body hereda un line-height chico (fijo, en rem) desde
-  // --mat-sys-body-medium; a 2.5rem de font-size eso alcanza a recortar
-  // el wordmark contra el overflow: hidden de .login-page.
-  line-height: 1.35;
-  font-weight: 700;
-  letter-spacing: 0.01em;
-  color: var(--nc-brand);
-}
-
-.login-card {
-  position: relative;
-  z-index: 1;
+// La imagen de marca cubre el letrero entero sin deformarse. Mientras sea
+// el marcador de 1×1 px no se muestra.
+.letrero-imagen {
+  position: absolute;
+  inset: 0;
+  display: none;
   width: 100%;
-  max-width: 360px;
-  background-color: var(--nc-surface-elevated);
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+
+  .letrero--imagen & {
+    display: block;
+  }
+}
+
+.letrero-texto {
+  width: 100%;
+  padding: 48px clamp(32px, 6vw, 96px);
+}
+
+// Letras de marquesina sobre una fila de bombillas, como en el riel del panel.
+.letrero-marca {
+  margin: 0;
+  padding-bottom: 20px;
+  border-bottom: 6px dotted var(--nc-bulb);
+  font-stretch: var(--nc-width-condensed);
+  font-size: 6rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  line-height: 0.9;
+  text-transform: uppercase;
+}
+
+.letrero-lema {
+  max-width: 28ch;
+  margin: 20px 0 0;
+  color: var(--nc-on-nav-muted);
+  font-size: 1.125rem;
+  line-height: 1.4;
+  text-wrap: balance;
+}
+
+// ---------------------------------------------------------------------------
+// La taquilla
+// ---------------------------------------------------------------------------
+.taquilla {
+  display: flex;
+  align-items: center;
+  padding: 48px clamp(32px, 8vw, 128px);
 }
 
 .login-form {
   display: flex;
   flex-direction: column;
   gap: 4px;
+  width: 100%;
+  max-width: 360px;
+}
+
+.login-titulo {
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: var(--nc-rail-width) solid var(--nc-rail);
+}
+
+// Aviso sobre el formulario: sesión expirada (neutro), contraseña cambiada
+// (verde) o un error (bermellón).
+.aviso {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 0 0 16px;
+  padding: 10px 12px;
+  border-radius: var(--nc-radius);
+  background: var(--nc-por-vencer-tint);
+  color: var(--nc-ink);
+  font-size: 0.875rem;
+  line-height: 1.4;
+
+  .mat-icon {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    color: var(--nc-por-vencer-ink);
+    font-size: 20px;
+  }
+
+  &--ok {
+    background: var(--nc-al-dia-tint);
+
+    .mat-icon {
+      color: var(--nc-al-dia-ink);
+    }
+  }
+
+  &--error {
+    background: var(--nc-vencida-tint);
+
+    .mat-icon {
+      color: var(--nc-vencida-ink);
+    }
+  }
 }
 
 .submit-button {
-  margin-top: 8px;
+  --mat-button-filled-container-height: 48px;
+
+  margin-top: 4px;
+  font-size: 1rem;
+  font-weight: 600;
+
+  mat-spinner {
+    --mat-progress-spinner-active-indicator-color: currentColor;
+  }
 }
 
-.error-message {
-  color: var(--mat-sys-error);
-  margin: 0 0 8px;
-  font-size: 0.875rem;
+// El texto del botón y, al ingresar, el indicador a su lado.
+.submit-contenido {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
 }
 
-.info-message {
-  color: var(--mat-sys-on-surface-variant);
-  margin: 0 0 8px;
-  font-size: 0.875rem;
+.login-ayuda {
+  margin: 16px 0 0;
+  color: var(--nc-ink-muted);
+  font-size: 0.8125rem;
+  line-height: 1.4;
+}
+
+// ---------------------------------------------------------------------------
+// Pantallas angostas: el letrero pasa a ser una banda arriba.
+// ---------------------------------------------------------------------------
+@media (max-width: 899.98px) {
+  .login-page {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto 1fr;
+  }
+
+  .letrero {
+    height: 132px;
+    transition: height var(--nc-duration) var(--nc-ease);
+  }
+
+  .letrero-texto {
+    padding: 0 20px;
+  }
+
+  .letrero-marca {
+    padding-bottom: 10px;
+    border-bottom-width: 4px;
+    font-size: 3rem;
+  }
+
+  .letrero-lema {
+    display: none;
+  }
+
+  .taquilla {
+    align-items: flex-start;
+    justify-content: center;
+    padding: 24px 20px 32px;
+  }
+
+  .login-titulo {
+    margin-bottom: 16px;
+  }
+
+  // Con el teclado abierto la banda se reduce a la marca en un renglón.
+  .teclado {
+    .letrero {
+      height: 48px;
+    }
+
+    .letrero-marca {
+      padding-bottom: 0;
+      border-bottom: 0;
+      font-size: 1.5rem;
+      line-height: 1;
+    }
+
+    .taquilla {
+      padding-top: 12px;
+    }
+
+    .login-titulo {
+      margin-bottom: 10px;
+      padding-bottom: 6px;
+      font-size: 1.375rem;
+    }
+
+    .login-ayuda {
+      display: none;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .letrero {
+    transition: none;
+  }
 }
